@@ -1,1 +1,6 @@
-# t5v5shvy5w-debug.github.io
+# MW Games
+
+Browser games hosted on GitHub Pages.
+
+- DEADZONE: ./deadzone/
+- LAST LIGHT: ./last-light/

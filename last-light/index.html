@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAST LIGHT</title>
+<style>
+  html,body{margin:0;height:100%;background:#07090c;color:#e8edf2;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:hidden}
+  #msg{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+  .bar{width:min(420px,80vw);height:8px;border:1px solid #334155;border-radius:999px;overflow:hidden;background:#0f172a}
+  .fill{height:100%;width:0%;background:#dc2626;transition:width .2s}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;display:none;background:#000}
+  .small{color:#94a3b8;font-size:14px}
+</style>
+</head>
+<body>
+<div id="msg">
+  <div>Loading LAST LIGHT...</div>
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div class="small" id="status">Fetching game data</div>
+</div>
+<iframe id="game" allow="fullscreen; pointer-lock; gamepad; autoplay" allowfullscreen></iframe>
+<script>
+const PARTS = ["game.b64.000", "game.b64.001", "game.b64.002"];
+const fill = document.getElementById('fill');
+const statusEl = document.getElementById('status');
+async function boot() {
+  try {
+    let b64 = '';
+    for (let i = 0; i < PARTS.length; i++) {
+      statusEl.textContent = 'Fetching game data ' + (i + 1) + ' / ' + PARTS.length;
+      const r = await fetch(PARTS[i], {cache: 'force-cache'});
+      if (!r.ok) throw new Error('Missing game chunk ' + PARTS[i]);
+      b64 += await r.text();
+      fill.style.width = Math.round(((i + 1) / PARTS.length) * 70) + '%';
+    }
+    statusEl.textContent = 'Unpacking game';
+    const bin = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    const stream = new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'));
+    let html = await new Response(stream).text();
+    fill.style.width = '88%';
+    if (!/<base\s/i.test(html)) {
+      html = html.replace(/<head([^>]*)>/i, '<head$1><base href="./">');
+    }
+    statusEl.textContent = 'Starting game';
+    const frame = document.getElementById('game');
+    frame.srcdoc = html;
+    frame.onload = () => {
+      fill.style.width = '100%';
+      document.getElementById('msg').style.display = 'none';
+      frame.style.display = 'block';
+    };
+  } catch (e) {
+    statusEl.textContent = 'Load failed: ' + e.message;
+  }
+}
+boot();
+</script>
+</body>
+</html>
