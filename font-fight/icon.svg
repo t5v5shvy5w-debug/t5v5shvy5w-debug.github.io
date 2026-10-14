@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#0e1e3a"/>
+      <stop offset="100%" stop-color="#04070f"/>
+    </radialGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9fd0ff"/>
+      <stop offset="45%" stop-color="#2f86e8"/>
+      <stop offset="100%" stop-color="#0b3f8f"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#58bdff"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <g filter="url(#glow)">
+    <path d="M60 150 L120 150 L160 330 L200 150 L260 150 L200 380 L140 380 Z" fill="url(#steel)" stroke="#cfe8ff" stroke-width="6"/>
+    <path d="M452 150 L392 150 L352 330 L312 150 L252 150 L312 380 L372 380 Z" fill="url(#steel)" stroke="#cfe8ff" stroke-width="6" opacity="0.92"/>
+  </g>
+  <g filter="url(#glow)">
+    <path d="M268 60 L232 190 L258 190 L222 330 L278 200 L252 200 Z" fill="url(#bolt)"/>
+    <circle cx="256" cy="256" r="10" fill="#ffffff"/>
+  </g>
+  <g fill="#58bdff" opacity="0.9">
+    <circle cx="150" cy="110" r="5"/>
+    <circle cx="370" cy="120" r="7"/>
+    <circle cx="410" cy="300" r="5"/>
+    <circle cx="100" cy="330" r="6"/>
+    <circle cx="330" cy="420" r="5"/>
+    <circle cx="200" cy="440" r="7"/>
+  </g>
+</svg>
