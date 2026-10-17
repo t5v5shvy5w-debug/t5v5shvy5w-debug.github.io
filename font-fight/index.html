@@ -83,7 +83,7 @@
 <meta name="theme-color" content="#0a0e1a">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
-<body><div id="ver">V2.2</div><button id="friendsBtn">FRIENDS</button>
+<body><div id="ver">V2.3</div><button id="friendsBtn">FRIENDS</button>
 <div id="app">
 <section id="selectScreen" class="screen overlay">
   <div id="netBar"><label>NAME <input id="netNameInput" maxlength="12" autocomplete="off"></label><span id="netIdLine"></span></div>
@@ -242,7 +242,7 @@ function drawProjectile(p){ctx.save();ctx.translate(p.x,p.y);const a=Math.atan2(
 function drawFighter(f){const pulse=1+Math.sin(f.bob*2)*.025,low=f.hp/f.max<.3;ctx.save();ctx.translate(f.x,f.y+Math.sin(f.bob)*4);ctx.scale(pulse,pulse);ctx.font=font(f.def,clamp(W/14,31,68));ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor=f.fx.c;ctx.shadowBlur=f.energy>=100?32:15;ctx.fillStyle=f.flash>0?'#fff':f.fx.c;ctx.globalAlpha=f.dead?.25:f.iframe>0?.55+Math.sin(f.iframe*80)*.35:1;if(low&&!f.dead)ctx.translate(rnd(-2,2),rnd(-2,2));ctx.fillText(f.def.word,0,0);ctx.restore();ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle=f.fx.c;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(f.x,f.y+42,60,9,0,0,TAU);ctx.stroke();if(f.isLocal){ctx.globalAlpha=.85;ctx.fillStyle=f.fx.c;ctx.beginPath();ctx.moveTo(f.x,f.y-54);ctx.lineTo(f.x-7,f.y-43);ctx.lineTo(f.x+7,f.y-43);ctx.closePath();ctx.fill()}ctx.restore()}
 function drawRing(r){const p=r.t/r.life,rad=r.r*p;ctx.save();ctx.globalAlpha=(1-p)*.9;ctx.strokeStyle=r.color;ctx.lineWidth=r.w*(1-p*.65);ctx.translate(r.x,r.y);ctx.beginPath();if(['grid','error','arcade'].includes(r.kind)){ctx.rect(-rad,-rad,rad*2,rad*2)}else if(['slash','moon','blizzard'].includes(r.kind)){ctx.arc(0,0,rad,-.65,.65)}else if(['quake','world','continent','seismic'].includes(r.kind)){for(let i=0;i<8;i++){const a=i/8*TAU,rr=rad*(i%2?1:.76);ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}ctx.closePath()}else ctx.arc(0,0,rad,0,TAU);ctx.stroke();ctx.restore()}
 function drawBolt(b){ctx.save();ctx.globalAlpha=b.life/b.max;ctx.strokeStyle=b.color;ctx.shadowColor=b.color;ctx.shadowBlur=13;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(b.x1,b.y1);for(let i=1;i<b.jag;i++){const t=i/b.jag;ctx.lineTo(b.x1+(b.x2-b.x1)*t+rnd(-16,16),b.y1+(b.y2-b.y1)*t+rnd(-16,16))}ctx.lineTo(b.x2,b.y2);ctx.stroke();ctx.restore()}
-function drawDmgNums(){ctx.save();ctx.textAlign='center';for(const n of dmgNums){const a=clamp(n.life/n.max,0,1),pop=1+clamp((n.max-n.life)*6,0,.45);ctx.globalAlpha=Math.min(1,a*1.6);ctx.font=`${Math.round((n.ult?34:n.crit?27:19)*pop)}px "Black Ops One"`;ctx.lineWidth=4;ctx.strokeStyle='rgba(5,6,16,.9)';ctx.fillStyle=n.ult?'#ff5f6d':n.crit?'#ffd34d':'#ffffff';ctx.strokeText(n.txt,n.x,n.y);ctx.fillText(n.txt,n.x,n.y)}ctx.restore()}
+function drawDmgNums(){ctx.save();ctx.textAlign='center';for(const n of dmgNums){const a=clamp(n.life/n.max,0,1),pop=1+clamp((n.max-n.life)*6,0,.45);ctx.globalAlpha=Math.min(1,a*1.6);ctx.font=`${Math.round((n.ult?30:n.crit?24:17)*pop)}px "Black Ops One"`;ctx.lineWidth=2;ctx.strokeStyle='rgba(5,6,16,.9)';ctx.fillStyle=n.ult?'#ff5f6d':n.crit?'#ffd34d':'#ffffff';ctx.strokeText(n.txt,n.x,n.y);ctx.fillText(n.txt,n.x,n.y)}ctx.restore()}
 function drawUltimateOverlay(c){const f=c.f,s=f.fx.sig,t=c.time,p=clamp(t/.7,0,1);ctx.save();ctx.globalAlpha=clamp(1-Math.abs(t-.78)*.9,0,.92);ctx.fillStyle='rgba(0,0,0,.62)';ctx.fillRect(0,0,W,H);ctx.translate(W/2,H/2);ctx.strokeStyle=f.fx.c;ctx.fillStyle=f.fx.c;ctx.shadowColor=f.fx.c;ctx.shadowBlur=25;ctx.lineWidth=4;const mode=s%10,rr=(40+p*Math.max(W,H)*.55);ctx.rotate(t*(s%2?1:-1)*(1.5+s%4));if(mode===0){for(let i=0;i<8;i++){ctx.rotate(TAU/8);ctx.fillRect(rr*.22,-5,rr*.75,10)}}else if(mode===1){for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(0,0,rr*(i+1)/5,0,TAU);ctx.stroke()}}else if(mode===2){for(let i=0;i<12;i++){ctx.rotate(TAU/12);ctx.beginPath();ctx.moveTo(20,0);ctx.lineTo(rr,0);ctx.stroke()}}else if(mode===3){for(let i=-4;i<=4;i++){ctx.beginPath();ctx.moveTo(-rr,i*26);ctx.lineTo(rr,i*26+Math.sin(t*20+i)*22);ctx.stroke()}}else if(mode===4){for(let i=0;i<6;i++){ctx.rotate(TAU/6);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(rr,0);ctx.lineTo(rr*.65,18);ctx.closePath();ctx.fill()}}else if(mode===5){for(let i=0;i<8;i++){ctx.strokeRect(-rr+i*14,-rr+i*14,(rr-i*14)*2,(rr-i*14)*2)}}else if(mode===6){for(let i=0;i<7;i++){ctx.rotate(.8);ctx.beginPath();ctx.ellipse(rr*.45,0,rr*.55,25+i*5,0,0,TAU);ctx.stroke()}}else if(mode===7){for(let i=0;i<18;i++){ctx.rotate(TAU/18);ctx.beginPath();ctx.moveTo(rr*.25,-8);ctx.lineTo(rr,0);ctx.lineTo(rr*.25,8);ctx.fill()}}else if(mode===8){for(let i=0;i<10;i++){ctx.rotate(TAU/10);ctx.beginPath();ctx.arc(rr*.55,0,18+i*2,0,TAU);ctx.fill()}}else{ctx.beginPath();ctx.arc(0,0,rr*.65,0,TAU);ctx.stroke();ctx.beginPath();ctx.arc(0,0,rr*.38,0,TAU);ctx.fill()}ctx.restore();ctx.save();ctx.globalAlpha=clamp(1-Math.abs(t-.76)*1.1,0,1);ctx.textAlign='center';ctx.font=`${clamp(W/16,24,54)}px "Black Ops One"`;ctx.fillStyle=f.fx.c2;ctx.shadowColor=f.fx.c;ctx.shadowBlur=25;ctx.fillText(f.def.ult.toUpperCase(),W/2,H*.18);ctx.restore()}
 function draw(){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);let zoom=1,focusX=W/2,focusY=H/2;const cviz=cinematic||netUltFx;if(cviz){const p=clamp(cviz.time/.65,0,1);zoom=1+p*.22;focusX=cviz.t.x;focusY=cviz.t.y}ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX+(focusX-W/2)/zoom,-focusY+(focusY-H/2)/zoom);if(shake>.4)ctx.translate(rnd(-shake,shake),rnd(-shake,shake));ctx.globalCompositeOperation='lighter';rings.forEach(drawRing);for(const p of particles){ctx.shadowColor=p.color;ctx.shadowBlur=p.size*2;drawShape(p,clamp(p.life/p.max,0,1))}bolts.forEach(drawBolt);projectiles.forEach(drawProjectile);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;fighters.forEach(drawFighter);drawDmgNums();ctx.restore();if(flash>0){ctx.fillStyle=`rgba(255,255,255,${Math.min(.72,flash)})`;ctx.fillRect(0,0,W,H)}if(cinematic||netUltFx)drawUltimateOverlay(cinematic||netUltFx)}
 function pause(){if(netMode&&netActive)return;if(mode!=='fight'&&mode!=='cinematic')return;paused=true;$('paused').classList.remove('hidden');sfx('ui')}function resume(){paused=false;$('paused').classList.add('hidden');audioInit();last=performance.now()}
@@ -294,11 +294,11 @@ function netWire(c){
 }
 function netOnClose(pid){
  const e=netConns[pid];if(e)e.online=false;
- if(netRoom&&netRoom.conn&&netRoom.conn.peer===pid){netOpponentGone();return}
+ if(netRoom&&netRoom.pid===pid){netOpponentGone();return}
  netRenderFriends();
 }
 function netSend(pid,msg){const e=netConns[pid];if(e&&e.conn&&e.conn.open){try{e.conn.send(msg);return true}catch(err){}}return false}
-function netRoomSend(msg){if(netRoom&&netRoom.conn&&netRoom.conn.open){try{netRoom.conn.send(msg)}catch(e){}}}
+function netRoomSend(msg){if(netRoom&&netRoom.pid)netSend(netRoom.pid,msg)}
 function netEnsureConn(f){
  if(!netPeer||!netReady)return null;
  let e=netConns[f.pid];
@@ -354,7 +354,7 @@ function netInvite(f){
  if(!netPeer||!netReady){netPopup('Offline','Not connected yet.',null,null,true);return}
  const roomId='room-'+Date.now().toString(36);
  const e=netEnsureConn(f);if(!e){netPopup('Offline',f.name+' is not reachable right now.',null,null,true);return}
- netRoom={roomId,conn:e.conn,hostName:netName,hostCode:netCode,guestName:f.name,guestCode:f.code,hostPick:null,guestPick:null,hostReady:false,guestReady:false,pending:true};
+ netRoom={roomId,pid:f.pid,conn:e.conn,hostName:netName,hostCode:netCode,guestName:f.name,guestCode:f.code,hostPick:null,guestPick:null,hostReady:false,guestReady:false,pending:true};
  let itries=0;const itry=()=>{itries++;if(netSend(f.pid,{t:'invite',roomId,from:netMe()}))netPopup('Invited','Invite sent to '+f.name+'#'+f.code+'. Waiting…',null,()=>{netRoom=null},true);else if(itries<10)setTimeout(itry,700);else{netRoom=null;netPopup('No answer','Could not reach '+f.name+'#'+f.code+'.',null,null,true)}};
  itry();
 }
@@ -427,7 +427,7 @@ function netOnMsg(pid,d){
  }
 }
 function netAcceptInvite(pid,d){
- netRoom={roomId:d.roomId,conn:netConns[pid].conn,hostName:d.from.name,hostCode:d.from.code,guestName:netName,guestCode:netCode,hostPick:null,guestPick:netOwnPick,hostReady:false,guestReady:false};
+ netRoom={roomId:d.roomId,pid,conn:netConns[pid].conn,hostName:d.from.name,hostCode:d.from.code,guestName:netName,guestCode:netCode,hostPick:null,guestPick:netOwnPick,hostReady:false,guestReady:false};
  netSend(pid,{t:'invite-accept',from:netMe()});
  netSend(pid,{t:'room-hello',from:netMe(),pick:netOwnPick});
  netShowRoom(false);
