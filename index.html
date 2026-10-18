@@ -2,54 +2,287 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MW Games</title>
-<link rel="icon" type="image/svg+xml" href="./icons/hub.svg">
-<link rel="apple-touch-icon" sizes="180x180" href="./icons/hub-180.png">
+<meta name="description" content="Browser games built with J.A.R.V.I.S. Open a link and play: Font Fight Arena, DEADZONE, LAST LIGHT and Gun Showcase.">
+<link rel="icon" type="image/svg+xml" href="./icons/mw.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/mw-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
 <link rel="manifest" href="./manifest.webmanifest">
-<meta name="theme-color" content="#07090c">
+<meta name="theme-color" content="#131314">
+<meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MW Games">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:title" content="MW Games">
+<meta property="og:description" content="Browser games built with J.A.R.V.I.S. Open a link and play.">
+<meta property="og:image" content="https://t5v5shvy5w-debug.github.io/shots/ff-inferno-1600.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@700;900&display=swap">
+<link rel="preload" as="image" href="./shots/ff-inferno-1400.webp" type="image/webp" media="(min-width: 760px)" imagesrcset="./shots/ff-inferno-1400.webp 1400w, ./shots/ff-inferno-2400.webp 2400w" imagesizes="(min-width: 1400px) 1320px, 100vw">
 <style>
-  :root{color-scheme:dark}
+  :root{
+    --bg:#131314; --raise:#1c1d20; --rule:#2c2d31;
+    --ink:#f1ede4; --ink-2:#cdc8bc; --muted:#a29e94;
+    --fire:#ff4b24; --ice:#6eeeff;
+    --display:"Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+    --text:Barlow, "Helvetica Neue", Arial, sans-serif;
+    --gutter:32px; --max:1320px;
+    color-scheme:dark;
+  }
   *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#07090c;color:#e8edf2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
-  main{width:min(920px,100%)}
-  h1{margin:0 0 8px;font-size:42px;letter-spacing:.08em}
-  p{color:#aeb9c4;line-height:1.5}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:24px}
-  a.card{display:block;text-decoration:none;color:inherit;background:#111821;border:1px solid #263241;border-radius:18px;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
-  a.card:hover{border-color:#b91c1c}
-  .kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#f87171}
-  h2{margin:8px 0;font-size:26px}
-  .cta{display:inline-block;margin-top:14px;background:#b91c1c;color:white;padding:10px 14px;border-radius:999px;font-weight:700}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--text);
+    display:flex;flex-direction:column;min-height:100%;overflow-x:hidden}
+  main{flex:1}
+  img{display:block;max-width:100%}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--fire);outline-offset:3px}
+  .wrap{width:100%;max-width:calc(var(--max) + 2 * var(--gutter));margin-inline:auto;padding-inline:var(--gutter)}
+
+  /* ---------- header ---------- */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:24px;
+    padding-block:max(20px, env(safe-area-inset-top)) 20px}
+  .brand{display:flex;align-items:center;gap:12px;margin:0;text-decoration:none}
+  .brand svg{width:34px;height:34px;flex:none}
+  .brand span{font:900 30px/1 var(--display);letter-spacing:.05em;text-transform:uppercase}
+  .tagline{margin:0;max-width:430px;color:var(--muted);font-size:15px;line-height:1.45;text-align:right}
+
+  /* ---------- featured game ---------- */
+  .feature{position:relative;margin-top:4px}
+  .art{position:relative;overflow:hidden;border-radius:4px;aspect-ratio:2.08/1;
+    background:#08131f radial-gradient(60% 80% at 62% 45%, #3a1410 0%, #0b1726 55%, #070d16 100%)}
+  .art img{width:100%;height:100%;object-fit:cover;object-position:62% 50%}
+  .art::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(90deg, rgba(10,11,13,.94) 0%, rgba(10,11,13,.78) 30%, rgba(10,11,13,.18) 58%, rgba(10,11,13,0) 72%),
+               linear-gradient(0deg, rgba(10,11,13,.55) 0%, rgba(10,11,13,0) 30%)}
+  .copy{position:absolute;left:56px;bottom:52px;width:min(540px, 46%);z-index:1}
+  .ff-title{margin:0;font:900 clamp(56px, 8.4vw, 132px)/.86 var(--display);text-transform:uppercase;letter-spacing:.005em}
+  .ff-title .line{display:block}
+  .ff-title .arena{font-size:.36em;letter-spacing:.2em;margin-top:.5em;color:var(--ink-2)}
+  .ff-title .line{white-space:nowrap}
+  .fit{display:inline-block}
+  .fight{display:inline-block;transform-origin:0 70%;will-change:transform}
+  .fight.hit{animation:hit .34s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes hit{0%{transform:translateX(-3px) scale(1.04)}45%{transform:translateX(2px) scale(.99)}100%{transform:none}}
+  .lede{margin:22px 0 10px;font:700 clamp(22px, 2vw, 27px)/1.15 var(--display);letter-spacing:.02em}
+  .desc{margin:0 0 6px;color:var(--ink-2)}
+  .facts{margin:0 0 26px;color:var(--muted);font-size:15px}
+  .play{display:inline-flex;align-items:center;gap:12px;padding:15px 24px 15px 20px;border-radius:4px;
+    background:var(--ink);color:#111;font:600 18px/1 var(--text);text-decoration:none;
+    transition:background-color .15s ease, transform .15s ease}
+  .play svg{width:14px;height:16px;fill:currentColor}
+  .play:hover{background:#fff;transform:translateY(-1px)}
+  .play:active{transform:translateY(1px)}
+
+  /* ---------- screenshots ---------- */
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+    margin:72px 0 18px;padding-top:18px;border-top:1px solid var(--rule)}
+  .sec-head h2{margin:0;font:700 30px/1.1 var(--display);letter-spacing:.02em}
+  .sec-head p{margin:0;color:var(--muted);font-size:15px}
+  .shots{display:grid;gap:12px}
+  .shots .row1{display:grid;gap:12px;grid-template-columns:.7fr .566fr 2.08fr}
+  .shots .row2{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+  .shot{margin:0;border-radius:4px;overflow:hidden;background:#0a1220}
+  .shot img{width:100%;height:100%;object-fit:cover}
+  .shot.p-vs{aspect-ratio:.7}
+  .shot.p-roster{aspect-ratio:.566}
+  .shot.l{aspect-ratio:2.08}
+
+  /* ---------- roster ---------- */
+  .wall{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 34px;margin:0;padding:0;list-style:none}
+  .wall li{font-size:clamp(30px, 4.1vw, 56px);line-height:1.3;white-space:nowrap;font-family:var(--display);font-weight:900;
+    transition:text-shadow .2s ease, transform .2s ease;cursor:default}
+  .wall li:hover{text-shadow:0 0 22px var(--c);transform:translateY(-2px)}
+
+  /* ---------- more games ---------- */
+  .games{list-style:none;margin:0;padding:0;border-bottom:1px solid var(--rule)}
+  .games li{border-top:1px solid var(--rule)}
+  .games li:first-child{border-top:0}
+  .games a{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 4px;text-decoration:none;
+    transition:background-color .15s ease}
+  .games .name{font:800 clamp(32px, 4vw, 52px)/1 var(--display);font-weight:900;letter-spacing:.03em;text-transform:uppercase;
+    transition:transform .2s ease}
+  .games .go{display:inline-flex;align-items:center;gap:10px;font-weight:600;color:var(--ink-2)}
+  .games .go svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s ease}
+  .games a:hover{background:var(--raise)}
+  .games a:hover .name{transform:translateX(8px)}
+  .games a:hover .go{color:var(--ink)}
+  .games a:hover .go svg{transform:translateX(4px)}
+
+  /* ---------- footer ---------- */
+  .foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;margin-top:72px;
+    padding-block:22px max(28px, env(safe-area-inset-bottom));color:var(--muted);font-size:14px}
+  .foot p{margin:0}
+
+  /* ---------- entrance ---------- */
+  @media (prefers-reduced-motion: no-preference){
+    .art img{animation:settle 1.4s cubic-bezier(.2,.7,.2,1) both}
+    .copy > *{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
+    .copy > :nth-child(2){animation-delay:.08s}.copy > :nth-child(3){animation-delay:.14s}
+    .copy > :nth-child(4){animation-delay:.2s}.copy > :nth-child(5){animation-delay:.26s}
+    @keyframes settle{from{transform:scale(1.05);opacity:.4}to{transform:none;opacity:1}}
+    @keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+    .js .wall li{opacity:0}
+    .wall.in li{animation:rise .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i) * 28ms)}
+  }
+
+  /* ---------- tablet ---------- */
+  @media (max-width: 1099px){
+    .copy{left:36px;bottom:36px;width:min(500px, 58%)}
+    .art{aspect-ratio:16/10}
+    .art img{object-position:68% 50%}
+  }
+  /* ---------- phone ---------- */
+  @media (max-width: 759px){
+    :root{--gutter:16px}
+    .top{flex-direction:column;align-items:flex-start;gap:8px;padding-block:max(16px, env(safe-area-inset-top)) 14px}
+    .brand span{font-size:26px}.brand svg{width:30px;height:30px}
+    .tagline{text-align:left;font-size:14px}
+    .art{aspect-ratio:.7}
+    .art img{object-position:50% 50%}
+    .art::after{background:linear-gradient(0deg, rgba(19,19,20,1) 0%, rgba(19,19,20,0) 22%)}
+    .copy{position:static;width:auto;margin-top:-56px;padding-inline:4px}
+    .ff-title{font-size:clamp(50px, 15.5vw, 84px)}
+    .lede{margin-top:16px}
+    .play{width:100%;justify-content:center}
+    .sec-head{margin-top:52px;flex-direction:column;gap:4px}
+    .shots, .shots .row1, .shots .row2{display:flex;gap:10px}
+    .shots{overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:calc(-1 * var(--gutter));padding-inline:var(--gutter);
+      scrollbar-width:none;position:relative}
+    .shots::-webkit-scrollbar{display:none}
+    .shot{flex:none;height:240px;scroll-snap-align:start}
+    .shot.p-vs{display:none}
+    .shot.p-roster{width:136px}
+    .shot.l{width:500px;max-width:86vw;aspect-ratio:auto}
+    .games a{padding:18px 2px}
+    .foot{margin-top:52px;flex-direction:column}
+  }
 </style>
 </head>
 <body>
+<header class="wrap top">
+  <h1 class="brand">
+    <svg viewBox="104 84 304 344" aria-hidden="true"><polygon fill="#f1ede4" points="104,236 104,84 166,84 256,172 346,84 408,84 408,236 350,236 350,168 256,244 162,168 162,236"/><polygon fill="#ff4b24" points="408,276 408,428 346,428 256,340 166,428 104,428 104,276 162,276 162,344 256,268 350,344 350,276"/></svg>
+    <span>MW Games</span>
+  </h1>
+  <p class="tagline">Browser games built with J.A.R.V.I.S. Open a link and play. No downloads, no Files preview nonsense.</p>
+</header>
+
 <main>
-  <h1>MW GAMES</h1>
-  <p>Browser games built with J.A.R.V.I.S. — open a link and play. No downloads, no Files preview nonsense.</p>
-  <section class="grid">
-    <a class="card" href="./deadzone/">
-      <div class="kicker">Zombie Survival FPS</div>
-      <h2>DEADZONE</h2>
-      <p>Survive the night. Gunsmith, waves, enterable buildings, touch controls built for iPad.</p>
-      <span class="cta">Play DEADZONE</span>
-    </a>
-    <a class="card" href="./last-light/">
-      <div class="kicker">Coastal Military TPS</div>
-      <h2>LAST LIGHT</h2>
-      <p>Golden-hour third-person shooter with procedural guns, enemies, and wave mode.</p>
-      <span class="cta">Play LAST LIGHT</span>
-    </a>
-    <a class="card" href="./font-fight/">
-      <div class="kicker">Font Battle Arena</div>
-      <h2>FONT FIGHT</h2>
-      <p>Pick any 2 of 30 fonts and make them fight — dash, ultimates, best-of-three rounds.</p>
-      <span class="cta">Play FONT FIGHT</span>
-    </a>
+  <section class="wrap feature" aria-labelledby="ff-title">
+    <div class="art">
+      <picture>
+        <source media="(max-width: 759px)" type="image/webp" srcset="./shots/ff-versus-900.webp">
+        <source media="(max-width: 759px)" srcset="./shots/ff-versus-900.jpg">
+        <source type="image/webp" srcset="./shots/ff-inferno-1400.webp 1400w, ./shots/ff-inferno-2400.webp 2400w" sizes="(min-width: 1400px) 1320px, 100vw">
+        <img src="./shots/ff-inferno-1600.jpg" width="1600" height="768" fetchpriority="high"
+             alt="Font Fight Arena: RAMPAGE fires its Inferno Breaker ultimate at FROST, red beams across the arena grid">
+      </picture>
+    </div>
+    <div class="copy">
+      <h2 class="ff-title" id="ff-title"><span class="line">Font <span class="fit" id="fit"><span class="fight" id="fight">Fight</span></span></span><span class="line arena">Arena</span></h2>
+      <p class="lede">Thirty fonts. Six elements. One arena.</p>
+      <p class="desc">Pick any 2 of 30 fonts and make them fight: dash, ultimates, best-of-three rounds.</p>
+      <p class="facts">Fight the AI solo, or share a room code and take on a friend. Keyboard or touch.</p>
+      <a class="play" href="./font-fight/"><svg viewBox="0 0 14 16" aria-hidden="true"><path d="M0 0v16l14-8z"/></svg>Play Font Fight</a>
+    </div>
+  </section>
+
+  <section class="wrap" aria-labelledby="shots-h">
+    <div class="sec-head"><h2 id="shots-h">From the arena</h2><p>Real screenshots from the game.</p></div>
+    <div class="shots">
+      <div class="row1">
+        <figure class="shot p-vs"><picture><source type="image/webp" srcset="./shots/ff-versus-900.webp"><img src="./shots/ff-versus-900.jpg" width="900" height="1284" loading="lazy" alt="The versus screen: RAMPAGE, Fire, against FROST, Ice, with the ice cracking"></picture></figure>
+        <figure class="shot p-roster"><picture><source type="image/webp" srcset="./shots/ff-roster-700.webp"><img src="./shots/ff-roster-700.jpg" width="700" height="1237" loading="lazy" alt="Fighter select on a phone: RAMPAGE and FROST locked in, with VOLTAGE, NOCTURNE, TURBO, TITAN and GLITCH in the roster"></picture></figure>
+        <figure class="shot l"><picture><source type="image/webp" srcset="./shots/ff-cryo-1200.webp"><img src="./shots/ff-cryo-1200.jpg" width="1200" height="576" loading="lazy" alt="FROST traps RAMPAGE in a Cryo Prison of glowing ice diamonds"></picture></figure>
+      </div>
+      <div class="row2">
+        <figure class="shot l"><picture><source type="image/webp" srcset="./shots/ff-thunder-1200.webp"><img src="./shots/ff-thunder-1200.jpg" width="1200" height="576" loading="lazy" alt="VOLTAGE's Thunder Crown sends yellow rings across the arena at TITAN"></picture></figure>
+        <figure class="shot l"><picture><source type="image/webp" srcset="./shots/ff-world-1200.webp"><img src="./shots/ff-world-1200.jpg" width="1200" height="576" loading="lazy" alt="TITAN unleashes Worldbreaker: green beams cut across the arena around VOLTAGE"></picture></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" aria-labelledby="roster-h">
+    <div class="sec-head"><h2 id="roster-h">The roster</h2><p>Every fighter is a font. Pick two in the game.</p></div>
+    <ul class="wall" id="roster" aria-label="Font Fight Arena fighters"></ul>
+  </section>
+
+  <section class="wrap" aria-labelledby="more-h">
+    <div class="sec-head"><h2 id="more-h">More games</h2></div>
+    <ul class="games">
+      <li><a href="./deadzone/"><span class="name">DEADZONE</span><span class="go">Play<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 9h13M10 4l5 5-5 5"/></svg></span></a></li>
+      <li><a href="./last-light/"><span class="name">LAST LIGHT</span><span class="go">Play<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 9h13M10 4l5 5-5 5"/></svg></span></a></li>
+      <li><a href="./gun-showcase/"><span class="name">Gun Showcase</span><span class="go">Play<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 9h13M10 4l5 5-5 5"/></svg></span></a></li>
+    </ul>
   </section>
 </main>
+
+<footer class="wrap foot">
+  <p>MW Games</p>
+  <p>Built with J.A.R.V.I.S. · Hosted on GitHub Pages</p>
+</footer>
+
+<script>
+(function(){
+  /* Font Fight's real roster: name, font, signature colour (copied from font-fight/index.html). */
+  var R=[["RAMPAGE","Anton","#ff2915"],["VOLTAGE","Monoton","#ffe834"],["NOCTURNE","UnifrakturCook","#7b2cff"],["TURBO","Faster One","#fff04a"],["TITAN","Black Ops One","#54df70"],["GLITCH","Rubik Glitch","#26a9ff"],["DREAD","Nosifer","#ff183d"],["PIXEL","Press Start 2P","#48d7ff"],["ROYAL","Cinzel","#1989ff"],["CHAOS","Creepster","#ff6a16"],["BRAWL","Bungee","#72ed66"],["ORBIT","Orbitron","#7aeaff"],["VENOM","Metal Mania","#3cff6e"],["PHANTOM","Pirata One","#895cff"],["HAVOC","Bangers","#ff3b1f"],["FROST","Iceberg","#6eeeff"],["WRAITH","Frijole","#c066ff"],["NOVA","Russo One","#1e9cff"],["BOLT","Jersey 10","#ffe820"],["REBEL","Permanent Marker","#ff3c21"],["REAPER","Special Elite","#8e54ff"],["ARCADE","Silkscreen","#16bcff"],["DRIFT","Racing Sans One","#b6f5ff"],["KRAKEN","Graduate","#35db78"],["HEX","VT323","#a05cff"],["BLAZE","Luckiest Guy","#ff4d1f"],["TEMPEST","Fjalla One","#ffe05a"],["RONIN","Kaushan Script","#8de7ff"],["COLOSSUS","Archivo Black","#4de06e"],["VOID","Rubik Glitch","#813cff"]];
+  var still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* the roster wall: every fighter's name in its own font and signature colour */
+  var host=document.getElementById('roster');
+  R.forEach(function(d,k){
+    var li=document.createElement('li');
+    li.textContent=d[0];
+    li.style.fontFamily='"'+d[1]+'", var(--display)';
+    li.style.color=d[2];li.style.setProperty('--c',d[2]+'99');li.style.setProperty('--i',k);
+    host.appendChild(li);
+  });
+  if(!still&&'IntersectionObserver' in window){
+    document.documentElement.classList.add('js');
+    var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){host.classList.add('in');io.disconnect();}},{rootMargin:'0px 0px -10% 0px'});
+    io.observe(host);
+  }
+
+  /* the fighters' fonts: only the capital letters, fetched after the page has painted */
+  var fams=['Anton','Archivo Black','Bangers','Black Ops One','Bungee','Cinzel:wght@800','Creepster','Faster One','Fjalla One','Frijole','Graduate','Iceberg','Jersey 10','Kaushan Script','Luckiest Guy','Metal Mania','Monoton','Nosifer','Orbitron:wght@800','Permanent Marker','Pirata One','Press Start 2P','Racing Sans One','Rubik Glitch','Russo One','Silkscreen:wght@700','Special Elite','UnifrakturCook:wght@700','VT323'];
+  function loadFonts(){
+    var link=document.createElement('link');link.rel='stylesheet';
+    link.href='https://fonts.googleapis.com/css2?'+fams.map(function(f){return 'family='+f.replace(/ /g,'+');}).join('&')+'&text=ABCDEFGHIJKLMNOPQRSTUVWXYZ&display=swap';
+    document.head.appendChild(link);
+  }
+  if(document.readyState==='complete')loadFonts();else addEventListener('load',loadFonts);
+
+  /* "Fight" changes fighter every couple of seconds, like a fighter-select screen */
+  var el=document.getElementById('fight');
+  if(!el||still)return;
+  var i=0,timer=null,visible=true,ready=false,fit=document.getElementById('fit');
+  /* keep the line steady: the box keeps the word's original width (in em, so it follows
+     the responsive type size) and wider fonts scale down to fit it */
+  function measure(){
+    var fs=parseFloat(getComputedStyle(el).fontSize)||1;
+    fit.style.width=(el.offsetWidth/fs)+'em';ready=true;
+  }
+  function step(){
+    var d=R[i++%R.length];
+    if(document.fonts&&document.fonts.check&&!document.fonts.check('40px "'+d[1]+'"','FIGHT'))return;
+    el.style.fontFamily='"'+d[1]+'", var(--display)';
+    el.style.color=d[2];
+    el.style.textShadow='0 0 28px '+d[2]+'55';
+    el.style.scale='';var max=fit.offsetWidth*1.12,w=el.offsetWidth;el.style.scale=w>max?String(max/w):'';
+    el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit');
+  }
+  function run(){if(ready&&!timer&&visible&&!document.hidden)timer=setInterval(step,1700);}
+  function halt(){clearInterval(timer);timer=null;}
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){visible=es[0].isIntersecting;visible?run():halt();}).observe(el);
+  }
+  document.addEventListener('visibilitychange',function(){document.hidden?halt():run();});
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(function(){measure();setTimeout(run,1800);});
+})();
+</script>
 </body>
 </html>

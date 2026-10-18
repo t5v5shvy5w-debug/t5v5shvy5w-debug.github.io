@@ -1,12 +1,14 @@
 {
   "name": "MW Games",
   "short_name": "MW Games",
+  "description": "Browser games built with J.A.R.V.I.S. Open a link and play.",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#07090c",
-  "theme_color": "#07090c",
+  "background_color": "#131314",
+  "theme_color": "#131314",
   "icons": [
-    {"src": "icons/hub-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icons/hub-512.png", "sizes": "512x512", "type": "image/png"}
+    {"src": "icons/mw-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/mw-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/mw-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
   ]
 }
