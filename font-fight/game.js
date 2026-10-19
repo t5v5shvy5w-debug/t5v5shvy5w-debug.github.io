@@ -587,7 +587,14 @@
       );
     });
     $("vsSkip").classList.add("hidden");
+    // Hide arena during VS
+    const arena = $("arenaScreen");
+    if (arena) arena.style.display = "none";
     vs.classList.remove("hidden");
+    vs.style.display = ""; // Clear vsGo's display:none
+    vs.style.opacity = "";
+    // Force reflow so canvas sizes correctly
+    void vs.offsetHeight;
     sfx("versus");
     // VSFX: Canvas particles for any element matchup
     const cv = $("vsCanvas");
@@ -621,9 +628,27 @@
     sr.classList.remove("go");
     sl.querySelector(".vs-particles").innerHTML = "";
     sr.querySelector(".vs-particles").innerHTML = "";
-    $("versus").classList.add("hidden");
-    if (netMode && isHost) netRoomSend({ t: "begin" });
-    beginRound();
+    // Fade out, then start arena (callback, not a separate timer)
+    const vs = $("versus");
+    vs.style.transition = "opacity 0.5s ease-out";
+    vs.style.opacity = "0";
+    const onFadeDone = () => {
+      vs.removeEventListener("transitionend", onFadeDone);
+      vs.classList.add("hidden");
+      vs.style.opacity = "";
+      vs.style.transition = "";
+      vs.style.display = "none"; // Ensure no touch interception
+      // Show arena
+      const arena = $("arenaScreen");
+      if (arena) arena.style.display = "";
+      if (netMode && isHost) netRoomSend({ t: "begin" });
+      beginRound();
+    };
+    vs.addEventListener("transitionend", onFadeDone);
+    // Fallback if transitionend doesn't fire
+    setTimeout(() => {
+      if (!vs.classList.contains("hidden")) onFadeDone();
+    }, 600);
   }
   function beginRound() {
     resize();
@@ -3879,11 +3904,16 @@ const VSFX = (function() {
 
   function resize() {
     if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    W = canvas.width = rect.width * dpr;
-    H = canvas.height = rect.height * dpr;
+    // Size from window (overlay is fixed fullscreen)
+    W = canvas.width = window.innerWidth * dpr;
+    H = canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
   }
+  // Re-size on orientation/resize
+  window.addEventListener('resize', () => { if (running) resize(); });
+  window.addEventListener('orientationchange', () => { setTimeout(() => { if (running) resize(); }, 100); });
 
   function setElements(e1, e2) {
     elem1 = e1; elem2 = e2;

@@ -506,3 +506,17 @@ body:has(#roomScreen:not(.hidden)) #friendsBtn{display:none}
 #versus{position:relative}
 #versus .vs-side{z-index:4}
 #versus .vs-mark{z-index:5}
+
+/* VS screen: fixed fullscreen overlay (overrides .overlay) */
+#versus{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;z-index:9999!important;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;background:#01040a}
+#versus.hidden{display:none!important}
+#versus .vs-side{position:absolute;left:0;right:0;height:50%;display:flex;flex-direction:column;justify-content:center;align-items:center}
+#versus .vs-left{top:0}
+#versus .vs-right{bottom:0}
+#versus .vs-clash{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10}
+/* Portrait: keep names clear of the slash */
+@media (orientation:portrait){
+  #versus .vfighter{font-size:clamp(36px,10vw,64px)!important}
+  #versus .vs-left{padding-bottom:8vh}
+  #versus .vs-right{padding-top:8vh}
+}
