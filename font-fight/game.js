@@ -104,125 +104,100 @@
   ];
   let currentMap = 0;
   const R = [
-    ["RAMPAGE", "Anton", "Fire", 174, 82, 63, "Inferno Breaker"],
-    ["VOLTAGE", "Monoton", "Storm", 130, 75, 94, "Thunder Crown"],
-    ["NOCTURNE", "UnifrakturCook", "Shadow", 150, 86, 67, "Eclipse Maw"],
-    ["TURBO", "Faster One", "Storm", 115, 70, 100, "Mach Lightning"],
-    ["TITAN", "Black Ops One", "Nature", 205, 93, 48, "Worldbreaker"],
-    ["GLITCH", "Rubik Glitch", "Light", 134, 76, 92, "Reality Error"],
-    ["DREAD", "Nosifer", "Fire", 147, 91, 64, "Bloodflare"],
-    ["PIXEL", "Press Start 2P", "Light", 126, 74, 82, "Critical Overflow"],
-    ["ROYAL", "Cinzel", "Light", 168, 84, 60, "Solar Decree"],
-    ["CHAOS", "Creepster", "Fire", 141, 88, 79, "Wildfire Grin"],
-    ["BRAWL", "Bungee", "Nature", 186, 90, 53, "Seismic Type"],
-    ["ORBIT", "Orbitron", "Ice", 144, 78, 87, "Absolute Zero"],
-    ["VENOM", "Metal Mania", "Nature", 150, 87, 72, "Toxic Bloom"],
-    ["PHANTOM", "Pirata One", "Shadow", 138, 82, 90, "Ghost Fleet"],
-    ["HAVOC", "Bangers", "Fire", 158, 92, 74, "Meteor Riot"],
-    ["FROST", "Iceberg", "Ice", 166, 79, 69, "Cryo Prison"],
-    ["WRAITH", "Frijole", "Shadow", 142, 89, 81, "Soul Spiral"],
-    ["NOVA", "Russo One", "Light", 131, 85, 93, "Supernova Type"],
-    ["BOLT", "Jersey 10", "Storm", 122, 73, 99, "Zero Frame"],
-    ["REBEL", "Permanent Marker", "Fire", 157, 86, 78, "Anarchy Arc"],
-    ["REAPER", "Special Elite", "Shadow", 149, 94, 66, "Final Draft"],
-    ["ARCADE", "Silkscreen", "Light", 139, 77, 89, "Extra Life"],
-    ["DRIFT", "Racing Sans One", "Ice", 131, 80, 96, "Whiteout Rush"],
-    ["KRAKEN", "Graduate", "Nature", 192, 88, 51, "Abyssal Roots"],
-    ["HEX", "VT323", "Shadow", 120, 81, 98, "Cursed Code"],
-    ["BLAZE", "Luckiest Guy", "Fire", 154, 90, 76, "Sunspike"],
-    ["TEMPEST", "Fjalla One", "Storm", 146, 83, 86, "Sky Rupture"],
-    ["RONIN", "Kaushan Script", "Ice", 160, 91, 71, "Mooncut Blizzard"],
-    ["COLOSSUS", "Archivo Black", "Nature", 210, 95, 43, "Continental Shift"],
-    ["VOID", "Rubik Glitch", "Cosmic", 133, 84, 95, "Event Horizon"],
-    [
-      "JUGGERNAUT",
-      "Alfa Slab One",
-      "Cosmic",
-      205,
-      88,
-      45,
-      "Event Horizon Crush",
-    ],
-    ["BRAWLER", "Titan One", "Cosmic", 168, 90, 62, "Gravity Slam"],
-    ["SPECTRE", "Righteous", "Cosmic", 131, 78, 95, "Phantom Nebula"],
-    ["NEBULA", "Audiowide", "Cosmic", 152, 82, 78, "Stellar Nursery"],
-    ["CIRCUIT", "Wallpoet", "Cosmic", 125, 75, 98, "Quantum Overload"],
-    ["DEVOUR", "Eater", "Cosmic", 176, 94, 55, "Consume the Stars"],
-    ["CARNAGE", "Butcherman", "Cosmic", 157, 93, 68, "Blood Moon Rising"],
-    ["COSMOS", "Geostar Fill", "Cosmic", 147, 80, 85, "Big Bang Requiem"],
-    ["INFERNO", "Rubik Burned", "Cosmic", 163, 92, 60, "Supernova Burn"],
-    ["VELVET", "Fascinate Inline", "Cosmic", 136, 77, 90, "Silk Nebula"],
-    ["SAVAGE", "Lacquer", "Cosmic", 173, 89, 72, "Untamed Void"],
-    ["IRONCLAD", "Staatliches", "Cosmic", 200, 85, 48, "Dreadnought Protocol"],
-    ["TITANFALL", "Bowlby One", "Cosmic", 189, 87, 58, "Orbital Drop"],
-    ["HEXTECH", "Chakra Petch", "Cosmic", 141, 83, 88, "Circuit Nova"],
-    ["STARDUST", "Zen Dots", "Cosmic", 152, 79, 82, "Dust to Stars"],
-  ].map((d, i) => ({
-    id: i,
-    word: d[0],
-    font: d[1],
-    element: d[2],
-    hp: d[3],
-    atk: d[4],
-    spd: d[5],
-    ult: d[6],
-  }));
+    { id: 0, name: "RAMPAGE", font: "Anton", element: "Fire", hp: 174, atk: 82, spd: 63, ult: "Inferno Breaker" },
+    { id: 1, name: "VOLTAGE", font: "Monoton", element: "Storm", hp: 130, atk: 75, spd: 94, ult: "Thunder Crown" },
+    { id: 2, name: "NOCTURNE", font: "UnifrakturCook", element: "Shadow", hp: 150, atk: 86, spd: 67, ult: "Eclipse Maw" },
+    { id: 3, name: "TURBO", font: "Faster One", element: "Storm", hp: 115, atk: 70, spd: 100, ult: "Mach Lightning" },
+    { id: 4, name: "TITAN", font: "Black Ops One", element: "Nature", hp: 205, atk: 93, spd: 48, ult: "Worldbreaker" },
+    { id: 5, name: "GLITCH", font: "Rubik Glitch", element: "Light", hp: 134, atk: 76, spd: 92, ult: "Reality Error" },
+    { id: 6, name: "DREAD", font: "Nosifer", element: "Fire", hp: 147, atk: 91, spd: 64, ult: "Bloodflare" },
+    { id: 7, name: "PIXEL", font: "Press Start 2P", element: "Light", hp: 126, atk: 74, spd: 82, ult: "Critical Overflow" },
+    { id: 8, name: "ROYAL", font: "Cinzel", element: "Light", hp: 168, atk: 84, spd: 60, ult: "Solar Decree" },
+    { id: 9, name: "CHAOS", font: "Creepster", element: "Fire", hp: 141, atk: 88, spd: 79, ult: "Wildfire Grin" },
+    { id: 10, name: "BRAWL", font: "Bungee", element: "Nature", hp: 186, atk: 90, spd: 53, ult: "Seismic Type" },
+    { id: 11, name: "ORBIT", font: "Orbitron", element: "Ice", hp: 144, atk: 78, spd: 87, ult: "Absolute Zero" },
+    { id: 12, name: "VENOM", font: "Metal Mania", element: "Nature", hp: 150, atk: 87, spd: 72, ult: "Toxic Bloom" },
+    { id: 13, name: "PHANTOM", font: "Pirata One", element: "Shadow", hp: 138, atk: 82, spd: 90, ult: "Ghost Fleet" },
+    { id: 14, name: "HAVOC", font: "Bangers", element: "Fire", hp: 158, atk: 92, spd: 74, ult: "Meteor Riot" },
+    { id: 15, name: "FROST", font: "Iceberg", element: "Ice", hp: 166, atk: 79, spd: 69, ult: "Cryo Prison" },
+    { id: 16, name: "WRAITH", font: "Frijole", element: "Shadow", hp: 142, atk: 89, spd: 81, ult: "Soul Spiral" },
+    { id: 17, name: "NOVA", font: "Russo One", element: "Light", hp: 131, atk: 85, spd: 93, ult: "Supernova Type" },
+    { id: 18, name: "BOLT", font: "Jersey 10", element: "Storm", hp: 122, atk: 73, spd: 99, ult: "Zero Frame" },
+    { id: 19, name: "REBEL", font: "Permanent Marker", element: "Fire", hp: 157, atk: 86, spd: 78, ult: "Anarchy Arc" },
+    { id: 20, name: "REAPER", font: "Special Elite", element: "Shadow", hp: 149, atk: 94, spd: 66, ult: "Final Draft" },
+    { id: 21, name: "ARCADE", font: "Silkscreen", element: "Light", hp: 139, atk: 77, spd: 89, ult: "Extra Life" },
+    { id: 22, name: "DRIFT", font: "Racing Sans One", element: "Ice", hp: 131, atk: 80, spd: 96, ult: "Whiteout Rush" },
+    { id: 23, name: "KRAKEN", font: "Graduate", element: "Nature", hp: 192, atk: 88, spd: 51, ult: "Abyssal Roots" },
+    { id: 24, name: "HEX", font: "VT323", element: "Shadow", hp: 120, atk: 81, spd: 98, ult: "Cursed Code" },
+    { id: 25, name: "BLAZE", font: "Luckiest Guy", element: "Fire", hp: 154, atk: 90, spd: 76, ult: "Sunspike" },
+    { id: 26, name: "TEMPEST", font: "Fjalla One", element: "Storm", hp: 146, atk: 83, spd: 86, ult: "Sky Rupture" },
+    { id: 27, name: "RONIN", font: "Kaushan Script", element: "Ice", hp: 160, atk: 91, spd: 71, ult: "Mooncut Blizzard" },
+    { id: 28, name: "COLOSSUS", font: "Archivo Black", element: "Nature", hp: 210, atk: 95, spd: 43, ult: "Continental Shift" },
+    { id: 29, name: "VOID", font: "Rubik Glitch", element: "Cosmic", hp: 133, atk: 84, spd: 95, ult: "Event Horizon" },
+    { id: 30, name: "JUGGERNAUT", font: "Alfa Slab One", element: "Cosmic", hp: 205, atk: 88, spd: 45, ult: "Event Horizon Crush" },
+    { id: 31, name: "BRAWLER", font: "Titan One", element: "Cosmic", hp: 168, atk: 90, spd: 62, ult: "Gravity Slam" },
+    { id: 32, name: "SPECTRE", font: "Righteous", element: "Cosmic", hp: 131, atk: 78, spd: 95, ult: "Phantom Nebula" },
+    { id: 33, name: "NEBULA", font: "Audiowide", element: "Cosmic", hp: 152, atk: 82, spd: 78, ult: "Stellar Nursery" },
+    { id: 34, name: "CIRCUIT", font: "Wallpoet", element: "Cosmic", hp: 125, atk: 75, spd: 98, ult: "Quantum Overload" },
+    { id: 35, name: "DEVOUR", font: "Eater", element: "Cosmic", hp: 176, atk: 94, spd: 55, ult: "Consume the Stars" },
+    { id: 36, name: "CARNAGE", font: "Butcherman", element: "Cosmic", hp: 157, atk: 93, spd: 68, ult: "Blood Moon Rising" },
+    { id: 37, name: "COSMOS", font: "Geostar Fill", element: "Cosmic", hp: 147, atk: 80, spd: 85, ult: "Big Bang Requiem" },
+    { id: 38, name: "INFERNO", font: "Rubik Burned", element: "Cosmic", hp: 163, atk: 92, spd: 60, ult: "Supernova Burn" },
+    { id: 39, name: "VELVET", font: "Fascinate Inline", element: "Cosmic", hp: 136, atk: 77, spd: 90, ult: "Silk Nebula" },
+    { id: 40, name: "SAVAGE", font: "Lacquer", element: "Cosmic", hp: 173, atk: 89, spd: 72, ult: "Untamed Void" },
+    { id: 41, name: "IRONCLAD", font: "Staatliches", element: "Cosmic", hp: 200, atk: 85, spd: 48, ult: "Dreadnought Protocol" },
+    { id: 42, name: "TITANFALL", font: "Bowlby One", element: "Cosmic", hp: 189, atk: 87, spd: 58, ult: "Orbital Drop" },
+    { id: 43, name: "HEXTECH", font: "Chakra Petch", element: "Cosmic", hp: 141, atk: 83, spd: 88, ult: "Circuit Nova" },
+    { id: 44, name: "STARDUST", font: "Zen Dots", element: "Cosmic", hp: 152, atk: 79, spd: 82, ult: "Dust to Stars" },
+  ];
   /* Every contender owns a distinct combat signature: geometry, motion, projectile silhouette and cinematic grammar. */
   const FX = [
-    ["#ff2915", "#ffc43d", "tri", "fountain", "flame", "meteor"],
-    ["#ffe834", "#59f3ff", "zig", "chain", "bolt", "crown"],
-    ["#7b2cff", "#e3b3ff", "crescent", "orbit", "eclipse", "maw"],
-    ["#fff04a", "#25bdff", "line", "speed", "drill", "mach"],
-    ["#54df70", "#b7ff6d", "rock", "quake", "boulder", "world"],
-    ["#26a9ff", "#ff56da", "pixel", "glitch", "cube", "error"],
-    ["#ff183d", "#ff866e", "drop", "saw", "blood", "bloodflare"],
-    ["#48d7ff", "#ffffff", "square", "grid", "pixel", "overflow"],
-    ["#1989ff", "#ffd769", "diamond", "ray", "lance", "decree"],
-    ["#ff6a16", "#dc2aff", "spiral", "chaos", "grin", "wildfire"],
-    ["#72ed66", "#dfff56", "hex", "impact", "fist", "seismic"],
-    ["#7aeaff", "#c9f8ff", "comet", "orbit", "iceball", "zero"],
-    ["#3cff6e", "#d0ff35", "thorn", "vine", "spore", "bloom"],
-    ["#895cff", "#d9f5ff", "wisp", "float", "ghost", "fleet"],
-    ["#ff3b1f", "#ffe563", "star", "scatter", "meteor", "riot"],
-    ["#6eeeff", "#ffffff", "shard", "crystal", "icicle", "prison"],
-    ["#c066ff", "#e7c0ff", "ribbon", "spiral", "soul", "soulstorm"],
-    ["#1e9cff", "#fff27b", "star", "nova", "prism", "supernova"],
-    ["#ffe820", "#55dfff", "frame", "stutter", "boltbox", "zeroframe"],
-    ["#ff3c21", "#fff0c6", "slash", "brush", "arc", "anarchy"],
-    ["#8e54ff", "#e7d7ff", "glyph", "ash", "skull", "finaldraft"],
-    ["#16bcff", "#ff48db", "pixel", "arcade", "disk", "extralife"],
-    ["#b6f5ff", "#66bfff", "mist", "drift", "wind", "whiteout"],
-    ["#35db78", "#52caff", "tentacle", "coil", "bubble", "abyss"],
-    ["#a05cff", "#7affcf", "code", "rain", "codebolt", "curse"],
-    ["#ff4d1f", "#fff35c", "petal", "sun", "sunshot", "sunspike"],
-    ["#ffe05a", "#75e7ff", "crescent", "cyclone", "gale", "rupture"],
-    ["#8de7ff", "#dde7ff", "slash", "moon", "blade", "blizzard"],
-    ["#4de06e", "#dfef9b", "rock", "gravity", "slab", "continent"],
-    ["#a06bff", "#e8d8ff", "orb", "vortex", "voidorb", "horizon"],
-    ["#8a5cff", "#d0b8ff", "orb", "vortex", "voidorb", "horizon"],
-    ["#9a6bff", "#e0ccff", "star", "orbit", "meteor", "supernova"],
-    ["#b48cff", "#f0e0ff", "wisp", "float", "ghost", "abyss"],
-    ["#a06bff", "#e8d8ff", "comet", "nova", "prism", "supernova"],
-    ["#7a5cff", "#c8b8ff", "square", "grid", "codebolt", "zero"],
-    ["#6a3aff", "#b898ff", "crescent", "vortex", "eclipse", "maw"],
-    ["#8a4cff", "#d8a8ff", "shard", "chaos", "blade", "bloodflare"],
-    ["#aa7bff", "#f0e8ff", "star", "orbit", "prism", "supernova"],
-    ["#9a5cff", "#e8ccff", "tri", "fountain", "meteor", "supernova"],
-    ["#ba8cff", "#f5e8ff", "diamond", "float", "lance", "decree"],
-    ["#7a4cff", "#c8a8ff", "spiral", "vortex", "voidorb", "horizon"],
-    ["#8a6bff", "#d8ccff", "hex", "gravity", "slab", "continent"],
-    ["#95a0ff", "#e0d8ff", "rock", "impact", "boulder", "seismic"],
-    ["#7ab8ff", "#d0e8ff", "pixel", "glitch", "cube", "error"],
-    ["#a88cff", "#f0e0ff", "star", "nova", "prism", "supernova"],
-  ].map((a, i) => ({
-    c: a[0],
-    c2: a[1],
-    shape: a[2],
-    motion: a[3],
-    shot: a[4],
-    ult: a[5],
-    sig: i,
-  }));
+    { sig: 0, c: "#ff2915", c2: "#ffc43d", shape: "tri", motion: "fountain", shot: "flame", ult: "meteor" },
+    { sig: 1, c: "#ffe834", c2: "#59f3ff", shape: "zig", motion: "chain", shot: "bolt", ult: "crown" },
+    { sig: 2, c: "#7b2cff", c2: "#e3b3ff", shape: "crescent", motion: "orbit", shot: "eclipse", ult: "maw" },
+    { sig: 3, c: "#fff04a", c2: "#25bdff", shape: "line", motion: "speed", shot: "drill", ult: "mach" },
+    { sig: 4, c: "#54df70", c2: "#b7ff6d", shape: "rock", motion: "quake", shot: "boulder", ult: "world" },
+    { sig: 5, c: "#26a9ff", c2: "#ff56da", shape: "pixel", motion: "glitch", shot: "cube", ult: "error" },
+    { sig: 6, c: "#ff183d", c2: "#ff866e", shape: "drop", motion: "saw", shot: "blood", ult: "bloodflare" },
+    { sig: 7, c: "#48d7ff", c2: "#ffffff", shape: "square", motion: "grid", shot: "pixel", ult: "overflow" },
+    { sig: 8, c: "#1989ff", c2: "#ffd769", shape: "diamond", motion: "ray", shot: "lance", ult: "decree" },
+    { sig: 9, c: "#ff6a16", c2: "#dc2aff", shape: "spiral", motion: "chaos", shot: "grin", ult: "wildfire" },
+    { sig: 10, c: "#72ed66", c2: "#dfff56", shape: "hex", motion: "impact", shot: "fist", ult: "seismic" },
+    { sig: 11, c: "#7aeaff", c2: "#c9f8ff", shape: "comet", motion: "orbit", shot: "iceball", ult: "zero" },
+    { sig: 12, c: "#3cff6e", c2: "#d0ff35", shape: "thorn", motion: "vine", shot: "spore", ult: "bloom" },
+    { sig: 13, c: "#895cff", c2: "#d9f5ff", shape: "wisp", motion: "float", shot: "ghost", ult: "fleet" },
+    { sig: 14, c: "#ff3b1f", c2: "#ffe563", shape: "star", motion: "scatter", shot: "meteor", ult: "riot" },
+    { sig: 15, c: "#6eeeff", c2: "#ffffff", shape: "shard", motion: "crystal", shot: "icicle", ult: "prison" },
+    { sig: 16, c: "#c066ff", c2: "#e7c0ff", shape: "ribbon", motion: "spiral", shot: "soul", ult: "soulstorm" },
+    { sig: 17, c: "#1e9cff", c2: "#fff27b", shape: "star", motion: "nova", shot: "prism", ult: "supernova" },
+    { sig: 18, c: "#ffe820", c2: "#55dfff", shape: "frame", motion: "stutter", shot: "boltbox", ult: "zeroframe" },
+    { sig: 19, c: "#ff3c21", c2: "#fff0c6", shape: "slash", motion: "brush", shot: "arc", ult: "anarchy" },
+    { sig: 20, c: "#8e54ff", c2: "#e7d7ff", shape: "glyph", motion: "ash", shot: "skull", ult: "finaldraft" },
+    { sig: 21, c: "#16bcff", c2: "#ff48db", shape: "pixel", motion: "arcade", shot: "disk", ult: "extralife" },
+    { sig: 22, c: "#b6f5ff", c2: "#66bfff", shape: "mist", motion: "drift", shot: "wind", ult: "whiteout" },
+    { sig: 23, c: "#35db78", c2: "#52caff", shape: "tentacle", motion: "coil", shot: "bubble", ult: "abyss" },
+    { sig: 24, c: "#a05cff", c2: "#7affcf", shape: "code", motion: "rain", shot: "codebolt", ult: "curse" },
+    { sig: 25, c: "#ff4d1f", c2: "#fff35c", shape: "petal", motion: "sun", shot: "sunshot", ult: "sunspike" },
+    { sig: 26, c: "#ffe05a", c2: "#75e7ff", shape: "crescent", motion: "cyclone", shot: "gale", ult: "rupture" },
+    { sig: 27, c: "#8de7ff", c2: "#dde7ff", shape: "slash", motion: "moon", shot: "blade", ult: "blizzard" },
+    { sig: 28, c: "#4de06e", c2: "#dfef9b", shape: "rock", motion: "gravity", shot: "slab", ult: "continent" },
+    { sig: 29, c: "#a06bff", c2: "#e8d8ff", shape: "orb", motion: "vortex", shot: "voidorb", ult: "horizon" },
+    { sig: 30, c: "#8a5cff", c2: "#d0b8ff", shape: "orb", motion: "vortex", shot: "voidorb", ult: "horizon" },
+    { sig: 31, c: "#9a6bff", c2: "#e0ccff", shape: "star", motion: "orbit", shot: "meteor", ult: "supernova" },
+    { sig: 32, c: "#b48cff", c2: "#f0e0ff", shape: "wisp", motion: "float", shot: "ghost", ult: "abyss" },
+    { sig: 33, c: "#a06bff", c2: "#e8d8ff", shape: "comet", motion: "nova", shot: "prism", ult: "supernova" },
+    { sig: 34, c: "#7a5cff", c2: "#c8b8ff", shape: "square", motion: "grid", shot: "codebolt", ult: "zero" },
+    { sig: 35, c: "#6a3aff", c2: "#b898ff", shape: "crescent", motion: "vortex", shot: "eclipse", ult: "maw" },
+    { sig: 36, c: "#8a4cff", c2: "#d8a8ff", shape: "shard", motion: "chaos", shot: "blade", ult: "bloodflare" },
+    { sig: 37, c: "#aa7bff", c2: "#f0e8ff", shape: "star", motion: "orbit", shot: "prism", ult: "supernova" },
+    { sig: 38, c: "#9a5cff", c2: "#e8ccff", shape: "tri", motion: "fountain", shot: "meteor", ult: "supernova" },
+    { sig: 39, c: "#ba8cff", c2: "#f5e8ff", shape: "diamond", motion: "float", shot: "lance", ult: "decree" },
+    { sig: 40, c: "#7a4cff", c2: "#c8a8ff", shape: "spiral", motion: "vortex", shot: "voidorb", ult: "horizon" },
+    { sig: 41, c: "#8a6bff", c2: "#d8ccff", shape: "hex", motion: "gravity", shot: "slab", ult: "continent" },
+    { sig: 42, c: "#95a0ff", c2: "#e0d8ff", shape: "rock", motion: "impact", shot: "boulder", ult: "seismic" },
+    { sig: 43, c: "#7ab8ff", c2: "#d0e8ff", shape: "pixel", motion: "glitch", shot: "cube", ult: "error" },
+    { sig: 44, c: "#a88cff", c2: "#f0e0ff", shape: "star", motion: "nova", shot: "prism", ult: "supernova" },
+  ];
   const UPGRADES = [
     { name: "Reinforced glyphs", desc: "+22% maximum health.", icon: "HP" },
     { name: "Kerning fury", desc: "+18% attack power.", icon: "ATK" },
@@ -335,7 +310,7 @@
       b.type = "button";
       b.dataset.id = d.id;
       b.style.animationDelay = idx * 18 + "ms";
-      b.innerHTML = `<span class="element" style="color:${e.color}">${d.element} · ${d.ult}</span><span class="preview" style="font-family:'${d.font}',system-ui;color:${e.color}">${d.word}</span>${bar("HP", d.hp / 131, d.hp, "#32d886")}${bar("ATK", d.atk / 100, d.atk, "#ff4f6f")}${bar("SPD", d.spd / 100, d.spd, "#39a9ff")}`;
+      b.innerHTML = `<span class="element" style="color:${e.color}">${d.element} · ${d.ult}</span><span class="preview" style="font-family:'${d.font}',system-ui;color:${e.color}">${d.name}</span>${bar("HP", d.hp / 131, d.hp, "#32d886")}${bar("ATK", d.atk / 100, d.atk, "#ff4f6f")}${bar("SPD", d.spd / 100, d.spd, "#39a9ff")}`;
       b.onclick = () => selectFighter(d);
       root.appendChild(b);
     });
@@ -361,7 +336,7 @@
         m = s.querySelector(".pickmeta");
       s.classList.toggle("filled", !!d);
       if (d) {
-        w.textContent = d.word;
+        w.textContent = d.name;
         w.style.fontFamily = `"${d.font}",system-ui`;
         w.style.color = FX[d.id].c;
         m.textContent = `${d.element} · ${d.ult}`;
@@ -392,7 +367,7 @@
     $("fightBtn").disabled = !(chosen[0] && chosen[1]);
     $("fightBtn").textContent =
       chosen[0] && chosen[1]
-        ? `${chosen[0].word} VS ${chosen[1].word}`
+        ? `${chosen[0].name} VS ${chosen[1].name}`
         : "Choose two fighters";
   }
   function randomRivals() {
@@ -510,9 +485,9 @@
     b = b || chosen[1];
     const c1 = FX[a.id].c,
       c2 = FX[b.id].c;
-    $("v1").textContent = a.word;
+    $("v1").textContent = a.name;
     $("v1").style.cssText = `font-family:"${a.font}";color:${c1}`;
-    $("v2").textContent = b.word;
+    $("v2").textContent = b.name;
     $("v2").style.cssText = `font-family:"${b.font}";color:${c2}`;
     $("vsEl1").textContent = a.element.toUpperCase();
     $("vsEl1").style.color = c1;
@@ -662,7 +637,7 @@
     upgradeMods.forEach((m) => (m.startEnergy = 0));
     setControlColors();
     updateHud();
-    addLog(`Move, dash and attack — you are ${chosen[0].word}`);
+    addLog(`Move, dash and attack — you are ${chosen[0].name}`);
     sfx("fight");
   }
   function resize() {
@@ -985,7 +960,7 @@
         console.warn("[ultFx opening]", e);
       }
     }
-    addLog(`${f.def.word}: ${f.def.ult.toUpperCase()}!`);
+    addLog(`${f.def.name}: ${f.def.ult.toUpperCase()}!`);
     for (let i = 0; i < 100; i++) {
       const a = rnd(0, TAU),
         r = rnd(30, Math.max(W, H) * 0.65),
@@ -1008,7 +983,7 @@
   }
   function ultFxSpawn(f) {
     sfx("ult");
-    addLog(`${f.def.word}: ${f.def.ult.toUpperCase()}!`);
+    addLog(`${f.def.name}: ${f.def.ult.toUpperCase()}!`);
     for (let i = 0; i < 100; i++) {
       const a = rnd(0, TAU),
         r = rnd(30, Math.max(W, H) * 0.65),
@@ -1113,7 +1088,7 @@
     flash = Math.max(flash, ultimate ? 0.55 : crit ? 0.16 : 0.05);
     sfx(ultimate ? "crit" : crit ? "crit" : "hit");
     addLog(
-      `${src.def.word} ${ultimate ? "unleashes " + src.def.ult : crit ? "lands a CRITICAL" : "hits"} — ${Math.round(dmg)}`,
+      `${src.def.name} ${ultimate ? "unleashes " + src.def.ult : crit ? "lands a CRITICAL" : "hits"} — ${Math.round(dmg)}`,
     );
     dmgNums.push({
       x: tgt.x + rnd(-24, 24),
@@ -1543,7 +1518,7 @@
     $("koTitle").classList.remove("show");
     void $("koTitle").offsetWidth;
     $("koTitle").classList.add("show");
-    addLog(`${winner.def.word} wins round ${round}!`);
+    addLog(`${winner.def.name} wins round ${round}!`);
     updateHud();
   }
   function afterRound() {
@@ -1565,7 +1540,7 @@
     if (winner === 0) {
       mode = "upgrade";
       const d = chosen[0];
-      $("upgradeH").textContent = `Winner's spoils \u2014 power up ${d.word}`;
+      $("upgradeH").textContent = `Winner's spoils \u2014 power up ${d.name}`;
       $("upgradeP").textContent =
         `You took round ${round}. Pick your reward \u2014 the AI only gets a weaker consolation prize.`;
       const pool = UPGRADES.slice()
@@ -1593,7 +1568,7 @@
       applyUpgrade(1, u, false);
       applyUpgrade(0, consolation, true);
       mode = "upgrade";
-      $("upgradeH").textContent = `${chosen[1].word} takes round ${round}`;
+      $("upgradeH").textContent = `${chosen[1].name} takes round ${round}`;
       $("upgradeP").textContent =
         `The AI claims ${u.name}. Your consolation prize: ${consolation.name} (weakened). Win the round, win the real loot.`;
       const row = $("upgradeRow");
@@ -1622,7 +1597,7 @@
     else if (u.icon === "CRIT") m.crit = (m.crit || 0) + (weak ? 0.09 : 0.18);
     else if (u.icon === "ELEM")
       m.elementAmp = (m.elementAmp || 0) + (weak ? 0.11 : 0.22);
-    addLog(`${chosen[side].word} gains ${u.name}${weak ? " (weakened)" : ""}`);
+    addLog(`${chosen[side].name} gains ${u.name}${weak ? " (weakened)" : ""}`);
   }
   function showResult(side) {
     mode = "result";
@@ -1651,7 +1626,7 @@
     }
     banner.textContent = title;
     banner.classList.toggle("defeat", !youWon);
-    fighterEl.textContent = d.word;
+    fighterEl.textContent = d.name;
     fighterEl.style.fontFamily = `"${d.font}",system-ui,sans-serif`;
     fighterEl.style.color = fx.c;
     fighterEl.style.textShadow = `0 0 24px ${fx.c},0 0 60px ${fx.c2}`;
@@ -1707,10 +1682,10 @@
     const a = fighters[0],
       b = fighters[1];
     $("nameL").textContent =
-      (netMode ? netLocalName + " · " : "YOU · ") + a.def.word;
+      (netMode ? netLocalName + " · " : "YOU · ") + a.def.name;
     $("nameL").style.cssText = `font-family:"${a.def.font}";color:${a.fx.c}`;
     $("nameR").textContent =
-      b.def.word + (netMode ? " · " + netRemoteName : " · AI");
+      b.def.name + (netMode ? " · " + netRemoteName : " · AI");
     $("nameR").style.cssText = `font-family:"${b.def.font}";color:${b.fx.c}`;
     $("hpL").style.width = clamp((a.hp / a.max) * 100, 0, 100) + "%";
     $("hpR").style.width = clamp((b.hp / b.max) * 100, 0, 100) + "%";
@@ -1935,7 +1910,7 @@
         ? 0.55 + Math.sin(f.iframe * 80) * 0.35
         : 1;
     if (low && !f.dead) ctx.translate(rnd(-2, 2), rnd(-2, 2));
-    ctx.fillText(f.def.word, 0, 0);
+    ctx.fillText(f.def.name, 0, 0);
     ctx.restore();
     ctx.save();
     ctx.globalAlpha = 0.55;
@@ -2992,7 +2967,7 @@
     if (myPick != null) {
       const d = R[myPick],
         e = ELEMENTS[d.element];
-      pl.querySelector(".rps-word").textContent = d.word;
+      pl.querySelector(".rps-word").textContent = d.name;
       pl.querySelector(".rps-word").style.cssText =
         `font-family:"${d.font}";color:${e.color}`;
     } else {
@@ -3002,7 +2977,7 @@
     if (opPick != null) {
       const d = R[opPick],
         e = ELEMENTS[d.element];
-      pr.querySelector(".rps-word").textContent = d.word;
+      pr.querySelector(".rps-word").textContent = d.name;
       pr.querySelector(".rps-word").style.cssText =
         `font-family:"${d.font}";color:${e.color}`;
     } else {
@@ -3040,7 +3015,7 @@
       w.className = "rw";
       w.style.fontFamily = "'" + d.font + "',system-ui";
       w.style.color = el.color;
-      w.textContent = d.word;
+      w.textContent = d.name;
       const m = document.createElement("span");
       m.className = "re";
       m.textContent = d.element + " · " + d.hp + "/" + d.atk + "/" + d.spd;
@@ -3205,7 +3180,7 @@
     snapCurr = null;
     setControlColors();
     updateHud();
-    addLog("Online battle — you are " + netOwnPick.word);
+    addLog("Online battle — you are " + netOwnPick.name);
     sfx("fight");
   }
   function applyRemoteInput(q, p, dt) {
