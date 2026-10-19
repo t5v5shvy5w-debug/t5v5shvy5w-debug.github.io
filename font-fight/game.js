@@ -589,20 +589,18 @@
     $("vsSkip").classList.add("hidden");
     vs.classList.remove("hidden");
     sfx("versus");
-    // VSFX: Canvas particles for Fire vs Storm
-    const elems = [a.element, b.element].sort().join('+');
-    if (elems === 'Fire+Storm') {
-      const cv = $("vsCanvas");
-      if (cv) {
-        VSFX.init(cv);
-        // Text zones for readability (RAMPAGE top-left, VOLTAGE bottom-right, VS center)
-        VSFX.setTextZones([
-          {x: 0.05, y: 0.15, w: 0.4, h: 0.15},  // RAMPAGE
-          {x: 0.55, y: 0.70, w: 0.4, h: 0.15},  // VOLTAGE
-          {x: 0.35, y: 0.40, w: 0.3, h: 0.20},  // VS
-        ]);
-        VSFX.start();
-      }
+    // VSFX: Canvas particles for any element matchup
+    const cv = $("vsCanvas");
+    if (cv && typeof VSFX !== 'undefined') {
+      VSFX.init(cv);
+      VSFX.setElements(a.element, b.element);
+      // Text zones for readability
+      VSFX.setTextZones([
+        {x: 0.05, y: 0.15, w: 0.4, h: 0.15},  // Fighter 1 name
+        {x: 0.55, y: 0.70, w: 0.4, h: 0.15},  // Fighter 2 name
+        {x: 0.35, y: 0.40, w: 0.3, h: 0.20},  // VS
+      ]);
+      VSFX.start();
     }
     if (vsTimer) clearTimeout(vsTimer);
     if (!isGuest) vsTimer = setTimeout(vsGo, 5000);
@@ -3674,412 +3672,394 @@
   resize();
   requestAnimationFrame(frame);
 
-/* VSFX - Cinematic VS screen particle system (Fire vs Storm) */
+/* VSFX v2 - Config-driven element VS particle system */
 const VSFX = (function() {
   let canvas, ctx, W, H;
   let running = false;
   let rafId = null;
-  let startTime = 0;
   let lastTime = 0;
+  let elem1 = 'Fire', elem2 = 'Storm';
   
-  // FPS monitoring
   let fpsSamples = [];
-  let particleScale = 1; // 1.0 = full, reduces if FPS drops
+  let particleScale = 1;
   
-  // Particle pool
-  const POOL_SIZE = 600;
+  const POOL_SIZE = 700;
   const pool = [];
   let poolIdx = 0;
-  
-  // Active particles
   const particles = [];
-  
-  // Lightning bolts (procedural)
-  const bolts = [];
-  
-  // Plasma orbs
-  const orbs = [];
-  
-  // Shockwaves
+  const bolts = [];      // lightning / energy arcs
+  const orbs = [];       // plasma orbs, planets, fireflies
   const shockwaves = [];
+  const crystals = [];   // ice crystals
+  const vines = [];      // nature vines
+  const tendrils = [];   // shadow tendrils
+  const rays = [];       // light rays
   
-  // Screen shake
   let shakeX = 0, shakeY = 0, shakeT = 0;
-  
-  // Flash
-  let flashA = 0;
-  let stormFlashA = 0;
-  
-  // Timers
-  let fireballTimer = 0;
+  let flashA = 0, flashColor = '#ffffff';
+  let sigTimer1 = 0, sigTimer2 = 0;
   let clashTimer = 0;
-  let lightningTimer = 0;
-  
-  // Intro state
-  let introT = 0;
-  const INTRO_DUR = 1.5;
-  
-  // Text zones (no-clutter) - set via setTextZones()
   let textZones = [];
-  
+  let time = 0;
+
+  /* ============ ELEMENT CONFIGS ============ */
+  // Adding a new element = just add a config here
+  const ELEMENTS = {
+    Fire: {
+      colors: { p: '#ff6a00', s: '#ffaa00', a: '#fff8d0' },
+      glow: '#ff6a00',
+      additive: true,
+      spawn: function(layer, x, y) {
+        if (layer === 0) {
+          if (Math.random() < 0.7) {
+            spawn('p', x, y, { vx: r(-0.01,0.01), vy: r(-0.10,-0.05), life: r(2,4), size: r(1,3), color: pick(['#ff6a00','#ff8800']), alpha: 0.4, layer: 0 });
+          } else {
+            spawn('smoke', x, y, { vx: r(-0.005,0.005), vy: r(-0.05,-0.03), life: r(3,5), size: r(20,50), color: '#1a1a1a', alpha: 0.3, layer: 0 });
+          }
+        } else if (layer === 1) {
+          spawn('p', x, y, { vx: r(-0.02,0.02), vy: r(-0.16,-0.08), life: r(1.5,3), size: r(2,5), color: pick(['#ffaa00','#ff8800','#ff6600']), alpha: 0.8, flicker: 0.3, layer: 1, shrink: true });
+        } else {
+          spawn('p', x, y, { vx: r(-0.03,0.03), vy: r(-0.22,-0.12), life: r(1,2), size: r(3,7), color: pick(['#fff8d0','#ffe080','#ffaa00']), alpha: 1, flicker: 0.2, layer: 2, shrink: true });
+        }
+      },
+      signature: function() {
+        // Fireball off the slash, bursts into sparks
+        const p = spawn('fireball', r(0.3,0.7), 0.5, { vx: r(-0.15,0.15), vy: r(-0.35,-0.2), life: 0.8, size: 8, color: '#ffaa00', alpha: 1, layer: 2 });
+        p.burst = 'fire';
+      },
+      sigInterval: 1.0,
+    },
+    Storm: {
+      colors: { p: '#aaccff', s: '#ffffaa', a: '#ffffff' },
+      glow: '#aaffff',
+      additive: true,
+      spawn: function(layer, x, y) {
+        if (layer === 0) {
+          spawn('p', x, y, { vx: r(-0.01,0.01), vy: r(-0.01,0.01), life: r(3,5), size: r(1,3), color: '#aaccff', alpha: 0.3, layer: 0 });
+        } else if (layer === 1) {
+          if (Math.random() < 0.6) {
+            spawn('p', x, y, { vx: r(-0.1,0.1), vy: r(-0.1,0.1), life: r(0.3,0.6), size: r(1,3), color: pick(['#ffffaa','#aaffff','#ffffff']), alpha: 0.9, layer: 1, zigzag: true });
+          } else {
+            spawn('p', x, y, { vx: -0.05, vy: r(0.3,0.5), life: 0.5, size: 1, color: '#88aaff', alpha: 0.4, layer: 1 });
+          }
+        } else {
+          spawn('p', x, y, { vx: r(-0.15,0.15), vy: r(-0.15,0.15), life: r(0.2,0.5), size: r(2,4), color: '#ffffff', alpha: 1, layer: 2 });
+        }
+      },
+      signature: function() {
+        // Forking lightning bolt
+        spawnBolt(r(0.2,0.8), 0.55, '#ffffff', true);
+        stormFlash = 0.35;
+      },
+      sigInterval: 0.7,
+    },
+    Ice: {
+      colors: { p: '#66ccff', s: '#aaeeff', a: '#ffffff' },
+      glow: '#66ccff',
+      additive: true,
+      spawn: function(layer, x, y) {
+        if (layer === 0) {
+          spawn('p', x, y, { vx: r(-0.02,0.02), vy: r(0.02,0.06), life: r(3,5), size: r(1,2), color: '#aaeeff', alpha: 0.4, layer: 0, sway: true });
+        } else if (layer === 1) {
+          spawn('shard', x, y, { vx: r(-0.03,0.03), vy: r(0.03,0.08), life: r(2,4), size: r(2,4), color: pick(['#ffffff','#aaeeff','#66ccff']), alpha: 0.8, layer: 1, spin: true });
+        } else {
+          spawn('p', x, y, { vx: r(-0.01,0.01), vy: r(0.01,0.04), life: r(2,3), size: r(2,3), color: '#ffffff', alpha: 0.9, layer: 2, glitter: true });
+        }
+      },
+      signature: function() {
+        // Crystal grows from slash then shatters
+        const c = { x: r(0.3,0.7), y: 0.5, size: 0, maxSize: r(15,30), life: 1.2, maxLife: 1.2 };
+        crystals.push(c);
+      },
+      sigInterval: 2.0,
+    },
+    Shadow: {
+      colors: { p: '#6a1fb0', s: '#a06bff', a: '#d0a0ff' },
+      glow: '#6a1fb0',
+      additive: false, // normal blending for smoke
+      spawn: function(layer, x, y) {
+        if (layer === 0) {
+          spawn('smoke', x, y, { vx: r(-0.01,0.01), vy: r(-0.03,-0.01), life: r(3,5), size: r(25,50), color: '#0a0015', alpha: 0.5, layer: 0 });
+        } else if (layer === 1) {
+          spawn('p', x, y, { vx: r(-0.02,0.02), vy: r(-0.05,-0.02), life: r(2,4), size: r(1,3), color: pick(['#6a1fb0','#a06bff']), alpha: 0.6, layer: 1, flicker: 0.5 });
+        } else {
+          spawn('p', x, y, { vx: r(-0.03,0.03), vy: r(-0.08,-0.03), life: r(1,2), size: r(2,4), color: '#d0a0ff', alpha: 0.8, layer: 2, glitch: true });
+        }
+      },
+      signature: function() {
+        // Tendril creeps in from edge
+        const side = Math.random() < 0.5 ? 0 : 1;
+        tendrils.push({ x: side, y: Math.random(), len: 0, maxLen: r(0.2,0.4), life: 2, maxLife: 2, side: side });
+      },
+      sigInterval: 1.5,
+    },
+    Light: {
+      colors: { p: '#ffe080', s: '#fff8d0', a: '#ffffff' },
+      glow: '#ffe080',
+      additive: true,
+      spawn: function(layer, x, y) {
+        if (layer === 0) {
+          spawn('p', x, y, { vx: r(-0.005,0.005), vy: r(-0.02,-0.01), life: r(3,5), size: r(1,2), color: '#ffe080', alpha: 0.3, layer: 0 });
+        } else if (layer === 1) {
+          spawn('p', x, y, { vx: r(-0.01,0.01), vy: r(-0.03,-0.01), life: r(2,4), size: r(2,3), color: pick(['#fff8d0','#ffe080']), alpha: 0.6, layer: 1, pulse: true });
+        } else {
+          spawn('sparkle', x, y, { vx: 0, vy: 0, life: r(0.5,1), size: r(3,6), color: '#ffffff', alpha: 1, layer: 2 });
+        }
+      },
+      signature: function() {
+        // Golden ray pulse with halo rings
+        shockwaves.push({ x: 0.5, y: 0.35, r: 0, maxR: 0.5, life: 0.8, maxLife: 0.8, color: '#ffe080' });
+        shockwaves.push({ x: 0.5, y: 0.35, r: 0, maxR: 0.3, life: 0.6, maxLife: 0.6, color: '#ffffff' });
+      },
+      sigInterval: 2.0,
+    },
+    Nature: {
+      colors: { p: '#3cdc78', s: '#a0ff80', a: '#ffffff' },
+      glow: '#3cdc78',
+      additive: true,
+      spawn: function(layer, x, y) {
+        if (layer === 0) {
+          spawn('p', x, y, { vx: r(-0.01,0.01), vy: r(0.01,0.03), life: r(3,5), size: r(1,2), color: '#a0ff80', alpha: 0.3, layer: 0, sway: true });
+        } else if (layer === 1) {
+          spawn('leaf', x, y, { vx: r(-0.02,0.02), vy: r(0.02,0.05), life: r(3,5), size: r(3,6), color: pick(['#3cdc78','#5ce08a','#2ca85e']), alpha: 0.8, layer: 1, spin: true, sway: true });
+        } else {
+          spawn('firefly', x, y, { vx: r(-0.02,0.02), vy: r(-0.02,0.02), life: r(2,4), size: r(2,3), color: '#ffffaa', alpha: 1, layer: 2, pulse: true });
+        }
+      },
+      signature: function() {
+        // Vine grows from edge, blooms at slash
+        const side = Math.random() < 0.5 ? 0 : 1;
+        vines.push({ x: side, y: r(0.2,0.8), len: 0, maxLen: 0.5, life: 2.5, maxLife: 2.5, side: side, bloomed: false });
+      },
+      sigInterval: 2.5,
+    },
+    Cosmic: {
+      colors: { p: '#a06bff', s: '#e8d8ff', a: '#ffffff' },
+      glow: '#a06bff',
+      additive: true,
+      spawn: function(layer, x, y) {
+        if (layer === 0) {
+          // Parallax star field (slow, tiny)
+          spawn('star', x, y, { vx: 0, vy: 0, life: r(4,6), size: r(0.5,1.5), color: pick(['#ffffff','#e8d8ff','#a06bff']), alpha: r(0.3,0.6), layer: 0, twinkle: true });
+        } else if (layer === 1) {
+          spawn('p', x, y, { vx: r(-0.005,0.005), vy: r(-0.005,0.005), life: r(3,5), size: r(1,2), color: '#a06bff', alpha: 0.4, layer: 1 });
+        } else {
+          if (Math.random() < 0.1) {
+            // Shooting star
+            spawn('shooting', x, y, { vx: r(-0.3,-0.2), vy: r(0.1,0.2), life: 0.8, size: 2, color: '#ffffff', alpha: 1, layer: 2 });
+          } else {
+            spawn('p', x, y, { vx: r(-0.01,0.01), vy: r(-0.01,0.01), life: r(2,4), size: r(1,2), color: '#e8d8ff', alpha: 0.6, layer: 2, twinkle: true });
+          }
+        }
+      },
+      signature: function() {
+        // Black hole swirl at slash pulls stars then bursts
+        const bh = { x: 0.5, y: 0.5, r: 0, maxR: 40, life: 1.5, maxLife: 1.5, phase: 'pull' };
+        blackholes.push(bh);
+      },
+      sigInterval: 3.0,
+    },
+  };
+
+  const blackholes = [];
+  let stormFlash = 0;
+
+  /* ============ HELPERS ============ */
+  function r(a, b) { return a + Math.random() * (b - a); }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
   function init(canvasEl) {
     canvas = canvasEl;
     ctx = canvas.getContext('2d');
     resize();
-    window.addEventListener('resize', resize);
-    
-    // Pre-allocate pool
     for (let i = 0; i < POOL_SIZE; i++) {
-      pool.push({
-        x: 0, y: 0, vx: 0, vy: 0,
-        life: 0, maxLife: 1,
-        size: 1, color: '#fff',
-        type: 'ember', layer: 0,
-        alpha: 1, flicker: 0,
-        trail: null
-      });
-    }
-    
-    // Init plasma orbs (storm)
-    for (let i = 0; i < 4; i++) {
-      orbs.push({
-        x: Math.random(), y: 0.6 + Math.random() * 0.3,
-        r: 12 + Math.random() * 8,
-        phase: Math.random() * Math.PI * 2,
-        hue: 55 + Math.random() * 10 // yellow-ish
-      });
+      pool.push({ x:0, y:0, vx:0, vy:0, life:0, maxLife:1, size:1, color:'#fff', type:'p', layer:0, alpha:1 });
     }
   }
-  
+
   function resize() {
     if (!canvas) return;
-    const r = canvas.getBoundingClientRect();
-    W = canvas.width = r.width * (window.devicePixelRatio || 1);
-    H = canvas.height = r.height * (window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    W = canvas.width = rect.width * dpr;
+    H = canvas.height = rect.height * dpr;
   }
-  
-  function setTextZones(zones) {
-    // zones: [{x, y, w, h}] in canvas coords (0-1)
-    textZones = zones;
-  }
-  
-  function inTextZone(x, y) {
-    // x,y in 0-1 coords
-    for (const z of textZones) {
-      if (x >= z.x && x <= z.x + z.w && y >= z.y && y <= z.y + z.h) {
-        return true;
+
+  function setElements(e1, e2) {
+    elem1 = e1; elem2 = e2;
+    // Clear
+    particles.length = 0; bolts.length = 0; orbs.length = 0;
+    shockwaves.length = 0; crystals.length = 0; vines.length = 0;
+    tendrils.length = 0; rays.length = 0; blackholes.length = 0;
+    // Init orbs for Storm (plasma) or Cosmic (planets)
+    orbs.length = 0;
+    if (e1 === 'Storm' || e2 === 'Storm') {
+      for (let i = 0; i < 4; i++) {
+        orbs.push({ type: 'plasma', x: r(0.2,0.8), y: r(0.6,0.9), r: r(12,20), phase: r(0,6.28) });
       }
+    }
+    if (e1 === 'Cosmic' || e2 === 'Cosmic') {
+      for (let i = 0; i < 3; i++) {
+        orbs.push({ type: 'planet', x: r(0.2,0.8), y: r(0.2,0.8), r: r(8,15), phase: r(0,6.28), orbitR: r(0.05,0.15), speed: r(0.5,1.5), color: pick(['#ff8888','#88aaff','#aaffaa']) });
+      }
+    }
+  }
+
+  function setTextZones(zones) { textZones = zones; }
+
+  function inTextZone(x, y) {
+    for (const z of textZones) {
+      if (x >= z.x && x <= z.x + z.w && y >= z.y && y <= z.y + z.h) return true;
     }
     return false;
   }
-  
+
   function spawn(type, x, y, opts) {
     opts = opts || {};
-    // Get from pool (reuse)
     const p = pool[poolIdx];
     poolIdx = (poolIdx + 1) % POOL_SIZE;
-    
     p.x = x; p.y = y;
     p.vx = opts.vx || 0; p.vy = opts.vy || 0;
     p.life = p.maxLife = opts.life || 1;
     p.size = opts.size || 2;
     p.color = opts.color || '#fff';
-    p.type = type;
-    p.layer = opts.layer || 0;
-    p.alpha = opts.alpha || 1;
+    p.type = type; p.layer = opts.layer || 0;
+    p.alpha = opts.alpha !== undefined ? opts.alpha : 1;
     p.flicker = opts.flicker || 0;
-    
+    p.shrink = opts.shrink || false;
+    p.zigzag = opts.zigzag || false;
+    p.sway = opts.sway || false;
+    p.spin = opts.spin || false;
+    p.pulse = opts.pulse || false;
+    p.twinkle = opts.twinkle || false;
+    p.glitter = opts.glitter || false;
+    p.glitch = opts.glitch || false;
+    p.burst = null;
+    p.phase = Math.random() * 6.28;
     particles.push(p);
     return p;
   }
-  
-  function updateFPS(dt) {
-    fpsSamples.push(1 / dt);
-    if (fpsSamples.length > 30) fpsSamples.shift();
-    if (fpsSamples.length === 30) {
-      const avg = fpsSamples.reduce((a, b) => a + b, 0) / 30;
-      // Auto-scale: if below 50fps, reduce particles
-      if (avg < 50 && particleScale > 0.4) {
-        particleScale -= 0.1;
-      } else if (avg > 58 && particleScale < 1) {
-        particleScale += 0.05;
-      }
-    }
-  }
-  
-  // === FIRE PARTICLES ===
-  function spawnFireEmber(layer) {
-    const target = Math.floor(280 * particleScale / 3); // ~93 per layer at full
-    // Count current fire particles
-    let count = 0;
-    for (const p of particles) {
-      if (p.type.startsWith('fire')) count++;
-    }
-    if (count >= target * 3) return;
-    
-    const x = Math.random(); // 0-1
-    const y = 0.5 + Math.random() * 0.1; // Start near slash (middle)
-    
-    if (layer === 0) {
-      // Back: tiny slow embers + smoke
-      if (Math.random() < 0.7) {
-        spawn('fire-back', x, y, {
-          vx: (Math.random() - 0.5) * 0.02,
-          vy: -0.05 - Math.random() * 0.05,
-          life: 2 + Math.random() * 2,
-          size: 1 + Math.random() * 2,
-          color: Math.random() < 0.3 ? '#333' : '#ff6a00',
-          alpha: 0.4,
-          layer: 0
-        });
-      } else {
-        // Smoke puff (dark, not additive - we'll draw it normally)
-        spawn('smoke', x, y, {
-          vx: (Math.random() - 0.5) * 0.01,
-          vy: -0.03 - Math.random() * 0.02,
-          life: 3 + Math.random() * 2,
-          size: 20 + Math.random() * 30,
-          color: '#1a1a1a',
-          alpha: 0.3,
-          layer: 0
-        });
-      }
-    } else if (layer === 1) {
-      // Mid: medium embers, flicker and shrink
-      spawn('fire-mid', x, y, {
-        vx: (Math.random() - 0.5) * 0.04,
-        vy: -0.08 - Math.random() * 0.08,
-        life: 1.5 + Math.random() * 1.5,
-        size: 2 + Math.random() * 3,
-        color: ['#ffaa00', '#ff8800', '#ff6600'][Math.floor(Math.random() * 3)],
-        alpha: 0.8,
-        flicker: 0.3,
-        layer: 1
-      });
-    } else {
-      // Front: large bright embers with trails
-      spawn('fire-front', x, y, {
-        vx: (Math.random() - 0.5) * 0.06,
-        vy: -0.12 - Math.random() * 0.1,
-        life: 1 + Math.random(),
-        size: 3 + Math.random() * 4,
-        color: ['#fff8d0', '#ffe080', '#ffaa00'][Math.floor(Math.random() * 3)],
-        alpha: 1,
-        flicker: 0.2,
-        layer: 2
-      });
-    }
-  }
-  
-  function spawnFireball() {
-    // Fireball shoots off the slash, bursts into sparks
-    const x = 0.3 + Math.random() * 0.4;
-    const y = 0.5;
-    const p = spawn('fireball', x, y, {
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: -0.2 - Math.random() * 0.15,
-      life: 0.8,
-      size: 8,
-      color: '#ffaa00',
-      alpha: 1,
-      layer: 2
-    });
-    p.burst = true;
-  }
-  
-  // === STORM PARTICLES ===
-  function spawnStormParticle(layer) {
-    const target = Math.floor(280 * particleScale / 3);
-    let count = 0;
-    for (const p of particles) {
-      if (p.type.startsWith('storm')) count++;
-    }
-    if (count >= target * 3) return;
-    
-    const x = Math.random();
-    const y = 0.5 + Math.random() * 0.5; // Bottom half
-    
-    if (layer === 0) {
-      // Back: slow drifting glow dust
-      spawn('storm-back', x, y, {
-        vx: (Math.random() - 0.5) * 0.02,
-        vy: (Math.random() - 0.5) * 0.02,
-        life: 3 + Math.random() * 2,
-        size: 1 + Math.random() * 2,
-        color: '#aaccff',
-        alpha: 0.3,
-        layer: 0
-      });
-    } else if (layer === 1) {
-      // Mid: fast zigzag sparks + rain streaks
-      if (Math.random() < 0.6) {
-        spawn('storm-spark', x, y, {
-          vx: (Math.random() - 0.5) * 0.2,
-          vy: (Math.random() - 0.5) * 0.2,
-          life: 0.3 + Math.random() * 0.3,
-          size: 1 + Math.random() * 2,
-          color: ['#ffffaa', '#aaffff', '#ffffff'][Math.floor(Math.random() * 3)],
-          alpha: 0.9,
-          layer: 1
-        });
-      } else {
-        // Rain streak (diagonal)
-        spawn('storm-rain', x, y, {
-          vx: -0.05,
-          vy: 0.3 + Math.random() * 0.2,
-          life: 0.5,
-          size: 1,
-          color: '#88aaff',
-          alpha: 0.4,
-          layer: 1
-        });
-      }
-    } else {
-      // Front: bright sparks
-      spawn('storm-front', x, y, {
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        life: 0.2 + Math.random() * 0.3,
-        size: 2 + Math.random() * 2,
-        color: '#ffffff',
-        alpha: 1,
-        layer: 2
-      });
-    }
-  }
-  
-  function spawnLightning() {
-    // Procedural branching lightning bolt
-    const x = Math.random();
-    const y = 0.55;
-    const segments = [];
+
+  function spawnBolt(x, y, color, branch) {
+    const pts = [{x: x, y: y}];
     let cx = x, cy = y;
-    const targetX = x + (Math.random() - 0.5) * 0.3;
-    const targetY = 0.95;
-    
-    // Main bolt
-    const points = [{x: cx, y: cy}];
     const steps = 8 + Math.floor(Math.random() * 6);
+    const tx = x + r(-0.15, 0.15), ty = 0.95;
+    const segs = [];
     for (let i = 1; i <= steps; i++) {
       const t = i / steps;
-      cx = x + (targetX - x) * t + (Math.random() - 0.5) * 0.08;
-      cy = y + (targetY - y) * t;
-      points.push({x: cx, y: cy});
-      
-      // Branch (30% chance)
-      if (Math.random() < 0.3 && i < steps - 2) {
-        const branch = [{x: cx, y: cy}];
+      cx = x + (tx - x) * t + r(-0.04, 0.04);
+      cy = y + (ty - y) * t;
+      pts.push({x: cx, y: cy});
+      if (branch && Math.random() < 0.3 && i < steps - 2) {
+        const bp = [{x: cx, y: cy}];
         let bx = cx, by = cy;
-        const bSteps = 3 + Math.floor(Math.random() * 3);
-        const bDir = Math.random() < 0.5 ? -1 : 1;
-        for (let j = 1; j <= bSteps; j++) {
-          bx += bDir * (0.02 + Math.random() * 0.03);
-          by += 0.03 + Math.random() * 0.04;
-          branch.push({x: bx, y: by});
+        const dir = Math.random() < 0.5 ? -1 : 1;
+        for (let j = 0; j < 4; j++) {
+          bx += dir * r(0.02, 0.05); by += r(0.03, 0.07);
+          bp.push({x: bx, y: by});
         }
-        segments.push({points: branch, alpha: 0.6});
+        segs.push({pts: bp, alpha: 0.6});
       }
     }
-    segments.push({points: points, alpha: 1});
-    
-    bolts.push({
-      segments: segments,
-      life: 0.25,
-      maxLife: 0.25,
-      color: '#ffffff'
-    });
-    
-    // Flash the storm half
-    stormFlashA = 0.35;
+    segs.push({pts: pts, alpha: 1});
+    bolts.push({segs: segs, life: 0.25, maxLife: 0.25, color: color});
   }
-  
-  // === SLASH & CLASH ===
-  function spawnSlashSparks() {
-    // Constant spray where fire and lightning meet (diagonal slash)
+
+  function updateFPS(dt) {
+    fpsSamples.push(1 / Math.max(dt, 0.001));
+    if (fpsSamples.length > 30) fpsSamples.shift();
+    if (fpsSamples.length === 30) {
+      const avg = fpsSamples.reduce((a,b) => a+b, 0) / 30;
+      if (avg < 50 && particleScale > 0.4) particleScale -= 0.1;
+      else if (avg > 58 && particleScale < 1) particleScale += 0.05;
+    }
+  }
+
+  function doClash() {
+    const c1 = ELEMENTS[elem1].colors, c2 = ELEMENTS[elem2].colors;
+    shockwaves.push({ x: 0.5, y: 0.5, r: 0, maxR: 0.6, life: 0.6, maxLife: 0.6, color: '#ffffff' });
+    shockwaves.push({ x: 0.5, y: 0.5, r: 0, maxR: 0.4, life: 0.5, maxLife: 0.5, color: c1.p });
+    shockwaves.push({ x: 0.5, y: 0.5, r: 0, maxR: 0.3, life: 0.4, maxLife: 0.4, color: c2.p });
+    shakeT = 0.4;
+    flashA = 0.4;
+    flashColor = '#ffffff';
+    for (let i = 0; i < 30; i++) {
+      const a = Math.random() * 6.28, sp = r(0.2, 0.5);
+      const c = Math.random() < 0.5 ? c1 : c2;
+      spawn('p', 0.5, 0.5, { vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: r(0.6,1.2), size: r(2,5), color: pick([c.p, c.s, c.a]), alpha: 1, layer: 2 });
+    }
+  }
+
+  function update(dt) {
+    time += dt;
+    
+    // Spawn from configs (top half = elem1, bottom half = elem2)
+    const cfg1 = ELEMENTS[elem1], cfg2 = ELEMENTS[elem2];
+    if (cfg1 && cfg2) {
+      const targetPerLayer = Math.floor(140 * particleScale / 3);
+      for (let l = 0; l < 3; l++) {
+        // Count
+        let c1 = 0, c2 = 0;
+        for (const p of particles) {
+          if (p.layer === l) {
+            if (p.y < 0.55) c1++; else c2++;
+          }
+        }
+        if (c1 < targetPerLayer) {
+          cfg1.spawn(l, Math.random(), r(0.05, 0.5));
+        }
+        if (c2 < targetPerLayer) {
+          cfg2.spawn(l, Math.random(), r(0.5, 0.95));
+        }
+      }
+      
+      // Signature moves
+      sigTimer1 -= dt;
+      if (sigTimer1 <= 0) { cfg1.signature(); sigTimer1 = cfg1.sigInterval * r(0.8, 1.2); }
+      sigTimer2 -= dt;
+      if (sigTimer2 <= 0) { cfg2.signature(); sigTimer2 = cfg2.sigInterval * r(0.8, 1.2); }
+    }
+    
+    // Slash sparks (mixed colors)
     for (let i = 0; i < 3; i++) {
       const t = Math.random();
-      // Diagonal from top-right to bottom-left
-      const x = 0.7 - t * 0.4 + (Math.random() - 0.5) * 0.05;
-      const y = 0.2 + t * 0.6 + (Math.random() - 0.5) * 0.05;
-      const isFire = Math.random() < 0.5;
-      spawn('slash', x, y, {
-        vx: (Math.random() - 0.5) * 0.2,
-        vy: (Math.random() - 0.5) * 0.2,
-        life: 0.4 + Math.random() * 0.4,
-        size: 1 + Math.random() * 2,
-        color: isFire ? '#ff8800' : '#aaffff',
-        alpha: 1,
-        layer: 2
-      });
+      const x = 0.7 - t * 0.4 + r(-0.025, 0.025);
+      const y = 0.2 + t * 0.6 + r(-0.025, 0.025);
+      const c = Math.random() < 0.5 ? ELEMENTS[elem1].colors : ELEMENTS[elem2].colors;
+      spawn('p', x, y, { vx: r(-0.1,0.1), vy: r(-0.1,0.1), life: r(0.4,0.8), size: r(1,3), color: pick([c.p, c.s]), alpha: 1, layer: 2 });
     }
-  }
-  
-  function doClash() {
-    // Big clash: shockwave ring, screen shake, white flash
-    shockwaves.push({
-      x: 0.5, y: 0.5,
-      r: 0, maxR: 0.6,
-      life: 0.6, maxLife: 0.6,
-      color: '#ffffff'
-    });
-    shakeT = 0.4;
-    flashA = 0.5;
     
-    // Burst of mixed sparks
-    for (let i = 0; i < 30; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const sp = 0.2 + Math.random() * 0.3;
-      spawn('slash', 0.5, 0.5, {
-        vx: Math.cos(a) * sp,
-        vy: Math.sin(a) * sp,
-        life: 0.6 + Math.random() * 0.6,
-        size: 2 + Math.random() * 3,
-        color: Math.random() < 0.5 ? '#ffaa00' : '#aaffff',
-        alpha: 1,
-        layer: 2
-      });
-    }
-  }
-  
-  // === UPDATE ===
-  function update(dt) {
+    // Clash timer
+    clashTimer -= dt;
+    if (clashTimer <= 0) { doClash(); clashTimer = r(2.5, 3.5); }
+    
     // Update particles
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
       p.life -= dt;
       if (p.life <= 0) {
-        // Fireball burst
-        if (p.burst && p.type === 'fireball') {
+        if (p.burst === 'fire') {
           for (let j = 0; j < 15; j++) {
-            const a = Math.random() * Math.PI * 2;
-            spawn('fire-spark', p.x, p.y, {
-              vx: Math.cos(a) * 0.15,
-              vy: Math.sin(a) * 0.15 - 0.05,
-              life: 0.5 + Math.random() * 0.5,
-              size: 1 + Math.random() * 2,
-              color: ['#ffaa00', '#ff6600', '#ffcc00'][Math.floor(Math.random() * 3)],
-              alpha: 1,
-              layer: 2
-            });
+            const a = Math.random() * 6.28;
+            spawn('p', p.x, p.y, { vx: Math.cos(a)*0.15, vy: Math.sin(a)*0.15 - 0.05, life: r(0.5,1), size: r(1,3), color: pick(['#ffaa00','#ff6600','#ffcc00']), alpha: 1, layer: 2 });
+          }
+        }
+        if (p.type === 'crystal-shatter') {
+          for (let j = 0; j < 8; j++) {
+            spawn('shard', p.x, p.y, { vx: r(-0.1,0.1), vy: r(-0.05,0.1), life: r(0.5,1), size: r(1,3), color: '#aaeeff', alpha: 0.8, layer: 2 });
           }
         }
         particles.splice(i, 1);
         continue;
       }
-      
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      
-      // Fire embers shrink as they rise
-      if (p.type.startsWith('fire')) {
-        const t = p.life / p.maxLife;
-        p.size *= (0.99 + t * 0.01); // Shrink over time
-      }
-      
-      // Flicker
-      if (p.flicker > 0) {
-        p.alpha = (p.alpha || 1) * (1 - p.flicker * Math.random());
-      }
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.phase += dt * 5;
+      if (p.shrink) p.size *= 0.995;
+      if (p.zigzag) { p.x += Math.sin(p.phase * 10) * 0.02 * dt * 60; }
+      if (p.sway) { p.x += Math.sin(p.phase) * 0.01; }
+      if (p.flicker) p.alpha *= (1 - p.flicker * Math.random() * 0.5);
+      if (p.glitch && Math.random() < 0.1) p.x += r(-0.02, 0.02);
     }
     
     // Update bolts
@@ -4096,121 +4076,190 @@ const VSFX = (function() {
       if (s.life <= 0) shockwaves.splice(i, 1);
     }
     
-    // Update shake
+    // Update crystals (grow then shatter)
+    for (let i = crystals.length - 1; i >= 0; i--) {
+      const c = crystals[i];
+      c.life -= dt;
+      const t = 1 - c.life / c.maxLife;
+      if (t < 0.5) c.size = (t / 0.5) * c.maxSize;
+      else if (!c.shattered) {
+        c.shattered = true;
+        // Shatter into shards
+        for (let j = 0; j < 10; j++) {
+          spawn('shard', c.x, c.y, { vx: r(-0.15,0.15), vy: r(-0.1,0.15), life: r(0.5,1), size: r(2,4), color: pick(['#ffffff','#aaeeff']), alpha: 0.9, layer: 2 });
+        }
+      }
+      if (c.life <= 0) crystals.splice(i, 1);
+    }
+    
+    // Update vines
+    for (let i = vines.length - 1; i >= 0; i--) {
+      const v = vines[i];
+      v.life -= dt;
+      v.len = Math.min(v.len + dt * 0.3, v.maxLen);
+      if (!v.bloomed && v.len >= v.maxLen * 0.9) {
+        v.bloomed = true;
+        // Bloom into petals at slash
+        const bx = v.side === 0 ? v.len : 1 - v.len;
+        for (let j = 0; j < 12; j++) {
+          spawn('petal', bx, v.y, { vx: r(-0.05,0.05), vy: r(-0.08,-0.03), life: r(1,2), size: r(2,4), color: pick(['#ff88aa','#ffaaaa','#ffffff']), alpha: 0.9, layer: 2, sway: true });
+        }
+      }
+      if (v.life <= 0) vines.splice(i, 1);
+    }
+    
+    // Update tendrils
+    for (let i = tendrils.length - 1; i >= 0; i--) {
+      const t = tendrils[i];
+      t.life -= dt;
+      t.len = Math.min(t.len + dt * 0.2, t.maxLen);
+      if (t.life <= 0) tendrils.splice(i, 1);
+    }
+    
+    // Update blackholes
+    for (let i = blackholes.length - 1; i >= 0; i--) {
+      const bh = blackholes[i];
+      bh.life -= dt;
+      const t = 1 - bh.life / bh.maxLife;
+      if (t < 0.6) {
+        bh.r = (t / 0.6) * bh.maxR;
+        // Pull nearby particles
+        for (const p of particles) {
+          const dx = bh.x - p.x, dy = bh.y - p.y;
+          const d = Math.sqrt(dx*dx + dy*dy);
+          if (d < 0.3 && d > 0.01) {
+            p.vx += (dx / d) * dt * 0.5;
+            p.vy += (dy / d) * dt * 0.5;
+          }
+        }
+      } else if (bh.phase === 'pull') {
+        bh.phase = 'burst';
+        // Burst
+        for (let j = 0; j < 25; j++) {
+          const a = Math.random() * 6.28;
+          spawn('p', bh.x, bh.y, { vx: Math.cos(a)*r(0.2,0.4), vy: Math.sin(a)*r(0.2,0.4), life: r(0.5,1), size: r(1,3), color: pick(['#a06bff','#e8d8ff','#ffffff']), alpha: 1, layer: 2 });
+        }
+        doClash();
+      }
+      if (bh.life <= 0) blackholes.splice(i, 1);
+    }
+    
+    // Update orbs
+    for (const o of orbs) {
+      o.phase += dt * 2;
+      if (o.type === 'planet') {
+        o.x = 0.5 + Math.cos(o.phase * o.speed) * o.orbitR;
+        o.y = 0.5 + Math.sin(o.phase * o.speed) * o.orbitR * 0.6;
+      }
+    }
+    
+    // Shake
     if (shakeT > 0) {
       shakeT -= dt;
       const mag = shakeT * 20;
-      shakeX = (Math.random() - 0.5) * mag;
-      shakeY = (Math.random() - 0.5) * mag;
-    } else {
-      shakeX = shakeY = 0;
-    }
+      shakeX = r(-mag, mag); shakeY = r(-mag, mag);
+    } else { shakeX = shakeY = 0; }
     
-    // Decay flashes
     flashA = Math.max(0, flashA - dt * 2);
-    stormFlashA = Math.max(0, stormFlashA - dt * 3);
-    
-    // Update orbs (float)
-    for (const o of orbs) {
-      o.phase += dt * 2;
-    }
-    
-    // Spawn timers
-    fireballTimer -= dt;
-    if (fireballTimer <= 0) {
-      spawnFireball();
-      fireballTimer = 0.8 + Math.random() * 0.4; // ~1s
-    }
-    
-    clashTimer -= dt;
-    if (clashTimer <= 0) {
-      doClash();
-      clashTimer = 2.5 + Math.random(); // ~3s
-    }
-    
-    lightningTimer -= dt;
-    if (lightningTimer <= 0) {
-      spawnLightning();
-      lightningTimer = 0.4 + Math.random() * 0.8;
-    }
-    
-    // Continuous spawning
-    for (let l = 0; l < 3; l++) {
-      spawnFireEmber(l);
-      spawnStormParticle(l);
-    }
-    spawnSlashSparks();
+    stormFlash = Math.max(0, stormFlash - dt * 3);
   }
-  
-  // === RENDER ===
+
   function render() {
     if (!ctx) return;
-    
+    const dpr = window.devicePixelRatio || 1;
     ctx.save();
     ctx.clearRect(0, 0, W, H);
+    ctx.translate(shakeX * (W/100), shakeY * (H/100));
     
-    // Apply screen shake
-    ctx.translate(shakeX * (W / 100), shakeY * (H / 100));
+    // Determine blend mode (Shadow uses normal for smoke, others additive)
+    const useAdditive = ELEMENTS[elem1].additive && ELEMENTS[elem2].additive;
+    ctx.globalCompositeOperation = useAdditive ? 'lighter' : 'source-over';
     
-    // Additive blending for glow
-    ctx.globalCompositeOperation = 'lighter';
-    
-    const dpr = window.devicePixelRatio || 1;
-    
-    // Draw particles (back to front by layer)
+    // Sort by layer
     const sorted = [...particles].sort((a, b) => a.layer - b.layer);
     for (const p of sorted) {
-      const px = p.x * W;
-      const py = p.y * H;
-      const pr = p.size * dpr;
+      const px = p.x * W, py = p.y * H;
+      let pr = p.size * dpr;
+      let alpha = (p.life / p.maxLife) * p.alpha;
+      if (inTextZone(p.x, p.y)) alpha *= 0.2;
       
-      // No-clutter zone: fade to 20% behind text
-      let alpha = (p.life / p.maxLife) * (p.alpha || 1);
-      if (inTextZone(p.x, p.y)) {
-        alpha *= 0.2;
-      }
+      if (p.twinkle) alpha *= 0.5 + 0.5 * Math.sin(p.phase * 3);
+      if (p.pulse) pr *= 1 + 0.3 * Math.sin(p.phase * 4);
+      if (p.glitter) alpha *= 0.7 + 0.3 * Math.sin(p.phase * 8);
       
       if (p.type === 'smoke') {
-        // Smoke: normal blending, dark
         ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = alpha * 0.3;
+        ctx.globalAlpha = alpha * 0.4;
         ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(px, py, pr * 3, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalCompositeOperation = 'lighter';
-      } else {
+        ctx.beginPath(); ctx.arc(px, py, pr * 3, 0, 6.29); ctx.fill();
+        ctx.globalCompositeOperation = useAdditive ? 'lighter' : 'source-over';
+      } else if (p.type === 'shard' || p.type === 'leaf' || p.type === 'petal') {
         ctx.globalAlpha = alpha;
         ctx.fillStyle = p.color;
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(p.phase);
+        const s = pr;
         ctx.beginPath();
-        ctx.arc(px, py, pr, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Glow (larger, fainter circle)
-        ctx.globalAlpha = alpha * 0.3;
+        if (p.type === 'shard') {
+          ctx.moveTo(0, -s); ctx.lineTo(s*0.6, 0); ctx.lineTo(0, s); ctx.lineTo(-s*0.6, 0);
+        } else {
+          ctx.ellipse(0, 0, s, s*0.6, 0, 0, 6.29);
+        }
+        ctx.closePath(); ctx.fill();
+        ctx.restore();
+      } else if (p.type === 'sparkle') {
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 1.5 * dpr;
+        const s = pr * (0.5 + 0.5 * Math.sin(p.phase * 6));
         ctx.beginPath();
-        ctx.arc(px, py, pr * 2.5, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(px - s, py); ctx.lineTo(px + s, py);
+        ctx.moveTo(px, py - s); ctx.lineTo(px, py + s);
+        ctx.stroke();
+      } else if (p.type === 'shooting') {
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 2 * dpr;
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px - p.vx * W * 0.1, py - p.vy * H * 0.1);
+        ctx.stroke();
+      } else if (p.type === 'star') {
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(px, py, pr, 0, 6.29); ctx.fill();
+      } else if (p.type === 'firefly') {
+        ctx.globalAlpha = alpha * (0.4 + 0.6 * Math.abs(Math.sin(p.phase * 2)));
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(px, py, pr, 0, 6.29); ctx.fill();
+        ctx.globalAlpha = alpha * 0.2;
+        ctx.beginPath(); ctx.arc(px, py, pr * 3, 0, 6.29); ctx.fill();
+      } else {
+        // Default circle with glow
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(px, py, pr, 0, 6.29); ctx.fill();
+        if (useAdditive) {
+          ctx.globalAlpha = alpha * 0.3;
+          ctx.beginPath(); ctx.arc(px, py, pr * 2.5, 0, 6.29); ctx.fill();
+        }
       }
     }
     ctx.globalAlpha = 1;
     
-    // Draw lightning bolts
+    // Lightning bolts
     for (const b of bolts) {
-      const alpha = b.life / b.maxLife;
+      const a = b.life / b.maxLife;
       ctx.strokeStyle = b.color;
       ctx.lineWidth = 3 * dpr;
-      ctx.globalAlpha = alpha;
-      ctx.shadowColor = '#aaffff';
-      ctx.shadowBlur = 15 * dpr;
-      for (const seg of b.segments) {
-        ctx.globalAlpha = alpha * seg.alpha;
+      ctx.shadowColor = '#aaffff'; ctx.shadowBlur = 15 * dpr;
+      for (const s of b.segs) {
+        ctx.globalAlpha = a * s.alpha;
         ctx.beginPath();
-        seg.points.forEach((pt, idx) => {
-          const px = pt.x * W;
-          const py = pt.y * H;
-          if (idx === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
+        s.pts.forEach((pt, idx) => {
+          const px = pt.x * W, py = pt.y * H;
+          if (idx === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
         });
         ctx.stroke();
       }
@@ -4218,139 +4267,196 @@ const VSFX = (function() {
     }
     ctx.globalAlpha = 1;
     
-    // Draw plasma orbs with arcs
+    // Orbs (plasma / planets)
     for (let i = 0; i < orbs.length; i++) {
       const o = orbs[i];
-      const ox = (o.x + Math.sin(o.phase) * 0.02) * W;
+      const ox = (o.x + (o.type === 'plasma' ? Math.sin(o.phase) * 0.02 : 0)) * W;
       const oy = o.y * H;
       const or_ = o.r * dpr;
-      
-      // Orb glow
-      const grad = ctx.createRadialGradient(ox, oy, 0, ox, oy, or_ * 2);
-      grad.addColorStop(0, 'rgba(255,255,200,0.8)');
-      grad.addColorStop(0.5, 'rgba(255,220,100,0.3)');
-      grad.addColorStop(1, 'rgba(255,220,100,0)');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(ox, oy, or_ * 2, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Arcs to next orb
-      const next = orbs[(i + 1) % orbs.length];
-      if (Math.random() < 0.3) { // Flicker
-        const nx = (next.x + Math.sin(next.phase) * 0.02) * W;
-        const ny = next.y * H;
-        ctx.strokeStyle = '#ffffaa';
-        ctx.lineWidth = 1.5 * dpr;
-        ctx.globalAlpha = 0.6;
-        ctx.beginPath();
-        const steps = 6;
-        for (let s = 0; s <= steps; s++) {
-          const t = s / steps;
-          const ax = ox + (nx - ox) * t + (Math.random() - 0.5) * 10 * dpr;
-          const ay = oy + (ny - oy) * t + (Math.random() - 0.5) * 10 * dpr;
-          if (s === 0) ctx.moveTo(ax, ay);
-          else ctx.lineTo(ax, ay);
+      if (o.type === 'plasma') {
+        const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, or_ * 2);
+        g.addColorStop(0, 'rgba(255,255,200,0.8)');
+        g.addColorStop(0.5, 'rgba(255,220,100,0.3)');
+        g.addColorStop(1, 'rgba(255,220,100,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(ox, oy, or_ * 2, 0, 6.29); ctx.fill();
+        // Arcs
+        const nxt = orbs[(i+1) % orbs.length];
+        if (nxt.type === 'plasma' && Math.random() < 0.3) {
+          const nx = (nxt.x + Math.sin(nxt.phase) * 0.02) * W, ny = nxt.y * H;
+          ctx.strokeStyle = '#ffffaa'; ctx.lineWidth = 1.5 * dpr; ctx.globalAlpha = 0.6;
+          ctx.beginPath();
+          for (let s = 0; s <= 6; s++) {
+            const t = s / 6;
+            const ax = ox + (nx - ox) * t + r(-5, 5) * dpr;
+            const ay = oy + (ny - oy) * t + r(-5, 5) * dpr;
+            if (s === 0) ctx.moveTo(ax, ay); else ctx.lineTo(ax, ay);
+          }
+          ctx.stroke(); ctx.globalAlpha = 1;
         }
-        ctx.stroke();
+      } else if (o.type === 'planet') {
+        ctx.fillStyle = o.color;
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath(); ctx.arc(ox, oy, or_, 0, 6.29); ctx.fill();
+        ctx.globalAlpha = 0.3;
+        ctx.strokeStyle = o.color; ctx.lineWidth = 1 * dpr;
+        ctx.beginPath(); ctx.ellipse(ox, oy, or_ * 1.8, or_ * 0.6, 0.5, 0, 6.29); ctx.stroke();
         ctx.globalAlpha = 1;
       }
     }
     
-    // Draw slash (diagonal glowing line)
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2 * dpr;
-    ctx.shadowColor = '#ffaa00';
-    ctx.shadowBlur = 20 * dpr;
-    ctx.globalAlpha = 0.8;
-    ctx.beginPath();
-    ctx.moveTo(W * 0.7, H * 0.15);
-    ctx.lineTo(W * 0.3, H * 0.85);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
+    // Crystals
+    for (const c of crystals) {
+      if (c.size <= 0 || c.shattered) continue;
+      const px = c.x * W, py = c.y * H;
+      ctx.fillStyle = 'rgba(170,238,255,0.8)';
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1 * dpr;
+      ctx.save();
+      ctx.translate(px, py);
+      for (let k = 0; k < 6; k++) {
+        ctx.rotate(Math.PI / 3);
+        ctx.beginPath();
+        ctx.moveTo(0, 0); ctx.lineTo(c.size * dpr * 0.3, -c.size * dpr); ctx.lineTo(-c.size * dpr * 0.3, -c.size * dpr);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+    }
     
-    // Draw shockwaves
-    for (const s of shockwaves) {
-      const alpha = s.life / s.maxLife;
-      ctx.strokeStyle = s.color;
-      ctx.lineWidth = 4 * dpr;
-      ctx.globalAlpha = alpha * 0.8;
+    // Vines
+    ctx.strokeStyle = '#3cdc78'; ctx.lineWidth = 3 * dpr; ctx.lineCap = 'round';
+    for (const v of vines) {
+      const x0 = v.side === 0 ? 0 : W;
+      const x1 = v.side === 0 ? v.len * W : W - v.len * W;
+      const y = v.y * H;
+      ctx.globalAlpha = 0.8;
       ctx.beginPath();
-      ctx.arc(s.x * W, s.y * H, s.r * W, 0, Math.PI * 2);
+      ctx.moveTo(x0, y);
+      ctx.quadraticCurveTo((x0 + x1) / 2, y + Math.sin(time * 3) * 10, x1, y);
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
     
-    // Storm half flash
-    if (stormFlashA > 0) {
-      ctx.fillStyle = `rgba(255,255,255,${stormFlashA * 0.5})`;
-      ctx.fillRect(0, H * 0.5, W, H * 0.5);
+    // Tendrils
+    ctx.strokeStyle = '#6a1fb0'; ctx.lineWidth = 4 * dpr; ctx.lineCap = 'round';
+    for (const t of tendrils) {
+      const x0 = t.side === 0 ? 0 : W;
+      const x1 = t.side === 0 ? t.len * W : W - t.len * W;
+      ctx.globalAlpha = 0.6 * (t.life / t.maxLife);
+      ctx.beginPath();
+      ctx.moveTo(x0, t.y * H);
+      for (let s = 1; s <= 5; s++) {
+        const tt = s / 5;
+        const wx = x0 + (x1 - x0) * tt;
+        const wy = t.y * H + Math.sin(tt * 10 + time * 5) * 15 * dpr * tt;
+        ctx.lineTo(wx, wy);
+      }
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    
+    // Black holes
+    for (const bh of blackholes) {
+      const px = bh.x * W, py = bh.y * H;
+      const pr = bh.r * dpr;
+      // Swirl
+      ctx.strokeStyle = '#a06bff'; ctx.lineWidth = 2 * dpr;
+      ctx.globalAlpha = 0.8;
+      for (let ring = 1; ring <= 3; ring++) {
+        ctx.beginPath();
+        const rr = pr * ring / 3;
+        const rot = time * 3 * ring;
+        ctx.arc(px, py, rr, rot, rot + 4.5);
+        ctx.stroke();
+      }
+      // Dark center
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = '#000';
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(px, py, pr * 0.5, 0, 6.29); ctx.fill();
+      ctx.globalCompositeOperation = useAdditive ? 'lighter' : 'source-over';
+      ctx.globalAlpha = 1;
     }
     
-    // Full flash
+    // Slash (diagonal, tinted by both elements)
+    const c1 = ELEMENTS[elem1].colors, c2 = ELEMENTS[elem2].colors;
+    const grad = ctx.createLinearGradient(W * 0.7, H * 0.15, W * 0.3, H * 0.85);
+    grad.addColorStop(0, c1.p); grad.addColorStop(0.5, '#ffffff'); grad.addColorStop(1, c2.p);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 2 * dpr;
+    ctx.shadowColor = c1.p; ctx.shadowBlur = 20 * dpr;
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.7, H * 0.15); ctx.lineTo(W * 0.3, H * 0.85);
+    ctx.stroke();
+    ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+    
+    // Shockwaves
+    for (const s of shockwaves) {
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = 4 * dpr;
+      ctx.globalAlpha = (s.life / s.maxLife) * 0.8;
+      ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r * W, 0, 6.29); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    
+    // Flashes
+    if (stormFlash > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (stormFlash * 0.5) + ')';
+      ctx.fillRect(0, H * 0.5, W, H * 0.5);
+    }
     if (flashA > 0) {
-      ctx.fillStyle = `rgba(255,255,255,${flashA})`;
+      ctx.fillStyle = flashColor.replace(')', ',' + flashA + ')').replace('#ffffff', 'rgba(255,255,255');
+      if (flashColor === '#ffffff') ctx.fillStyle = 'rgba(255,255,255,' + flashA + ')';
       ctx.fillRect(0, 0, W, H);
     }
     
-    // Vignette (dark edges) - normal blending
+    // Vignette
     ctx.globalCompositeOperation = 'source-over';
     const vg = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.3, W/2, H/2, Math.max(W,H)*0.7);
-    vg.addColorStop(0, 'rgba(0,0,0,0)');
-    vg.addColorStop(1, 'rgba(0,0,0,0.6)');
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.6)');
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, W, H);
     
     ctx.restore();
   }
-  
+
   function loop(t) {
     if (!running) return;
-    
-    const dt = Math.min((t - lastTime) / 1000, 0.05); // Cap at 50ms
+    const dt = Math.min((t - lastTime) / 1000, 0.05);
     lastTime = t;
-    
     updateFPS(dt);
     update(dt);
     render();
-    
     rafId = requestAnimationFrame(loop);
   }
-  
+
   function start() {
     if (running) return;
-    // Ensure canvas has dimensions (in case it was hidden on init)
     resize();
-    if (W === 0 || H === 0) {
-      // Retry next frame
-      requestAnimationFrame(() => start());
-      return;
-    }
+    if (W === 0 || H === 0) { requestAnimationFrame(() => start()); return; }
     running = true;
-    startTime = performance.now();
-    lastTime = startTime;
-    introT = 0;
-    // Initial clash for intro impact
-    doClash();
+    lastTime = performance.now();
+    sigTimer1 = 0.5; sigTimer2 = 0.8; clashTimer = 1.0;
+    doClash(); // Intro impact
     rafId = requestAnimationFrame(loop);
   }
-  
+
   function stop() {
     running = false;
     if (rafId) cancelAnimationFrame(rafId);
-    particles.length = 0;
-    bolts.length = 0;
-    shockwaves.length = 0;
+    particles.length = 0; bolts.length = 0; shockwaves.length = 0;
+    crystals.length = 0; vines.length = 0; tendrils.length = 0; blackholes.length = 0;
   }
-  
+
   return {
     init: init,
     start: start,
     stop: stop,
     setTextZones: setTextZones,
-    resize: resize
+    setElements: setElements,
+    resize: resize,
   };
 })();
+
 
 })();
