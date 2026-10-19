@@ -477,3 +477,26 @@ body:has(#roomScreen:not(.hidden)) #friendsBtn{display:none}
 
 .room-card.banned{position:relative;opacity:.35;filter:grayscale(.7)}
 .room-card.banned::after{content:'BANNED';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);font:900 14px system-ui;letter-spacing:3px;color:#ff5050;text-shadow:0 0 8px rgba(255,0,0,.6);border:2px solid #ff5050;border-radius:6px;padding:4px 10px;background:rgba(0,0,0,.6)}
+
+/* Cinematic VS screens - corrected class names */
+/* Darker element backgrounds for cinematic feel */
+.vs-fx-fire{background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(255,60,0,.35),transparent 70%),radial-gradient(ellipse 80% 60% at 80% 50%,rgba(255,60,0,.15),transparent 70%),linear-gradient(180deg,#0a0200 0%,#1a0500 100%)}
+.vs-fx-storm{background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(170,136,255,.3),transparent 70%),radial-gradient(ellipse 80% 60% at 80% 50%,rgba(255,238,85,.2),transparent 70%),linear-gradient(180deg,#050510 0%,#0a0a1a 100%)}
+.vs-fx-shadow{background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(100,30,200,.4),transparent 70%),linear-gradient(180deg,#000 0%,#0a0015 100%)}
+.vs-fx-light{background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(255,240,180,.25),transparent 70%),radial-gradient(ellipse 80% 60% at 80% 50%,rgba(255,240,180,.15),transparent 70%),linear-gradient(180deg,#0a0800 0%,#141000 100%)}
+.vs-fx-nature{background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(60,220,120,.3),transparent 70%),radial-gradient(ellipse 80% 60% at 80% 50%,rgba(60,220,120,.15),transparent 70%),linear-gradient(180deg,#001005 0%,#021a08 100%)}
+.vs-fx-ice{background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(102,204,255,.3),transparent 70%),radial-gradient(ellipse 80% 60% at 80% 50%,rgba(102,204,255,.15),transparent 70%),linear-gradient(180deg,#000a14 0%,#001a33 100%)}
+.vs-fx-cosmic{background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(0,0,0,.9) 0%,transparent 60%),radial-gradient(ellipse 90% 70% at 50% 50%,rgba(160,107,255,.35),transparent 70%),linear-gradient(180deg,#000 0%,#0a0020 100%)}
+
+.vfighter{font-weight:900!important;letter-spacing:3px!important;text-shadow:0 0 30px currentColor,0 0 80px currentColor,0 4px 8px rgba(0,0,0,.8)!important}
+.vs-mark{background:linear-gradient(180deg,#fff 0%,#ffd700 50%,#ff8c00 100%)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;filter:drop-shadow(0 0 24px rgba(255,215,0,.6)) drop-shadow(0 4px 6px rgba(0,0,0,.8))!important}
+.vs-el{letter-spacing:6px!important;opacity:.95!important}
+
+/* Cinematic element backgrounds - darker with depth */
+.vs-fx-fire{background:radial-gradient(ellipse 70% 50% at 30% 50%,rgba(255,60,0,.4),transparent 70%),linear-gradient(180deg,#050100 0%,#1a0800 100%)!important}
+.vs-fx-storm{background:radial-gradient(ellipse 70% 50% at 30% 50%,rgba(170,136,255,.35),transparent 70%),linear-gradient(180deg,#030308 0%,#0d0d20 100%)!important}
+.vs-fx-shadow{background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(100,30,200,.45),transparent 70%),linear-gradient(180deg,#000 0%,#0d0018 100%)!important}
+.vs-fx-light{background:radial-gradient(ellipse 70% 50% at 30% 50%,rgba(255,240,180,.3),transparent 70%),linear-gradient(180deg,#050400 0%,#171204 100%)!important}
+.vs-fx-nature{background:radial-gradient(ellipse 70% 50% at 30% 50%,rgba(60,220,120,.35),transparent 70%),linear-gradient(180deg,#000802 0%,#041a0c 100%)!important}
+.vs-fx-ice{background:radial-gradient(ellipse 70% 50% at 30% 50%,rgba(102,204,255,.35),transparent 70%),linear-gradient(180deg,#00060e 0%,#001e3a 100%)!important}
+.vs-fx-cosmic{background:radial-gradient(ellipse 60% 40% at 50% 50%,rgba(0,0,0,.95) 0%,transparent 55%),radial-gradient(ellipse 90% 70% at 50% 50%,rgba(160,107,255,.4),transparent 70%),linear-gradient(180deg,#000 0%,#0c0022 100%)!important}
