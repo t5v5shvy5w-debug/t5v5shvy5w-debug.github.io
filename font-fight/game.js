@@ -564,9 +564,19 @@ function showVersus(a, b, metaText, isGuest) {
     // Force reflow so canvas sizes correctly
     void vs.offsetHeight;
     sfx("versus");
-    // VSFX disabled - visuals only for now (no particles yet)
-    // const cv = $("vsCanvas");
-    // if (cv && typeof VSFX !== 'undefined') { ... }
+    // VSFX: canvas particles behind text
+    const cv = $("vsCanvas");
+    if (cv && typeof VSFX !== 'undefined') {
+      cv.style.display = "";
+      VSFX.init(cv);
+      VSFX.setElements(a.element, b.element);
+      VSFX.setTextZones([
+        {x: 0.05, y: 0.12, w: 0.9, h: 0.18},  // Top name
+        {x: 0.05, y: 0.70, w: 0.9, h: 0.18},  // Bottom name
+        {x: 0.30, y: 0.40, w: 0.4, h: 0.20},  // VS
+      ]);
+      VSFX.start();
+    }
     if (vsTimer) clearTimeout(vsTimer);
     if (!isGuest) vsTimer = setTimeout(vsGo, 5000);
   }
@@ -3655,6 +3665,33 @@ function showVersus(a, b, metaText, isGuest) {
   resize();
   requestAnimationFrame(frame);
 
+
+  // VS Debug menu: test any matchup
+  (function() {
+    const replayBtn = $("vsDbgReplay");
+    if (!replayBtn) return;
+    replayBtn.addEventListener("click", () => {
+      const top = $("vsDbgTop").value;
+      const bot = $("vsDbgBot").value;
+      // Mock fighters (names change per element for testing)
+      const mockNames = { Fire: 'RAMPAGE', Storm: 'VOLTAGE', Ice: 'FROSTBITE', Shadow: 'NIGHTMARE', Light: 'RADIANCE', Nature: 'THORN', Cosmic: 'STARDUST' };
+      const mockA = { id: 0, name: mockNames[top] || top.toUpperCase(), font: 'Arial Black', element: top };
+      const mockB = { id: 1, name: mockNames[bot] || bot.toUpperCase(), font: 'Arial Black', element: bot };
+      // Need FX colors - use element defaults
+      if (typeof FX === 'undefined' || !FX[0]) return;
+      // Temporarily override chosen (restored when VS ends)
+      const oldChosen = chosen;
+      chosen = [mockA, mockB];
+      const origVsGo = vsGo;
+      vsGo = function() {
+        chosen = oldChosen;
+        vsGo = origVsGo;
+        origVsGo();
+      };
+      showVersus(mockA, mockB, top + ' vs ' + bot, false);
+    });
+  })();
+
 /* VSFX v2 - Config-driven element VS particle system */
 const VSFX = (function() {
   let canvas, ctx, W, H;
@@ -3966,6 +4003,17 @@ const VSFX = (function() {
 
   function doClash() {
     const c1 = ELEMENTS[elem1].colors, c2 = ELEMENTS[elem2].colors;
+    // Fire vs Ice: steam burst
+    const isFireIce = (elem1 === 'Fire' && elem2 === 'Ice') || (elem1 === 'Ice' && elem2 === 'Fire');
+    if (isFireIce) {
+      for (let i = 0; i < 20; i++) {
+        spawn('smoke', r(0.35, 0.65), r(0.35, 0.65), {
+          vx: r(-0.03, 0.03), vy: r(-0.08, -0.03),
+          life: r(1.5, 2.5), size: r(15, 30),
+          color: '#dddddd', alpha: 0.5, layer: 2
+        });
+      }
+    }
     shockwaves.push({ x: 0.5, y: 0.5, r: 0, maxR: 0.6, life: 0.6, maxLife: 0.6, color: '#ffffff' });
     shockwaves.push({ x: 0.5, y: 0.5, r: 0, maxR: 0.4, life: 0.5, maxLife: 0.5, color: c1.p });
     shockwaves.push({ x: 0.5, y: 0.5, r: 0, maxR: 0.3, life: 0.4, maxLife: 0.4, color: c2.p });
@@ -3985,7 +4033,7 @@ const VSFX = (function() {
     // Spawn from configs (top half = elem1, bottom half = elem2)
     const cfg1 = ELEMENTS[elem1], cfg2 = ELEMENTS[elem2];
     if (cfg1 && cfg2) {
-      const targetPerLayer = Math.floor(140 * particleScale / 3);
+      const targetPerLayer = Math.floor(200 * particleScale / 3); // 150-250 per side
       for (let l = 0; l < 3; l++) {
         // Count
         let c1 = 0, c2 = 0;
