@@ -33,9 +33,9 @@
     </div>
     <div class="wn-body">
       <div class="wn-entry">
-        <div class="wn-ver-row"><span class="wn-ver wn-ver-new">V10.20</span><span class="wn-date">Oct 19, 2026</span><span class="wn-tag">LATEST</span></div>
+        <div class="wn-ver-row"><span class="wn-ver wn-ver-new">V10.21</span><span class="wn-date">Oct 19, 2026</span><span class="wn-tag">LATEST</span></div>
         <ul>
-          <li><b>Decluttered fight room</b> — stripped to essentials: code, bans, your fighters, READY. Nothing else.</li>
+          <li><b>Reverted room declutter</b> — back to the previous fight room layout</li>
         </ul>
       </div>
       <div class="wn-entry">
@@ -203,7 +203,7 @@
     </div>
   </div>
 </div>
-<div id="ver">V10.20</div><button id="friendsBtn">PLAY WITH FRIEND</button>
+<div id="ver">V10.21</div><button id="friendsBtn">PLAY WITH FRIEND</button>
 <div id="app">
 <section id="selectScreen" class="screen overlay">
   <div id="netBar"><label>NAME <span class="namewrap"><span id="nameHint">add a number</span><input id="netNameInput" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false"></span></label><span id="netIdLine"></span></div>
@@ -240,10 +240,12 @@
 <section id="result" class="overlay modal hidden"><div class="modal-card result-card"><div class="result-banner" id="resultBanner">VICTORY</div><div class="result-fighter" id="resultFighter">RAMPAGE</div><p id="resultP"></p><div class="result-stats" id="resultStats"></div><div class="action-row"><button class="primary result-btn" id="rematchBtn">Rematch</button><button id="newFightBtn">New rivals</button></div></div></section>
 <section id="roomScreen" class="overlay hidden">
   <div class="room-wrap">
-    <div class="room-head"><span class="rh-code">CODE <b id="roomCodeVal"></b></span><button id="copyCodeBtn" type="button">Copy</button><span class="rh-rival" id="roomRivalStatus"></span></div>
-    <div class="ban-row" id="banRow"><div class="ban-btns" id="banBtns"></div></div>
-    <div class="room-roster" id="roomRosterL"></div>
-    <button class="ready" id="readyL"><span class="ready-main">READY</span><span class="ready-sub">lock in your fighter</span></button>
+    <h2>FIGHT ROOM</h2><p id="roomMeta"></p><div id="roomCodeBig" class="hidden"><span class="code-label">ROOM CODE</span><span id="roomCodeVal"></span><button id="copyCodeBtn" type="button">Copy</button></div>
+    <div class="ban-row" id="banRow"><span class="ban-label">BAN AN ELEMENT:</span><div class="ban-btns" id="banBtns"></div><div class="ban-status" id="banStatus"></div></div>
+    <div class="room-panels">
+      <div class="room-panel"><h3><span id="roomNameL"></span> <span class="you">YOU</span></h3><div class="room-pick-show" id="roomPickL"><span class="rps-label">YOUR FIGHTER</span><span class="rps-word">?</span></div><div class="room-roster" id="roomRosterL"></div><button class="ready" id="readyL"><span class="ready-main">READY</span><span class="ready-sub">lock in your fighter</span></button></div>
+      <div class="rival-status"><div class="rs-vs">VS</div><h3 id="roomNameR"></h3><div class="room-pick-show" id="roomPickR"><span class="rps-label">RIVAL</span><span class="rps-word">?</span></div><div class="rs-ready" id="readyR">WAITING</div></div>
+    </div>
     <p id="roomStatus"></p>
     <div class="action-row"><button id="leaveRoomBtn">Leave room</button></div>
   </div>

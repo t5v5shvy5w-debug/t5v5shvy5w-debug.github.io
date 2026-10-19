@@ -2592,7 +2592,7 @@
       };
       $("friendsPanel").classList.add("hidden");
       netShowRoom(true);
-      // Room code always visible in header now
+      $("roomCodeBig").classList.remove("hidden");
       $("roomCodeVal").textContent = code;
       $("roomStatus").innerHTML =
         'Share the code — waiting for your rival<span class="waiting-dots"></span>';
@@ -2956,11 +2956,12 @@
     $("friendsPanel").classList.add("hidden");
     $("roomScreen").classList.remove("hidden");
     $("roomMeta").textContent = ""; // Redundant with ROOM CODE display below
-    // Room code always visible
+    if (!asHost) $("roomCodeBig").classList.add("hidden");
     netRenderRoom();
   }
   function renderBanUI() {
     const btnsEl = $("banBtns");
+    const statusEl = $("banStatus");
     if (!btnsEl || !netRoom) return;
     const elements = ["Fire", "Nature", "Light", "Cosmic", "Shadow", "Storm", "Ice"];
     const myBan = isHost ? netRoom.hostBan : netRoom.guestBan;
@@ -2993,33 +2994,67 @@
       }
       btnsEl.appendChild(b);
     });
-    // Status shown via button states (no separate status element)
+    // Status text
+    if (!myBan && !opBan) statusEl.textContent = "Both players ban one element.";
+    else if (myBan && !opBan) statusEl.textContent = "Waiting for rival to ban…";
+    else if (!myBan && opBan) statusEl.textContent = "Rival banned " + opBan + ". Your turn!";
+    else statusEl.textContent = "Bans locked: " + myBan + " & " + opBan;
   }
   function netRenderRoom() {
     if (!netRoom || $("roomScreen").classList.contains("hidden")) return;
+    // Render ban buttons
     renderBanUI();
+    const L = isHost ? netRoom.hostName : netRoom.guestName;
+    const Rr = isHost ? netRoom.guestName : netRoom.hostName;
+    $("roomNameL").textContent = L;
+    $("roomNameR").textContent = Rr || "…";
     const myPick = isHost ? netRoom.hostPick : netRoom.guestPick;
     const opPick = isHost ? netRoom.guestPick : netRoom.hostPick;
     const myReady = isHost ? netRoom.hostReady : netRoom.guestReady;
     const opReady = isHost ? netRoom.guestReady : netRoom.hostReady;
-    const myBan = isHost ? netRoom.hostBan : netRoom.guestBan;
-    const opBan = isHost ? netRoom.guestBan : netRoom.hostBan;
     buildRoomRoster($("roomRosterL"), myPick, true);
-    // Room code
-    $("roomCodeVal").textContent = netRoom.roomId;
-    // Rival status line
-    const rs = $("roomRivalStatus");
-    const opName = isHost ? netRoom.guestName : netRoom.hostName;
-    if (!opName) rs.textContent = "Waiting for rival to join…";
-    else if (opReady) rs.textContent = opName + " is READY!";
-    else if (opPick != null) rs.textContent = opName + " locked in (blind pick)";
-    else rs.textContent = opName + " is picking…";
-    // READY button
+    // Rival roster removed (blind pick) - just show status
+    const pl = $("roomPickL"),
+      pr = $("roomPickR");
+    if (myPick != null) {
+      const d = R[myPick],
+        e = ELEMENTS[d.element];
+      pl.querySelector(".rps-word").textContent = d.name;
+      pl.querySelector(".rps-word").style.cssText =
+        `font-family:"${d.font}";color:${e.color}`;
+    } else {
+      pl.querySelector(".rps-word").textContent = "?";
+      pl.querySelector(".rps-word").style.cssText = "";
+    }
+    // BLIND PICK: hide opponent's fighter until VS screen
+    if (opPick != null) {
+      pr.querySelector(".rps-word").textContent = "LOCKED IN";
+      pr.querySelector(".rps-word").style.cssText =
+        "font-family:system-ui;color:#8a9bc0;letter-spacing:2px";
+    } else {
+      pr.querySelector(".rps-word").textContent = "?";
+      pr.querySelector(".rps-word").style.cssText = "";
+    }
+    const myBan = isHost ? netRoom.hostBan : netRoom.guestBan;
     const rl = $("readyL");
     rl.querySelector(".ready-main").textContent = myReady ? "READY!" : "READY";
     rl.querySelector(".ready-sub").textContent = myReady ? "you're locked in" : myBan == null ? "ban an element first" : myPick == null ? "pick your fighter" : "lock in your fighter";
     rl.classList.toggle("on", !!myReady);
     rl.disabled = myPick == null || myBan == null;
+    const rr = $("readyR");
+    rr.textContent = opReady ? "RIVAL READY!" : opPick != null ? "RIVAL LOCKED IN" : "WAITING";
+    rr.classList.toggle("on", !!opReady);
+    const myBan2 = isHost ? netRoom.hostBan : netRoom.guestBan;
+    const opBan2 = isHost ? netRoom.guestBan : netRoom.hostBan;
+    let st = "Pick your fighter.";
+    if (myBan2 == null) st = "Ban an element first!";
+    else if (opBan2 == null) st = "Waiting for opponent to ban…";
+    else if (myPick != null && opPick == null) st = "Waiting for opponent to pick…";
+    else if (myPick != null && opPick != null && !(myReady && opReady))
+      st = "Press READY when set.";
+    else if (myReady && opReady)
+      st = isHost ? "Both ready — starting!" : "Both ready!";
+    $("roomStatus").textContent = st;
   }
   function buildRoomRoster(root, pickId, interactive) {
     root.innerHTML = "";

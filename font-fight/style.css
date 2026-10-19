@@ -477,12 +477,3 @@ body:has(#roomScreen:not(.hidden)) #friendsBtn{display:none}
 
 .room-card.banned{position:relative;opacity:.35;filter:grayscale(.7)}
 .room-card.banned::after{content:'BANNED';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);font:900 14px system-ui;letter-spacing:3px;color:#ff5050;text-shadow:0 0 8px rgba(255,0,0,.6);border:2px solid #ff5050;border-radius:6px;padding:4px 10px;background:rgba(0,0,0,.6)}
-
-/* Decluttered room */
-.room-head{display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0 12px;flex-wrap:wrap}
-.rh-code{font:700 14px system-ui;letter-spacing:2px;color:#8a9bc0}
-.rh-code b{font-size:22px;color:#fff;letter-spacing:4px;margin-left:6px;text-shadow:0 0 12px rgba(56,182,255,.5)}
-#copyCodeBtn{background:rgba(56,182,255,.1);border:1px solid rgba(56,182,255,.3);color:#38b6ff;padding:8px 16px;border-radius:8px;font:700 12px system-ui;cursor:pointer}
-.rh-rival{font:12px system-ui;color:#8a9bc0;width:100%;text-align:center}
-.ban-row{margin:0 0 12px;padding:0;background:none;border:none}
-.ban-btns{justify-content:center}
