@@ -387,8 +387,42 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Font Fight">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#eaf1fa">
 <meta name="theme-color" content="#0a0e1a">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style id="light-fix">
+@media (prefers-color-scheme: light){
+  body:has(#selectScreen:not(.hidden)):not(:has(.modal:not(.hidden))) #ver{color:var(--ink);opacity:.55;text-shadow:none}
+  body:has(#roomScreen:not(.hidden)) #ver{color:var(--ink);opacity:.55;text-shadow:none}
+  #menuSound{color:var(--muted)}
+  #netBar label{color:var(--muted)}
+  .slot,.slot.filled{background:linear-gradient(160deg,#10243d,#071222);border-color:#1d3a55;box-shadow:0 8px 22px rgba(5,31,66,.2)}
+  .slot.filled{border-color:rgba(56,182,255,.6)}
+  .slot:not(.filled):hover{background:linear-gradient(160deg,#142c4a,#0a1729);border-color:rgba(56,182,255,.45)}
+  .slot .num{color:#7f98b0}
+  .slot .pickmeta{color:#7088a0}
+  .slot:not(.filled) .pickword{color:#a9bdd1}
+  .vs-mark{background:linear-gradient(180deg,#58bdff 10%,#087ef0 55%,#0a4fa8 100%);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(8,126,240,.45)) drop-shadow(0 2px 2px rgba(5,31,66,.3))}
+  #elemFilter{background:transparent}
+  .elem-pill{background:#fff;box-shadow:0 1px 2px rgba(5,31,66,.08)}
+  .elem-pill.on{background:#0b1728;color:#fff;border-color:currentColor;box-shadow:0 0 0 1px currentColor,0 4px 14px rgba(5,31,66,.28)}
+  .font-card{background:#fff;box-shadow:0 1px 0 rgba(5,31,66,.04),0 6px 18px rgba(5,31,66,.07)}
+  .font-card .preview{background:radial-gradient(120% 150% at 50% 0%,#15324f 0,#0a1729 58%,#060f1c 100%);border-radius:6px;margin:3px -4px 7px;box-shadow:inset 0 0 0 1px rgba(56,182,255,.14)}
+  .font-card .element[style*="ff4b24" i],.font-card .element[style*="255, 75, 36"],.elem-pill:not(.on)[style*="ff4b24" i],.elem-pill:not(.on)[style*="255, 75, 36"]{-webkit-text-fill-color:#cc3010}
+  .font-card .element[style*="5edcff" i],.font-card .element[style*="94, 220, 255"],.elem-pill:not(.on)[style*="5edcff" i],.elem-pill:not(.on)[style*="94, 220, 255"]{-webkit-text-fill-color:#00799e}
+  .font-card .element[style*="ffe34c" i],.font-card .element[style*="255, 227, 76"],.elem-pill:not(.on)[style*="ffe34c" i],.elem-pill:not(.on)[style*="255, 227, 76"]{-webkit-text-fill-color:#876500}
+  .font-card .element[style*="b45cff" i],.font-card .element[style*="180, 92, 255"],.elem-pill:not(.on)[style*="b45cff" i],.elem-pill:not(.on)[style*="180, 92, 255"]{-webkit-text-fill-color:#8a2be2}
+  .font-card .element[style*="208cff" i],.font-card .element[style*="32, 140, 255"],.elem-pill:not(.on)[style*="208cff" i],.elem-pill:not(.on)[style*="32, 140, 255"]{-webkit-text-fill-color:#0a66cc}
+  .font-card .element[style*="55e87d" i],.font-card .element[style*="85, 232, 125"],.elem-pill:not(.on)[style*="55e87d" i],.elem-pill:not(.on)[style*="85, 232, 125"]{-webkit-text-fill-color:#12813a}
+  .font-card .element[style*="a06bff" i],.font-card .element[style*="160, 107, 255"],.elem-pill:not(.on)[style*="a06bff" i],.elem-pill:not(.on)[style*="160, 107, 255"]{-webkit-text-fill-color:#6c3be0}
+  #fightBtn:disabled{opacity:1;filter:none;background:#d5e0ec;color:#475c74;box-shadow:none}
+  #roomScreen h2{color:var(--ink)}
+  #roomMeta{color:var(--muted)}
+  #roomCodeBig .code-label{color:#0a66cc}
+  #roomCodeVal{color:var(--ink)}
+  #roomStatus{color:#875e00}
+}
+</style>
 </head>
 <body>
 <!-- WHAT'S NEW modal -->
@@ -401,7 +435,13 @@
     </div>
     <div class="wn-body">
       <div class="wn-entry">
-        <div class="wn-ver-row"><span class="wn-ver wn-ver-new">V10.11</span><span class="wn-date">Oct 19, 2026</span><span class="wn-tag">LATEST</span></div>
+        <div class="wn-ver-row"><span class="wn-ver wn-ver-new">V10.12</span><span class="wn-date">Oct 19, 2026</span><span class="wn-tag">LATEST</span></div>
+        <ul>
+          <li><b>Light mode support</b> — clean light theme when your phone is in light mode</li>
+        </ul>
+      </div>
+      <div class="wn-entry">
+        <div class="wn-ver-row"><span class="wn-ver">V10.11</span><span class="wn-date">Oct 19, 2026</span><span class="wn-tag">LATEST</span></div>
         <ul>
           <li><b>Polished health bars</b> — damage ghost trail, HP numbers, green/yellow/red states, low-HP pulse</li>
         </ul>
@@ -513,7 +553,7 @@
     </div>
   </div>
 </div>
-<div id="ver">V10.11</div><button id="friendsBtn">PLAY WITH FRIEND</button>
+<div id="ver">V10.12</div><button id="friendsBtn">PLAY WITH FRIEND</button>
 <div id="app">
 <section id="selectScreen" class="screen overlay">
   <div id="netBar"><label>NAME <span class="namewrap"><span id="nameHint">add a number</span><input id="netNameInput" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false"></span></label><span id="netIdLine"></span></div>
