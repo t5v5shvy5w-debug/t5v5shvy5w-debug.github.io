@@ -512,8 +512,8 @@ function showVersus(a, b, metaText, isGuest) {
     $("vsEl2").style.color = st2.label;
     $("vsEl2").style.textShadow = `0 0 12px ${st2.glow}`;
     // Slash colors (blend of both elements)
-    vs.style.setProperty("--slash-c1", st1.slash);
-    vs.style.setProperty("--slash-c2", st2.slash);
+    $("versus").style.setProperty("--slash-c1", st1.slash);
+    $("versus").style.setProperty("--slash-c2", st2.slash);
     const vs = $("versus");
     vs.style.setProperty("--c1", c1);
     vs.style.setProperty("--c2", c2);
