@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Win Screen Demo</title>
+<style>
+body{margin:0;background:#05070f;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center}
+.modal-card{background:#0a0e1f;border-radius:16px;padding:24px;max-width:420px;width:90%}
+.result-card{text-align:center;padding:32px 28px;max-width:440px;background:linear-gradient(165deg,#0a0e1f 0%,#141a35 50%,#0a0e1f 100%);border:1px solid rgba(255,215,0,.25);box-shadow:0 0 60px rgba(255,215,0,.15),0 0 120px rgba(0,100,255,.1);position:relative;overflow:hidden;animation:cardSlam .5s cubic-bezier(.2,1.4,.4,1)}
+@keyframes cardSlam{from{transform:scale(.7) translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.result-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,215,0,.06) 30deg,transparent 60deg,rgba(0,150,255,.06) 120deg,transparent 150deg);animation:resultShine 4s linear infinite;pointer-events:none}
+@keyframes resultShine{to{transform:rotate(360deg)}}
+.result-banner{font-size:52px;font-weight:900;letter-spacing:6px;margin:0 0 4px;background:linear-gradient(180deg,#fff6c9 0%,#ffd700 40%,#ff8c00 70%,#ffd700 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 24px rgba(255,215,0,.7)) drop-shadow(0 4px 4px rgba(0,0,0,.5));animation:bannerPulse 1.6s ease-in-out infinite}
+@keyframes bannerPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.result-fighter{font-size:44px;margin:6px 0 10px;letter-spacing:2px;color:#a06bff;text-shadow:0 0 24px #a06bff,0 0 60px #e8d8ff;font-family:Georgia,serif;animation:fighterDrop .55s cubic-bezier(.2,1.6,.4,1)}
+@keyframes fighterDrop{from{transform:translateY(-28px) scale(.7);opacity:0}to{transform:none;opacity:1}}
+#resultP{color:#9fb3d8;font-size:15px;margin:0 0 16px}
+.result-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 20px}
+.result-stats>div{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 4px;animation:statPop .4s cubic-bezier(.2,1.6,.4,1) backwards}
+.result-stats>div:nth-child(1){animation-delay:.15s}.result-stats>div:nth-child(2){animation-delay:.25s}.result-stats>div:nth-child(3){animation-delay:.35s}.result-stats>div:nth-child(4){animation-delay:.45s}
+@keyframes statPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.result-stats b{display:block;font-size:22px;color:#ffd700}
+.result-stats span{font-size:10px;color:#8a9bc0;text-transform:uppercase;letter-spacing:1px}
+.action-row{display:flex;gap:12px;justify-content:center}
+button{padding:14px 28px;border-radius:10px;border:none;font-size:16px;cursor:pointer}
+.primary{background:linear-gradient(180deg,#38b6ff,#087ef0);color:#fff;font-weight:700}
+.confetti{position:absolute;top:-12px;width:8px;height:14px;opacity:0;pointer-events:none;animation:confettiFall 2.8s ease-in forwards}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(420px) rotate(720deg);opacity:0}}
+</style></head>
+<body>
+<div class="overlay"><div class="modal-card result-card" id="card" style="border-color:#a06bff55;box-shadow:0 0 60px #a06bff44,0 0 120px rgba(0,100,255,.1)">
+<div class="result-banner">YOU WIN</div>
+<div class="result-fighter">IRONCLAD</div>
+<p id="resultP">2-0 vs Fighter798 · Cosmic · Dreadnought Protocol</p>
+<div class="result-stats">
+<div><b>330</b><span>damage</span></div>
+<div><b>8</b><span>hits</span></div>
+<div><b>4</b><span>ults</span></div>
+<div><b>40s</b><span>time</span></div>
+</div>
+<div class="action-row"><button class="primary">Back to room</button></div>
+</div></div>
+<script>
+const card=document.getElementById('card');
+const colors=['#a06bff','#e8d8ff','#ffd700','#ffffff'];
+for(let i=0;i<40;i++){const c=document.createElement('div');c.className='confetti';c.style.left=Math.random()*100+'%';c.style.background=colors[i%4];c.style.animationDelay=(Math.random()*.8)+'s';card.appendChild(c);setTimeout(()=>c.remove(),4000)}
+</script>
+</body></html>
