@@ -431,3 +431,21 @@ body:has(#arenaScreen:not(.hidden)) #friendsBtn{display:none}
 .ban-btn:disabled{opacity:.4;cursor:not-allowed}
 .ban-status{font:12px system-ui;color:#8a9bc0;width:100%;text-align:center}
 .room-card.banned{opacity:.25;filter:grayscale(1)}
+
+/* Cool Play-with-a-friend modal */
+#friendsPanel .net-card{background:linear-gradient(165deg,#0a0e1f 0%,#0d1530 50%,#0a0e1f 100%);border:1px solid rgba(56,182,255,.25);box-shadow:0 0 40px rgba(8,126,240,.15),0 25px 80px rgba(0,0,0,.5);position:relative;overflow:hidden}
+#friendsPanel .net-card::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:2px;background:linear-gradient(90deg,transparent,#38b6ff,transparent);animation:scanline 3s linear infinite}
+@keyframes scanline{to{left:100%}}
+#friendsPanel .net-title{font-size:32px;background:linear-gradient(180deg,#fff 0%,#38b6ff 60%,#087ef0 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 12px rgba(56,182,255,.4));margin-bottom:8px}
+#friendsPanel .net-create{background:linear-gradient(135deg,#01008a 0%,#087ef0 50%,#38b6ff 100%);box-shadow:0 0 24px rgba(8,126,240,.4),inset 0 1px 0 rgba(255,255,255,.2);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+#friendsPanel .net-create:hover{transform:translateY(-2px);box-shadow:0 0 32px rgba(56,182,255,.6),inset 0 1px 0 rgba(255,255,255,.2)}
+#friendsPanel .net-create::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:btnshine 2.5s ease-in-out infinite}
+@keyframes btnshine{0%{left:-100%}60%,100%{left:200%}}
+#friendsPanel #joinCode{background:rgba(0,0,0,.4);border:1px solid rgba(56,182,255,.3);color:#fff;font-family:monospace;font-size:22px;letter-spacing:10px;text-align:center;padding:14px;border-radius:10px;transition:border-color .2s,box-shadow .2s;width:100%}
+#friendsPanel #joinCode:focus{outline:none;border-color:#38b6ff;box-shadow:0 0 16px rgba(56,182,255,.3)}
+#friendsPanel #joinCode::placeholder{letter-spacing:4px;font-size:16px;color:#4a5a70}
+#friendsPanel #joinRoomBtn{background:linear-gradient(135deg,#01008a,#087ef0);border:none;color:#fff;font-weight:700;padding:14px 28px;border-radius:10px;cursor:pointer;box-shadow:0 0 16px rgba(8,126,240,.3);transition:transform .15s,box-shadow .15s;white-space:nowrap}
+#friendsPanel #joinRoomBtn:hover{transform:translateY(-1px);box-shadow:0 0 24px rgba(56,182,255,.5)}
+#friendsPanel .net-divider span{background:#0d1530;color:#38b6ff}
+#friendsPanel .net-you{color:#8a9bc0}
+#friendsPanel .net-you b{color:#fff;text-shadow:0 0 8px rgba(56,182,255,.5)}
