@@ -3013,7 +3013,7 @@
     const myReady = isHost ? netRoom.hostReady : netRoom.guestReady;
     const opReady = isHost ? netRoom.guestReady : netRoom.hostReady;
     buildRoomRoster($("roomRosterL"), myPick, true);
-    buildRoomRoster($("roomRosterR"), opPick, false);
+    // Rival roster removed (blind pick) - just show status
     const pl = $("roomPickL"),
       pr = $("roomPickR");
     if (myPick != null) {
@@ -3035,13 +3035,14 @@
       pr.querySelector(".rps-word").textContent = "?";
       pr.querySelector(".rps-word").style.cssText = "";
     }
-    const rl = $("readyL");
-    rl.textContent = myReady ? "READY!" : "READY";
-    rl.classList.toggle("on", !!myReady);
     const myBan = isHost ? netRoom.hostBan : netRoom.guestBan;
+    const rl = $("readyL");
+    rl.querySelector(".ready-main").textContent = myReady ? "READY!" : "READY";
+    rl.querySelector(".ready-sub").textContent = myReady ? "you're locked in" : myBan == null ? "ban an element first" : myPick == null ? "pick your fighter" : "lock in your fighter";
+    rl.classList.toggle("on", !!myReady);
     rl.disabled = myPick == null || myBan == null;
     const rr = $("readyR");
-    rr.textContent = opReady ? "READY!" : "READY";
+    rr.textContent = opReady ? "RIVAL READY!" : opPick != null ? "RIVAL LOCKED IN" : "WAITING";
     rr.classList.toggle("on", !!opReady);
     const myBan2 = isHost ? netRoom.hostBan : netRoom.guestBan;
     const opBan2 = isHost ? netRoom.guestBan : netRoom.hostBan;
