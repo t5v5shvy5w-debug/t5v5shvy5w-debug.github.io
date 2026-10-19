@@ -3064,6 +3064,20 @@ function showVersus(a, b, metaText, isGuest) {
       st = isHost ? "Both ready — starting!" : "Both ready!";
     $("roomStatus").textContent = st;
   }
+  // Seeded shuffle: same order for host and guest (seeded by room code)
+  function seededShuffle(arr, seed) {
+    const a = [...arr];
+    let s = seed;
+    const rand = () => {
+      s = (s * 9301 + 49297) % 233280;
+      return s / 233280;
+    };
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
   function buildRoomRoster(root, pickId, interactive) {
     root.innerHTML = "";
     const banned = [];
@@ -3071,7 +3085,10 @@ function showVersus(a, b, metaText, isGuest) {
       if (netRoom.hostBan) banned.push(netRoom.hostBan);
       if (netRoom.guestBan) banned.push(netRoom.guestBan);
     }
-    R.forEach((d, idx) => {
+    // Shuffle roster (seeded by room code so both players see same order)
+    const seed = netRoom && netRoom.roomId ? parseInt(netRoom.roomId, 10) || 1 : 1;
+    const shuffled = seededShuffle(R, seed);
+    shuffled.forEach((d, idx) => {
       const el = ELEMENTS[d.element],
         b = document.createElement("button");
       const isBanned = banned.includes(d.element);
