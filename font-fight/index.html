@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bangers&family=Black+Ops+One&family=Bungee&family=Cinzel:wght@800&family=Creepster&family=Faster+One&family=Fjalla+One&family=Frijole&family=Graduate&family=Honk&family=Iceberg&family=Jersey+10&family=Kaushan+Script&family=Luckiest+Guy&family=Metal+Mania&family=Monoton&family=Nosifer&family=Orbitron:wght@800&family=Permanent+Marker&family=Pirata+One&family=Press+Start+2P&family=Racing+Sans+One&family=Rubik+Glitch&family=Russo+One&family=Silkscreen:wght@700&family=Special+Elite&family=UnifrakturCook:wght@700&family=VT323&family=Alfa+Slab+One&family=Titan+One&family=Righteous&family=Audiowide&family=Wallpoet&family=Eater&family=Butcherman&family=Geostar+Fill&family=Rubik+Burned&family=Fascinate+Inline&family=Lacquer&family=Staatliches&family=Bowlby+One&family=Chakra+Petch&family=Zen+Dots&display=swap">
-<link rel="stylesheet" href="style.css?v=1026">
+<link rel="stylesheet" href="style.css?v=1027">
 
 <title>Font Fight Arena v2</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,7 +33,13 @@
     </div>
     <div class="wn-body">
       <div class="wn-entry">
-        <div class="wn-ver-row"><span class="wn-ver wn-ver-new">V10.26</span><span class="wn-date">Oct 19, 2026</span><span class="wn-tag">LATEST</span></div>
+        <div class="wn-ver-row"><span class="wn-ver wn-ver-new">V10.27</span><span class="wn-date">Oct 19, 2026</span><span class="wn-tag">LATEST</span></div>
+        <ul>
+          <li><b>VS visuals cleanup</b> — no more boxes/emoji, diagonal slash, per-element name gradients</li>
+        </ul>
+      </div>
+      <div class="wn-entry">
+        <div class="wn-ver-row"><span class="wn-ver wn-ver">V10.26</span><span class="wn-date">Oct 19, 2026</span></div>
         <ul>
           <li><b>Cache fix</b> — assets now load fresh every update, no more stale files</li>
         </ul>
@@ -233,7 +239,7 @@
     </div>
   </div>
 </div>
-<div id="ver">V10.26</div><button id="friendsBtn">PLAY WITH FRIEND</button>
+<div id="ver">V10.27</div><button id="friendsBtn">PLAY WITH FRIEND</button>
 <div id="app">
 <section id="selectScreen" class="screen overlay">
   <div id="netBar"><label>NAME <span class="namewrap"><span id="nameHint">add a number</span><input id="netNameInput" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false"></span></label><span id="netIdLine"></span></div>
@@ -257,9 +263,10 @@
   <div class="battlebar"><div class="matchup" id="matchup">ELEMENT MATCHUP<b>Even</b></div><div class="log" id="battleLog">You control fighter one.</div><div class="arena-controls"><button id="pauseBtn">Pause</button><button id="skipBtn">Skip round</button><button class="soundbtn" id="soundBtn" aria-label="Toggle sound">Sound</button></div></div>
 </section>
 <section id="versus" class="overlay hidden">
-<canvas id="vsCanvas"></canvas>
+<canvas id="vsCanvas" style="display:none"></canvas>
 <div class="vs-flash" id="vsFlash"></div>
 <div class="vs-side vs-left" id="vsLeft"><div class="vfighter" id="v1"></div><div class="vs-el" id="vsEl1"></div><div class="vs-impact"></div><div class="vs-particles"></div></div>
+<div class="vs-slash" id="vsSlash"></div>
 <div class="vs-clash" id="vsClash"><div class="bigvs" id="bigvs">VS</div></div>
 <div class="vs-side vs-right" id="vsRight"><div class="vfighter" id="v2"></div><div class="vs-el" id="vsEl2"></div><div class="vs-impact"></div><div class="vs-particles"></div></div>
 <div class="vs-sparks" id="vsSparks"></div>
@@ -300,9 +307,9 @@
 </div></section>
 </div>
 
-<script src="qrcode.js?v=1026"></script>
-<script src="game.js?v=1026"></script>
-<script src="ui.js?v=1026"></script>
-<script src="fx.js?v=1026" defer></script>
+<script src="qrcode.js?v=1027"></script>
+<script src="game.js?v=1027"></script>
+<script src="ui.js?v=1027"></script>
+<script src="fx.js?v=1027" defer></script>
 </body>
 </html>

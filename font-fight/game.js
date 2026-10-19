@@ -479,20 +479,41 @@
     });
   }
   let vsTimer = null;
-  function showVersus(a, b, metaText, isGuest) {
+  
+  // VS element style configs (visuals only, no particles)
+  const VS_STYLE = {
+    Fire: { name:'linear-gradient(180deg,#fff 0%,#ffe080 30%,#ffaa00 60%,#ff4400 100%)', glow:'#ff6a00', label:'#ffaa00', slash:'#ff6a00' },
+    Storm: { name:'linear-gradient(180deg,#fff 0%,#fffbd0 30%,#ffe34c 60%,#aa88ff 100%)', glow:'#ffee55', label:'#ffe34c', slash:'#ffee55' },
+    Ice: { name:'linear-gradient(180deg,#fff 0%,#e8fdff 30%,#aaeeff 60%,#5edcff 100%)', glow:'#66ccff', label:'#aaeeff', slash:'#66ccff' },
+    Shadow: { name:'linear-gradient(180deg,#e8d8ff 0%,#c080ff 40%,#8040cc 100%)', glow:'#a060ff', label:'#c080ff', slash:'#a060ff', outline:'#1a0033' },
+    Light: { name:'linear-gradient(180deg,#fff 0%,#fff8d0 30%,#ffe080 60%,#ffcc44 100%)', glow:'#ffe080', label:'#ffe080', slash:'#ffe080' },
+    Nature: { name:'linear-gradient(180deg,#eaffea 0%,#a0ff80 40%,#3cdc78 70%,#1a8844 100%)', glow:'#44dd77', label:'#a0ff80', slash:'#44dd77' },
+    Cosmic: { name:'linear-gradient(180deg,#fff 0%,#e8d8ff 30%,#c080ff 60%,#8040ff 100%)', glow:'#b478ff', label:'#c080ff', slash:'#b478ff' },
+  };
+
+function showVersus(a, b, metaText, isGuest) {
     mode = "versus";
     a = a || chosen[0];
     b = b || chosen[1];
     const c1 = FX[a.id].c,
       c2 = FX[b.id].c;
     $("v1").textContent = a.name;
-    $("v1").style.cssText = `font-family:"${a.font}";color:${c1}`;
     $("v2").textContent = b.name;
-    $("v2").style.cssText = `font-family:"${b.font}";color:${c2}`;
+    // Apply element styles from config (no hardcoded fighters)
+    const st1 = VS_STYLE[a.element] || VS_STYLE.Fire;
+    const st2 = VS_STYLE[b.element] || VS_STYLE.Fire;
+    const v1el = $("v1"), v2el = $("v2");
+    v1el.style.cssText = `font-family:"${a.font}";background:${st1.name};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:0 0 30px ${st1.glow},0 0 80px ${st1.glow}${st1.outline ? `,0 0 4px ${st1.outline},2px 2px 0 ${st1.outline}` : ''}`;
+    v2el.style.cssText = `font-family:"${b.font}";background:${st2.name};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:0 0 30px ${st2.glow},0 0 80px ${st2.glow}${st2.outline ? `,0 0 4px ${st2.outline},2px 2px 0 ${st2.outline}` : ''}`;
     $("vsEl1").textContent = a.element.toUpperCase();
-    $("vsEl1").style.color = c1;
+    $("vsEl1").style.color = st1.label;
+    $("vsEl1").style.textShadow = `0 0 12px ${st1.glow}`;
     $("vsEl2").textContent = b.element.toUpperCase();
-    $("vsEl2").style.color = c2;
+    $("vsEl2").style.color = st2.label;
+    $("vsEl2").style.textShadow = `0 0 12px ${st2.glow}`;
+    // Slash colors (blend of both elements)
+    vs.style.setProperty("--slash-c1", st1.slash);
+    vs.style.setProperty("--slash-c2", st2.slash);
     const vs = $("versus");
     vs.style.setProperty("--c1", c1);
     vs.style.setProperty("--c2", c2);
@@ -510,60 +531,7 @@
     sr.classList.remove("go");
     $("vmeta").textContent = metaText || matchupText();
     $("countdown").textContent = `ROUND ${round}`;
-    // V8.0: 3-layer particles per element
-    function makeParticles(side, el, col) {
-      const cont = side.querySelector(".vs-particles");
-      const layers = {
-        Fire: [
-          ["🔥", 26, 34, "rise", 3],
-          ["✦", 10, 16, "riseFast", 8],
-          ["·", 4, 7, "drift", 12],
-        ],
-        Ice: [
-          ["❄", 24, 32, "fall", 4],
-          ["◇", 10, 15, "fallFast", 8],
-          ["·", 4, 6, "drift", 10],
-        ],
-        Storm: [
-          ["⚡", 28, 36, "flash", 3],
-          ["ϟ", 12, 18, "flicker", 7],
-          ["·", 3, 6, "static", 12],
-        ],
-        Shadow: [
-          ["☁", 30, 40, "riseSlow", 3],
-          ["●", 10, 16, "float", 7],
-          ["·", 3, 5, "drift", 10],
-        ],
-        Light: [
-          ["✦", 24, 32, "rise", 4],
-          ["✧", 10, 16, "twinkle", 8],
-          ["·", 3, 6, "drift", 12],
-        ],
-        Nature: [
-          ["🍃", 22, 30, "swayFall", 4],
-          ["✿", 10, 15, "fall", 7],
-          ["·", 3, 6, "drift", 12],
-        ],
-        Cosmic: [
-          ["✦", 24, 34, "twinkle", 5],
-          ["✧", 10, 16, "float", 9],
-          ["·", 3, 6, "drift", 16],
-        ],
-      };
-      const cfg = layers[el] || layers.Fire;
-      cfg.forEach(([ch, minS, maxS, anim, count], li) => {
-        for (let k = 0; k < count; k++) {
-          const d = document.createElement("i");
-          d.textContent = ch;
-          d.style.cssText = `position:absolute;left:${Math.random() * 100}%;top:${Math.random() * 100}%;font-size:${minS + Math.random() * (maxS - minS)}px;color:${col};opacity:${0.5 + Math.random() * 0.4};pointer-events:none;z-index:4;animation:vsP_${anim} ${2 + Math.random() * 3}s ease-in-out infinite;animation-delay:${Math.random() * 2}s`;
-          // Layer depth: big=slower, tiny=faster
-          if (li === 0) d.style.filter = `drop-shadow(0 0 8px ${col})`;
-          cont.appendChild(d);
-        }
-      });
-    }
-    makeParticles(sl, a.element, c1);
-    makeParticles(sr, b.element, c2);
+
     // V8.0: per-element impact timing (ms within 5s)
     const impactAt = {
       Storm: 1500,
@@ -596,19 +564,9 @@
     // Force reflow so canvas sizes correctly
     void vs.offsetHeight;
     sfx("versus");
-    // VSFX: Canvas particles for any element matchup
-    const cv = $("vsCanvas");
-    if (cv && typeof VSFX !== 'undefined') {
-      VSFX.init(cv);
-      VSFX.setElements(a.element, b.element);
-      // Text zones for readability
-      VSFX.setTextZones([
-        {x: 0.05, y: 0.15, w: 0.4, h: 0.15},  // Fighter 1 name
-        {x: 0.55, y: 0.70, w: 0.4, h: 0.15},  // Fighter 2 name
-        {x: 0.35, y: 0.40, w: 0.3, h: 0.20},  // VS
-      ]);
-      VSFX.start();
-    }
+    // VSFX disabled - visuals only for now (no particles yet)
+    // const cv = $("vsCanvas");
+    // if (cv && typeof VSFX !== 'undefined') { ... }
     if (vsTimer) clearTimeout(vsTimer);
     if (!isGuest) vsTimer = setTimeout(vsGo, 5000);
   }

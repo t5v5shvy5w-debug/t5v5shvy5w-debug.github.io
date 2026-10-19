@@ -520,3 +520,21 @@ body:has(#roomScreen:not(.hidden)) #friendsBtn{display:none}
   #versus .vs-left{padding-bottom:8vh}
   #versus .vs-right{padding-top:8vh}
 }
+
+/* === VS Visual Fix V10.27: clean overrides === */
+/* No boxes behind names - text-shadow glow only */
+#versus .vfighter{background:none!important;background-color:transparent!important;border:none!important;box-shadow:none!important;outline:none!important;padding:0!important}
+#versus .vs-el{background:none!important;background-color:transparent!important;border:none!important;box-shadow:none!important;padding:0!important}
+/* Halves exactly 100vw */
+#versus .vs-side{width:100vw!important;left:0!important;right:0!important;margin:0!important;padding:0!important}
+/* Element background glows (soft radial, fills the half) */
+#versus .vs-fx-fire{background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(255,80,0,.25),transparent 70%),linear-gradient(180deg,#0d0300,#1f0800)!important}
+#versus .vs-fx-storm{background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(100,120,255,.22),transparent 70%),linear-gradient(180deg,#060614,#0d0d24)!important}
+#versus .vs-fx-ice{background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(102,204,255,.22),transparent 70%),linear-gradient(180deg,#00101f,#002a4d)!important}
+#versus .vs-fx-shadow{background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(140,60,220,.20),transparent 70%),linear-gradient(180deg,#050005,#0d0018)!important}
+#versus .vs-fx-light{background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(255,220,120,.20),transparent 70%),linear-gradient(180deg,#0d0a02,#1f1805)!important}
+#versus .vs-fx-nature{background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(60,220,120,.20),transparent 70%),linear-gradient(180deg,#02120a,#062a14)!important}
+#versus .vs-fx-cosmic{background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(160,110,255,.22),transparent 70%),linear-gradient(180deg,#050510,#0d0620)!important}
+/* Diagonal slash */
+#versus .vs-slash{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:6;overflow:hidden}
+#versus .vs-slash::before{content:'';position:absolute;top:-10%;left:65%;width:3px;height:120%;transform:rotate(24deg);background:linear-gradient(180deg,var(--slash-c1,#ff6a00),#fff,var(--slash-c2,#aaffff));box-shadow:0 0 20px var(--slash-c1,#ff6a00),0 0 40px #fff,0 0 20px var(--slash-c2,#aaffff)}
