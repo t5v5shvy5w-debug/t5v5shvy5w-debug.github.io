@@ -301,7 +301,7 @@ body:has(#arenaScreen:not(.hidden)) #friendsBtn{display:none}
 .room-panel h3{margin:0 0 8px;font-size:14px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .room-panel h3 .you{font:9px system-ui,sans-serif;color:#62c1ff;letter-spacing:.14em}
 .room-roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-height:300px;overflow:auto;margin-bottom:10px;-webkit-overflow-scrolling:touch}
-.room-panels{position:relative}.room-vs{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font:800 28px system-ui,sans-serif;color:#fff;text-shadow:0 0 20px #38b6ff,0 0 40px #16a8ff;z-index:5;pointer-events:none;animation:vsPulse 2s ease-in-out infinite}@keyframes vsPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.12)}}.room-pick-show{text-align:center;padding:12px 8px;margin-bottom:10px;border:1px solid #1d4668;border-radius:8px;background:#081726;min-height:86px;display:flex;flex-direction:column;justify-content:center;gap:4px}.room-pick-show .rps-label{font:700 10px system-ui,sans-serif;letter-spacing:2px;color:#8eabc4}.room-pick-show .rps-word{font-size:34px;line-height:1.1;text-shadow:0 0 16px currentColor;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.room-card{border:1px solid #1d4668;background:#0b2035;border-radius:6px;padding:8px 4px;cursor:pointer;color:#edf7ff;min-height:64px;min-width:0;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}.room-card:hover{transform:translateY(-2px);border-color:#38b6ff}
+.room-panels{position:relative}.room-vs{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font:800 28px system-ui,sans-serif;color:#fff;text-shadow:0 0 20px #38b6ff,0 0 40px #16a8ff;z-index:5;pointer-events:none;animation:vsPulse 2s ease-in-out infinite}@keyframes vsPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.12)}}.room-pick-show{text-align:center;padding:10px 8px;margin-bottom:10px;border:1px solid rgba(56,182,255,.2);border-radius:10px;background:linear-gradient(165deg,rgba(8,126,240,.08),transparent);min-height:70px;display:flex;flex-direction:column;justify-content:center;gap:2px}.room-pick-show .rps-label{font:700 10px system-ui,sans-serif;letter-spacing:2px;color:#8eabc4}.room-pick-show .rps-word{font-size:34px;line-height:1.1;text-shadow:0 0 16px currentColor;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.room-card{border:1px solid #1d4668;background:#0b2035;border-radius:6px;padding:8px 4px;cursor:pointer;color:#edf7ff;min-height:64px;min-width:0;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}.room-card:hover{transform:translateY(-2px);border-color:#38b6ff}
 .room-card .rw{display:block;font-size:15px;text-shadow:0 0 10px currentColor;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .room-card .re{display:block;font:8px system-ui,sans-serif;color:#8eabc4;margin-top:3px}
 .room-card.mine{box-shadow:inset 0 0 0 2px #2397ff}
@@ -464,7 +464,7 @@ body:has(#arenaScreen:not(.hidden)) #friendsBtn{display:none}
 /* Cool READY button */
 .ready{position:relative;overflow:hidden;background:linear-gradient(135deg,#01008a 0%,#087ef0 60%,#38b6ff 100%);border:none;border-radius:14px;padding:18px;color:#fff;cursor:pointer;width:100%;margin-top:12px;box-shadow:0 0 24px rgba(8,126,240,.35),inset 0 1px 0 rgba(255,255,255,.2);transition:transform .15s,box-shadow .2s,opacity .2s}
 .ready:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 0 36px rgba(56,182,255,.55)}
-.ready:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.ready:disabled{opacity:.65;cursor:not-allowed;box-shadow:0 0 12px rgba(8,126,240,.15)}
 .ready.on{background:linear-gradient(135deg,#065f46,#10b981);box-shadow:0 0 24px rgba(16,185,129,.4)}
 .ready-main{display:block;font-size:22px;font-weight:900;letter-spacing:4px}
 .ready-sub{display:block;font-size:11px;opacity:.7;margin-top:2px;letter-spacing:1px}
@@ -473,3 +473,6 @@ body:has(#arenaScreen:not(.hidden)) #friendsBtn{display:none}
 .ban-row{background:linear-gradient(165deg,rgba(255,60,60,.08),rgba(255,60,60,.02));border:1px solid rgba(255,80,80,.25);padding:16px}
 .ban-label{font-size:14px;color:#ff8080}
 .ban-btn{padding:10px 16px;font-size:13px}
+
+.room-card.banned{position:relative;opacity:.35;filter:grayscale(.7)}
+.room-card.banned::after{content:'BANNED';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);font:900 14px system-ui;letter-spacing:3px;color:#ff5050;text-shadow:0 0 8px rgba(255,0,0,.6);border:2px solid #ff5050;border-radius:6px;padding:4px 10px;background:rgba(0,0,0,.6)}
