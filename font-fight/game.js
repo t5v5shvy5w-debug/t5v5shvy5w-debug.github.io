@@ -2586,6 +2586,8 @@
         guestPick: null,
         hostReady: false,
         guestReady: false,
+        hostBan: null,
+        guestBan: null,
         pending: true,
       };
       $("friendsPanel").classList.add("hidden");
@@ -2678,6 +2680,8 @@
         guestPick: null,
         hostReady: false,
         guestReady: false,
+        hostBan: null,
+        guestBan: null,
         pending: true,
       };
       c.on("open", () => {
@@ -2841,11 +2845,13 @@
         name: netRoom.hostName,
         pick: netRoom.hostPick,
         ready: netRoom.hostReady,
+        ban: netRoom.hostBan,
       },
       guest: {
         name: netRoom.guestName,
         pick: netRoom.guestPick,
         ready: netRoom.guestReady,
+        ban: netRoom.guestBan,
       },
     };
   }
@@ -2856,6 +2862,7 @@
         if (!isHost) break;
         netRoom.guestName = d.from.name;
         netRoom.guestPick = d.pick == null ? null : d.pick;
+        netRoom.guestBan = d.ban || null;
         netRoom.pending = false;
         netRoomSend(roomStateMsg());
         netRenderRoom();
@@ -2866,8 +2873,10 @@
         netRoom.hostName = d.host.name;
         netRoom.hostPick = d.host.pick;
         netRoom.hostReady = !!d.host.ready;
+        netRoom.hostBan = d.host.ban || null;
         netRoom.guestPick = d.guest.pick;
         netRoom.guestReady = !!d.guest.ready;
+        netRoom.guestBan = d.guest.ban || null;
         netRenderRoom();
         break;
       case "pick":
@@ -2950,8 +2959,51 @@
     if (!asHost) $("roomCodeBig").classList.add("hidden");
     netRenderRoom();
   }
+  function renderBanUI() {
+    const btnsEl = $("banBtns");
+    const statusEl = $("banStatus");
+    if (!btnsEl || !netRoom) return;
+    const elements = ["Fire", "Nature", "Light", "Cosmic", "Shadow", "Storm", "Ice"];
+    const myBan = isHost ? netRoom.hostBan : netRoom.guestBan;
+    const opBan = isHost ? netRoom.guestBan : netRoom.hostBan;
+    btnsEl.innerHTML = "";
+    elements.forEach((el) => {
+      const b = document.createElement("button");
+      b.className = "ban-btn";
+      b.textContent = el;
+      b.type = "button";
+      if (el === myBan) {
+        b.classList.add("banned");
+        b.textContent = el + " (YOU BANNED)";
+      } else if (el === opBan) {
+        b.classList.add("banned");
+        b.disabled = true;
+        b.textContent = el + " (BANNED)";
+      } else if (opBan && myBan) {
+        b.disabled = true;
+      }
+      if (!myBan && el !== opBan) {
+        b.onclick = () => netBan(el);
+      } else {
+        b.disabled = true;
+      }
+      // Element color
+      const e = ELEMENTS[el];
+      if (e && !b.classList.contains("banned")) {
+        b.style.borderColor = e.color + "55";
+      }
+      btnsEl.appendChild(b);
+    });
+    // Status text
+    if (!myBan && !opBan) statusEl.textContent = "Both players ban one element.";
+    else if (myBan && !opBan) statusEl.textContent = "Waiting for rival to ban…";
+    else if (!myBan && opBan) statusEl.textContent = "Rival banned " + opBan + ". Your turn!";
+    else statusEl.textContent = "Bans locked: " + myBan + " & " + opBan;
+  }
   function netRenderRoom() {
     if (!netRoom || $("roomScreen").classList.contains("hidden")) return;
+    // Render ban buttons
+    renderBanUI();
     const L = isHost ? netRoom.hostName : netRoom.guestName;
     const Rr = isHost ? netRoom.guestName : netRoom.hostName;
     $("roomNameL").textContent = L;
@@ -2974,12 +3026,11 @@
       pl.querySelector(".rps-word").textContent = "?";
       pl.querySelector(".rps-word").style.cssText = "";
     }
+    // BLIND PICK: hide opponent's fighter until VS screen
     if (opPick != null) {
-      const d = R[opPick],
-        e = ELEMENTS[d.element];
-      pr.querySelector(".rps-word").textContent = d.name;
+      pr.querySelector(".rps-word").textContent = "LOCKED IN";
       pr.querySelector(".rps-word").style.cssText =
-        `font-family:"${d.font}";color:${e.color}`;
+        "font-family:system-ui;color:#8a9bc0;letter-spacing:2px";
     } else {
       pr.querySelector(".rps-word").textContent = "?";
       pr.querySelector(".rps-word").style.cssText = "";
@@ -2987,12 +3038,17 @@
     const rl = $("readyL");
     rl.textContent = myReady ? "READY!" : "READY";
     rl.classList.toggle("on", !!myReady);
-    rl.disabled = myPick == null;
+    const myBan = isHost ? netRoom.hostBan : netRoom.guestBan;
+    rl.disabled = myPick == null || myBan == null;
     const rr = $("readyR");
     rr.textContent = opReady ? "READY!" : "READY";
     rr.classList.toggle("on", !!opReady);
+    const myBan2 = isHost ? netRoom.hostBan : netRoom.guestBan;
+    const opBan2 = isHost ? netRoom.guestBan : netRoom.hostBan;
     let st = "Pick your fighter.";
-    if (myPick != null && opPick == null) st = "Waiting for opponent to pick…";
+    if (myBan2 == null) st = "Ban an element first!";
+    else if (opBan2 == null) st = "Waiting for opponent to ban…";
+    else if (myPick != null && opPick == null) st = "Waiting for opponent to pick…";
     else if (myPick != null && opPick != null && !(myReady && opReady))
       st = "Press READY when set.";
     else if (myReady && opReady)
@@ -3001,13 +3057,22 @@
   }
   function buildRoomRoster(root, pickId, interactive) {
     root.innerHTML = "";
+    const banned = [];
+    if (netRoom) {
+      if (netRoom.hostBan) banned.push(netRoom.hostBan);
+      if (netRoom.guestBan) banned.push(netRoom.guestBan);
+    }
     R.forEach((d, idx) => {
       const el = ELEMENTS[d.element],
         b = document.createElement("button");
+      const isBanned = banned.includes(d.element);
+      // BLIND PICK: don't highlight opponent's pick
       b.className =
         "room-card" +
-        (pickId === d.id ? (interactive ? " mine" : " opp") : "") +
-        (interactive ? "" : " locked");
+        (pickId === d.id && interactive ? " mine" : "") +
+        (interactive ? "" : " locked") +
+        (isBanned ? " banned" : "");
+      if (isBanned) b.disabled = true;
       b.style.animation = "cardIn .3s ease backwards";
       b.style.animationDelay = idx * 12 + "ms";
       b.type = "button";
@@ -3027,6 +3092,14 @@
   }
   function netPick(id) {
     if (!netRoom) return;
+    // Can't pick a banned element's fighter
+    const d = R[id];
+    const myBan = isHost ? netRoom.hostBan : netRoom.guestBan;
+    const opBan = isHost ? netRoom.guestBan : netRoom.hostBan;
+    if (d.element === myBan || d.element === opBan) {
+      sfx("deny");
+      return;
+    }
     if (isHost) {
       netRoom.hostPick = id;
       netRoomSend(roomStateMsg());
@@ -3038,16 +3111,49 @@
     netRenderRoom();
     sfx("ui");
   }
+  function netBan(element) {
+    if (!netRoom) return;
+    // Can't ban an element already banned by opponent
+    const opBan = isHost ? netRoom.guestBan : netRoom.hostBan;
+    if (element === opBan) {
+      sfx("deny");
+      return;
+    }
+    if (isHost) {
+      netRoom.hostBan = element;
+      netRoomSend(roomStateMsg());
+    } else {
+      netRoom.guestBan = element;
+      netRoomSend({ t: "ban", element: element });
+    }
+    // Clear pick if it was from the banned element
+    const myPick = isHost ? netRoom.hostPick : netRoom.guestPick;
+    if (myPick != null && R[myPick].element === element) {
+      if (isHost) netRoom.hostPick = null;
+      else {
+        netRoom.guestPick = null;
+        netOwnPick = null;
+      }
+    }
+    netRenderRoom();
+    sfx("ui");
+  }
   function netToggleReady() {
     if (!netRoom) return;
     if (isHost) {
-      if (netRoom.hostPick == null) return;
+      if (netRoom.hostPick == null || netRoom.hostBan == null) {
+        sfx("deny");
+        return;
+      }
       netRoom.hostReady = !netRoom.hostReady;
       netRoomSend(roomStateMsg());
       netRenderRoom();
       netMaybeStart();
     } else {
-      if (netRoom.guestPick == null) return;
+      if (netRoom.guestPick == null || netRoom.guestBan == null) {
+        sfx("deny");
+        return;
+      }
       netRoom.guestReady = !netRoom.guestReady;
       netRoomSend({ t: "ready", ready: netRoom.guestReady });
       netRenderRoom();

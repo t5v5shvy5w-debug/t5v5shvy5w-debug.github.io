@@ -420,3 +420,14 @@ body:has(#arenaScreen:not(.hidden)) #friendsBtn{display:none}
 .result-stats>div:nth-child(1){animation-delay:.15s}.result-stats>div:nth-child(2){animation-delay:.25s}.result-stats>div:nth-child(3){animation-delay:.35s}.result-stats>div:nth-child(4){animation-delay:.45s}
 @keyframes statPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 
+
+/* Ban phase UI */
+.ban-row{display:flex;align-items:center;gap:12px;justify-content:center;margin:12px 0;padding:10px;background:rgba(255,255,255,.03);border-radius:10px;flex-wrap:wrap}
+.ban-label{font:700 12px system-ui;letter-spacing:2px;color:#8a9bc0}
+.ban-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.ban-btn{padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font:700 12px system-ui;cursor:pointer;transition:all .2s}
+.ban-btn:hover:not(:disabled){background:rgba(255,80,80,.2);border-color:#ff5050}
+.ban-btn.banned{background:rgba(255,50,50,.3);border-color:#ff3030;color:#ff8080;text-decoration:line-through}
+.ban-btn:disabled{opacity:.4;cursor:not-allowed}
+.ban-status{font:12px system-ui;color:#8a9bc0;width:100%;text-align:center}
+.room-card.banned{opacity:.25;filter:grayscale(1)}
