@@ -231,6 +231,7 @@
 /* online multiplayer */
 #friendsBtn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 4px);left:10px;z-index:70;border:1px solid var(--line);background:var(--panel);border-radius:7px;min-height:30px;padding:6px 12px;cursor:pointer;font:700 11px system-ui,sans-serif;letter-spacing:1px;box-shadow:var(--shadow)}
 body:has(#arenaScreen:not(.hidden)) #friendsBtn{display:none}
+body:has(#roomScreen:not(.hidden)) #friendsBtn{display:none}
 
 #netBar{display:flex;align-items:center;gap:12px;width:min(1040px,100%);margin:0 auto 14px;padding-top:calc(env(safe-area-inset-top,0px) + 44px)}#netBar label{display:flex;align-items:center;gap:8px;font:600 10px system-ui,sans-serif;letter-spacing:.16em;color:#5a7288}#netNameInput{background:#0a1524;border:1px solid #1d3a52;border-radius:8px;padding:10px 14px;font:600 15px system-ui,sans-serif;color:#fff;min-width:170px;transition:border-color .15s}#netNameInput:focus{outline:none;border-color:#38b6ff;box-shadow:0 0 0 3px rgba(56,182,255,.15)}#netIdLine{font:12px system-ui,sans-serif;color:#5a7288}#netIdLine b{color:#8eabc4;font-weight:600}
 #netBar label{display:flex;align-items:center;gap:6px;letter-spacing:.08em;font-size:10px}

@@ -2955,7 +2955,7 @@
     $("arenaScreen").classList.add("hidden");
     $("friendsPanel").classList.add("hidden");
     $("roomScreen").classList.remove("hidden");
-    $("roomMeta").textContent = "ROOM " + netRoom.roomId;
+    $("roomMeta").textContent = ""; // Redundant with ROOM CODE display below
     if (!asHost) $("roomCodeBig").classList.add("hidden");
     netRenderRoom();
   }
