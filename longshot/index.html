@@ -1081,6 +1081,9 @@ class Enemy{
     this.headshot=false;this.dieYaw=0;this.sy0=1.5;this.fallAxisV=new THREE.Vector3(1,0,0); // directional-fall state
     this.deathT=0;this.deathDone=false;this.thudded=true;this.blast=false;this.bVy=0;this.bLand=0;this.bDrift=0; // DEATH 2.0 : weighted-collapse state
     this.helmFly=null;this.helmetG=null;this.twT=0.95;this.twArm=null;this.hsX=0;this.hsZ=0;this.dy0=0;
+    this.deathRate=1;this.rArmZL=1;this.rArmZR=1;this.rArmXL=0.5;this.rArmXR=0.5;this.rSplL=0.1;this.rSplR=0.1; // RAGDOLL 3.0 defaults (die() re-rolls per death)
+    this.legFoldL=1;this.legFoldR=0.8;this.legSplayL=0.13;this.legSplayR=0.13;this.restHX=0;this.restHZ=0;
+    this.entryFl=1;this.entryFr=1;this.bArmL=1.25;this.bArmR=1.25;this.sldX=0;this.sldZ=0;this.landX=null;this.landZ=0;this.rise=0.20;
     this.discovered=false;this.invest=null;this.investCd=rand(0,0.5); // corpse-discovery state
     this.glintT=rand(0.4,2);this.glintF=0;this.relocP=null; // irregular glint flashes + shoot-and-scoot post
     const g=this.group=new THREE.Group();
@@ -1333,6 +1336,24 @@ class Enemy{
     /* bullet direction in the body's local frame — drives the head whip */
     const cy=Math.cos(this.dieYaw),sy=Math.sin(this.dieYaw);
     this.hsX=clamp(sy*fx+cy*fz,-1,1);this.hsZ=clamp(-(cy*fx-sy*fz),-1,1);
+    /* RAGDOLL 3.0 : per-death randoms — no two corpses fall the same way, and
+       never a mirror-symmetric mannequin. Arms get INDEPENDENT droop / rest-x /
+       splay per side; one leg folds hard, the other softer (random which);
+       the head parks in a per-death loll instead of a frozen whip; the whole
+       timeline runs at a slightly personal pace. */
+    this.deathRate=rand(0.9,1.12);
+    this.rArmZL=rand(0.7,1.2);this.rArmZR=rand(0.7,1.2);
+    this.rArmXL=rand(-0.1,0.8);this.rArmXR=rand(-0.1,0.8);
+    this.rSplL=rand(0.04,0.18);this.rSplR=rand(0.04,0.18);
+    this.legFoldL=rand(0.85,1.15);this.legFoldR=rand(0.6,0.95);
+    if(Math.random()<0.5){const tf=this.legFoldL;this.legFoldL=this.legFoldR;this.legFoldR=tf;}
+    this.legSplayL=rand(0.06,0.22);this.legSplayR=rand(0.06,0.22);
+    this.restHX=this.hsX*0.22+rand(-0.15,0.15);this.restHZ=this.hsZ*0.22+rand(-0.3,0.3);
+    this.entryFl=this.hsZ>0?1.2:1;this.entryFr=this.hsZ<0?1.2:1; // bullet-entry side arm flings ~20% wider
+    this.bArmL=1.25*rand(0.85,1.15);this.bArmR=1.25*rand(0.85,1.15); // blast airborne arms : per-arm throw
+    this.sldX=fl>0.01?fx/fl:0;this.sldZ=fl>0.01?fz/fl:0; // ground-slide direction (pivot reads at the hips)
+    this.landX=null;this.landZ=0;
+    this.rise=0.20; // REST-LIFT : the corpse ends lying ON the dirt, not sunk into it (0.23 in sim put heads at 0.39 — 0.20 buys margin under the 0.40 flat-lying cap)
     if(this.blast){this.bVy=rand(3.6,4.1);this.bLand=2*this.bVy/9.8;this.bDrift=rand(2.0,3.0);} // explosion : launched on a short arc, lands ~0.75-0.85s out
     if(this.headshot&&this.helmetG){ // HEADSHOT : the helmet pops off and arcs to the dirt beside the body
       const hg=this.helmetG;scene.attach(hg);
@@ -1350,45 +1371,64 @@ class Enemy{
     const g=this.group;
     if(this.helmFly)this.helmTick(dt);
     if(this.deathDone)return;
-    this.deathT+=dt*(this.headshot?1.22:1); // headshots crumple faster overall
+    this.deathT+=dt*(this.headshot?1.22:1)*(this.deathRate||1); // headshots crumple faster overall; every death keeps its own pace
     const T=this.deathT;
     if(T<0.3){const e=0.5*(1-T/0.3);for(const m of this.mats)m.emissive.setRGB(e,e*0.11,e*0.11);} // impact flash bleeding out
     else if(T-dt<0.3)for(const m of this.mats)m.emissive.setRGB(0,0,0);
-    const hs=this.headshot,tipMax=hs?0.62:Math.PI/2*0.98;
+    const hs=this.headshot,tipMax=hs?1.42:1.50; // RAGDOLL 3.0 : EVERYONE falls flat — headshots no longer freeze in a floating lean
     let tip;
     if(this.blast&&T<this.bLand){ // airborne : launched arc + spin, limbs thrown wide
       g.position.y=this.dy0+this.bVy*T-4.9*T*T;
       g.position.x+=this.hitDir.x*this.bDrift*dt;g.position.z+=this.hitDir.z*this.bDrift*dt;
       tip=(Math.PI/2)*(T/this.bLand);
-      this.armL.rotation.z=1.25;this.armR.rotation.z=-1.25;
+      this.armL.rotation.z=this.bArmL;this.armR.rotation.z=-this.bArmR;
       this.armL.rotation.x=this.armR.rotation.x=-0.5;
       this.legL.rotation.x=this.legR.rotation.x=0.55;
     }else{
       if(this.blast&&!this.thudded){this.thudded=true;this.groundThud(1.5);} // blast landing = the ground-contact beat
-      const bk=sstep(0.09,0.38,T); // BUCKLE : knees fold under the body
-      this.legL.rotation.x=-1.15*bk;this.legR.rotation.x=-0.75*bk;
+      const bk=sstep(0.09,0.38,T); // BUCKLE : knees fold under the body — per-leg fold factors, one side gives more than the other
+      this.legL.rotation.x=-1.15*bk*this.legFoldL;this.legR.rotation.x=-1.15*bk*this.legFoldR;
       if(T<0.35)tip=tipMax*0.24*sstep(0.09,0.35,T); // pitch starts as the knees go
       else if(T<0.72){const u=(T-0.35)/0.37;tip=tipMax*(0.24+0.76*u*u);} // DROP : u^2 — gravity curve, not a leaf drift
       else tip=tipMax-0.055*Math.sin(Math.PI*clamp((T-0.72)/0.3,0,1))*Math.exp(-(T-0.72)*3); // one-bounce settle on contact
-      g.position.y=this.dy0-(Math.sin(Math.PI*clamp((T-0.09)/0.66,0,1))*0.17+(hs?0.10*sstep(0.3,0.7,T):0)); // sink through the buckle; headshots stay sunk (crumple)
+      /* REST-LIFT + HIP SLIDE : as the tip commits past halfway, ease the whole
+         group UP by `rise` (the buckle sink alone left corpses ~0.2m buried)
+         and slide a touch along the fall line, so the rotation reads as a
+         pivot at the hips instead of a hinge at the ankles. Final rest y is
+         dy0 - (headshot crumple) + rise — lying ON the ground. Blast corpses
+         anchor the slide at wherever they landed. */
+      const tipN=tip/tipMax;
+      if(this.landX===null){this.landX=g.position.x;this.landZ=g.position.z;}
+      g.position.y=this.dy0-(Math.sin(Math.PI*clamp((T-0.09)/0.66,0,1))*0.17+(hs?0.10*sstep(0.3,0.7,T):0))+this.rise*sstep(0.55,1,tipN);
+      const sl=0.30*sstep(0.35,1,tipN);
+      g.position.x=this.landX+this.sldX*sl;g.position.z=this.landZ+this.sldZ*sl;
       if(!this.thudded&&tip>tipMax*0.8){this.thudded=true;this.groundThud(hs?0.8:1);} // torso meets dirt
       /* arms : fling out on the snap, droop loose (overshoot via the fling
-         decay crossing the droop rise), splay to rest in the settle */
+         decay crossing the droop rise), splay to rest in the settle — every
+         target is PER-ARM now (droop, rest-x, splay, entry-side fling boost) */
       const fling=T<0.09?T/0.09:Math.max(0,1-(T-0.09)/0.3);
       const droop=sstep(0.09,0.5,T),splay=sstep(0.7,1.05,T);
-      const armZ=lerp(0.55,0.85,droop)+0.45*fling;
-      this.armL.rotation.z=armZ+0.1*splay;this.armR.rotation.z=-armZ-0.1*splay;
-      this.armL.rotation.x=this.armR.rotation.x=0.55*droop+0.2*fling;
-      this.legL.rotation.z=0.13*splay;this.legR.rotation.z=-0.13*splay; // legs open a touch at rest
+      this.armL.rotation.z=lerp(0.55,this.rArmZL,droop)+0.45*fling*this.entryFl+this.rSplL*splay;
+      this.armR.rotation.z=-lerp(0.55,this.rArmZR,droop)-0.45*fling*this.entryFr-this.rSplR*splay;
+      this.armL.rotation.x=this.rArmXL*droop+0.2*fling*this.entryFl;
+      this.armR.rotation.x=this.rArmXR*droop+0.2*fling*this.entryFr;
+      this.legL.rotation.z=this.legSplayL*splay;this.legR.rotation.z=-this.legSplayR*splay; // legs open a touch at rest — independent amounts
     }
     _qFall.setFromAxisAngle(this.fallAxisV,tip);
     _qYaw.setFromAxisAngle(_YUP,this.dieYaw);
     g.quaternion.multiplyQuaternions(_qFall,_qYaw);
-    if(hs)g.scale.y=Math.max(0.45,this.sy0*(1-0.38*sstep(0.08,0.5,T))); // headshot crumple squash
-    /* head : whips along the round's line on the snap, then lolls to rest */
+    /* kneelers UNFOLD to full body length as they fall (a kneeling corpse
+       shouldn't stay kneel-squashed); the headshot squash then multiplies the
+       eased base — and it's gentler now (0.20), no funhouse-doll corpses */
+    let baseY=this.sy0;
+    if(this.sy0<1.5)baseY=lerp(this.sy0,1.5,sstep(0.09,0.6,T));
+    g.scale.y=hs?Math.max(0.45,baseY*(1-0.20*sstep(0.08,0.5,T))):baseY;
+    /* head : whips along the round's line on the snap, then the parked whip
+       DECAYS into this death's loll rest pose — no permanently cranked neck */
     const whip=T<0.09?T/0.09:Math.max(0,1-(T-0.09)/0.28),wm=hs?1:0.45;
-    this.headG.rotation.x=this.hsX*(0.5+0.95*whip)*wm;
-    this.headG.rotation.z=this.hsZ*(0.4+0.8*whip)*wm;
+    const loll=sstep(0.35,0.65,T);
+    this.headG.rotation.x=lerp(this.hsX*(0.5+0.95*whip)*wm,this.restHX,loll);
+    this.headG.rotation.z=lerp(this.hsZ*(0.4+0.8*whip)*wm,this.restHZ,loll);
     if(T>this.twT&&T<this.twT+0.18&&this.twArm)this.twArm.rotation.x+=Math.sin(Math.PI*(T-this.twT)/0.18)*0.35; // settle twitch
     if(T>1.3){this.deathDone=true;for(const m of this.mats)m.emissive.setRGB(0,0,0);}
   }
@@ -2025,7 +2065,13 @@ function spawnBlood(p,dir,head){
 function pierceKill(b,e,hshot){
   b.kills++;b.pierced.push(e);
   _kd.set(b.vx,b.vy,b.vz).normalize();
-  spawnBlood(b.m.position,_kd,hshot);
+  /* BLOOD-ON-CAM : if this kill is about to trigger the bullet cam, the burst
+     at the real kill moment fires 300+ m away a full replay before the cam's
+     bullet "arrives" — so DEFER it: kcUpdate bursts spawnBlood at KC.tgt the
+     instant the replayed round makes contact. The gate mirrors killEnemy's
+     cam gate exactly (first kill of the shot, >300m, killcam not off). */
+  const camWillRun=(b.kills===1&&camera.position.distanceTo(e.group.position)>300&&G.kcam!=='off');
+  if(!camWillRun)spawnBlood(b.m.position,_kd,hshot);
   /* BULLET-CAM 2.1 : the truth — the exact point the round touched flesh, plus
      a snapshot of the flown path ending at that point. Only the FIRST kill of
      the shot may drive the cam (killEnemy's cam flag does the gating). */
@@ -2546,7 +2592,7 @@ document.addEventListener('visibilitychange',()=>{ // hidden : release nothing; 
    scope DOM, rifle) and runs on every exit path: natural finish, mission change (calls in
    startMission / missionComplete / missionFail), firing again, scope toggle, an unknown
    phase, a total-time overrun, and a frame-loop watchdog if state leaves 'play'.        */
-const KC={active:false,phase:'',t:0,dur:0,total:0,travel:0,orbA:0,wasScoped:false,ts:1,rush:null,
+const KC={active:false,phase:'',t:0,dur:0,total:0,travel:0,orbA:0,wasScoped:false,ts:1,rush:null,hshot:false,
   dir:new THREE.Vector3(),from:new THREE.Vector3(),tgt:new THREE.Vector3(),orbC:new THREE.Vector3(),
   startP:new THREE.Vector3(),retP:new THREE.Vector3(),
   startQ:new THREE.Quaternion(),retQ:new THREE.Quaternion()};
@@ -2599,10 +2645,11 @@ function kcRushStop(){
   if(!KC.rush)return;const r=KC.rush;KC.rush=null;
   try{const t=AC?AC.currentTime:0;r.g.gain.setTargetAtTime(0,t,0.04);r.src.stop(t+0.25);}catch(e){}
 }
-function startBulletCam(e,dir,hitP,path){
+function startBulletCam(e,dir,hitP,path,hshot){
   if(KC.active)endKillcam(); // re-entry : restore first, then start the new one
   KC.active=true;KC.phase='chase';KC.t=0;KC.dur=1.5;KC.total=0;
   KC.dir.copy(dir);
+  KC.hshot=!!hshot; // deferred blood (pierceKill skipped its burst for this cam) sprays at the impact beat, headshot-wide if set
   /* BULLET-CAM 2.1 : the cam target is the TRUE impact point (where the blood
      burst), not a fixed point 1.6m over the victim's feet — and the chase
      replays the recorded flight path point-for-point, so the visual round
@@ -2685,6 +2732,7 @@ function kcUpdate(dt){
       kcRushSet(0.02,300);
       impactPuff(KC.tgt,'dirt'); // impact dust + shock on the victim
       spawnBurst(KC.tgt,{color:0xd8c9a3,n:16,sp0:2.5,sp1:6.5,up0:1,up1:4,life:0.7,grav:6});
+      spawnBlood(KC.tgt,KC.dir,KC.hshot); // DEFERRED BLOOD : pierceKill held its burst for this exact frame — the replayed contact bleeds, spray along the path-end tangent
     }
   }
   else if(KC.phase==='impact'){
@@ -2756,7 +2804,7 @@ function killEnemy(e,dir,cam,hshot,blast,hitP,camPath){
   toast((hshot?'HEADSHOT — ':'')+(e.hvt?'HVT DOWN':(e.sniper?'SNIPER DOWN':'GUARD DOWN'))+'  +'+pts+(G.chain>1?'  x'+G.chain+' CHAIN':''));
   if(!lsGet('lh_kill','')){lsSet('lh_kill','1'); // one-time hint : bodies get found
     setTimeout(()=>toast('BODIES GET FOUND — KEEP THE ALARM DOWN'),1750);}
-  if(cam&&dist>300&&G.kcam!=='off')startBulletCam(e,dir,hitP,camPath); // BULLET-CAM : only for actual bullet kills, never explosion kills (killcam pref can disable)
+  if(cam&&dist>300&&G.kcam!=='off')startBulletCam(e,dir,hitP,camPath,hshot); // BULLET-CAM : only for actual bullet kills, never explosion kills (killcam pref can disable); hshot rides along so the deferred blood sprays headshot-wide on impact
   updateHUD();
   checkMissionDone();
 }
