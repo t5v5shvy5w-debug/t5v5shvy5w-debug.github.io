@@ -50,6 +50,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 .panel .tap{margin-top:16px;font-size:14px;letter-spacing:3px;color:#9fe09f;animation:blink 1.4s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
 .panel .row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.riflebox{margin:14px 0 4px;padding:10px 12px;border:1px solid #3a5a3a;border-radius:8px;background:rgba(10,20,10,.5)}
+.rrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.rrow .mbtn{padding:8px 14px}
+.rinfo{text-align:center;flex:1}
+.rinfo b{font-size:16px;letter-spacing:2px;color:#ffe9a8}
+.rinfo span{display:block;font-size:11px;color:#9fc09f;margin-top:4px}
+.rlocks{margin-top:8px;font-size:10px;color:#7a9a7a;text-align:center;line-height:1.7;letter-spacing:1px}
+.debrief{display:flex;gap:14px;justify-content:center;margin:12px 0 4px;flex-wrap:wrap}
+.debrief div{text-align:center}
+.debrief span{display:block;font-size:10px;letter-spacing:2px;color:#8aa086}
+.debrief b{font-size:16px;color:#ffe9a8}
 .mbtn{background:#1d2b1d;border:1px solid #5a8a5a;color:#e9f2e4;border-radius:8px;padding:10px 22px;font-size:14px;letter-spacing:2px;font-family:inherit}
 .mbtn:active{transform:scale(.95)}
 #setBtn{position:fixed;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:70;width:40px;height:40px;border-radius:10px;background:rgba(8,12,8,.62);border:1px solid rgba(190,230,190,.35);color:#dfeee0;font-size:19px;display:flex;align-items:center;justify-content:center}
@@ -78,6 +89,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
   <div class="bar">MISSION <b id="hMission">1</b> &nbsp;HVT <b id="hHvt">0/0</b> &nbsp;KILLS <b id="hKills">0</b></div>
   <div class="bar">WIND <b id="hWind">—</b> &nbsp;ZOOM <b id="hZoom">—</b></div>
   <div class="bar">AMMO <b id="hAmmo">IIIII</b></div>
+  <div class="bar">RIFLE <b id="hRifle">LONGSHOT</b></div>
   <div class="bar meterwrap">ALARM <span class="meter"><i id="alarmFill" style="background:#e8b23a;transform:scaleX(0)"></i></span><b id="hAlarm">0%</b></div>
   <div class="bar meterwrap">HP <span class="meter"><i id="hpFill" style="background:#6fd67f;transform:scaleX(1)"></i></span></div>
 </div>
@@ -139,6 +151,19 @@ function sstep(a,b,x){x=clamp((x-a)/(b-a),0,1);return x*x*(3-2*x);}
 const $=id=>document.getElementById(id);
 const isTouch=('ontouchstart'in window)||(window.matchMedia&&matchMedia('(pointer: coarse)').matches);
 
+/* ---------------- unlockable rifles ---------------- */
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+const RIFLES={
+  longshot:{name:'LONGSHOT',mag:5, vel:800,reload:2.2,cool:1.1,desc:'Standard issue — balanced and reliable.'},
+  varmint:{name:'VARMINT', mag:6, vel:900,reload:1.9,cool:0.8,unlock:1,desc:'Fast cycle, flat trajectory.'},
+  thunder:{name:'THUNDER', mag:10,vel:750,reload:2.6,cool:1.3,unlock:3,desc:'Big mag, heavy arc.'},
+};
+const RIFLE_ORDER=['longshot','varmint','thunder'];
+function rifleMaxMission(){return +(lsGet('longshot_rifles',0))||0;}
+function rifleUnlocked(k){const r=RIFLES[k];return !!r&&(!r.unlock||rifleMaxMission()>=r.unlock);}
+let selRifle='longshot'; // rifle browsed on the mission card; locked in when the mission starts
+
 /* ---------------- audio (tiny synth) ---------------- */
 let AC=null,_nb=null;
 function nbuf(ac){if(_nb)return _nb;const b=ac.createBuffer(1,ac.sampleRate*0.5,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;_nb=b;return b;}
@@ -181,9 +206,11 @@ const G={
   state:'menu',            // menu | play | over | win
   mission:1, score:0, best:+(localStorage.getItem('longshot_best')||0),
   kills:0, chain:0, lastKillT:-99,
-  ammo:5, reloading:false, reloadT:0, fireCd:0,
+  ammo:5, reloading:false, reloadT:0, reloadMax:2.2, fireCd:0,
   alarm:0, lastShotT:-99, converged:false,
   hp:100, lastDmgT:-99,
+  rifle:'longshot', // persisted pick; mag/vel/reload/cool come from RIFLES
+  shots:0, hits:0, longest:0, bestChain:0, // mission debrief stats
   yaw:0, pitch:0.02, kick:0,
   scoped:false, zoom:4, maxZoom:6,
   breathHeld:false, breath:100, breathFx:0,
@@ -197,6 +224,8 @@ const G={
   distTgt:'—',
 };
 $('hBest').textContent=G.best;
+G.rifle=lsGet('longshot_rifle','longshot'); // reload the persisted pick
+if(RIFLE_ORDER.indexOf(G.rifle)<0||!rifleUnlocked(G.rifle))G.rifle='longshot'; // validate persisted pick
 
 /* ---------------- three.js setup ---------------- */
 const wrap=$('c');
@@ -641,6 +670,7 @@ class Enemy{
     this.hvt=hvt;this.alive=true;this.fall=0;
     this.speed=rand(1.3,1.8);this.walkPhase=rand(0,TAU);this.pauseT=rand(0,2);
     this.radio=0;this.headYaw=0; // idle radio-call pose + head scan state
+    this.relocT=rand(2,5);this.sprinting=false; // high-alarm relocation state
     this.shootCd=rand(1.5,3);this.strafe=rand(0,TAU);
     const g=this.group=new THREE.Group();
     const uni=hvt?0xa32424:0x4c5530,skin=0xc9a07a;
@@ -718,13 +748,20 @@ class Enemy{
       if(distP<90){this.shootCd-=dt;
         if(this.shootCd<=0){this.shootCd=rand(1.8,3.4);enemyShoot(this);}}
     }else{
-      if(this.pauseT>0){this.pauseT-=dt;g.rotation.y+=Math.sin(G.swayT*0.7+this.walkPhase)*dt*0.4;
+      if(this.hvt&&!this.isDriver&&G.alarm>50){ // hot zone : foot-HVTs bolt to fresh cover every few seconds
+        this.relocT-=dt;
+        if(this.relocT<=0){this.relocT=rand(3,5);
+          const nx=clamp(g.position.x+rand(-25,25),-45,45);
+          const nz=clamp(g.position.z+rand(-25,25),-CAMP_D-50,-CAMP_D+50);
+          this.wps.unshift([nx,nz]);this.wpi=0;this.sprinting=true;this.pauseT=0;}}
+      if(this.pauseT>0&&!this.sprinting){this.pauseT-=dt;g.rotation.y+=Math.sin(G.swayT*0.7+this.walkPhase)*dt*0.4;
         if(this.radio<=0&&Math.random()<dt*0.25)this.radio=rand(2,3.5);} // sometimes raises a hand to the ear
       else{
         const w=this.wps[this.wpi],wx=w[0]-g.position.x,wz=w[1]-g.position.z,wd=Math.hypot(wx,wz);
-        if(wd<2){this.wpi=(this.wpi+1)%this.wps.length;if(Math.random()<0.45)this.pauseT=rand(1,3);}
+        if(wd<2){this.wpi=(this.wpi+1)%this.wps.length;this.sprinting=false;if(Math.random()<0.45)this.pauseT=rand(1,3);}
         else{mvx=wx/wd;mvz=wz/wd;moving=true;
-          g.position.x+=mvx*this.speed*dt;g.position.z+=mvz*this.speed*dt;
+          const sp=this.sprinting?this.speed*2.2:this.speed;
+          g.position.x+=mvx*sp*dt;g.position.z+=mvz*sp*dt;
           g.position.y=groundH(g.position.x,g.position.z);
           g.rotation.y=Math.atan2(mvx,mvz);}
       }
@@ -751,16 +788,90 @@ class Enemy{
   }
 }
 function spawnEnemies(cfg){
-  enemies.forEach(e=>scene.remove(e.group));enemies.length=0;
+  enemies.forEach(e=>{if(e!==driver)scene.remove(e.group);});enemies.length=0;
   const spots=[];
-  for(let i=0;i<cfg.hvts;i++){const a=rand(0,TAU),r=rand(6,22);
+  for(let i=0;i<Math.max(1,cfg.hvts-1);i++){const a=rand(0,TAU),r=rand(6,22);
     spots.push([rand(-20,20)+Math.cos(a)*r,-CAMP_D+Math.sin(a)*r*0.7,true]);}
   for(let i=0;i<cfg.guards;i++){const a=rand(0,TAU),r=rand(24,60);
     spots.push([Math.cos(a)*r*0.8,-CAMP_D+Math.sin(a)*r*0.75,false]);}
   spots.forEach(s=>enemies.push(new Enemy(s[0],s[1],s[2])));
+  resetTruck();            // the truck's driver takes the last HVT slot
+  enemies.push(driver);
   G.hvtTotal=cfg.hvts;
 }
 function hvtsAlive(){let n=0;for(const e of enemies)if(e.alive&&e.hvt)n++;return n;}
+
+/* ---------------- patrol truck : the driver is an HVT ----------------
+   The truck loops an ellipse around the camp (~12 m/s, slowing to ~6 near
+   the camp heart). Its driver counts as one of the mission's HVTs. Kill the
+   driver and the truck rolls to a stop over ~3s; clip the truck body and you
+   just get sparks, a tink and a small alarm bump. The driver group is
+   scene-level and synced to the cab each frame, so distance/toast/killcam
+   code all sees world coordinates. */
+const truck={group:null,wheels:[],a:0,speed:12,active:false,dead:false};
+const driver={group:null,alive:true,hvt:true,isDriver:true,marker:null,
+  update(dt){}, // truckUpdate drives it; never patrols or converges
+  chest(){const v=new THREE.Vector3();this.group.getWorldPosition(v);v.y+=0.2;return v;},
+  die(dir){if(!this.alive)return;this.alive=false;
+    this.group.rotation.x=0.85; // slump forward over the wheel
+    if(this.marker)this.marker.visible=false;
+    truck.dead=true;toast('DRIVER DOWN — TRUCK STOPPING');}
+};
+const _tk=new THREE.Vector3();
+function buildTruck(){
+  const g=truck.group=new THREE.Group();
+  const bodyM=new THREE.MeshLambertMaterial({color:0x4a5238});
+  const darkM=new THREE.MeshLambertMaterial({color:0x22241c});
+  const glassM=new THREE.MeshPhongMaterial({color:0x101820,shininess:120,specular:0x8899aa});
+  const bx=(w,h,d,m,x,y,z)=>{const q=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);q.position.set(x,y,z);q.castShadow=true;g.add(q);return q;};
+  bx(2.2,0.5,4.6,bodyM,0,0.85,0);            // chassis / bed base
+  bx(2.2,1.5,1.9,darkM,0,1.75,1.25);         // cab
+  bx(1.9,0.7,0.12,glassM,0,2.05,2.22);       // windshield
+  bx(2.2,0.9,2.3,bodyM,0,1.55,-1.05);        // bed walls
+  const wg=new THREE.CylinderGeometry(0.55,0.55,0.4,10);
+  const wm=new THREE.MeshLambertMaterial({color:0x1a1a1a});
+  for(const pair of[[-1.15,1.5],[1.15,1.5],[-1.15,-1.4],[1.15,-1.4]]){
+    const w=new THREE.Mesh(wg,wm);w.rotation.z=Math.PI/2;w.position.set(pair[0],0.55,pair[1]);
+    w.castShadow=true;g.add(w);truck.wheels.push(w);}
+  /* driver : seated red-uniform HVT in the cab */
+  const dg=driver.group=new THREE.Group();
+  const uni=new THREE.MeshLambertMaterial({color:0xa32424});
+  const skin=new THREE.MeshLambertMaterial({color:0xc9a07a});
+  const torso=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.6,0.3),uni);torso.castShadow=true;dg.add(torso);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(0.24,0.26,0.24),skin);head.position.set(0,0.45,0);dg.add(head);
+  const beret=new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.17,0.08,8),new THREE.MeshLambertMaterial({color:0xff2222}));
+  beret.position.set(0.04,0.6,0);dg.add(beret);
+  for(const sx of[-1,1]){const arm=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.12,0.4),uni);
+    arm.position.set(sx*0.3,-0.05,0.3);dg.add(arm);}
+  const mk=new THREE.Sprite(new THREE.SpriteMaterial({map:markerTex,transparent:true,depthWrite:false}));
+  mk.scale.set(1.6,1.6,1);mk.position.y=1.3;dg.add(mk);driver.marker=mk;
+  scene.add(dg);
+  scene.add(g);
+}
+function resetTruck(){
+  truck.a=rand(0,TAU);truck.speed=12;truck.dead=false;truck.active=true;
+  driver.alive=true;driver.group.rotation.x=0;driver.group.visible=true;
+  if(driver.marker)driver.marker.visible=true;
+  truckUpdate(0);
+}
+function truckUpdate(dt){
+  if(!truck.active||!truck.group)return;
+  if(truck.dead)truck.speed=Math.max(0,truck.speed-4*dt); // rolls to a stop over ~3s
+  else{ // slow near the camp heart, cruise elsewhere
+    const dd=Math.hypot(truck.group.position.x,truck.group.position.z+CAMP_D-25);
+    truck.speed=6+6*sstep(15,40,dd);
+  }
+  const px=truck.group.position.x,pz=truck.group.position.z;
+  truck.a+=truck.speed*dt/45;
+  const x=Math.cos(truck.a)*55,z=-CAMP_D+Math.sin(truck.a)*32;
+  truck.group.position.set(x,groundH(x,z)+0.15,z);
+  if(Math.abs(x-px)+Math.abs(z-pz)>0.0001)truck.group.rotation.y=Math.atan2(x-px,z-pz);
+  for(const w of truck.wheels)w.rotation.x+=truck.speed*dt/0.55;
+  truck.group.updateMatrixWorld(true); // sync the scene-level driver group to the cab seat
+  _tk.set(0.35,2.05,1.35).applyMatrix4(truck.group.matrixWorld);
+  driver.group.position.copy(_tk);
+  driver.group.rotation.y=truck.group.rotation.y;
+}
 
 /* ---------------- player projectiles ---------------- */
 const bullets=[],tracers=[],puffs=[];
@@ -771,13 +882,14 @@ function fireBullet(){
   if(KC.active)endKillcam(); // firing mid-killcam : snap the camera home, then shoot
   if(G.ammo<=0){sEmpty();toast('RELOAD — PRESS RELD');return;}
   if(G.reloading||G.fireCd>0||G.state!=='play')return;
-  G.ammo--;G.fireCd=1.1;G.lastShotT=G.swayT;
+  G.ammo--;G.shots++;G.fireCd=RIFLES[G.rifle].cool;G.lastShotT=G.swayT;
   const dir=new THREE.Vector3();camera.getWorldDirection(dir);
   const m=new THREE.Mesh(bulletGeo,bulletMat);
   m.position.copy(camera.position).addScaledVector(dir,1.2);
   m.lookAt(_tv.copy(m.position).add(dir));
   scene.add(m);
-  bullets.push({m,vx:dir.x*800,vy:dir.y*800,vz:dir.z*800,life:5}); // 800 m/s — real rifle ballistics
+  const vel=RIFLES[G.rifle].vel;
+  bullets.push({m,sp:vel,vx:dir.x*vel,vy:dir.y*vel,vz:dir.z*vel,life:5}); // per-rifle muzzle velocity
   G.kick=1;G.shake=0.55;G.flashT=0.14;G.alarm=Math.min(100,G.alarm+10);
   flashSprite.material.rotation=rand(0,TAU);
   const bl=$('bloom');bl.style.transition='none';bl.style.opacity=0.85;
@@ -789,8 +901,8 @@ function fireBullet(){
 function bulletUpdate(dt){
   const wvx=Math.sin(G.windDir)*G.windSpd,wvz=Math.cos(G.windDir)*G.windSpd;
   for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];
-    const steps=Math.max(1,Math.ceil(800*dt/1.5));const sdt=dt/steps;
-    let hit=null,ground=false;
+    const steps=Math.max(1,Math.ceil(b.sp*dt/1.5));const sdt=dt/steps;
+    let hit=null,ground=false,thit=false;
     for(let s=0;s<steps;s++){
       b.vy-=9.8*sdt;b.vx+=wvx*1.6*sdt;b.vz+=wvz*1.6*sdt; // real gravity 9.8 m/s^2 — hold over with the mil-dots
       b.m.position.x+=b.vx*sdt;b.m.position.y+=b.vy*sdt;b.m.position.z+=b.vz*sdt;
@@ -799,11 +911,18 @@ function bulletUpdate(dt){
         const c=e.chest(),dx=p.x-c.x,dy=p.y-c.y,dz=p.z-c.z;
         if(dx*dx+dy*dy+dz*dz<1.1){hit=e;break;}}
       if(hit)break;
+      if(truck.active&&truck.group){_tv.copy(p);truck.group.worldToLocal(_tv); // truck body (driver sphere already checked above)
+        if(Math.abs(_tv.x)<1.25&&_tv.y>0.2&&_tv.y<2.6&&Math.abs(_tv.z)<2.5){thit=true;break;}}
       if(p.y<groundH(p.x,p.z)-0.2){ground=true;break;}
     }
     b.life-=dt;
     _td.set(b.vx,b.vy,b.vz);b.m.lookAt(_tv.copy(b.m.position).add(_td));
     if(hit){killEnemy(hit,_td.normalize());scene.remove(b.m);bullets.splice(i,1);}
+    else if(thit){ // clipped the patrol truck : spark burst + tink, small alarm bump, no kill
+      spawnBurst(b.m.position,{color:0xffb13c,n:8,sp0:3,sp1:7,up0:2,up1:5,life:0.45,grav:13,add:1});
+      sTone(rand(2100,2600),0.06,'square',0.05);
+      G.alarm=Math.min(100,G.alarm+3);toast('TRUCK HIT — DRIVER STILL UP');
+      scene.remove(b.m);bullets.splice(i,1);}
     else if(ground||b.life<=0){
       if(ground){impactPuff(b.m.position);G.alarm=Math.min(100,G.alarm+8);}
       scene.remove(b.m);bullets.splice(i,1);}
@@ -1068,6 +1187,7 @@ function updateHUD(){
   const di=Math.round((((G.windDir*180/Math.PI)%360+360)%360)/45)%8;
   $('hWind').textContent=COMPASS[di]+' '+G.windSpd.toFixed(1)+'m/s';
   $('hZoom').textContent=G.scoped?G.zoom.toFixed(1)+'x':'—';
+  $('hRifle').textContent=RIFLES[G.rifle].name;
   $('hAmmo').textContent=G.reloading?'·····':(G.ammo>0?'I'.repeat(G.ammo):'EMPTY');
   $('hAlarm').textContent=Math.round(G.alarm)+'%';
   $('alarmFill').style.transform='scaleX('+(G.alarm/100)+')';
@@ -1173,6 +1293,7 @@ function killEnemy(e,dir){
   const now=G.swayT;
   G.chain=(now-G.lastKillT<8)?G.chain+1:1;G.lastKillT=now;
   const dist=camera.position.distanceTo(e.group.position);
+  G.hits++;if(dist>G.longest)G.longest=dist;if(G.chain>G.bestChain)G.bestChain=G.chain;
   const pts=Math.round((100+dist*0.6)*G.chain);
   G.score+=pts;
   G.alarm=Math.min(100,G.alarm+6);
@@ -1186,15 +1307,40 @@ function killEnemy(e,dir){
   if(hvtsAlive()===0&&G.state==='play')setTimeout(()=>{if(G.state==='play')missionComplete();},1500);
 }
 function startReload(){
-  if(G.reloading||G.ammo===5||G.state!=='play')return;
-  G.reloading=true;G.reloadT=2.2;sReload();toast('RELOADING…');updateHUD();
+  const r=RIFLES[G.rifle];
+  if(G.reloading||G.ammo===r.mag||G.state!=='play')return;
+  G.reloading=true;G.reloadT=r.reload;G.reloadMax=r.reload;sReload();toast('RELOADING…');updateHUD();
 }
 function missionCfg(n){return{hvts:Math.min(2+n,6),guards:4+2*n,wind:1.1+0.85*n,maxZoom:Math.min(9+n,16)};}
+function rifleCardHTML(){
+  return '<div class="riflebox"><div class="rrow"><button class="mbtn" id="rifPrev">&#9664;</button>'+
+    '<div class="rinfo"><b id="rifName"></b><span id="rifStats"></span></div>'+
+    '<button class="mbtn" id="rifNext">&#9654;</button></div>'+
+    '<div class="rlocks" id="rifLocks"></div></div>';
+}
+function renderRiflePicker(){
+  const r=RIFLES[selRifle];
+  $('rifName').textContent=r.name;
+  $('rifStats').textContent=r.desc+' MAG '+r.mag+' · '+r.vel+' m/s · '+r.reload+'s reload · '+r.cool+'s cycle';
+  $('rifLocks').innerHTML=RIFLE_ORDER.map(k=>{
+    const rr=RIFLES[k];
+    if(rr.unlock&&!rifleUnlocked(k))return '<div>LOCKED — '+rr.name+' (COMPLETE MISSION '+rr.unlock+')</div>';
+    return '<div style="color:#8fd68f">'+rr.name+(k===selRifle?' — SELECTED':'')+'</div>';
+  }).join('');
+}
+function cycleRifle(d){
+  const un=RIFLE_ORDER.filter(rifleUnlocked);
+  let i=un.indexOf(selRifle);if(i<0)i=0;
+  selRifle=un[(i+d+un.length)%un.length];
+  sClick();renderRiflePicker();
+}
 function startMission(n){
   endKillcam();
   G.mission=n;const cfg=missionCfg(n);
-  G.ammo=5;G.reloading=false;G.alarm=0;G.converged=false;G.hp=100;G.fireCd=0;
-  G.chain=0;G.kills=0;G.px=0;G.pz=24;G.yaw=0;G.pitch=0.02;G.breath=100;G.breathFx=0;
+  const rifle=RIFLES[G.rifle];
+  G.ammo=rifle.mag;G.reloading=false;G.reloadMax=rifle.reload;G.alarm=0;G.converged=false;G.hp=100;G.fireCd=0;
+  G.chain=0;G.kills=0;G.shots=0;G.hits=0;G.longest=0;G.bestChain=0;
+  G.px=0;G.pz=24;G.yaw=0;G.pitch=0.02;G.breath=100;G.breathFx=0;
   G.maxZoom=cfg.maxZoom;G.zoom=Math.min(8,cfg.maxZoom);
   const zs=$('zoomSlider');zs.max=cfg.maxZoom;zs.value=G.zoom;
   G.windDir=rand(0,TAU);G.windBase=cfg.wind;G.windT=0;G.windSpd=cfg.wind*rand(0.85,1.15);
@@ -1203,20 +1349,32 @@ function startMission(n){
   setScoped(false);
   spawnEnemies(cfg);
   G.state='menu';
+  selRifle=G.rifle;
   showCard('<h1>MISSION '+n+'</h1><h2>ELIMINATE ALL RED HVTs</h2>'+
-    '<p>'+cfg.hvts+' high-value targets, ~340m out in the valley outpost — guards patrol the camp.<br>'+
-    'Real ballistics: the bullet drops for real — hold over with the mil-dots and lead for wind. 5 rounds per mag.<br>'+
+    '<p>'+cfg.hvts+' high-value targets, ~340m out in the valley outpost — guards patrol the camp, and one HVT drives the patrol truck.<br>'+
+    'Real ballistics: the bullet drops for real — hold over with the mil-dots and lead for wind. '+rifle.mag+' rounds per mag.<br>'+
     'If the ALARM hits 100%, the patrols will come for you.</p>'+
+    rifleCardHTML()+
     '<div class="tap">TAP TO START</div>');
+  renderRiflePicker();
+  $('rifPrev').addEventListener('click',e=>{e.stopPropagation();cycleRifle(-1);});
+  $('rifNext').addEventListener('click',e=>{e.stopPropagation();cycleRifle(1);});
   updateHUD();
 }
 function missionComplete(){
   endKillcam();
   G.state='win';setScoped(false);
   if(G.score>G.best){G.best=G.score;localStorage.setItem('longshot_best',G.best);}
+  lsSet('longshot_rifles',Math.max(rifleMaxMission(),G.mission)); // unlock progress
+  const acc=G.shots>0?Math.round(G.hits/G.shots*100)+'%':'—';
   showCard('<h1>MISSION '+G.mission+' COMPLETE</h1>'+
     '<p>SCORE <b>'+G.score+'</b> &nbsp; BEST <b>'+G.best+'</b><br>'+
     'Next: more guards, stronger wind, stronger scope.</p>'+
+    '<div class="debrief">'+
+    '<div><span>ACCURACY</span><b>'+acc+'</b></div>'+
+    '<div><span>LONGEST KILL</span><b>'+Math.round(G.longest)+'m</b></div>'+
+    '<div><span>BEST CHAIN</span><b>x'+G.bestChain+'</b></div>'+
+    '</div>'+
     '<div class="row"><button class="mbtn" id="nextBtn">MISSION '+(G.mission+1)+' &rarr;</button></div>');
   $('nextBtn').addEventListener('click',e=>{e.stopPropagation();startMission(G.mission+1);});
   updateHUD();
@@ -1231,7 +1389,8 @@ function missionFail(){
 }
 $('card').addEventListener('click',()=>{
   if(G.state!=='menu')return;
-  hideCard();G.state='play';audio();sClick();
+  G.rifle=selRifle;lsSet('longshot_rifle',selRifle); // lock in the card pick for this mission
+  hideCard();G.state='play';audio();sClick();updateHUD();
   if(!isTouch){try{renderer.domElement.requestPointerLock();}catch(e){}}
 });
 
@@ -1269,9 +1428,10 @@ function frame(now){
     if(G.alarm>=100&&!G.converged){G.converged=true;toast('ALARM 100% — PATROLS CONVERGING');}
     if(G.hp>0&&G.hp<100&&t-G.lastDmgT>5)G.hp=Math.min(100,G.hp+2*gdt);
     if(G.fireCd>0)G.fireCd-=gdt;
-    if(G.reloading){G.reloadT-=gdt;if(G.reloadT<=0){G.reloading=false;G.ammo=5;updateHUD();}}
+    if(G.reloading){G.reloadT-=gdt;if(G.reloadT<=0){G.reloading=false;G.ammo=RIFLES[G.rifle].mag;updateHUD();}}
     G.windT+=gdt;G.windSpd=Math.max(0.5,G.windBase*(1+0.28*Math.sin(G.windT*0.35)));
     for(const e of enemies)e.update(gdt);
+    truckUpdate(gdt);
     bulletUpdate(gdt);tracerUpdate(gdt);
     if(((frame._hf=(frame._hf||0)+1)%10)===0)updateHUD();
   }
@@ -1299,7 +1459,7 @@ function frame(now){
   rifle.position.set(Math.sin(t*1.1)*0.004,-Math.abs(Math.sin(t*1.1))*0.003,-G.kick*0.16);
   rifle.rotation.x=Math.sin(G.kick*Math.PI)*0.06;
   if(G.reloading){ // bolt-action reload animation on the viewmodel
-    const ph=clamp(1-G.reloadT/2.2,0,1);
+    const ph=clamp(1-G.reloadT/G.reloadMax,0,1);
     const pull=Math.sin(clamp(ph/0.55,0,1)*Math.PI);
     rifle.userData.bolt.position.z=-0.72+pull*0.14;
     rifle.rotation.z=Math.sin(ph*Math.PI)*0.14;
@@ -1340,6 +1500,7 @@ function frame(now){
 function onResize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();sizeReticle();}
 window.addEventListener('resize',onResize);
 window.addEventListener('orientationchange',()=>setTimeout(onResize,250));
+buildTruck();
 startMission(1);
 requestAnimationFrame(frame);
 </script>
