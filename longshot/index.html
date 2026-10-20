@@ -45,6 +45,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 #zoomSlider{-webkit-appearance:none;appearance:none;width:110px;height:6px;border-radius:3px;background:rgba(200,220,200,.35);outline:none}
 #zoomSlider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#dfeee0;border:2px solid #5a7a5a}
 #zoomSlider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#dfeee0;border:2px solid #5a7a5a}
+/* ---------- pass-4 HUD systems : chain readout, ghost tick, score pops, low-HP, panel fade ---------- */
+#hud{transition:opacity .6s ease}
+.meter{position:relative}
+.meter .gtick{position:absolute;left:25%;top:-1px;bottom:-1px;width:2px;margin-left:-1px;background:rgba(255,233,168,.9);box-shadow:0 0 4px rgba(255,220,150,.8);z-index:2}
+#hChainWrap{display:none;align-items:center;gap:6px}
+.hchain{font-size:12px;color:#ffe9a8;font-weight:800;letter-spacing:1px}
+.chainbar{display:block;width:44px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden}
+.chainbar>i{display:block;height:100%;width:100%;background:#ffe9a8;border-radius:2px}
+#scorePop{position:fixed;left:50%;top:34%;transform:translateX(-50%);z-index:36;pointer-events:none;text-align:center;font-size:26px;font-weight:800;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.8);opacity:0;letter-spacing:1px}
+#scorePop span{display:block;font-size:11px;letter-spacing:3px;color:#ffb0a0;margin-top:3px}
+#scorePop span.qs{color:#ffe9a8}
+#scorePop.show{animation:spop .9s ease-out forwards}
+@keyframes spop{0%{opacity:0;transform:translate(-50%,14px) scale(.8)}18%{opacity:1;transform:translate(-50%,0) scale(1.08)}30%{transform:translate(-50%,-4px) scale(1)}100%{opacity:0;transform:translate(-50%,-52px) scale(1)}}
+.meter.lowhp>i{animation:lowhp .75s ease-in-out infinite}
+@keyframes lowhp{0%,100%{opacity:1}50%{opacity:.3}}
 /* ---------- touch buttons : CODM cluster ---------- */
 .hbtn{position:fixed;z-index:50;border-radius:50%;background:rgba(12,16,12,.55);border:2px solid rgba(190,230,190,.42);color:#e8f3e4;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:1px;font-family:inherit}
 .hbtn:active,.hbtn.on{background:rgba(70,140,70,.62);transform:scale(.93)}
@@ -118,7 +133,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 
 <div id="hud">
   <div class="hrow">
-    <span class="hlab">SCORE</span><b id="hScore" class="hscore">0</b>
+    <span class="hlab">SCORE</span><b id="hScore" class="hscore">0</b><span id="hChainWrap"><b id="hChain" class="hchain"></b><span class="chainbar"><i id="hChainFill"></i></span></span>
     <span class="hbest">BEST <b id="hBest">0</b></span>
   </div>
   <div class="hrow">
@@ -130,11 +145,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
     <span class="hstat"><span class="hlab">SABOTAGE</span><b id="hSab" class="hval">0/0</b></span>
     <b id="hGhost" class="ghostchip"></b>
   </div>
-  <div class="hrow hmeter"><span class="hlab">ALARM</span><span class="meter"><i id="alarmFill" style="background:#e8b23a;transform:scaleX(0)"></i></span><b id="hAlarm" class="hmeterval">0%</b></div>
+  <div class="hrow hmeter"><span class="hlab">ALARM</span><span class="meter"><i id="alarmFill" style="background:#e8b23a;transform:scaleX(0)"></i><i class="gtick"></i></span><b id="hAlarm" class="hmeterval">0%</b></div>
   <div class="hrow hmeter"><span class="hlab">HP</span><span class="meter"><i id="hpFill" style="background:#6fd67f;transform:scaleX(1)"></i></span><span class="hmeterval"></span></div>
 </div>
 <div id="windChip">
-  <span class="hstat"><span class="hlab">WIND</span><b id="hWind" class="hval">—</b></span>
+  <span class="hstat"><span class="hlab">WIND</span><b id="hWind" class="hval">—</b><b id="hWindArr" class="hval" style="color:#ffe9a8"></b></span>
   <span class="hstat"><span class="hlab">ZOOM</span><b id="hZoom" class="hval">—</b></span>
 </div>
 <div id="ammoChip">
@@ -160,6 +175,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 <div class="cine" id="ctop"></div>
 <div class="cine" id="cbot"></div>
 <div id="toast"></div>
+<div id="scorePop"></div>
 <div id="setBtn">&#9881;</div>
 
 <div id="card"><div class="panel" id="cardPanel"></div></div>
@@ -303,6 +319,8 @@ const G={
   night:false,                // night-ops lighting preset
   menuBlend:0,                // menu cinematic drift blend 0..1
   aimVel:0,                   // smoothed aim speed (counter-snipers lead a moving target)
+  reposAcc:0, reposFX:0, reposFZ:24, lostX:0, lostZ:24, contactLostT:-99, // reposition-breaks-contact : unscopped travel since scope-in, last-known spot, lose-tail expiry
+  scopeT:-99,                 // last scope-in time (quickscope window)
   lastMoveT:-99,              // last time the player repositioned (counter-sniper accuracy)
   distTgt:'—',
 };
@@ -938,16 +956,20 @@ class Enemy{
     if(G.converged){
       /* fan-out : each guard approaches on a personal bearing (convA) and holds
          at a personal range (convR, 60–110m) instead of bunching on one line */
-      const toA=Math.atan2(dx,dz)+this.convA;
-      if(distP>this.convR){mvx=Math.sin(toA);mvz=Math.cos(toA);moving=true;}
+      const lost=G.swayT<G.contactLostT; // CONTACT BROKEN : they hunt the last-known spot, guns quiet
+      const tx=lost?G.lostX:px,tz=lost?G.lostZ:pz;
+      const tdx=tx-g.position.x,tdz=tz-g.position.z,tdist=Math.hypot(tdx,tdz);
+      const toA=Math.atan2(tdx,tdz)+this.convA;
+      if(tdist>this.convR){mvx=Math.sin(toA);mvz=Math.cos(toA);moving=true;}
       else{this.strafe+=dt*0.5;mvx=Math.cos(this.strafe)*0.4;mvz=Math.sin(this.strafe)*0.4;moving=true;}
       const sp=3.4;
       g.position.x+=mvx*sp*dt;g.position.z+=mvz*sp*dt;
       g.position.y=groundH(g.position.x,g.position.z);
-      g.rotation.y=Math.atan2(dx,dz);
-      if(this.burst>0){this.burstT-=dt; // mid-burst : feed the next rounds of the 3-round burst
+      g.rotation.y=Math.atan2(tdx,tdz);
+      if(lost){/* fire cooldowns frozen — they shoot at a ghost */}
+      else if(this.burst>0){this.burstT-=dt; // mid-burst : feed the next rounds of the 3-round burst
         if(this.burstT<=0){this.burstT=0.16;this.burst--;fireEnemyRound(this);}}
-      else if(distP<this.convR+30){this.shootCd-=dt;
+      else if(tdist<this.convR+30){this.shootCd-=dt;
         if(this.shootCd<=0){this.shootCd=rand(2.2,4);enemyShoot(this);}}
     }else{
       /* BODY DISCOVERY : a patrolling guard that passes within ~12m of an
@@ -1349,7 +1371,7 @@ function sBoom(){const ac=audio();if(!ac)return;const t=ac.currentTime;
 function explodeSab(tg){
   if(!tg.alive)return;
   tg.alive=false;tg.group.visible=false;tg.marker.visible=false;
-  G.sabDone++;G.score+=50;G.missionScore+=50;
+  G.sabDone++;G.score+=50;G.missionScore+=50;scorePop(50,false,false);
   G.alarm=Math.min(100,G.alarm+25);
   sBoom();boomFx(tg.pos);
   spawnBurst(tg.pos,{color:0xffa03c,n:40,sp0:2,sp1:9,up0:2,up1:9,life:1.1,grav:7,add:1});   // ember storm
@@ -1696,7 +1718,9 @@ function setScoped(on){
   if(on&&G.state!=='play')return;
   G.scoped=on;
   if(on&&joyId!==null){joyId=null;knob.style.transform='';} // scope-in cancels any live joystick drag
+  if(on){G.scopeT=G.swayT;G.reposAcc=0;} // QUICKSCOPE window starts now ; reposition tracker resets on scoping in
   joyEl.classList.toggle('locked',on); // dim the stick while scoped : visual "locked out" cue
+  setScopeRim(0); // stale warning rim must never survive a scope toggle
   scopeEl.style.display=on?'block':'none';
   $('zoomWrap').style.display=on?'flex':'none';
   $('hud').style.display=on?'none':'flex';
@@ -1747,6 +1771,25 @@ function drawReticle(){
 let toastTm=null;
 function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';
   clearTimeout(toastTm);toastTm=setTimeout(()=>t.style.display='none',1600);}
+/* SCORE POPUPS : one pooled element near screen center, floats up and fades.
+   Restart the CSS animation by re-adding the class. Kills only (sabotage uses toast). */
+function scorePop(pts,hs,quick){
+  const el=$('scorePop');
+  el.innerHTML='+'+pts+(hs?'<span>HEADSHOT</span>':'')+(quick?'<span class="qs">QUICKSCOPE +25</span>':'');
+  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+}
+/* SNIPER WARNING RIM : a red ring around the scope circle while a counter-sniper
+   is mid-aim, intensifying with his aim progress. Drawn as an extra gradient layer
+   on #scope; clearing the inline style restores the CSS original. */
+let _rimV=0;
+function setScopeRim(p){
+  p=clamp(p,0,1);
+  if(Math.abs(p-_rimV)<0.03)return;
+  _rimV=p;
+  if(p<=0.01){scopeEl.style.background='';return;}
+  const a=(0.25+0.65*p).toFixed(3);
+  scopeEl.style.background='radial-gradient(circle 37vmin at 50% 50%, rgba(255,40,25,0) 35.4vmin, rgba(255,40,25,'+a+') 37vmin, rgba(255,40,25,0) 38.4vmin), radial-gradient(circle 37vmin at 50% 50%, rgba(0,0,0,0) 0, rgba(0,0,0,0) 37vmin, rgba(0,0,0,.985) 37.6vmin, #000 38.2vmin)';
+}
 const COMPASS=['N','NE','E','SE','S','SW','W','NW'];
 function updateHUD(){
   $('hScore').textContent=G.score;$('hBest').textContent=G.best;
@@ -1755,6 +1798,10 @@ function updateHUD(){
   $('hKills').textContent=G.kills;
   const di=Math.round((((G.windDir*180/Math.PI)%360+360)%360)/45)%8;
   $('hWind').textContent=COMPASS[di]+' '+G.windSpd.toFixed(1)+'m/s';
+  /* wind drift arrow : which way the wind pushes the bullet relative to the
+     player's facing — lateral component = spd * sin(windDir - yaw) */
+  const wfrac=Math.sin(G.windDir-G.yaw);
+  $('hWindArr').textContent=G.windSpd>0.5?(wfrac>0.35?'→':(wfrac<-0.35?'←':'·')):'';
   $('hZoom').textContent=G.scoped?G.zoom.toFixed(1)+'x':'—';
   $('hRifle').textContent=RIFLES[G.rifle].name;
   $('hAmmo').textContent=G.reloading?'·····':(G.ammo>0?'I'.repeat(G.ammo):'EMPTY');
@@ -1762,9 +1809,15 @@ function updateHUD(){
   $('hSab').textContent=G.sabDone+'/'+G.sabTotal;
   $('hGhost').textContent=(G.state==='play'&&G.alarm<25)?'· GHOST ELIGIBLE':'';
   $('alarmFill').style.transform='scaleX('+(G.alarm/100)+')';
-  $('alarmFill').style.background=G.alarm>=100?'#e83a2a':(G.alarm>60?'#e87a2a':'#e8b23a');
+  $('alarmFill').style.background=G.alarm>=100?'#e83a2a':(G.alarm>60?'#e87a2a':(G.alarm>=25?'#e8b23a':'#6fd67f')); // green inside the ghost budget, amber past the tick, orange/red when hot
   $('hpFill').style.transform='scaleX('+(G.hp/100)+')';
-  $('hpFill').style.background=G.hp>50?'#6fd67f':(G.hp>25?'#e8b23a':'#e83a2a');
+  $('hpFill').style.background=G.hp>50?'#6fd67f':(G.hp>=30?'#e8b23a':'#e83a2a');
+  $('hpFill').parentNode.classList.toggle('lowhp',G.hp<30&&G.hp>0); // LOW-HP STATE : red pulse under 30%
+  $('hChain').textContent=G.chain>1?('×'+G.chain+' CHAIN'):''; // chain readout : bar + visibility are frame-driven
+  /* CONTEXTUAL HUD FADE : remember when any displayed value last changed —
+     the frame loop fades the panel out after 4 quiet seconds in play */
+  const sig=G.score+'|'+Math.round(G.alarm)+'|'+Math.round(G.hp)+'|'+G.ammo+'|'+G.kills;
+  if(sig!==updateHUD._sig){updateHUD._sig=sig;updateHUD._chgT=performance.now()/1000;}
 }
 function showCard(html){$('cardPanel').innerHTML=html;$('card').style.display='flex';}
 function hideCard(){$('card').style.display='none';}
@@ -1873,8 +1926,11 @@ function killEnemy(e,dir,cam,hshot){
   G.chain=(now-G.lastKillT<8)?G.chain+1:1;G.lastKillT=now;
   const dist=camera.position.distanceTo(e.group.position);
   G.hits++;if(dist>G.longest)G.longest=dist;if(G.chain>G.bestChain)G.bestChain=G.chain;
-  const pts=e.sniper?150:Math.round((100+dist*0.6)*G.chain); // counter-snipers pay a flat 150 bounty
+  const pts0=e.sniper?150:Math.round((100+dist*0.6)*G.chain); // counter-snipers pay a flat 150 bounty
+  const quick=!!(cam&&G.scoped&&(now-G.scopeT)<1.2); // QUICKSCOPE : kill within 1.2s of scoping in, +25
+  const pts=pts0+(quick?25:0);
   G.score+=pts;G.missionScore+=pts;
+  scorePop(pts,hshot,quick);
   G.alarm=Math.min(100,G.alarm+6);
   for(const o of enemies){ // witnessed kill : anyone close and facing the drop bolts for cover
     if(o===e||!o.alive||o.sniper||o.isDriver)continue;
@@ -1897,7 +1953,8 @@ function killEnemy(e,dir,cam,hshot){
 function startReload(){
   const r=RIFLES[G.rifle];
   if(G.reloading||G.ammo===r.mag||G.state!=='play')return;
-  G.reloading=true;G.reloadT=r.reload;G.reloadMax=r.reload;sReload();toast('RELOADING…');updateHUD();
+  const dur=G.ammo>0?r.reload*0.7:r.reload; // TACTICAL RELOAD : rounds still in the mag — mag swap only, ~30% faster than a dry full cycle
+  G.reloading=true;G.reloadT=dur;G.reloadMax=dur;sReload();toast(G.ammo>0?'TAC RELOAD…':'RELOADING…');updateHUD();
 }
 function missionCfg(n){return{hvts:Math.min(2+n,6),guards:4+2*n,wind:1.1+0.85*n,maxZoom:Math.min(9+n,16),
   snipers:n>=4?2:(n>=2?1:0),sabTanks:Math.min(2+n,5)};}
@@ -2061,24 +2118,49 @@ function frame(now){
     $('alarmFill').parentNode.classList.toggle('decaying',decaying);
     if((hitMax||G.alarm>=100)&&!G.converged){G.converged=true;toast('ALARM 100% — PATROLS CONVERGING');}
     if(G.alarm>G.peakAlarm)G.peakAlarm=G.alarm; // ghost-bonus tracking
-    if(G.px!==frame._lpx||G.pz!==frame._lpz){G.lastMoveT=t;frame._lpx=G.px;frame._lpz=G.pz;} // movement (sniper accuracy)
+    if(G.px!==frame._lpx||G.pz!==frame._lpz){G.lastMoveT=t; // movement (sniper accuracy)
+      if(!G.scoped){ /* REPOSITION BREAKS CONTACT : unscopped travel piles up;
+         past 4m the tail loses the player's exact position for ~3s */
+        const ox=frame._lpx||0,oz=frame._lpz!=null?frame._lpz:24;
+        if(G.reposAcc<=0){G.reposFX=ox;G.reposFZ=oz;} // the run started here — this becomes the last-known spot
+        G.reposAcc+=Math.hypot(G.px-ox,G.pz-oz);
+        if(G.reposAcc>4&&t>=G.contactLostT){
+          G.reposAcc=0;G.lostX=G.reposFX;G.lostZ=G.reposFZ;G.contactLostT=t+3;
+          for(const e of enemies)if(e.sniper&&e.alive&&e.aimPhase==='aim'){e.aimPhase='idle';e.aimT=rand(1.4,2.6);e.showLaser(false);}
+          toast('CONTACT BROKEN');}}
+      frame._lpx=G.px;frame._lpz=G.pz;}
     const av=(Math.abs(G.yaw-(frame._py||0))+Math.abs(G.pitch-(frame._pp||0)))/Math.max(0.001,rawDt); // aim speed — snipers lead a moving reticle
     G.aimVel=lerp(G.aimVel||0,Math.min(av,3),0.25);frame._py=G.yaw;frame._pp=G.pitch;
     const regen=G.hp>0&&G.hp<100&&t-G.lastDmgT>8; // out-of-combat regen : 8s untouched, then ~6%/s back to full
     if(regen)G.hp=Math.min(100,G.hp+6*gdt);
     $('hpFill').parentNode.classList.toggle('regening',regen);
+    if(G.hp<30&&G.hp>0){frame._hbT=(frame._hbT||0)-gdt; // LOW-HP HEARTBEAT : two low thumps, looping while critical
+      if(frame._hbT<=0){frame._hbT=1.05;sTone(52,0.13,'sine',0.3,-18);setTimeout(()=>sTone(48,0.11,'sine',0.2,-14),190);}}
+    { /* CHAIN READOUT : decay bar + visibility from the live 8s chain window */
+      const cfrac=G.chain>1?clamp(1-(t-G.lastKillT)/8,0,1):0;
+      const cw=$('hChainWrap');
+      if(cfrac>0){if(frame._cwd!=='flex'){cw.style.display='flex';frame._cwd='flex';}
+        const wp=Math.round(cfrac*100);
+        if(wp!==frame._cfw){$('hChainFill').style.width=wp+'%';frame._cfw=wp;}}
+      else if(frame._cwd!=='none'){cw.style.display='none';frame._cwd='none';}}
     if(G.fireCd>0)G.fireCd-=gdt;
     if(G.reloading){G.reloadT-=gdt;if(G.reloadT<=0){G.reloading=false;G.ammo=RIFLES[G.rifle].mag;updateHUD();}}
     G.windT+=gdt; // gusts : the single live wind source — HUD, ballistics, dust/grass, flag and ambient audio all read these
     G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7))); // ±40% strength, ~20s swell
     G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77); // heading wanders ±15° on the same swell
     for(const e of enemies)e.update(gdt);
+    {let ma=0;for(const e of enemies)if(e.sniper&&e.alive&&e.aimPhase==='aim')ma=Math.max(ma,1-e.aimT/1.5);
+     setScopeRim(G.scoped?ma:0);} // SNIPER WARNING RIM : hottest aim progress drives the scope rim
     truckUpdate(gdt);
     bulletUpdate(gdt);tracerUpdate(gdt);
     for(let i=chainQ.length-1;i>=0;i--){chainQ[i].t-=gdt; // chained fuel detonations
       if(chainQ[i].t<=0){const tq=chainQ[i].tg;chainQ.splice(i,1);if(tq.alive)explodeSab(tq);}}
     if(((frame._hf=(frame._hf||0)+1)%10)===0)updateHUD();
   }
+  { /* CONTEXTUAL HUD FADE : 4 quiet seconds in play and the panel drops to 45%;
+       any HUD value change (tracked in updateHUD) pops it back to full */
+    const wantFade=G.state==='play'&&updateHUD._chgT!=null&&(performance.now()/1000-updateHUD._chgT)>4;
+    if(wantFade!==frame._hudF){frame._hudF=wantFade;$('hud').style.opacity=wantFade?'0.45':'1';}}
   if(windGain)windGain.gain.value=(G.state==='play'?0.012+G.windSpd*0.007:0.008); // wind loop follows wind speed
   birdT-=dt;if(birdT<0){birdT=rand(8,20);birdChirp();}
   puffUpdate(dt);sparkUpdate(dt);shellUpdate(dt);
