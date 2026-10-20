@@ -97,6 +97,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 #hitmark.hs{width:52px;height:52px;margin:-26px 0 0 -26px}
 #hitmark.hs:before,#hitmark.hs:after{left:23px;width:6px;height:52px;background:#ff1e1e;box-shadow:0 0 9px rgba(0,0,0,.9),0 0 4px #ff1e1e}
 .meter.decaying>i{animation:aldec 1.15s ease-in-out infinite}
+.meter.regening>i{animation:hpreg 1.1s ease-in-out infinite}
+@keyframes hpreg{0%,100%{opacity:1}50%{opacity:.45}}
 @keyframes aldec{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes hpop{0%{transform:scale(.55);opacity:1}35%{transform:scale(1.3);opacity:1}100%{transform:scale(1);opacity:0}}
 #killring{position:fixed;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border:3px solid rgba(255,90,60,.95);border-radius:50%;z-index:35;pointer-events:none;opacity:0}
@@ -202,9 +204,9 @@ const isTouch=('ontouchstart'in window)||(window.matchMedia&&matchMedia('(pointe
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 const RIFLES={
-  longshot:{name:'LONGSHOT',mag:5, vel:800,reload:2.2,cool:1.1,desc:'Standard issue — balanced and reliable.'},
-  varmint:{name:'VARMINT', mag:6, vel:900,reload:1.9,cool:0.8,unlock:1,desc:'Fast cycle, flat trajectory.'},
-  thunder:{name:'THUNDER', mag:10,vel:750,reload:2.6,cool:1.3,unlock:3,desc:'Big mag, heavy arc.'},
+  longshot:{name:'LONGSHOT',mag:5, vel:800,reload:2.2,cool:1.1,zmin:8,zmax:16,pitch:1.0, stock:0x4a3b2a,desc:'Standard issue — balanced and reliable.'},
+  varmint:{name:'VARMINT', mag:6, vel:900,reload:1.9,cool:0.8,unlock:1,zmin:6,zmax:14,pitch:1.3, stock:0xb59a6a,desc:'Fast cycle, flat trajectory.'},
+  thunder:{name:'THUNDER', mag:10,vel:750,reload:2.6,cool:1.3,unlock:3,zmin:8,zmax:18,pitch:0.72,stock:0x2e4034,desc:'Big mag, heavy arc.'},
 };
 const RIFLE_ORDER=['longshot','varmint','thunder'];
 function rifleMaxMission(){return +(lsGet('longshot_rifles',0))||0;}
@@ -214,20 +216,20 @@ let selRifle='longshot'; // rifle browsed on the mission card; locked in when th
 /* ---------------- audio (tiny synth) ---------------- */
 let AC=null,_nb=null;
 function nbuf(ac){if(_nb)return _nb;const b=ac.createBuffer(1,ac.sampleRate*0.5,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;_nb=b;return b;}
-function sShot(){const ac=audio();if(!ac)return;const t=ac.currentTime;
+function sShot(pitch){const ac=audio();if(!ac)return;const t=ac.currentTime;const P=pitch||1; // per-rifle voice : VARMINT sharper, THUNDER boomier
   /* crack : bright supersonic snap layered on top */
   const cs=ac.createBufferSource();cs.buffer=nbuf(ac);
-  const cf=ac.createBiquadFilter();cf.type='highpass';cf.frequency.value=1400;
+  const cf=ac.createBiquadFilter();cf.type='highpass';cf.frequency.value=1400*P;
   const cg=ac.createGain();cg.gain.setValueAtTime(0.34,t);cg.gain.exponentialRampToValueAtTime(0.001,t+0.09);
   cs.connect(cf);cf.connect(cg);cg.connect(ac.destination);cs.start(t);cs.stop(t+0.1);
   /* body : the working noise burst */
   const s=ac.createBufferSource();s.buffer=nbuf(ac);
-  const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(3200,t);f.frequency.exponentialRampToValueAtTime(220,t+0.28);
+  const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(3200*P,t);f.frequency.exponentialRampToValueAtTime(220,t+0.28);
   const g=ac.createGain();g.gain.setValueAtTime(0.5,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.32);
   s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t);s.stop(t+0.35);
   /* low thump : chest weight under the crack */
   const bo=ac.createOscillator(),bg=ac.createGain();bo.type='sine';
-  bo.frequency.setValueAtTime(110,t);bo.frequency.exponentialRampToValueAtTime(48,t+0.16);
+  bo.frequency.setValueAtTime(110*P,t);bo.frequency.exponentialRampToValueAtTime(48*P,t+0.16);
   bg.gain.setValueAtTime(0.32,t);bg.gain.exponentialRampToValueAtTime(0.001,t+0.2);
   bo.connect(bg);bg.connect(ac.destination);bo.start(t);bo.stop(t+0.22);
   /* valley echo : one delayed, lowpassed tail at -14dB under the body */
@@ -298,6 +300,8 @@ const G={
   sabDone:0, sabTotal:0,      // sabotage objectives destroyed / active
   peakAlarm:0, missionScore:0, // ghost-bonus tracking per mission
   night:false,                // night-ops lighting preset
+  menuBlend:0,                // menu cinematic drift blend 0..1
+  aimVel:0,                   // smoothed aim speed (counter-snipers lead a moving target)
   lastMoveT:-99,              // last time the player repositioned (counter-sniper accuracy)
   distTgt:'—',
 };
@@ -797,6 +801,7 @@ const rifle=new THREE.Group();
   const bh=new THREE.Mesh(new THREE.CylinderGeometry(0.014,0.014,0.09,6),metal2);bh.rotation.z=Math.PI/2;bh.position.set(0.045,0,0);bolt.add(bh);
   const knob=new THREE.Mesh(new THREE.SphereGeometry(0.032,10,8),dark);knob.position.set(0.095,0,0);bolt.add(knob);
   rifle.userData.bolt=bolt;                        // bolt handle group
+  rifle.userData.stockMat=tan;                     // stock material — recolored per selected rifle
   rifle.userData.muzzle=new THREE.Vector3(0.27,-0.245,-2.38);
   camera.add(rifle);})();
 const muzzleFlash=new THREE.PointLight(0xffc46a,0,18,2);scene.add(muzzleFlash);
@@ -843,6 +848,8 @@ class Enemy{
     this.shootCd=rand(1.5,3);this.strafe=rand(0,TAU);
     this.convA=0;this.convR=80;this.burst=0;this.burstT=0;this.stuckT=0; // converge fan-out + return-fire burst state
     this.headshot=false;this.dieYaw=0;this.sy0=1.5;this.fallAxisV=new THREE.Vector3(1,0,0); // directional-fall state
+    this.discovered=false;this.invest=null;this.investCd=rand(0,0.5); // corpse-discovery state
+    this.glintT=rand(0.4,2);this.glintF=0;this.relocP=null; // irregular glint flashes + shoot-and-scoot post
     const g=this.group=new THREE.Group();
     const uni=hvt?0xa32424:(this.sniper?0x23262c:0x4c5530),skin=0xc9a07a;
     this.mats=[];
@@ -942,6 +949,21 @@ class Enemy{
       else if(distP<this.convR+30){this.shootCd-=dt;
         if(this.shootCd<=0){this.shootCd=rand(2.2,4);enemyShoot(this);}}
     }else{
+      /* BODY DISCOVERY : a patrolling guard that passes within ~12m of an
+         undiscovered corpse diverts to it, pauses in the radio pose, and
+         radios it in (alarm +12). The corpse is then marked discovered, so
+         it never triggers twice. Driver + sniper corpses count too. */
+      if(this.investCd>0)this.investCd-=dt;
+      if(!this.invest&&this.investCd<=0&&!this.sprinting){
+        this.investCd=0.5;
+        for(const o of enemies){if(o===this||o.alive||o.discovered||!o.group)continue;
+          const op=o.group.position,odx=op.x-g.position.x,odz=op.z-g.position.z;
+          if(odx*odx+odz*odz<144){this.invest=o;this.wps.unshift([op.x,op.z]);this.wpi=0;this.pauseT=0;break;}}}
+      if(this.invest){
+        const cp=this.invest.group.position,cdx=cp.x-g.position.x,cdz=cp.z-g.position.z;
+        if(cdx*cdx+cdz*cdz<10){this.invest.discovered=true;this.invest=null;
+          G.alarm=Math.min(100,G.alarm+12);G.lastNearT=G.swayT; // counts as activity — decay won't instantly forgive it
+          this.radio=rand(2,3);this.pauseT=2;toast('BODY DISCOVERED — ALARM +12');updateHUD();}}
       if(this.hvt&&!this.isDriver&&G.alarm>50){ // hot zone : foot-HVTs bolt to fresh cover every few seconds
         this.relocT-=dt;
         if(this.relocT<=0){this.relocT=rand(3,5);
@@ -982,6 +1004,19 @@ class Enemy{
      idle -> aim 1.5s (glint swells + laser shimmer) -> fire -> cool */
   sniperUpdate(dt){
     const g=this.group;
+    if(this.aimPhase==='reloc'){ // SHOOT-AND-SCOOT : sprint to the fresh post, settle, resume the cycle
+      const r=this.relocP,dx=r.x-g.position.x,dz=r.z-g.position.z,d=Math.hypot(dx,dz);
+      this.walkPhase+=dt*9;
+      const sw2=Math.sin(this.walkPhase)*0.55;this.legL.rotation.x=sw2;this.legR.rotation.x=-sw2;
+      if(this.glint)this.glint.material.opacity=0.06; // scope down while moving — no tell
+      if(d<1.3){g.position.set(r.x,r.y,r.z);this.postY=r.y;this.aimPhase='idle';this.aimT=rand(1.6,2.8);
+        if(this.prone){g.scale.set(1.5,1.12,1.5);this.chestOff=1.0;}} // kneel back into the nest pose
+      else{const sp=this.speed*2.3;
+        g.position.x+=dx/d*sp*dt;g.position.z+=dz/d*sp*dt;
+        const gy=groundH(g.position.x,g.position.z);
+        g.position.y+=(gy-g.position.y)*Math.min(1,dt*2.5); // steps down off the tower smoothly
+        g.rotation.y=Math.atan2(dx,dz);resolveBlockers(g);}
+      return;}
     if(this.postY!=null)g.position.y=this.postY;
     const dx=G.px-g.position.x,dz=G.pz-g.position.z;
     g.rotation.y=Math.atan2(dx,dz);
@@ -990,15 +1025,27 @@ class Enemy{
         const pr=1-this.aimT/1.5; // aim progress 0..1
         this.glint.material.opacity=0.75+0.25*pr;
         const gs=0.5+0.55*pr;this.glint.scale.set(gs,gs,1);
-      }else{
-        this.glint.material.opacity=0.3+0.28*Math.sin(G.swayT*2.3+this.walkPhase);
-        this.glint.scale.set(0.5,0.5,1);}}
+      }else{ // idle glint : irregular flashes at random intervals — never a steady, readable pulse
+        this.glintT-=dt;
+        if(this.glintT<=0){this.glintT=rand(0.4,2.8);this.glintF=1;}
+        this.glintF=Math.max(0,this.glintF-dt*2.4);
+        this.glint.material.opacity=0.08+0.85*this.glintF;
+        const gs=0.45+0.3*this.glintF;this.glint.scale.set(gs,gs,1);}}
     this.aimT-=dt;
     if(this.aimPhase==='idle'){
       if(this.aimT<=0){this.aimPhase='aim';this.aimT=1.5;this.showLaser(true);}
     }else if(this.aimPhase==='aim'){
       this.updateLaser();
-      if(this.aimT<=0){this.aimPhase='cool';this.aimT=rand(2.6,4.4);this.showLaser(false);sniperFire(this);}
+      if(this.aimT<=0){this.showLaser(false);sniperFire(this);
+        /* SHOOT-AND-SCOOT : after every shot he packs up and relocates to a
+           fresh post 20–40m out instead of sitting in cooldown on the same spot */
+        const gp=g.position;let nx=gp.x,nz=gp.z;
+        for(let tr=0;tr<8;tr++){const a=rand(0,TAU),dd=rand(20,40);
+          nx=clamp(gp.x+Math.cos(a)*dd,-48,48);nz=clamp(gp.z+Math.sin(a)*dd,-CAMP_D-55,-CAMP_D+55);
+          if(Math.hypot(nx-gp.x,nz-gp.z)>14)break;}
+        this.relocP={x:nx,z:nz,y:groundH(nx,nz)};
+        this.postY=null;this.aimPhase='reloc';
+        if(this.prone){g.scale.set(1.5,1.5,1.5);this.chestOff=null;}} // stands up out of the nest to move
     }else if(this.aimT<=0){this.aimPhase='idle';this.aimT=rand(1.4,2.6);}
   }
   showLaser(on){
@@ -1030,6 +1077,9 @@ class Enemy{
 }
 /* quaternion temps for the directional-fall branch (no per-frame allocation) */
 const _qFall=new THREE.Quaternion(),_qYaw=new THREE.Quaternion(),_YUP=new THREE.Vector3(0,1,0);
+/* menu cinematic drift temps (no per-frame allocation) */
+const _md=new THREE.Vector3(),_campLook=new THREE.Vector3(0,groundH(0,-CAMP_D)+3,-CAMP_D),
+  _m4=new THREE.Matrix4(),_qPlay=new THREE.Quaternion(),_qDrift=new THREE.Quaternion(),_tk2=new THREE.Vector3();
 /* camp obstacle blockers : enemies slide along these circles instead of clipping through props.
    Sabotage props are appended after buildSabotage defines SAB_SPOTS; the truck registers itself
    dynamically in resolveBlockers once it has rolled to a stop. */
@@ -1111,8 +1161,8 @@ function hvtsAlive(){let n=0;for(const e of enemies)if(e.alive&&e.hvt)n++;return
    just get sparks, a tink and a small alarm bump. The driver group is
    scene-level and synced to the cab each frame, so distance/toast/killcam
    code all sees world coordinates. */
-const truck={group:null,wheels:[],a:0,speed:12,active:false,dead:false};
-const driver={group:null,alive:true,hvt:true,isDriver:true,marker:null,
+const truck={group:null,wheels:[],a:0,speed:12,active:false,dead:false,panic:0,dustT:0,lastCrackT:-99,hl:null};
+const driver={group:null,alive:true,hvt:true,isDriver:true,marker:null,discovered:false,
   update(dt){}, // truckUpdate drives it; never patrols or converges
   chest(){const v=new THREE.Vector3();this.group.getWorldPosition(v);v.y+=0.2;return v;},
   die(dir){if(!this.alive)return;this.alive=false;
@@ -1136,6 +1186,15 @@ function buildTruck(){
   for(const pair of[[-1.15,1.5],[1.15,1.5],[-1.15,-1.4],[1.15,-1.4]]){
     const w=new THREE.Mesh(wg,wm);w.rotation.z=Math.PI/2;w.position.set(pair[0],0.55,pair[1]);
     w.castShadow=true;g.add(w);truck.wheels.push(w);}
+  /* headlights : two additive cones + one warm point light, night ops only
+     (visibility + intensity are driven from truckUpdate by G.night) */
+  const hlGrp=new THREE.Group();hlGrp.visible=false;
+  const hlMat=new THREE.MeshBasicMaterial({color:0xffd9a0,transparent:true,opacity:0.20,
+    blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+  for(const sx of[-0.72,0.72]){const cone=new THREE.Mesh(coneGeo,hlMat);
+    cone.position.set(sx,1.05,2.25);cone.scale.set(1.15,1,1.5);hlGrp.add(cone);}
+  const hlLight=new THREE.PointLight(0xffc37a,0,36,2);hlLight.position.set(0,1.1,3.4);hlGrp.add(hlLight);
+  g.add(hlGrp);truck.hl={grp:hlGrp,light:hlLight};
   /* driver : seated red-uniform HVT in the cab */
   const dg=driver.group=new THREE.Group();
   const uni=new THREE.MeshLambertMaterial({color:0xa32424});
@@ -1152,21 +1211,32 @@ function buildTruck(){
   scene.add(g);
 }
 function resetTruck(){
-  truck.a=rand(0,TAU);truck.speed=12;truck.dead=false;truck.active=true;
-  driver.alive=true;driver.group.rotation.x=0;driver.group.visible=true;
+  truck.a=rand(0,TAU);truck.speed=12;truck.dead=false;truck.active=true;truck.panic=0;truck.lastCrackT=-99;
+  driver.alive=true;driver.discovered=false;driver.group.rotation.x=0;driver.group.visible=true;
   if(driver.marker)driver.marker.visible=true;
   truckUpdate(0);
 }
 function truckUpdate(dt){
   if(!truck.active||!truck.group)return;
-  if(truck.dead)truck.speed=Math.max(0,truck.speed-4*dt); // rolls to a stop over ~3s
-  else{ // slow near the camp heart, cruise elsewhere
+  if(truck.dead){truck.speed=Math.max(0,truck.speed-4*dt);truck.panic=0;} // rolls to a stop over ~3s
+  else{
+    /* DRIVER AI : a round cracking past the truck (lastCrackT, fed from
+       bulletUpdate) or a hot alarm (>60%) makes the driver floor it — ~18 m/s
+       with a mild evasive swerve. 8 quiet seconds AND alarm under 40% calms
+       him back to the cruise profile. */
+    const threat=G.alarm>60||(G.swayT-truck.lastCrackT)<2.5;
+    const calm=(G.swayT-G.lastShotT)>8&&G.alarm<40;
+    if(threat)truck.panic=Math.min(1,truck.panic+dt*1.6);
+    else if(calm)truck.panic=Math.max(0,truck.panic-dt*0.45);
     const dd=Math.hypot(truck.group.position.x,truck.group.position.z+CAMP_D-25);
-    truck.speed=6+6*sstep(15,40,dd);
+    const cruise=6+6*sstep(15,40,dd); // slow near the camp heart, cruise elsewhere
+    const target=lerp(cruise,18,truck.panic);
+    truck.speed+=(target-truck.speed)*Math.min(1,dt*0.9);
   }
   const px=truck.group.position.x,pz=truck.group.position.z;
   truck.a+=truck.speed*dt/45;
-  const x=Math.cos(truck.a)*55,z=-CAMP_D+Math.sin(truck.a)*32;
+  const sw=Math.sin(truck.a*2.6)*2.6*truck.panic; // evasive swerve while fleeing : small lateral wobble
+  const x=Math.cos(truck.a)*(55+sw),z=-CAMP_D+Math.sin(truck.a)*(32+sw*0.58);
   truck.group.position.set(x,groundH(x,z)+0.15,z);
   if(Math.abs(x-px)+Math.abs(z-pz)>0.0001)truck.group.rotation.y=Math.atan2(x-px,z-pz);
   for(const w of truck.wheels)w.rotation.x+=truck.speed*dt/0.55;
@@ -1174,6 +1244,13 @@ function truckUpdate(dt){
   _tk.set(0.35,2.05,1.35).applyMatrix4(truck.group.matrixWorld);
   driver.group.position.copy(_tk);
   driver.group.rotation.y=truck.group.rotation.y;
+  /* dust trail : kicked up behind the rear wheels while rolling */
+  truck.dustT+=dt;
+  if(truck.speed>3&&truck.dustT>0.13){truck.dustT=0;
+    for(const wi of[2,3]){truck.wheels[wi].getWorldPosition(_tk2);_tk2.y-=0.35;
+      spawnBurst(_tk2,{color:0xbfae86,n:2,sp0:0.4,sp1:1.3,up0:0.5,up1:1.6,life:0.8,grav:2.2});}}
+  /* headlights : night ops only */
+  if(truck.hl){const on=G.night;truck.hl.grp.visible=on;truck.hl.light.intensity=on?1.7:0;}
 }
 
 /* ---------------- V6 systems : sabotage + counter-snipers + ghost ----------------
@@ -1291,8 +1368,11 @@ function sniperFire(e){
   scene.add(line);tracers.push({line,t:-0.1});
   sTone(rand(900,1200),0.14,'sawtooth',0.07,-500); // incoming crack
   const dist=from.distanceTo(to);
-  const moving=(G.swayT-G.lastMoveT)<0.9;
-  let p=G.scoped?(moving?0.34:0.55):(moving?0.16:0.30);
+  /* THEY LEAD THE SHOT : a still player is the easiest hit, slow aim drifts
+     are harder, and fast aim/position changes are hardest of all */
+  const moving=(G.swayT-G.lastMoveT)<0.9||(G.aimVel||0)>0.06;
+  const fast=(G.aimVel||0)>0.4;
+  let p=G.scoped?(fast?0.20:(moving?0.34:0.55)):(fast?0.09:(moving?0.16:0.30));
   p*=clamp(420/dist,0.75,1.1);
   if(Math.random()<p){damagePlayer(25);showDmgDir(from);}
   else{ // near miss : dust bursts off the ridge + a sharper crack
@@ -1336,7 +1416,7 @@ function fireBullet(){
   requestAnimationFrame(()=>{bl.style.transition='opacity .2s';bl.style.opacity=0;});
   ejectShell();
   puffMuzzleSmoke();
-  sShot();updateHUD();
+  sShot(RIFLES[G.rifle].pitch);updateHUD();
 }
 function bulletUpdate(dt){
   const wvx=Math.sin(G.windDir)*G.windSpd,wvz=Math.cos(G.windDir)*G.windSpd;
@@ -1352,6 +1432,8 @@ function bulletUpdate(dt){
         const c=e.chest(),dx=p.x-c.x,dy=p.y-c.y,dz=p.z-c.z,d2=dx*dx+dy*dy+dz*dz;
         if(d2<1.1){hit=e;break;}
         if(d2<nearD2){nearD2=d2;nearE=e;}}
+      if(truck.active&&driver.alive){_tv.copy(p).sub(truck.group.position);_tv.y-=1.2;
+        if(_tv.lengthSq()<100)truck.lastCrackT=G.swayT;} // round cracked past the truck — the driver reacts
       if(hit)break;
       if(truck.active&&truck.group){_tv.copy(p);truck.group.worldToLocal(_tv); // truck body (driver sphere already checked above)
         if(Math.abs(_tv.x)<1.25&&_tv.y>0.2&&_tv.y<2.6&&Math.abs(_tv.z)<2.5){thit=true;break;}}
@@ -1574,7 +1656,7 @@ if(!isTouch){
     if(e.button===0)fireBullet();else if(e.button===2)setScoped(!G.scoped);});
   document.addEventListener('contextmenu',e=>e.preventDefault());
   document.addEventListener('wheel',e=>{if(G.scoped&&G.state==='play'){
-    G.zoom=clamp(G.zoom+(e.deltaY>0?-0.5:0.5),2,G.maxZoom);
+    G.zoom=clamp(G.zoom+(e.deltaY>0?-0.5:0.5),RIFLES[G.rifle].zmin,G.maxZoom);
     $('zoomSlider').value=G.zoom;updateHUD();}},{passive:true});
   document.addEventListener('keydown',e=>{
     if(G.state!=='play')return;
@@ -1813,6 +1895,15 @@ function cycleRifle(d){
   selRifle=un[(i+d+un.length)%un.length];
   sClick();renderRiflePicker();
 }
+/* per-rifle identity : scope range (slider min/max, G.maxZoom, zoom clamp) +
+   viewmodel stock accent color. Runs at mission start and when the card pick locks in. */
+function applyRifleZoom(){
+  const r=RIFLES[G.rifle];
+  G.maxZoom=r.zmax;
+  G.zoom=clamp(Math.max(G.zoom||8,r.zmin),r.zmin,r.zmax);
+  const zs=$('zoomSlider');zs.min=r.zmin;zs.max=r.zmax;zs.value=G.zoom;
+  if(rifle.userData.stockMat)rifle.userData.stockMat.color.setHex(r.stock);
+}
 function startMission(n){
   endKillcam();
   G.mission=n;const cfg=missionCfg(n);
@@ -1823,7 +1914,7 @@ function startMission(n){
   G.chain=0;G.kills=0;G.shots=0;G.hits=0;G.longest=0;G.bestChain=0;
   G.px=0;G.pz=24;G.yaw=0;G.pitch=0.02;G.breath=100;G.breathFx=0;
   G.maxZoom=cfg.maxZoom;G.zoom=Math.min(8,cfg.maxZoom);
-  const zs=$('zoomSlider');zs.max=cfg.maxZoom;zs.value=G.zoom;
+  applyRifleZoom(); // per-rifle scope range + stock accent for the active rifle
   G.windDir0=rand(0,TAU);G.windDir=G.windDir0; // mission base heading; gusts vary around it live
   G.windBase=cfg.wind;G.windT=0;G.windSpd=cfg.wind*rand(0.85,1.15);
   bullets.forEach(b=>scene.remove(b.m));bullets.length=0;
@@ -1880,6 +1971,7 @@ function missionFail(){
 $('card').addEventListener('click',()=>{
   if(G.state!=='menu')return;
   G.rifle=selRifle;lsSet('longshot_rifle',selRifle); // lock in the card pick for this mission
+  applyRifleZoom(); // scope range + stock color follow the locked-in rifle
   hideCard();G.state='play';audio();sClick();updateHUD();
   if(!isTouch){try{renderer.domElement.requestPointerLock();}catch(e){}}
 });
@@ -1945,7 +2037,11 @@ function frame(now){
     if((hitMax||G.alarm>=100)&&!G.converged){G.converged=true;toast('ALARM 100% — PATROLS CONVERGING');}
     if(G.alarm>G.peakAlarm)G.peakAlarm=G.alarm; // ghost-bonus tracking
     if(G.px!==frame._lpx||G.pz!==frame._lpz){G.lastMoveT=t;frame._lpx=G.px;frame._lpz=G.pz;} // movement (sniper accuracy)
-    if(G.hp>0&&G.hp<100&&t-G.lastDmgT>5)G.hp=Math.min(100,G.hp+2*gdt);
+    const av=(Math.abs(G.yaw-(frame._py||0))+Math.abs(G.pitch-(frame._pp||0)))/Math.max(0.001,rawDt); // aim speed — snipers lead a moving reticle
+    G.aimVel=lerp(G.aimVel||0,Math.min(av,3),0.25);frame._py=G.yaw;frame._pp=G.pitch;
+    const regen=G.hp>0&&G.hp<100&&t-G.lastDmgT>8; // out-of-combat regen : 8s untouched, then ~6%/s back to full
+    if(regen)G.hp=Math.min(100,G.hp+6*gdt);
+    $('hpFill').parentNode.classList.toggle('regening',regen);
     if(G.fireCd>0)G.fireCd-=gdt;
     if(G.reloading){G.reloadT-=gdt;if(G.reloadT<=0){G.reloading=false;G.ammo=RIFLES[G.rifle].mag;updateHUD();}}
     G.windT+=gdt; // gusts : the single live wind source — HUD, ballistics, dust/grass, flag and ambient audio all read these
@@ -1974,6 +2070,21 @@ function frame(now){
   const shX=(Math.random()-0.5)*G.shake*0.06,shY=(Math.random()-0.5)*G.shake*0.06;
   G.shake=Math.max(0,G.shake-dt*3.2);
   camera.rotation.set(G.pitch+swP+pPitch+kick*0.045+shX,G.yaw+swY+pYaw+shY,0);
+  /* MENU CINEMATIC DRIFT : with the mission card up, the camera leaves the
+     ridge and pans a slow ~25s arc across the outpost. On tap-to-start the
+     blend eases it back home. Slow and subtle — no shake, no sickness. */
+  if(G.state==='menu')G.menuBlend=Math.min(1,G.menuBlend+dt/1.6);
+  else G.menuBlend=Math.max(0,G.menuBlend-dt/1.1);
+  if(G.menuBlend>0&&G.state==='menu'){
+    _qPlay.copy(camera.quaternion);
+    const a=t*TAU/25;
+    _md.set(Math.sin(a)*46,0,-CAMP_D+62+Math.cos(a)*22);
+    _md.y=Math.max(groundH(_md.x,_md.z)+7,15+3*Math.sin(a*2+1));
+    camera.position.lerp(_md,G.menuBlend);
+    _m4.lookAt(_md,_campLook,_YUP);_qDrift.setFromRotationMatrix(_m4);
+    camera.quaternion.slerpQuaternions(_qPlay,_qDrift,G.menuBlend);
+    rifle.visible=false;
+  }else if(G.state==='play')rifle.visible=!G.scoped;
   const fovT=(G.scoped?68/Math.max(2,G.zoom):68)*(G.slowmo>0?0.78:1); // smooth scope zoom : ~120ms ease, no snap
   G.fovCur+=(fovT-G.fovCur)*Math.min(1,dt*14);
   camera.fov=G.fovCur;camera.updateProjectionMatrix();
