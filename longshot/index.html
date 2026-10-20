@@ -205,6 +205,7 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
   <div class="row"><button class="mbtn" id="wnBtn">GOT IT</button></div>
 </div></div>
 <div id="intro"></div>
+<div id="verBadge" style="position:fixed;top:10px;left:10px;z-index:35;font:10px/1.4 monospace;color:#aebfff;opacity:.55;pointer-events:none;letter-spacing:.08em"></div>
 <div id="card"><div class="panel" id="cardPanel"></div></div>
 <div id="card2" style="display:none;position:fixed;inset:0;z-index:80;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:20px">
   <div class="panel" id="setPanel">
@@ -256,14 +257,34 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='10.0'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='10.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'10.1',lines:[
+  '<b>AUTO-UPDATE</b> — the game now checks for new builds itself. No more stale copies',
+  '<b>NEW OPENING</b> — cinematic ridge intro every time you boot up',
+  '<b>LIVING VALLEY</b> — patrols and the truck move behind the menu now',
+  '<b>HALLOWEEN</b> — pumpkins at the camp through Nov 1',
+  '<b>RAGDOLL 3.0</b> — full falls, real rest poses, blood on bullet-cam impact',
+  '<b>BULLET CAM</b> — replays your bullet\u2019s true flight path to the true impact']},
  {v:'10.0',lines:[
   '<b>NEW OPENING</b> — cinematic ridge intro every time you boot up',
   '<b>LIVING VALLEY</b> — the camp patrols and the truck move behind the menu now',
   '<b>HALLOWEEN</b> — pumpkins at the camp through Nov 1',
   '<b>v9.3</b> — Ragdoll 3.0 deaths + blood on bullet-cam impact',
   '<b>v9.1</b> — bullet cam now replays your bullet\u2019s true flight path']}];
+/* SELF-UPDATE : a stale cached page can strand a player on an old build for
+   days (bit MW on v9.3/v10.0 — his browser kept serving v9.2). The tiny
+   version.txt is fetched no-store; if it names a newer build than this page,
+   reload ONCE to a cache-busted URL. sessionStorage guard = no reload loops;
+   any failure (offline, 404) is a silent no-op. */
+if(/^https?:$/.test(location.protocol)){try{
+  if(!sessionStorage.getItem('ls_upd')){
+    fetch('version.txt',{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>{
+      const rv=(t||'').trim();
+      if(rv&&rv!==LS_VER){try{sessionStorage.setItem('ls_upd','1');}catch(e){}
+        location.replace(location.pathname+'?v='+rv.replace(/\./g,'')+'&u='+Date.now());}
+    }).catch(()=>{});
+  }}catch(e){}}
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const lerp=(a,b,t)=>a+(b-a)*t;
 const rand=(a,b)=>a+Math.random()*(b-a);
@@ -3270,6 +3291,7 @@ $('wnBtn').addEventListener('click',e=>{e.stopPropagation();dismissWhatsNew();})
 buildTruck();
 buildSabotage();
 applyGraphics(); // boot-time graphics application : manual preset, or Auto matching the stock behavior
+$('verBadge').textContent='v'+LS_VER; // VERSION BADGE : the running build, always on screen (Font Fight rule — kills 'update is not there' guesswork)
 startMission(missionUnlockMax()); // BOOT TO PROGRESS : the card opens on the player's current mission, not Mission 1 every time
 requestAnimationFrame(frame);
 </script>
