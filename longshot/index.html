@@ -1987,7 +1987,8 @@ function fireBullet(){
   scene.add(m);
   const vel=RIFLES[G.rifle].vel;
   bullets.push({m,sp:vel,vx:dir.x*vel,vy:dir.y*vel,vz:dir.z*vel,life:5, // per-rifle muzzle velocity
-    pierced:[],kills:0,throughCab:false,tx:m.position.x,ty:m.position.y,tz:m.position.z}); // OVERPENETRATION state + tracer anchor
+    pierced:[],kills:0,throughCab:false,tx:m.position.x,ty:m.position.y,tz:m.position.z, // OVERPENETRATION state + tracer anchor
+    path:[m.position.clone()]}); // BULLET-CAM 2.1 : the true flown path, recorded so the cam replays the real arc, never a straight-line lie
   G.kickT=0;G.shake=0.55;G.flashT=0.14;G.alarm=Math.min(100,G.alarm+10);
   flashSprite.material.rotation=rand(0,TAU);
   const bl=$('bloom');bl.style.transition='none';bl.style.opacity=G.reduceFlash?0.42:0.85; // REDUCE FLASHES : halve the muzzle bloom
@@ -2025,7 +2026,12 @@ function pierceKill(b,e,hshot){
   b.kills++;b.pierced.push(e);
   _kd.set(b.vx,b.vy,b.vz).normalize();
   spawnBlood(b.m.position,_kd,hshot);
-  killEnemy(e,_kd,b.kills===1,hshot);
+  /* BULLET-CAM 2.1 : the truth — the exact point the round touched flesh, plus
+     a snapshot of the flown path ending at that point. Only the FIRST kill of
+     the shot may drive the cam (killEnemy's cam flag does the gating). */
+  const hitP=b.m.position.clone();
+  const camPath=b.path.slice();camPath.push(hitP);
+  killEnemy(e,_kd,b.kills===1,hshot,false,hitP,camPath);
   if(b.kills===2){G.score+=150;G.missionScore+=150;scorePop(150,false,false,'DOUBLE KILL');}
   else if(b.kills===3){G.score+=300;G.missionScore+=300;scorePop(300,false,false,'TRIPLE KILL');}
 }
@@ -2068,6 +2074,11 @@ function bulletUpdate(dt){
       if(shit)break;
       if(p.y<groundH(p.x,p.z)-0.2){ground=true;break;}
     }
+    /* BULLET-CAM 2.1 : trail the true flight — one breadcrumb every ~1.5m of
+       travel while the round is airborne; the cam replays THESE points */
+    if(b.path[b.path.length-1].distanceToSquared(b.m.position)>=2.25){
+      b.path.push(b.m.position.clone());
+      if(b.path.length>800)b.path.shift();}
     b.life-=dt;
     _td.set(b.vx,b.vy,b.vz);b.m.lookAt(_tv.copy(b.m.position).add(_td));
     /* SHOT TRACER : short-lived streak segments along the actually-flown path,
@@ -2588,13 +2599,21 @@ function kcRushStop(){
   if(!KC.rush)return;const r=KC.rush;KC.rush=null;
   try{const t=AC?AC.currentTime:0;r.g.gain.setTargetAtTime(0,t,0.04);r.src.stop(t+0.25);}catch(e){}
 }
-function startBulletCam(e,dir){
+function startBulletCam(e,dir,hitP,path){
   if(KC.active)endKillcam(); // re-entry : restore first, then start the new one
   KC.active=true;KC.phase='chase';KC.t=0;KC.dur=1.5;KC.total=0;
   KC.dir.copy(dir);
-  KC.from.copy(camera.position);
-  KC.tgt.copy(e.group.position);KC.tgt.y+=1.6;
-  KC.travel=KC.from.distanceTo(KC.tgt);
+  /* BULLET-CAM 2.1 : the cam target is the TRUE impact point (where the blood
+     burst), not a fixed point 1.6m over the victim's feet — and the chase
+     replays the recorded flight path point-for-point, so the visual round
+     drops and drifts exactly like the real one did */
+  if(hitP)KC.tgt.copy(hitP);else KC.tgt.copy(e.chest());
+  if(path&&path.length>=2){KC.path=path;
+    KC.cum=[0];for(let i=1;i<path.length;i++)KC.cum.push(KC.cum[i-1]+path[i].distanceTo(path[i-1]));
+    KC.travel=KC.cum[KC.cum.length-1];
+    KC.from.copy(path[0]);}
+  else{KC.from.copy(camera.position); // no recording (shouldn't happen) — synth a straight 2-point path so the sampler still works
+    KC.path=[KC.from.clone(),KC.tgt.clone()];KC.cum=[0,KC.from.distanceTo(KC.tgt)];KC.travel=KC.cum[1];}
   KC.wasScoped=G.scoped;
   if(G.scoped){scopeEl.style.display='none';$('zoomWrap').style.display='none';}
   rifle.visible=false;
@@ -2621,6 +2640,7 @@ function kcTap(){ // player-driven skip : chase jumps to the orbit, anything lat
   if(KC.phase==='chase'){
     if(G.kcam==='short'){endKillcam();return;} // SHORT pref : chase only — a tap ends it outright
     KC.phase='orbit';KC.t=0;KC.dur=1.6;KC.orbC.copy(KC.tgt);KC.orbC.y-=0.4;
+    if(KC.orbC.y<0.55)KC.orbC.y=0.55; // low hits (legs/ground-graze) : don't bury the orbit center under the terrain
     KC.orbA=Math.atan2(camera.position.x-KC.orbC.x,camera.position.z-KC.orbC.z);}
   else endKillcam();
 }
@@ -2630,7 +2650,14 @@ function kcUpdate(dt){
   if(KC.phase==='chase'){
     const u=Math.min(1,KC.t/KC.dur);
     const k=1-Math.pow(1-u,1.5); // progress curve : fast off the muzzle, decelerating into the approach — a bullet-time arrival
-    _kcA.copy(KC.from).addScaledVector(KC.dir,KC.travel*k); // bullet position along the shot line
+    /* BULLET-CAM 2.1 : sample the RECORDED path at arc distance travel*k — the
+       round rides the same arc (drop + wind drift) the real shot flew, and at
+       u=1 it lands exactly on KC.tgt, the true impact point */
+    {const d=KC.travel*k,P=KC.path,C=KC.cum;let i=KC._si||0;
+     while(i<C.length-2&&C[i+1]<d)i++;while(i>0&&C[i]>d)i--;KC._si=i; // monotone scan : d only grows during a chase
+     const seg=(C[i+1]-C[i])||1e-9,f=Math.min(1,Math.max(0,(d-C[i])/seg));
+     _kcA.lerpVectors(P[i],P[i+1],f);
+     _kcB.subVectors(P[i+1],P[i]);if(_kcB.lengthSq()>1e-12)KC.dir.copy(_kcB.normalize());} // true local tangent : bullet aim, side vec, cam offset + look bias all read KC.dir
     kcBullet.position.copy(_kcA);
     kcBullet.lookAt(_kcB.copy(_kcA).add(KC.dir));
     KC.spin=(KC.spin||0)+dt*22*(0.3+0.7*(1-u));kcBullet.rotateZ(KC.spin); // rifling spin — winds down with the round so it reads at bullet-time speed
@@ -2663,12 +2690,13 @@ function kcUpdate(dt){
     if(KC.t>=KC.dur){
       if(G.kcam==='short'){endKillcam();return;} // SHORT pref : chase + impact was the show — no orbit
       KC.phase='orbit';KC.t=0;KC.dur=1.6;KC.orbC.copy(KC.tgt);KC.orbC.y-=0.4;
+      if(KC.orbC.y<0.55)KC.orbC.y=0.55; // low hits : keep the orbit center + camera above the dirt
       KC.orbA=Math.atan2(camera.position.x-KC.orbC.x,camera.position.z-KC.orbC.z);}
   }
   else if(KC.phase==='orbit'){
     const k=Math.min(1,KC.t/KC.dur),a=KC.orbA+k*Math.PI*0.67; // ~120° sweep, low + close (4.6m) at victim height, corpse centered
     camera.position.set(KC.orbC.x+Math.sin(a)*4.6,KC.orbC.y+0.6,KC.orbC.z+Math.cos(a)*4.6);
-    camera.lookAt(KC.orbC.x,KC.orbC.y-0.5,KC.orbC.z);
+    camera.lookAt(KC.orbC.x,Math.max(0.35,KC.orbC.y-0.5),KC.orbC.z);
     camera.fov=lerp(78,46,sstep(0,0.45,KC.t));camera.updateProjectionMatrix(); // velocity FOV eases back through the orbit
     KC.ts=lerp(0.12,0.30,sstep(0,0.5,KC.t)); // time loosens out of the freeze but stays heavy
     kcRushSet(0.03,380);
@@ -2696,7 +2724,7 @@ function kcUpdate(dt){
 }
 
 /* ---------------- combat outcomes ---------------- */
-function killEnemy(e,dir,cam,hshot,blast){
+function killEnemy(e,dir,cam,hshot,blast,hitP,camPath){
   e.die(dir,hshot,blast);G.kills++;
   const now=G.swayT;
   G.chain=(now-G.lastKillT<8)?G.chain+1:1;G.lastKillT=now;
@@ -2724,7 +2752,7 @@ function killEnemy(e,dir,cam,hshot,blast){
   toast((hshot?'HEADSHOT — ':'')+(e.hvt?'HVT DOWN':(e.sniper?'SNIPER DOWN':'GUARD DOWN'))+'  +'+pts+(G.chain>1?'  x'+G.chain+' CHAIN':''));
   if(!lsGet('lh_kill','')){lsSet('lh_kill','1'); // one-time hint : bodies get found
     setTimeout(()=>toast('BODIES GET FOUND — KEEP THE ALARM DOWN'),1750);}
-  if(cam&&dist>300&&G.kcam!=='off')startBulletCam(e,dir); // BULLET-CAM : only for actual bullet kills, never explosion kills (killcam pref can disable)
+  if(cam&&dist>300&&G.kcam!=='off')startBulletCam(e,dir,hitP,camPath); // BULLET-CAM : only for actual bullet kills, never explosion kills (killcam pref can disable)
   updateHUD();
   checkMissionDone();
 }
