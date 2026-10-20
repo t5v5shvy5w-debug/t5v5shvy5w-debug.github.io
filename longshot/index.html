@@ -502,7 +502,7 @@ const campFx={flames:[],smokes:[],light:null}; // campfire flame sprites, smoke 
       s.position.set(fx+Math.cos(a)*0.85,fy+0.12,fz+Math.sin(a)*0.85);s.castShadow=true;g.add(s);}
     for(const a of[0.5,1.7,2.9]){const log=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.11,1.5,6),woodM);
       log.position.set(fx,fy+0.25,fz);log.rotation.set(Math.PI/2.3,a,0);log.castShadow=true;g.add(log);}
-    const mkFlame=(r1,r0,c1)=>{const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
+    const mkFlame=(r1,c1)=>{const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
       const gr=x.createRadialGradient(32,36,2,32,32,30);
       gr.addColorStop(0,'rgba(255,244,200,1)');gr.addColorStop(0.35,c1);gr.addColorStop(1,'rgba(255,90,10,0)');
       x.fillStyle=gr;x.fillRect(0,0,64,64);
