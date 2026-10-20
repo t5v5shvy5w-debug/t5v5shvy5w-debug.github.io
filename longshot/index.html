@@ -973,6 +973,8 @@ class Enemy{
     this.shootCd=rand(1.5,3);this.strafe=rand(0,TAU);
     this.convA=0;this.convR=80;this.burst=0;this.burstT=0;this.stuckT=0; // converge fan-out + return-fire burst state
     this.headshot=false;this.dieYaw=0;this.sy0=1.5;this.fallAxisV=new THREE.Vector3(1,0,0); // directional-fall state
+    this.deathT=0;this.deathDone=false;this.thudded=true;this.blast=false;this.bVy=0;this.bLand=0;this.bDrift=0; // DEATH 2.0 : weighted-collapse state
+    this.helmFly=null;this.helmetG=null;this.twT=0.95;this.twArm=null;this.hsX=0;this.hsZ=0;this.dy0=0;
     this.discovered=false;this.invest=null;this.investCd=rand(0,0.5); // corpse-discovery state
     this.glintT=rand(0.4,2);this.glintF=0;this.relocP=null; // irregular glint flashes + shoot-and-scoot post
     const g=this.group=new THREE.Group();
@@ -1023,14 +1025,15 @@ class Enemy{
       hood.position.set(0,0.15,-0.02);hood.castShadow=true;hg.add(hood);
       const hoodLip=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.26,0.05,8),M(0x3c4828));
       hoodLip.position.set(0,0.06,-0.01);hg.add(hoodLip);}
-    else{const hm=new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.21,0.15,8),M(0x2e3324));
-      hm.position.set(0,0.17,0);hm.castShadow=true;hg.add(hm);
+    else{const helmG=new THREE.Group();hg.add(helmG);this.helmetG=helmG; // helmet rides in its own group — a headshot can pop it off (DEATH 2.0)
+      const hm=new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.21,0.15,8),M(0x2e3324));
+      hm.position.set(0,0.17,0);hm.castShadow=true;helmG.add(hm);
       const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.24,0.03,8),M(0x2e3324));
-      brim.position.set(0,0.11,0.02);hg.add(brim);
+      brim.position.set(0,0.11,0.02);helmG.add(brim);
       const strap=new THREE.Mesh(new THREE.CylinderGeometry(0.225,0.225,0.035,8),M(0x1c1f16)); // helmet strap band
-      strap.position.set(0,0.09,0);hg.add(strap);
+      strap.position.set(0,0.09,0);helmG.add(strap);
       const nvg=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.06,0.05),M(0x1c1f16)); // NVG mount nub
-      nvg.position.set(0,0.15,0.13);hg.add(nvg);}
+      nvg.position.set(0,0.15,0.13);helmG.add(nvg);}
     /* arms : shoulder pivots, bent to hold a rifle across the chest */
     const gloveM=M(0x24231f);
     const mkArm=sx=>{const p=new THREE.Group();p.position.set(sx*0.32,1.2,0);g.add(p);
@@ -1068,25 +1071,7 @@ class Enemy{
   chest(){const p=this.group.position;return new THREE.Vector3(p.x,p.y+(this.chestOff==null?1.55:this.chestOff),p.z);}
   update(dt){
     const g=this.group;
-    if(!this.alive){
-      if(this.react>0){ // hit reaction : jolt + red emissive flash before the fall
-        this.react-=dt;
-        g.position.addScaledVector(this.hitDir,Math.max(0,this.react)*9*dt);
-        const k=Math.max(0,this.react/0.28);
-        for(const m of this.mats)m.emissive.setRGB(0.55*k,0.06*k,0.06*k);
-      }else if(this.fall<1){ // fall over : direction follows the bullet's travel line
-        if(this.headshot){ // headshot : crumple straight down, fast — barely tips
-          this.fall=Math.min(1,this.fall+dt*3.6);
-          g.scale.y=Math.max(0.45,this.sy0*(1-0.55*this.fall));
-          g.rotation.x=-Math.PI/2*0.12*this.fall;
-        }else{ // tip away from the shot : rotate about the world axis perpendicular to the round, over the pre-death yaw
-          this.fall=Math.min(1,this.fall+dt*2.4);
-          const e2=this.fall*this.fall*(3-2*this.fall);
-          _qFall.setFromAxisAngle(this.fallAxisV,Math.PI/2*e2);
-          _qYaw.setFromAxisAngle(_YUP,this.dieYaw);
-          g.quaternion.multiplyQuaternions(_qFall,_qYaw);}
-        this.marker&&(this.marker.visible=false);}
-      return;}
+    if(!this.alive){this.deathTick(dt);return;} // DEATH 2.0 : weighted per-part collapse (deathTick)
     if(this.sniper){this.sniperUpdate(dt);return;}
     if(this.flinchT>0)this.flinchT-=dt; // under-fire reaction timers
     if(this.crouchT>0)this.crouchT-=dt;
@@ -1227,20 +1212,100 @@ class Enemy{
     arr[3]=G.px;arr[4]=camera.position.y-0.1;arr[5]=G.pz;
     this.laser.geometry.attributes.position.needsUpdate=true;
   }
-  die(dir,hshot){
-    if(!this.alive)return;this.alive=false;this.fall=0.0001;
+  die(dir,hshot,blast){
+    if(!this.alive)return;this.alive=false;
     if(this.laser)this.laser.visible=false;
     if(this.glint)this.glint.visible=false;
-    this.hitDir=dir?dir.clone():new THREE.Vector3(0,0,-1);this.react=0.28;
-    this.headshot=!!hshot;this.dieYaw=this.group.rotation.y;this.sy0=this.group.scale.y;
+    if(this.marker)this.marker.visible=false;
+    this.hitDir=dir?dir.clone():new THREE.Vector3(0,0,-1);
+    this.headshot=!!hshot;this.blast=!!blast;
+    this.dieYaw=this.group.rotation.y;this.sy0=this.group.scale.y;this.dy0=this.group.position.y;
+    this.deathT=0;this.deathDone=false;this.thudded=false;
+    this.twT=0.8+Math.random()*0.15;this.twArm=Math.random()<0.5?this.armL:this.armR; // settle twitch : one limb, once, late
     const fx=this.hitDir.x,fz=this.hitDir.z,fl=Math.hypot(fx,fz); // fall axis : perpendicular to the bullet's horizontal travel
     if(fl>0.01)this.fallAxisV.set(fz/fl,0,-fx/fl);else this.fallAxisV.set(1,0,0);
-    const dp=this.group.position.clone();dp.y+=0.5; // dust burst where the body drops
-    spawnBurst(dp,{color:0xb8a888,n:10,sp0:0.8,sp1:2.6,up0:0.8,up1:2.6,life:0.9,grav:4});
+    /* bullet direction in the body's local frame — drives the head whip */
+    const cy=Math.cos(this.dieYaw),sy=Math.sin(this.dieYaw);
+    this.hsX=clamp(sy*fx+cy*fz,-1,1);this.hsZ=clamp(-(cy*fx-sy*fz),-1,1);
+    if(this.blast){this.bVy=rand(3.6,4.1);this.bLand=2*this.bVy/9.8;this.bDrift=rand(2.0,3.0);} // explosion : launched on a short arc, lands ~0.75-0.85s out
+    if(this.headshot&&this.helmetG){ // HEADSHOT : the helmet pops off and arcs to the dirt beside the body
+      const hg=this.helmetG;scene.attach(hg);
+      const wp=new THREE.Vector3();hg.getWorldPosition(wp);
+      this.helmFly={m:hg,t:0,vx:this.hitDir.x*1.6+rand(-0.5,0.5),vy:rand(2.0,2.8),vz:this.hitDir.z*1.6+rand(-0.5,0.5),
+        rx:rand(-7,7),rz:rand(-7,7),gy:groundH(wp.x,wp.z)+0.07,rest:false};
+    }
+  }
+  /* DEATH 2.0 : a weighted, per-part collapse on a ~1.1s timeline — SNAP the
+     struck part, BUCKLE the knees, then an ACCELERATING drop (the anti-leaf
+     fix : slow off the knees, fast into the dirt), a ground thud, and a
+     settle with one late twitch. Poses are written absolute from deathT
+     every tick — no drift — and the corpse is bit-static once deathDone. */
+  deathTick(dt){
+    const g=this.group;
+    if(this.helmFly)this.helmTick(dt);
+    if(this.deathDone)return;
+    this.deathT+=dt*(this.headshot?1.22:1); // headshots crumple faster overall
+    const T=this.deathT;
+    if(T<0.3){const e=0.5*(1-T/0.3);for(const m of this.mats)m.emissive.setRGB(e,e*0.11,e*0.11);} // impact flash bleeding out
+    else if(T-dt<0.3)for(const m of this.mats)m.emissive.setRGB(0,0,0);
+    const hs=this.headshot,tipMax=hs?0.62:Math.PI/2*0.98;
+    let tip;
+    if(this.blast&&T<this.bLand){ // airborne : launched arc + spin, limbs thrown wide
+      g.position.y=this.dy0+this.bVy*T-4.9*T*T;
+      g.position.x+=this.hitDir.x*this.bDrift*dt;g.position.z+=this.hitDir.z*this.bDrift*dt;
+      tip=(Math.PI/2)*(T/this.bLand);
+      this.armL.rotation.z=1.25;this.armR.rotation.z=-1.25;
+      this.armL.rotation.x=this.armR.rotation.x=-0.5;
+      this.legL.rotation.x=this.legR.rotation.x=0.55;
+    }else{
+      if(this.blast&&!this.thudded){this.thudded=true;this.groundThud(1.5);} // blast landing = the ground-contact beat
+      const bk=sstep(0.09,0.38,T); // BUCKLE : knees fold under the body
+      this.legL.rotation.x=-1.15*bk;this.legR.rotation.x=-0.75*bk;
+      if(T<0.35)tip=tipMax*0.24*sstep(0.09,0.35,T); // pitch starts as the knees go
+      else if(T<0.72){const u=(T-0.35)/0.37;tip=tipMax*(0.24+0.76*u*u);} // DROP : u^2 — gravity curve, not a leaf drift
+      else tip=tipMax-0.055*Math.sin(Math.PI*clamp((T-0.72)/0.3,0,1))*Math.exp(-(T-0.72)*3); // one-bounce settle on contact
+      g.position.y=this.dy0-(Math.sin(Math.PI*clamp((T-0.09)/0.66,0,1))*0.17+(hs?0.10*sstep(0.3,0.7,T):0)); // sink through the buckle; headshots stay sunk (crumple)
+      if(!this.thudded&&tip>tipMax*0.8){this.thudded=true;this.groundThud(hs?0.8:1);} // torso meets dirt
+      /* arms : fling out on the snap, droop loose (overshoot via the fling
+         decay crossing the droop rise), splay to rest in the settle */
+      const fling=T<0.09?T/0.09:Math.max(0,1-(T-0.09)/0.3);
+      const droop=sstep(0.09,0.5,T),splay=sstep(0.7,1.05,T);
+      const armZ=lerp(0.55,0.85,droop)+0.45*fling;
+      this.armL.rotation.z=armZ+0.1*splay;this.armR.rotation.z=-armZ-0.1*splay;
+      this.armL.rotation.x=this.armR.rotation.x=0.55*droop+0.2*fling;
+      this.legL.rotation.z=0.13*splay;this.legR.rotation.z=-0.13*splay; // legs open a touch at rest
+    }
+    _qFall.setFromAxisAngle(this.fallAxisV,tip);
+    _qYaw.setFromAxisAngle(_YUP,this.dieYaw);
+    g.quaternion.multiplyQuaternions(_qFall,_qYaw);
+    if(hs)g.scale.y=Math.max(0.45,this.sy0*(1-0.38*sstep(0.08,0.5,T))); // headshot crumple squash
+    /* head : whips along the round's line on the snap, then lolls to rest */
+    const whip=T<0.09?T/0.09:Math.max(0,1-(T-0.09)/0.28),wm=hs?1:0.45;
+    this.headG.rotation.x=this.hsX*(0.5+0.95*whip)*wm;
+    this.headG.rotation.z=this.hsZ*(0.4+0.8*whip)*wm;
+    if(T>this.twT&&T<this.twT+0.18&&this.twArm)this.twArm.rotation.x+=Math.sin(Math.PI*(T-this.twT)/0.18)*0.35; // settle twitch
+    if(T>1.3){this.deathDone=true;for(const m of this.mats)m.emissive.setRGB(0,0,0);}
+  }
+  groundThud(big){ // dust burst + heavy low thud at the moment the body lands
+    const p=this.group.position;
+    _dp.set(p.x,p.y+0.25,p.z);
+    spawnBurst(_dp,{color:0xb8a888,n:Math.round(13*big),sp0:0.9,sp1:3.1,up0:0.7,up1:2.8,life:0.9,grav:4.5});
+    sTone(56,0.24,'sine',0.42*big,-22);
+    sTone(140,0.1,'sine',0.10*big,-60);
+  }
+  helmTick(dt){ // a popped helmet : ballistic arc, one small bounce, then it lies where it fell
+    const h=this.helmFly;h.t+=dt;
+    h.vy-=9.8*dt;
+    h.m.position.x+=h.vx*dt;h.m.position.y+=h.vy*dt;h.m.position.z+=h.vz*dt;
+    if(!h.rest){h.m.rotation.x+=h.rx*dt;h.m.rotation.z+=h.rz*dt;}
+    if(h.m.position.y<=h.gy&&h.vy<0){h.m.position.y=h.gy;
+      if(Math.abs(h.vy)>1.1){h.vy=-h.vy*0.28;h.vx*=0.5;h.vz*=0.5;h.rx*=0.4;h.rz*=0.4;}
+      else h.rest=true;}
   }
 }
 /* quaternion temps for the directional-fall branch (no per-frame allocation) */
 const _qFall=new THREE.Quaternion(),_qYaw=new THREE.Quaternion(),_YUP=new THREE.Vector3(0,1,0);
+const _dp=new THREE.Vector3(); // death-fx scratch (ground-thud burst origin)
 /* menu cinematic drift temps (no per-frame allocation) */
 const _md=new THREE.Vector3(),_campLook=new THREE.Vector3(0,groundH(0,-CAMP_D)+3,-CAMP_D),
   _m4=new THREE.Matrix4(),_qPlay=new THREE.Quaternion(),_qDrift=new THREE.Quaternion(),_tk2=new THREE.Vector3();
@@ -1454,6 +1519,7 @@ function reactToDanger(e,coverNow,alarmBump){
 }
 function spawnEnemies(cfg){
   enemies.forEach(e=>{if(e!==driver)scene.remove(e.group);
+    if(e.helmetG&&e.helmetG.parent===scene)scene.remove(e.helmetG); // last mission's popped helmet doesn't litter the new one
     if(e.laser){scene.remove(e.laser);e.laser.geometry.dispose();e.laser.material.dispose();e.laser=null;}});
   enemies.length=0;
   const spots=[];
@@ -1491,10 +1557,11 @@ function hvtsAlive(){let n=0;for(const e of enemies)if(e.alive&&e.hvt)n++;return
    code all sees world coordinates. */
 const truck={group:null,wheels:[],a:0,speed:12,active:false,dead:false,panic:0,dustT:0,lastCrackT:-99,hl:null};
 const driver={group:null,alive:true,hvt:true,isDriver:true,marker:null,discovered:false,
+  deathT:0,hsSnap:0.55,headM:null, // DEATH 2.0 slump state (animated in truckUpdate)
   update(dt){}, // truckUpdate drives it; never patrols or converges
   chest(){const v=new THREE.Vector3();this.group.getWorldPosition(v);v.y+=0.2;return v;},
-  die(dir){if(!this.alive)return;this.alive=false;
-    this.group.rotation.x=0.85; // slump forward over the wheel
+  die(dir,hshot){if(!this.alive)return;this.alive=false;
+    this.deathT=0;this.hsSnap=hshot?1:0.55; // the slump itself animates in truckUpdate : snap first, then the weight settles onto the wheel
     if(this.marker)this.marker.visible=false;
     truck.dead=true;toast('DRIVER DOWN — TRUCK STOPPING');}
 };
@@ -1574,6 +1641,7 @@ function buildTruck(){
   const skin=new THREE.MeshLambertMaterial({color:0xc9a07a});
   const torso=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.6,0.3),uni);torso.castShadow=true;dg.add(torso);
   const head=new THREE.Mesh(new THREE.BoxGeometry(0.24,0.26,0.24),skin);head.position.set(0,0.45,0);dg.add(head);
+  driver.headM=head; // slump animation pitches the head onto the wheel (DEATH 2.0)
   const beret=new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.17,0.08,8),new THREE.MeshLambertMaterial({color:0xff2222}));
   beret.position.set(0.04,0.6,0);dg.add(beret);
   for(const sx of[-1,1]){const arm=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.12,0.4),uni);
@@ -1586,6 +1654,7 @@ function buildTruck(){
 function resetTruck(){
   truck.a=rand(0,TAU);truck.speed=4;truck.dead=false;truck.active=true;truck.panic=0;truck.lastCrackT=-99;
   driver.alive=true;driver.discovered=false;driver.group.rotation.x=0;driver.group.visible=true;
+  driver.deathT=0;if(driver.headM)driver.headM.rotation.x=0; // slump state reset with the truck
   if(driver.marker)driver.marker.visible=true;
   truckUpdate(0);
 }
@@ -1618,6 +1687,13 @@ function truckUpdate(dt){
   _tk.set(0.35,2.05,1.35).applyMatrix4(truck.group.matrixWorld);
   driver.group.position.copy(_tk);
   driver.group.rotation.y=truck.group.rotation.y;
+  if(!driver.alive&&driver.deathT<1.3){driver.deathT+=dt; // DRIVER SLUMP 2.0 : head snaps on the hit, then the body folds onto the wheel with weight
+    const T=driver.deathT;
+    const snap=T<0.09?T/0.09:Math.max(0,1-(T-0.09)/0.3);
+    if(driver.headM)driver.headM.rotation.x=driver.hsSnap*(0.62+0.75*snap); // head onto the wheel — and it stays there
+    let sl=T<0.1?0.12*sstep(0,0.1,T):0.12+0.73*Math.pow(clamp((T-0.1)/0.5,0,1),2); // accelerating fold — ~0.6s to full slump
+    if(T>=0.6)sl=0.85-0.045*Math.sin(Math.PI*clamp((T-0.6)/0.3,0,1))*Math.exp(-(T-0.6)*3); // one-bounce settle
+    driver.group.rotation.x=sl;}
   /* dust trail : kicked up behind the rear wheels while rolling */
   truck.dustT+=dt;
   if(truck.speed>1.2&&truck.dustT>0.55/Math.max(1,truck.speed)){truck.dustT=0; // dust spacing stays ~0.55m of travel at any speed — no sliding look
@@ -1742,7 +1818,7 @@ function explodeSab(tg){
     if(e.chest().distanceTo(tg.pos)<kr){
       _td.copy(e.group.position).sub(tg.pos);_td.y=0;
       if(_td.lengthSq()<0.01)_td.set(0,0,1);_td.normalize();
-      killEnemy(e,_td);}}
+      killEnemy(e,_td,false,false,true);}} // blast kill : DEATH 2.0 launches the body on an arc
   if(truck.active&&truck.group&&truck.group.position.distanceTo(tg.pos)<kr+2)truck.dead=true; // blast stops the truck
   if(tg.kind==='fuel')for(const o of sabTargets)
     if(o!==tg&&o.alive&&o.kind==='fuel'&&o.pos.distanceTo(tg.pos)<12)chainQ.push({tg:o,t:0.4});
@@ -2340,7 +2416,7 @@ document.addEventListener('visibilitychange',()=>{ // hidden : release nothing; 
    scope DOM, rifle) and runs on every exit path: natural finish, mission change (calls in
    startMission / missionComplete / missionFail), firing again, scope toggle, an unknown
    phase, a total-time overrun, and a frame-loop watchdog if state leaves 'play'.        */
-const KC={active:false,phase:'',t:0,dur:0,total:0,travel:0,orbA:0,wasScoped:false,
+const KC={active:false,phase:'',t:0,dur:0,total:0,travel:0,orbA:0,wasScoped:false,ts:1,rush:null,
   dir:new THREE.Vector3(),from:new THREE.Vector3(),tgt:new THREE.Vector3(),orbC:new THREE.Vector3(),
   startP:new THREE.Vector3(),retP:new THREE.Vector3(),
   startQ:new THREE.Quaternion(),retQ:new THREE.Quaternion()};
@@ -2371,6 +2447,28 @@ const kcBullet=(function(){
   sp.scale.set(0.5,0.5,1);grp.add(sp);
   grp.userData.glowMat=sp.material;
   grp.visible=false;scene.add(grp);return grp;})();
+/* wind-rush : one looped noise source through a bandpass, alive only while
+   the cam runs. Gain/filter track the cam's speed and pitch down with the
+   bullet-time ramp; endKillcam stops it on every exit path. */
+function kcRushStart(){
+  const ac=audio();if(!ac||KC.rush)return;
+  try{
+    const src=ac.createBufferSource();src.buffer=nbuf(ac);src.loop=true;
+    const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=900;f.Q.value=0.6;
+    const g=ac.createGain();g.gain.value=0;
+    src.connect(f);f.connect(g);g.connect(aDest(ac));src.start();
+    KC.rush={src,f,g};
+  }catch(e){KC.rush=null;}
+}
+function kcRushSet(level,freq){
+  if(!KC.rush||!AC)return;const t=AC.currentTime;
+  KC.rush.g.gain.setTargetAtTime(level,t,0.05);
+  KC.rush.f.frequency.setTargetAtTime(freq,t,0.05);
+}
+function kcRushStop(){
+  if(!KC.rush)return;const r=KC.rush;KC.rush=null;
+  try{const t=AC?AC.currentTime:0;r.g.gain.setTargetAtTime(0,t,0.04);r.src.stop(t+0.25);}catch(e){}
+}
 function startBulletCam(e,dir){
   if(KC.active)endKillcam(); // re-entry : restore first, then start the new one
   KC.active=true;KC.phase='chase';KC.t=0;KC.dur=1.5;KC.total=0;
@@ -2382,11 +2480,13 @@ function startBulletCam(e,dir){
   if(G.scoped){scopeEl.style.display='none';$('zoomWrap').style.display='none';}
   rifle.visible=false;
   kcBullet.visible=true;
+  KC.ts=0.34;kcRushStart(); // KILLCAM 2.0 : the cam choreographs the world clock (frame loop reads KC.ts while active)
   G.slowmo=3.6;G.punchT=0; // letterbox + slow-mo cover chase + orbit
 }
 function endKillcam(){
   if(!KC.active)return;
   KC.active=false;KC.phase='';
+  KC.ts=1;kcRushStop(); // world clock restored + rush silenced — every exit path funnels through here
   kcBullet.visible=false;
   G.slowmo=0;G.punchT=0;
   camera.position.set(G.px,groundH(G.px,G.pz)+1.7,G.pz);
@@ -2409,26 +2509,50 @@ function kcUpdate(dt){
   KC.t+=dt;KC.total+=dt;
   if(KC.total>6){endKillcam();return;} // absolute overrun watchdog — camera never strands
   if(KC.phase==='chase'){
-    const k=Math.min(1,KC.t/KC.dur);
+    const u=Math.min(1,KC.t/KC.dur);
+    const k=1-Math.pow(1-u,1.5); // progress curve : fast off the muzzle, decelerating into the approach — a bullet-time arrival
     _kcA.copy(KC.from).addScaledVector(KC.dir,KC.travel*k); // bullet position along the shot line
     kcBullet.position.copy(_kcA);
     kcBullet.lookAt(_kcB.copy(_kcA).add(KC.dir));
-    KC.spin=(KC.spin||0)+dt*22;kcBullet.rotateZ(KC.spin); // rifling spin around the flight axis — the off-axis streak corkscrews
+    KC.spin=(KC.spin||0)+dt*22*(0.3+0.7*(1-u));kcBullet.rotateZ(KC.spin); // rifling spin — winds down with the round so it reads at bullet-time speed
     kcBullet.userData.glowMat.rotation=-KC.spin*1.7; // glow shimmer counter-rotates
     _kcP.set(-KC.dir.z,0,KC.dir.x).normalize(); // horizontal side vector
     _kcB.copy(_kcA).addScaledVector(KC.dir,-1.2).addScaledVector(_kcP,0.55);_kcB.y+=0.32; // chase cam : tight behind-side of the true-scale round
     camera.position.copy(_kcB);
-    camera.lookAt(_kcA.x+KC.dir.x*2.4,_kcA.y+KC.dir.y*2.4,_kcA.z+KC.dir.z*2.4);
-    camera.fov=55;camera.updateProjectionMatrix();
-    if(k>=1){if(G.kcam==='short'){endKillcam();return;} // SHORT pref : chase only, skip the orbit entirely
+    /* framing : early chase looks down the flight line; as the range closes
+       the victim takes over the frame, growing into the shot */
+    const bias=sstep(0.55,1,u)*0.8;
+    _kcB.set(_kcA.x+KC.dir.x*2.4,_kcA.y+KC.dir.y*2.4,_kcA.z+KC.dir.z*2.4).lerp(KC.tgt,bias);
+    camera.lookAt(_kcB);
+    camera.rotateZ(Math.sin(u*Math.PI*1.15)*0.07*(1-bias)); // banking roll along the arc — settles as the victim framing takes over
+    camera.fov=55+23*sstep(0.08,0.62,u);camera.updateProjectionMatrix(); // velocity FOV : widens 55 -> 78 as the flight builds
+    /* world clock : gentle slow-mo cruise, then the last ~0.7s ramps down to deep bullet-time */
+    KC.ts=u<0.53?lerp(0.34,0.24,u/0.53):lerp(0.24,0.12,(u-0.53)/0.47);
+    const spd=Math.pow(1-u,0.5); // cam speed factor : the rush swells with it and its pitch sags as ts drops
+    kcRushSet(0.04+0.30*spd,(420+1500*spd)*(0.35+0.65*(KC.ts/0.34)));
+    if(u>=1){ // IMPACT : freeze + FOV punch + burst on the victim, then orbit (SHORT ends after the impact beat)
+      KC.phase='impact';KC.t=0;KC.dur=0.09;KC.ts=0.02;
+      kcRushSet(0.02,300);
+      impactPuff(KC.tgt,'dirt'); // impact dust + shock on the victim
+      spawnBurst(KC.tgt,{color:0xd8c9a3,n:16,sp0:2.5,sp1:6.5,up0:1,up1:4,life:0.7,grav:6});
+    }
+  }
+  else if(KC.phase==='impact'){
+    KC.ts=0.02; // ~90ms of near-frozen time at the moment of the hit
+    camera.fov=78-6*Math.sin(Math.PI*Math.min(1,KC.t/KC.dur));camera.updateProjectionMatrix(); // tight 6° squeeze, released by the orbit ease
+    camera.position.x+=(Math.random()-0.5)*0.03;camera.position.y+=(Math.random()-0.5)*0.03; // impact jolt
+    if(KC.t>=KC.dur){
+      if(G.kcam==='short'){endKillcam();return;} // SHORT pref : chase + impact was the show — no orbit
       KC.phase='orbit';KC.t=0;KC.dur=1.6;KC.orbC.copy(KC.tgt);KC.orbC.y-=0.4;
       KC.orbA=Math.atan2(camera.position.x-KC.orbC.x,camera.position.z-KC.orbC.z);}
   }
   else if(KC.phase==='orbit'){
-    const k=Math.min(1,KC.t/KC.dur),a=KC.orbA+k*Math.PI*0.85; // ~150° sweep at 8m radius
-    camera.position.set(KC.orbC.x+Math.sin(a)*8,KC.orbC.y+2.6,KC.orbC.z+Math.cos(a)*8);
-    camera.lookAt(KC.orbC.x,KC.orbC.y,KC.orbC.z);
-    camera.fov=42;camera.updateProjectionMatrix();
+    const k=Math.min(1,KC.t/KC.dur),a=KC.orbA+k*Math.PI*0.67; // ~120° sweep, low + close (4.6m) at victim height, corpse centered
+    camera.position.set(KC.orbC.x+Math.sin(a)*4.6,KC.orbC.y+0.6,KC.orbC.z+Math.cos(a)*4.6);
+    camera.lookAt(KC.orbC.x,KC.orbC.y-0.5,KC.orbC.z);
+    camera.fov=lerp(78,46,sstep(0,0.45,KC.t));camera.updateProjectionMatrix(); // velocity FOV eases back through the orbit
+    KC.ts=lerp(0.12,0.30,sstep(0,0.5,KC.t)); // time loosens out of the freeze but stays heavy
+    kcRushSet(0.03,380);
     if(k>=1){
       KC.phase='return';KC.t=0;KC.dur=0.6;
       KC.startP.copy(camera.position);KC.startQ.copy(camera.quaternion);
@@ -2441,14 +2565,20 @@ function kcUpdate(dt){
     camera.position.lerpVectors(KC.startP,KC.retP,e2);
     camera.quaternion.slerpQuaternions(KC.startQ,KC.retQ,e2);
     camera.fov=G.scoped?68/G.zoom:68;camera.updateProjectionMatrix();
+    KC.ts=lerp(0.30,1,sstep(0.1,0.9,k)); // world returns to full speed behind the fade
+    kcRushSet(0.02,300);
+    /* fade through black at the midpoint : the letterbox bars close to meet,
+       the glide home happens behind them, then they open on the scope view */
+    const fh=k<0.42?lerp(8,50,sstep(0,1,k/0.42)):(k<0.58?50:lerp(50,8,sstep(0,1,(k-0.58)/0.42)));
+    $('ctop').style.height=$('cbot').style.height=fh+'vh';
     if(k>=1)endKillcam();
   }
   else endKillcam(); // unknown phase — restore rather than strand
 }
 
 /* ---------------- combat outcomes ---------------- */
-function killEnemy(e,dir,cam,hshot){
-  e.die(dir,hshot);G.kills++;
+function killEnemy(e,dir,cam,hshot,blast){
+  e.die(dir,hshot,blast);G.kills++;
   const now=G.swayT;
   G.chain=(now-G.lastKillT<8)?G.chain+1:1;G.lastKillT=now;
   const dist=camera.position.distanceTo(e.group.position);
@@ -2650,6 +2780,7 @@ function frame(now){
   if(G.slowmo>0){G.slowmo-=dt;G.slowT+=dt;           // killcam slow-mo : ramped in/out, not a hard cut
     ts=1-0.84*sstep(0,0.5,G.slowT)*sstep(0,0.4,Math.max(0,G.slowmo));}
   else G.slowT=0;
+  if(KC.active)ts=KC.ts; // KILLCAM 2.0 : while the cam runs it choreographs the world clock directly (cruise / bullet-time / freeze / release)
   let gdt=dt*ts;
   if(G.settingsOpen&&G.state==='play')gdt=0; // SETTINGS PAUSE : world clock + all play-state sim freeze while the panel is open
   G.swayT+=gdt;
@@ -2748,7 +2879,7 @@ function frame(now){
   G.fovCur+=(fovT-G.fovCur)*Math.min(1,dt*14);
   camera.fov=G.fovCur;camera.updateProjectionMatrix();
   }
-  const wantCine=G.slowmo>0;                                  // cinematic letterbox
+  const wantCine=G.slowmo>0||KC.active; // cinematic letterbox : stays up for the whole cam (the bars carry the return fade)
   if(wantCine!==G.cine){G.cine=wantCine;
     $('ctop').style.height=$('cbot').style.height=wantCine?'8vh':'0px';}
   rifle.position.set(Math.sin(t*1.1)*0.004,-Math.abs(Math.sin(t*1.1))*0.003,-kick*0.16);
