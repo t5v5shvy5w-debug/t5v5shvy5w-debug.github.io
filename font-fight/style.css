@@ -559,3 +559,18 @@ body:has(#roomScreen:not(.hidden)) #friendsBtn{display:none}
 #versus .vs-clash{z-index:3!important}
 #versus .vmeta{position:relative;z-index:3!important}
 #versus .count{position:relative;z-index:3!important}
+
+/* Polished map cards V10.33 */
+.map-card{position:relative;border:1px solid rgba(120,140,220,.18);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;background:#0a0d1c}
+.map-card:hover{transform:translateY(-3px);border-color:rgba(120,140,255,.4);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.map-card:active{transform:scale(.97)}
+.map-card.selected{border-color:var(--accent,#4d7cff);box-shadow:0 0 20px var(--accent,#4d7cff)}
+.map-prev{height:110px;position:relative;overflow:hidden}
+.map-grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:20px 20px;mask-image:linear-gradient(180deg,transparent,#000 40%)}
+.map-horizon{position:absolute;left:0;right:0;bottom:32%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.6;box-shadow:0 0 12px var(--accent)}
+.map-size-badge{position:absolute;top:10px;right:10px;font:800 11px system-ui;letter-spacing:1px;color:var(--accent);background:rgba(0,0,0,.5);border:1px solid var(--accent);border-radius:20px;padding:3px 10px;backdrop-filter:blur(4px)}
+.map-info{padding:12px 14px}
+.map-name{font-size:16px;font-weight:800;letter-spacing:.5px;color:#fff;margin-bottom:6px}
+.map-meta{display:flex;align-items:center;gap:8px}
+.map-size{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);text-transform:uppercase;letter-spacing:1px}
+.map-desc{font-size:12px;color:#8899bb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

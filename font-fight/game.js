@@ -436,10 +436,25 @@
     MAPS.forEach((m, i) => {
       const card = document.createElement("div");
       card.className = "map-card";
-      card.innerHTML = `<div class="map-prev" style="background:linear-gradient(165deg,${m.bg1},${m.bg2})"><div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 60%,${m.accent}33,transparent 70%)"></div><div style="position:absolute;bottom:8px;left:12px;font-size:11px;font-weight:800;letter-spacing:2px;color:${m.accent}">${m.mult}x SIZE</div></div><div class="map-info"><div class="map-name">${m.name}</div><div class="map-meta"><span class="map-size">${m.mult === 1 ? "Standard" : m.mult > 1.3 ? "Large" : "Bigger"}</span></div><div class="map-desc">${m.desc}</div></div>`;
+      const sizeLabel = m.mult === 1 ? "Standard" : m.mult >= 1.5 ? "Huge" : m.mult >= 1.3 ? "Large" : "Bigger";
+      card.innerHTML = `
+        <div class="map-prev" style="--accent:${m.accent};background:
+          radial-gradient(ellipse 80% 60% at 50% 100%, ${m.accent}44, transparent 70%),
+          radial-gradient(ellipse 50% 40% at 70% 20%, ${m.accent}22, transparent 60%),
+          linear-gradient(165deg, ${m.bg1}, ${m.bg2})">
+          <div class="map-grid-lines"></div>
+          <div class="map-horizon"></div>
+          <div class="map-size-badge">${m.mult}x</div>
+        </div>
+        <div class="map-info">
+          <div class="map-name">${m.name}</div>
+          <div class="map-meta"><span class="map-size" style="--accent:${m.accent}">${sizeLabel}</span><span class="map-desc">${m.desc}</span></div>
+        </div>`;
       card.onclick = () => {
-        onPick(i);
-        sfx("ui");
+        // Selection feedback
+        grid.querySelectorAll(".map-card").forEach(c => c.classList.remove("selected"));
+        card.classList.add("selected");
+        setTimeout(() => { onPick(i); sfx("ui"); }, 150);
       };
       grid.appendChild(card);
     });
