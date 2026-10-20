@@ -94,6 +94,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 #hitmark:before,#hitmark:after{content:"";position:absolute;left:16px;top:0;width:4px;height:36px;background:#ff5040;box-shadow:0 0 7px rgba(0,0,0,.9),0 0 3px #ff5040}
 #hitmark:before{transform:rotate(45deg)}#hitmark:after{transform:rotate(-45deg)}
 #hitmark.pop{animation:hpop .3s ease-out}
+#hitmark.hs{width:52px;height:52px;margin:-26px 0 0 -26px}
+#hitmark.hs:before,#hitmark.hs:after{left:23px;width:6px;height:52px;background:#ff1e1e;box-shadow:0 0 9px rgba(0,0,0,.9),0 0 4px #ff1e1e}
+.meter.decaying>i{animation:aldec 1.15s ease-in-out infinite}
+@keyframes aldec{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes hpop{0%{transform:scale(.55);opacity:1}35%{transform:scale(1.3);opacity:1}100%{transform:scale(1);opacity:0}}
 #killring{position:fixed;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border:3px solid rgba(255,90,60,.95);border-radius:50%;z-index:35;pointer-events:none;opacity:0}
 #killring.pop{animation:ringpop .5s ease-out}
@@ -221,6 +225,7 @@ function sTone(fr,dur,type,vol,slide){const ac=audio();if(!ac)return;const t=ac.
   g.gain.setValueAtTime(vol||0.18,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
   o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+dur+0.02);}
 const sHit=c=>sTone(1150+c*160,0.07,'square',0.12);
+const sThock=()=>sTone(170,0.1,'sine',0.2,-90); // soft kill-confirm thock layered under sKill
 const sKill=()=>{sTone(660,0.12,'triangle',0.2);setTimeout(()=>sTone(440,0.18,'triangle',0.2),90);};
 const sReload=()=>{sTone(300,0.06,'square',0.1);setTimeout(()=>sTone(420,0.06,'square',0.1),450);setTimeout(()=>sTone(520,0.08,'square',0.12),1100);};
 const sHurt=()=>sTone(110,0.25,'sawtooth',0.22,-60);
@@ -254,7 +259,8 @@ const G={
   hp:100, lastDmgT:-99,
   rifle:'longshot', // persisted pick; mag/vel/reload/cool come from RIFLES
   shots:0, hits:0, longest:0, bestChain:0, // mission debrief stats
-  yaw:0, pitch:0.02, kick:0,
+  lastNearT:-99, // last near-miss reaction (alarm quiet-period tracking)
+  yaw:0, pitch:0.02, kickT:99, fovCur:68, slowT:0,
   scoped:false, zoom:4, maxZoom:6,
   breathHeld:false, breath:100, breathFx:0,
   swayT:0,
@@ -523,7 +529,10 @@ let riverTex=null;
     d.position.set(x,groundH(x,z)+0.35,z);d.scale.set(rand(1,2.2),rand(0.5,0.9),rand(1,2));d.rotation.set(0,rand(0,3),0);d.updateMatrix();bushes.setMatrixAt(i,d.matrix);}
   bushes.castShadow=true;bushes.instanceMatrix.needsUpdate=true;scene.add(bushes);})();
 
-/* grass tufts : instanced crossed planes, static with varied rotation/scale */
+/* grass tufts : instanced crossed planes, static with varied rotation/scale.
+   Base transforms are kept in grassBase so the frame loop can lean the tufts
+   with the wind (rotating slice, no per-frame allocation). */
+let grassMesh=null;const grassBase=[];const _grassD=new THREE.Object3D();const grassSway={i:0};
 (function(){
   const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
   for(let i=0;i<16;i++){
@@ -562,8 +571,9 @@ let riverTex=null;
     d.position.set(x,h-0.06,z);
     d.scale.set(rand(0.7,1.6),rand(0.7,1.5),rand(0.7,1.6));
     d.rotation.set(0,rand(0,TAU),0);d.updateMatrix();
+    grassBase.push({x:d.position.x,y:d.position.y,z:d.position.z,sx:d.scale.x,sy:d.scale.y,sz:d.scale.z,ry:d.rotation.y});
     grass.setMatrixAt(placed,d.matrix);placed++;}
-  grass.count=placed;grass.instanceMatrix.needsUpdate=true;scene.add(grass);})();
+  grass.count=placed;grass.instanceMatrix.needsUpdate=true;scene.add(grass);grassMesh=grass;})();
 
 /* floating dust motes near the player's ridge position */
 const dust=(function(){
@@ -804,6 +814,7 @@ class Enemy{
     this.speed=rand(1.3,1.8);this.walkPhase=rand(0,TAU);this.pauseT=rand(0,2);
     this.radio=0;this.headYaw=0; // idle radio-call pose + head scan state
     this.relocT=rand(2,5);this.sprinting=false; // high-alarm relocation state
+    this.flinchT=0;this.crouchT=0;this.lastNearT0=-99; // near-miss reaction state
     this.shootCd=rand(1.5,3);this.strafe=rand(0,TAU);
     const g=this.group=new THREE.Group();
     const uni=hvt?0xa32424:(this.sniper?0x23262c:0x4c5530),skin=0xc9a07a;
@@ -873,6 +884,8 @@ class Enemy{
         this.fall=Math.min(1,this.fall+dt*2.4);g.rotation.x=-Math.PI/2*this.fall;this.marker&&(this.marker.visible=false);}
       return;}
     if(this.sniper){this.sniperUpdate(dt);return;}
+    if(this.flinchT>0)this.flinchT-=dt; // under-fire reaction timers
+    if(this.crouchT>0)this.crouchT-=dt;
     this.walkPhase+=dt*7;
     const px=G.px,pz=G.pz;
     const dx=px-g.position.x,dz=pz-g.position.z,distP=Math.hypot(dx,dz);
@@ -917,7 +930,7 @@ class Enemy{
       this.armR.rotation.z=lerp(this.armR.rotation.z,0,Math.min(1,dt*6));
       this.headYaw=lerp(this.headYaw,0,Math.min(1,dt*4));}
     this.headG.rotation.y=this.headYaw;
-    g.position.y=groundH(g.position.x,g.position.z)+(moving?Math.abs(Math.sin(this.walkPhase))*0.06:0);
+    g.position.y=groundH(g.position.x,g.position.z)+(moving?Math.abs(Math.sin(this.walkPhase))*0.06:0)-((this.flinchT>0||this.crouchT>0)?0.32:0); // crouch dip while flinching / holding cover
   }
   /* counter-sniper behavior : hold the post, face the ridge, cycle
      idle -> aim 1.5s (glint swells + laser shimmer) -> fire -> cool */
@@ -965,6 +978,28 @@ class Enemy{
     const dp=this.group.position.clone();dp.y+=0.5; // dust burst where the body drops
     spawnBurst(dp,{color:0xb8a888,n:10,sp0:0.8,sp1:2.6,up0:0.8,up1:2.6,life:0.9,grav:4});
   }
+}
+/* under-fire reaction : a near-miss flinches an enemy (crouch dip + startled pause,
+   small alarm bump); a second near-miss inside 3s — or a witnessed kill, or ANY
+   near-miss on an HVT — sends them sprinting to fresh cover via the same waypoint
+   machinery the high-alarm HVT relocation uses. Snipers hold their posts and the
+   truck driver has no patrol behavior, so both ignore this. */
+function reactToDanger(e,coverNow,alarmBump){
+  if(!e||!e.alive||e.sniper||e.isDriver)return;
+  const now=G.swayT;
+  e.flinchT=0.5;
+  e.pauseT=Math.max(e.pauseT||0,1.2);
+  e.sprinting=false;
+  G.alarm=Math.min(100,G.alarm+(alarmBump||4));
+  G.lastNearT=now;
+  if(coverNow||now-(e.lastNearT0||-99)<3){
+    e.lastNearT0=-99; // second-chance window consumed
+    const gp=e.group.position;
+    const nx=clamp(gp.x+rand(-25,25),-45,45);
+    const nz=clamp(gp.z+rand(-25,25),-CAMP_D-50,-CAMP_D+50);
+    e.wps.unshift([nx,nz]);e.wpi=0;e.sprinting=true;e.pauseT=0;e.crouchT=4;
+  }else e.lastNearT0=now; // first near-miss : open the 3s window
+  updateHUD();
 }
 function spawnEnemies(cfg){
   enemies.forEach(e=>{if(e!==driver)scene.remove(e.group);
@@ -1216,7 +1251,7 @@ function fireBullet(){
   scene.add(m);
   const vel=RIFLES[G.rifle].vel;
   bullets.push({m,sp:vel,vx:dir.x*vel,vy:dir.y*vel,vz:dir.z*vel,life:5}); // per-rifle muzzle velocity
-  G.kick=1;G.shake=0.55;G.flashT=0.14;G.alarm=Math.min(100,G.alarm+10);
+  G.kickT=0;G.shake=0.55;G.flashT=0.14;G.alarm=Math.min(100,G.alarm+10);
   flashSprite.material.rotation=rand(0,TAU);
   const bl=$('bloom');bl.style.transition='none';bl.style.opacity=0.85;
   requestAnimationFrame(()=>{bl.style.transition='opacity .2s';bl.style.opacity=0;});
@@ -1229,13 +1264,15 @@ function bulletUpdate(dt){
   for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];
     const steps=Math.max(1,Math.ceil(b.sp*dt/1.5));const sdt=dt/steps;
     let hit=null,ground=false,thit=false,shit=null;
+    let nearE=null,nearD2=36; // nearest pass within ~6m that ISN'T a hit -> near-miss reaction
     for(let s=0;s<steps;s++){
       b.vy-=9.8*sdt;b.vx+=wvx*1.6*sdt;b.vz+=wvz*1.6*sdt; // real gravity 9.8 m/s^2 — hold over with the mil-dots
       b.m.position.x+=b.vx*sdt;b.m.position.y+=b.vy*sdt;b.m.position.z+=b.vz*sdt;
       const p=b.m.position;
       for(const e of enemies){if(!e.alive)continue;
-        const c=e.chest(),dx=p.x-c.x,dy=p.y-c.y,dz=p.z-c.z;
-        if(dx*dx+dy*dy+dz*dz<1.1){hit=e;break;}}
+        const c=e.chest(),dx=p.x-c.x,dy=p.y-c.y,dz=p.z-c.z,d2=dx*dx+dy*dy+dz*dz;
+        if(d2<1.1){hit=e;break;}
+        if(d2<nearD2){nearD2=d2;nearE=e;}}
       if(hit)break;
       if(truck.active&&truck.group){_tv.copy(p);truck.group.worldToLocal(_tv); // truck body (driver sphere already checked above)
         if(Math.abs(_tv.x)<1.25&&_tv.y>0.2&&_tv.y<2.6&&Math.abs(_tv.z)<2.5){thit=true;break;}}
@@ -1247,26 +1284,30 @@ function bulletUpdate(dt){
     }
     b.life-=dt;
     _td.set(b.vx,b.vy,b.vz);b.m.lookAt(_tv.copy(b.m.position).add(_td));
-    if(hit){killEnemy(hit,_td.normalize(),true);scene.remove(b.m);bullets.splice(i,1);}
-    else if(shit){explodeSab(shit);scene.remove(b.m);bullets.splice(i,1);}
+    if(hit){const hshot=b.m.position.y>hit.chest().y+0.45; // headshot : round landed head-high
+      killEnemy(hit,_td.normalize(),true,hshot);scene.remove(b.m);bullets.splice(i,1);}
+    else{
+      if(nearE)reactToDanger(nearE,nearE.hvt); // suppressive fire : HVTs bolt for cover immediately
+      if(shit){explodeSab(shit);scene.remove(b.m);bullets.splice(i,1);}
     else if(thit){ // clipped the patrol truck : spark burst + tink, small alarm bump, no kill
-      spawnBurst(b.m.position,{color:0xffb13c,n:8,sp0:3,sp1:7,up0:2,up1:5,life:0.45,grav:13,add:1});
-      sTone(rand(2100,2600),0.06,'square',0.05);
+      impactPuff(b.m.position,'metal');
       G.alarm=Math.min(100,G.alarm+3);toast('TRUCK HIT — DRIVER STILL UP');
       scene.remove(b.m);bullets.splice(i,1);}
     else if(ground||b.life<=0){
-      if(ground){impactPuff(b.m.position);G.alarm=Math.min(100,G.alarm+8);}
-      scene.remove(b.m);bullets.splice(i,1);}
+      if(ground){impactPuff(b.m.position,'dirt');G.alarm=Math.min(100,G.alarm+8);}
+      scene.remove(b.m);bullets.splice(i,1);}}
   }
 }
-function impactPuff(p){
-  const m=new THREE.Mesh(new THREE.SphereGeometry(0.5,8,8),
-    new THREE.MeshBasicMaterial({color:0xcbb98f,transparent:true,opacity:0.9}));
+function impactPuff(p,kind){
+  const metal=kind==='metal';
+  const m=new THREE.Mesh(new THREE.SphereGeometry(metal?0.32:0.62,8,8),
+    new THREE.MeshBasicMaterial({color:metal?0xd8d8d8:0xcbb98f,transparent:true,opacity:0.9}));
   m.position.copy(p);scene.add(m);puffs.push({m,t:0});
-  spawnBurst(p,{color:0xbfae86,n:9,sp0:1,sp1:3.2,up0:1,up1:3.4,life:0.9,grav:5});       // dirt clods
-  spawnBurst(p,{color:0xffb13c,n:7,sp0:3,sp1:7,up0:2,up1:5,life:0.45,grav:13,add:1});  // spark burst
-  sTone(95,0.16,'sine',0.14,-40);
-  if(Math.random()<0.5)sTone(rand(2100,2600),0.06,'square',0.05);                     // rock tink
+  if(!metal)spawnBurst(p,{color:0xbfae86,n:12,sp0:1,sp1:3.6,up0:1,up1:3.8,life:1.0,grav:5}); // dirt clods
+  spawnBurst(p,{color:0xffb13c,n:metal?10:6,sp0:3,sp1:7,up0:2,up1:5,life:0.45,grav:13,add:1}); // sparks
+  sTone(metal?140:95,0.16,'sine',0.14,-40);
+  if(Math.random()<0.5||metal)sTone(rand(2100,2600),0.06,'square',0.05);                   // rock/metal tink
+  if(p.distanceTo(camera.position)<15)G.shake=Math.max(G.shake,0.4); // close impacts rattle the camera
 }
 function puffUpdate(dt){
   for(let i=puffs.length-1;i>=0;i--){const p=puffs[i];p.t+=dt;
@@ -1377,12 +1418,13 @@ const joyEl=$('joy'),knob=$('joyKnob');
 let joyId=null,joyCX=0,joyCY=0;
 let aimId=null,lastAX=0,lastAY=0;
 function aimByPixels(dx,dy){
-  const s=0.0021*G.sens*(G.scoped?0.4:1);
+  const s=0.0021*G.sens*(G.scoped?0.4*Math.pow(8/Math.max(2,G.zoom),0.7):1); // finer control as zoom climbs
   G.yaw=clamp(G.yaw-dx*s,-0.65,0.65);
   G.pitch=clamp(G.pitch+(G.invertY?dy:-dy)*s,-0.4,0.55);
 }
 function touchPos(t){return[t.clientX,t.clientY];}
 document.addEventListener('touchstart',e=>{
+  if(KC.active){kcTap();e.preventDefault();return;} // tap during bullet-cam : chase -> orbit, orbit -> end
   if(G.state!=='play')return;
   for(const t of e.changedTouches){
     const[x,y]=touchPos(t),el=document.elementFromPoint(x,y);
@@ -1428,7 +1470,7 @@ function bindBtn(id,down,up){
 bindBtn('btnFire',()=>fireBullet());
 bindBtn('btnScope',()=>setScoped(!G.scoped));
 bindBtn('btnReload',()=>startReload());
-$('zoomSlider').addEventListener('input',e=>{G.zoom=+e.target.value;if(G.scoped)camera.fov=68/G.zoom;camera.updateProjectionMatrix();updateHUD();});
+$('zoomSlider').addEventListener('input',e=>{G.zoom=+e.target.value;updateHUD();drawReticle();});
 /* desktop */
 if(!isTouch){
   renderer.domElement.addEventListener('click',()=>{
@@ -1443,7 +1485,7 @@ if(!isTouch){
   document.addEventListener('contextmenu',e=>e.preventDefault());
   document.addEventListener('wheel',e=>{if(G.scoped&&G.state==='play'){
     G.zoom=clamp(G.zoom+(e.deltaY>0?-0.5:0.5),2,G.maxZoom);
-    $('zoomSlider').value=G.zoom;camera.fov=68/G.zoom;camera.updateProjectionMatrix();updateHUD();}},{passive:true});
+    $('zoomSlider').value=G.zoom;updateHUD();}},{passive:true});
   document.addEventListener('keydown',e=>{
     if(G.state!=='play')return;
     if(e.key==='f'||e.key==='F')setScoped(!G.scoped);
@@ -1463,8 +1505,7 @@ function setScoped(on){
   $('hud').style.display=on?'none':'flex';
   $('xhair').style.display=on?'none':'block';
   rifle.visible=!on;
-  camera.fov=on?68/G.zoom:68;camera.updateProjectionMatrix();
-  updateNightTint();updateHUD();
+  updateNightTint();updateHUD(); // fov eases to the scoped value in the frame loop — no snap
 }
 function targetDistance(){
   const fwd=new THREE.Vector3();camera.getWorldDirection(fwd);
@@ -1579,9 +1620,17 @@ function endKillcam(){
   camera.position.set(G.px,groundH(G.px,G.pz)+1.7,G.pz);
   camera.rotation.set(G.pitch,G.yaw,0);
   camera.fov=G.scoped?68/G.zoom:68;camera.updateProjectionMatrix();
+  G.fovCur=camera.fov; // sync the smooth-zoom state so the frame loop doesn't re-ease from the killcam fov
   rifle.visible=!G.scoped;
   if(KC.wasScoped&&G.scoped){scopeEl.style.display='block';$('zoomWrap').style.display='flex';}
   KC.wasScoped=false;
+}
+function kcTap(){ // player-driven skip : chase jumps to the orbit, anything later ends it
+  if(!KC.active)return;
+  if(KC.phase==='chase'){
+    KC.phase='orbit';KC.t=0;KC.dur=1.6;KC.orbC.copy(KC.tgt);KC.orbC.y-=0.4;
+    KC.orbA=Math.atan2(camera.position.x-KC.orbC.x,camera.position.z-KC.orbC.z);}
+  else endKillcam();
 }
 function kcUpdate(dt){
   KC.t+=dt;KC.total+=dt;
@@ -1621,7 +1670,7 @@ function kcUpdate(dt){
 }
 
 /* ---------------- combat outcomes ---------------- */
-function killEnemy(e,dir,cam){
+function killEnemy(e,dir,cam,hshot){
   e.die(dir);G.kills++;
   const now=G.swayT;
   G.chain=(now-G.lastKillT<8)?G.chain+1:1;G.lastKillT=now;
@@ -1630,11 +1679,20 @@ function killEnemy(e,dir,cam){
   const pts=e.sniper?150:Math.round((100+dist*0.6)*G.chain); // counter-snipers pay a flat 150 bounty
   G.score+=pts;G.missionScore+=pts;
   G.alarm=Math.min(100,G.alarm+6);
-  sHit(G.chain);sKill();
+  for(const o of enemies){ // witnessed kill : anyone close and facing the drop bolts for cover
+    if(o===e||!o.alive||o.sniper||o.isDriver)continue;
+    const op=o.group.position,ep=e.group.position;
+    const wx=ep.x-op.x,wz=ep.z-op.z,wd=Math.hypot(wx,wz);
+    if(wd<25&&wd>0.01){
+      const dot=(Math.sin(o.group.rotation.y)*wx+Math.cos(o.group.rotation.y)*wz)/wd;
+      if(dot>0.25)reactToDanger(o,true,10);}}
+  sHit(G.chain);sKill();sThock();
+  if(hshot)sTone(2300,0.09,'square',0.14); // headshot ping — higher and sharper
   const hm=$('hitmark'),kr=$('killring');
-  hm.classList.remove('pop');kr.classList.remove('pop');void hm.offsetWidth;
+  hm.classList.remove('pop');hm.classList.remove('hs');kr.classList.remove('pop');void hm.offsetWidth;
+  if(hshot)hm.classList.add('hs');
   hm.classList.add('pop');kr.classList.add('pop');
-  toast((e.hvt?'HVT DOWN':(e.sniper?'SNIPER DOWN':'GUARD DOWN'))+'  +'+pts+(G.chain>1?'  x'+G.chain+' CHAIN':''));
+  toast((hshot?'HEADSHOT — ':'')+(e.hvt?'HVT DOWN':(e.sniper?'SNIPER DOWN':'GUARD DOWN'))+'  +'+pts+(G.chain>1?'  x'+G.chain+' CHAIN':''));
   if(cam&&dist>300)startBulletCam(e,dir); // BULLET-CAM : only for actual bullet kills, never explosion kills
   updateHUD();
   checkMissionDone();
@@ -1756,16 +1814,24 @@ function campFxUpdate(dt){
     p.s.material.opacity=0.34*(1-k)*Math.min(1,k*6);}
 }
 let lastT=performance.now();
+function kickEnv(){const T=0.22;if(G.kickT>=T)return 0;const k=G.kickT/T; // recoil spring : fast rise, ~180ms settle
+  return Math.sin(Math.min(1,k/0.18)*Math.PI*0.5)*(1-k);}
 function frame(now){
   requestAnimationFrame(frame);
   const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
   let ts=1;
-  if(G.slowmo>0){G.slowmo-=dt;ts=0.16;}           // killcam slow-mo
+  if(G.slowmo>0){G.slowmo-=dt;G.slowT+=dt;           // killcam slow-mo : ramped in/out, not a hard cut
+    ts=1-0.84*sstep(0,0.5,G.slowT)*sstep(0,0.4,Math.max(0,G.slowmo));}
+  else G.slowT=0;
   const gdt=dt*ts;
   G.swayT+=gdt;
   const t=G.swayT;
   if(G.state==='play'){
-    if(G.alarm<100&&t-G.lastShotT>4)G.alarm=Math.max(0,G.alarm-1.6*gdt);
+    const heatFloor=Math.min(40,(G.mission-1)*10); // alarm cools after 6 quiet seconds, down to the mission heat floor
+    const quiet=t-G.lastShotT>6&&t-G.lastKillT>6&&t-G.lastNearT>6;
+    const decaying=quiet&&G.alarm>heatFloor;
+    if(decaying)G.alarm=Math.max(heatFloor,G.alarm-1.5*gdt);
+    $('alarmFill').parentNode.classList.toggle('decaying',decaying);
     if(G.alarm>=100&&!G.converged){G.converged=true;toast('ALARM 100% — PATROLS CONVERGING');}
     if(G.alarm>G.peakAlarm)G.peakAlarm=G.alarm; // ghost-bonus tracking
     if(G.px!==frame._lpx||G.pz!==frame._lpz){G.lastMoveT=t;frame._lpx=G.px;frame._lpz=G.pz;} // movement (sniper accuracy)
@@ -1785,7 +1851,8 @@ function frame(now){
   puffUpdate(dt);sparkUpdate(dt);shellUpdate(dt);
   msmokeUpdate(dt);campFxUpdate(dt);boomUpdate(dt);
   const swY=0,swP=0; // scope sway removed entirely — MW's call
-  G.kick=Math.max(0,G.kick-dt*4.5);
+  G.kickT+=dt;
+  const kick=kickEnv();
   let pYaw=0,pPitch=0;
   if(G.punchT>0){G.punchT-=dt;const k=Math.max(0,G.punchT/0.5);pYaw=G.punchYaw*k;pPitch=G.punchPitch*k;}
   if(KC.active&&G.state!=='play')endKillcam(); // mission ended mid-killcam — restore now
@@ -1794,15 +1861,16 @@ function frame(now){
   camera.position.set(G.px,groundH(G.px,G.pz)+1.7,G.pz);
   const shX=(Math.random()-0.5)*G.shake*0.06,shY=(Math.random()-0.5)*G.shake*0.06;
   G.shake=Math.max(0,G.shake-dt*3.2);
-  camera.rotation.set(G.pitch+swP+pPitch+Math.sin(G.kick*Math.PI)*0.035+shX,G.yaw+swY+pYaw+shY,0);
-  const baseFov=G.scoped?68/G.zoom:68;                        // killcam subtle zoom-in
-  camera.fov=baseFov*(G.slowmo>0?0.78:1);camera.updateProjectionMatrix();
+  camera.rotation.set(G.pitch+swP+pPitch+kick*0.045+shX,G.yaw+swY+pYaw+shY,0);
+  const fovT=(G.scoped?68/Math.max(2,G.zoom):68)*(G.slowmo>0?0.78:1); // smooth scope zoom : ~120ms ease, no snap
+  G.fovCur+=(fovT-G.fovCur)*Math.min(1,dt*14);
+  camera.fov=G.fovCur;camera.updateProjectionMatrix();
   }
   const wantCine=G.slowmo>0;                                  // cinematic letterbox
   if(wantCine!==G.cine){G.cine=wantCine;
     $('ctop').style.height=$('cbot').style.height=wantCine?'8vh':'0px';}
-  rifle.position.set(Math.sin(t*1.1)*0.004,-Math.abs(Math.sin(t*1.1))*0.003,-G.kick*0.16);
-  rifle.rotation.x=Math.sin(G.kick*Math.PI)*0.06;
+  rifle.position.set(Math.sin(t*1.1)*0.004,-Math.abs(Math.sin(t*1.1))*0.003,-kick*0.16);
+  rifle.rotation.x=kick*0.07;
   if(G.reloading){ // bolt-action reload animation on the viewmodel
     const ph=clamp(1-G.reloadT/G.reloadMax,0,1);
     const pull=Math.sin(clamp(ph/0.55,0,1)*Math.PI);
@@ -1816,12 +1884,27 @@ function frame(now){
   else{muzzleFlash.intensity=0;flashSprite.visible=false;}
   muzzleFlash.position.copy(camera.position);
   for(const c of clouds){c.position.x+=c.userData.v*dt;if(c.position.x>700)c.position.x=-700;}
+  { /* grass sway : tufts lean with the real wind vector in a rolling wave — read wind off the ground.
+         Only a rotating slice of instances is recomposed per frame; no allocations. */
+    if(grassMesh&&grassBase.length){
+      const wvx=Math.sin(G.windDir),wvz=Math.cos(G.windDir),lb=G.windSpd*0.022;
+      const n=grassBase.length;
+      grassSway.i=(grassSway.i+80)%n;
+      for(let k=0;k<80;k++){
+        const b=grassBase[(grassSway.i+k)%n];
+        const lk=lb*(0.55+0.45*Math.sin(t*2.4+b.x*0.12+b.z*0.09));
+        _grassD.position.set(b.x,b.y,b.z);
+        _grassD.scale.set(b.sx,b.sy,b.sz);
+        _grassD.rotation.set(wvz*lk,b.ry,-wvx*lk);
+        _grassD.updateMatrix();
+        grassMesh.setMatrixAt((grassSway.i+k)%n,_grassD.matrix);}
+      grassMesh.instanceMatrix.needsUpdate=true;}}
   { /* drifting dust motes around the ridge : no allocations, in-place float32 writes */
     const a=dust.userData.arr,n=dust.userData.n;
     for(let i=0;i<n;i++){
-      a[i*3]+=(0.35+Math.sin(G.windDir)*G.windSpd*0.12)*dt;
+      a[i*3]+=(0.15+Math.sin(G.windDir)*G.windSpd*0.55)*dt;   // motes ride the actual wind vector — read wind off the air
       a[i*3+1]+=Math.sin(t*0.8+i*2.1)*0.3*dt;
-      a[i*3+2]+=Math.cos(G.windDir)*G.windSpd*0.12*dt;
+      a[i*3+2]+=Math.cos(G.windDir)*G.windSpd*0.55*dt;
       const gy=groundH(a[i*3],a[i*3+2]);
       if(a[i*3]>18)a[i*3]=-18;else if(a[i*3]<-18)a[i*3]=18;
       if(a[i*3+2]>40)a[i*3+2]=4;else if(a[i*3+2]<4)a[i*3+2]=40;
