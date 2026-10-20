@@ -12,12 +12,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 #c{position:fixed;inset:0;z-index:0}
 #c canvas{display:block}
 /* ---------- HUD ---------- */
-#hud{position:fixed;top:calc(8px + env(safe-area-inset-top));left:10px;z-index:30;display:flex;flex-direction:column;gap:4px;pointer-events:none}
-.bar{background:rgba(8,12,8,.62);color:#e9f2e4;font-size:12px;line-height:1.5;padding:2px 9px;border-left:3px solid #7fd67f;letter-spacing:1px;white-space:nowrap;border-radius:0 4px 4px 0}
-.bar b{color:#fff}
-.meterwrap{display:flex;align-items:center;gap:6px}
-.meter{flex:1;height:8px;min-width:70px;background:rgba(255,255,255,.14);border-radius:4px;overflow:hidden}
-.meter>i{display:block;height:100%;width:100%;border-radius:4px;transform-origin:left;transition:transform .12s linear}
+#hud{position:fixed;top:calc(8px + env(safe-area-inset-top));left:10px;z-index:30;display:flex;flex-direction:column;pointer-events:none;width:230px;background:rgba(8,12,8,.62);backdrop-filter:blur(6px) saturate(.8);-webkit-backdrop-filter:blur(6px) saturate(.8);border:1px solid rgba(190,230,190,.22);border-radius:10px;padding:7px 12px 8px;color:#e9f2e4;font-variant-numeric:tabular-nums;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+.hrow{display:flex;align-items:baseline;gap:12px;padding:2.5px 0;flex-wrap:wrap}
+.hrow+.hrow{border-top:1px solid rgba(190,230,190,.12)}
+.hlab{font-size:9px;letter-spacing:1.6px;color:#8aa086;font-weight:700;flex:none}
+.hval{font-size:13px;color:#fff;font-weight:700;letter-spacing:.5px}
+.hstat{display:flex;align-items:baseline;gap:5px;white-space:nowrap}
+.hscore{font-size:19px;color:#fff;font-weight:800;letter-spacing:.5px;line-height:1.1}
+.hbest{margin-left:auto;font-size:9px;letter-spacing:1.6px;color:#8aa086;font-weight:700}
+.hbest b{font-size:12px;color:#c9d8c4;font-weight:700}
+.ghostchip{display:inline-block;font-size:9px;letter-spacing:1.2px;color:#ffe9a8;background:rgba(255,210,90,.14);border:1px solid rgba(255,220,150,.45);border-radius:20px;padding:2px 8px;margin-left:auto;font-weight:700;white-space:nowrap}
+.ghostchip:empty{display:none}
+.hmeter{display:flex;align-items:center;gap:8px;padding:3px 0}
+.hmeter .hlab{width:38px}
+.meter{flex:1;height:6px;background:rgba(255,255,255,.13);border-radius:3px;overflow:hidden}
+.meter>i{display:block;height:100%;width:100%;border-radius:3px;transform-origin:left;transition:transform .12s linear}
+.hmeterval{font-size:11px;color:#fff;font-weight:700;min-width:32px;text-align:right}
+#windChip{position:fixed;top:calc(58px + env(safe-area-inset-top));right:10px;z-index:30;pointer-events:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px;background:rgba(8,12,8,.62);backdrop-filter:blur(6px) saturate(.8);-webkit-backdrop-filter:blur(6px) saturate(.8);border:1px solid rgba(190,230,190,.22);border-radius:10px;padding:6px 11px;color:#e9f2e4;font-variant-numeric:tabular-nums;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+#ammoChip{position:fixed;right:16px;bottom:calc(208px + env(safe-area-inset-bottom));z-index:30;pointer-events:none;text-align:right;background:rgba(8,12,8,.62);backdrop-filter:blur(6px) saturate(.8);-webkit-backdrop-filter:blur(6px) saturate(.8);border:1px solid rgba(190,230,190,.22);border-radius:10px;padding:7px 13px 8px;color:#e9f2e4;font-variant-numeric:tabular-nums;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+#hAmmo{font-size:21px;font-weight:800;color:#fff;letter-spacing:3px;line-height:1.15}
+.hrifle{font-size:9px;letter-spacing:1.8px;color:#8aa086;font-weight:700;margin-top:1px}
+.hrifle b{color:#c9d8c4;font-weight:700}
 /* ---------- crosshair (unscoped) ---------- */
 #xhair{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(235,245,235,.92);box-shadow:0 0 5px #000;z-index:20;pointer-events:none}
 /* ---------- scope overlay : perfect circle ---------- */
@@ -103,14 +118,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 <div id="c"></div>
 
 <div id="hud">
-  <div class="bar">SCORE <b id="hScore">0</b> &nbsp;BEST <b id="hBest">0</b></div>
-  <div class="bar">MISSION <b id="hMission">1</b> &nbsp;HVT <b id="hHvt">0/0</b> &nbsp;KILLS <b id="hKills">0</b></div>
-  <div class="bar">WIND <b id="hWind">—</b> &nbsp;ZOOM <b id="hZoom">—</b></div>
-  <div class="bar">AMMO <b id="hAmmo">IIIII</b></div>
-  <div class="bar">RIFLE <b id="hRifle">LONGSHOT</b></div>
-  <div class="bar">SABOTAGE <b id="hSab">0/0</b> <b id="hGhost" style="color:#ffe9a8"></b></div>
-  <div class="bar meterwrap">ALARM <span class="meter"><i id="alarmFill" style="background:#e8b23a;transform:scaleX(0)"></i></span><b id="hAlarm">0%</b></div>
-  <div class="bar meterwrap">HP <span class="meter"><i id="hpFill" style="background:#6fd67f;transform:scaleX(1)"></i></span></div>
+  <div class="hrow">
+    <span class="hlab">SCORE</span><b id="hScore" class="hscore">0</b>
+    <span class="hbest">BEST <b id="hBest">0</b></span>
+  </div>
+  <div class="hrow">
+    <span class="hstat"><span class="hlab">MISSION</span><b id="hMission" class="hval">1</b></span>
+    <span class="hstat"><span class="hlab">HVT</span><b id="hHvt" class="hval">0/0</b></span>
+    <span class="hstat"><span class="hlab">KILLS</span><b id="hKills" class="hval">0</b></span>
+  </div>
+  <div class="hrow">
+    <span class="hstat"><span class="hlab">SABOTAGE</span><b id="hSab" class="hval">0/0</b></span>
+    <b id="hGhost" class="ghostchip"></b>
+  </div>
+  <div class="hrow hmeter"><span class="hlab">ALARM</span><span class="meter"><i id="alarmFill" style="background:#e8b23a;transform:scaleX(0)"></i></span><b id="hAlarm" class="hmeterval">0%</b></div>
+  <div class="hrow hmeter"><span class="hlab">HP</span><span class="meter"><i id="hpFill" style="background:#6fd67f;transform:scaleX(1)"></i></span><span class="hmeterval"></span></div>
+</div>
+<div id="windChip">
+  <span class="hstat"><span class="hlab">WIND</span><b id="hWind" class="hval">—</b></span>
+  <span class="hstat"><span class="hlab">ZOOM</span><b id="hZoom" class="hval">—</b></span>
+</div>
+<div id="ammoChip">
+  <b id="hAmmo">IIIII</b>
+  <div class="hrifle"><b id="hRifle">LONGSHOT</b></div>
 </div>
 <div id="xhair"></div>
 
