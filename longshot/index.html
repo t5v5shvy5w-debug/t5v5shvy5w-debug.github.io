@@ -113,6 +113,7 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 .setrow{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:12px 0;font-size:13px}
 .sethead{font-size:12px;letter-spacing:3px;color:#8fd68f;margin:18px 0 2px;text-align:left;border-bottom:1px solid #2c4a2c;padding-bottom:5px}
 #fpsRead{position:fixed;left:14px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:50;font:11px monospace;color:#9fe09f;background:rgba(8,12,8,.55);padding:3px 8px;border-radius:6px;display:none;pointer-events:none}
+#pauseChip{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top));transform:translateX(-50%);z-index:65;font:600 12px ui-monospace,monospace;letter-spacing:4px;color:#ffe9a8;background:rgba(8,12,8,.62);border:1px solid rgba(255,233,168,.4);padding:5px 14px 5px 18px;border-radius:20px;display:none;pointer-events:none}
 .setrow input[type=checkbox]{width:22px;height:22px}
 .setrow input[type=range]{width:130px}
 #hitmark{position:fixed;left:50%;top:50%;z-index:35;width:36px;height:36px;margin:-18px 0 0 -18px;pointer-events:none;opacity:0}
@@ -184,6 +185,7 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 <div class="cine" id="ctop"></div>
 <div class="cine" id="cbot"></div>
 <div id="toast"></div>
+<div id="pauseChip">PAUSED</div>
 <div id="scorePop"></div>
 <div id="fpsRead"></div>
 <div id="setBtn">&#9881;</div>
@@ -198,10 +200,13 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
     <div class="setrow"><span>Aim sensitivity</span><input type="range" id="sens" min="0.5" max="2" step="0.1" value="1"></div>
     <div class="setrow"><span>Scoped sensitivity</span><input type="range" id="sensScope" min="0.5" max="2" step="0.1" value="1"></div>
     <div class="setrow"><span>Mute all sound</span><input type="checkbox" id="setMute"></div>
+    <div class="setrow"><span>Volume</span><input type="range" id="setVol" min="0" max="1" step="0.05" value="1"></div>
     <div class="setrow"><span>Auto-reload on empty</span><input type="checkbox" id="setAutoR" checked></div>
     <div class="setrow"><span>Reduce flashes</span><input type="checkbox" id="setFlash"></div>
+    <div class="setrow"><span>Reduce shake</span><input type="checkbox" id="setShake"></div>
     <div class="setrow"><span>Killcam</span><select id="setKcam"><option value="on">ON</option><option value="short">SHORT</option><option value="off">OFF</option></select></div>
     <div class="setrow"><span>Reticle color</span><select id="setRet"><option value="black">BLACK</option><option value="red">RED</option><option value="green">GREEN</option></select></div>
+    <div class="setrow"><span>Scope button</span><select id="setScopeMode"><option value="toggle">TOGGLE</option><option value="hold">HOLD</option></select></div>
     <div class="sethead">GRAPHICS</div>
     <div class="setrow"><span>Quality</span><select id="setQual"><option value="auto">AUTO</option><option value="low">LOW</option><option value="medium">MEDIUM</option><option value="high">HIGH</option><option value="ultra">ULTRA</option></select></div>
     <div class="setrow"><span>Shadows</span><input type="checkbox" id="setShad" checked></div>
@@ -209,6 +214,7 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
     <div class="setrow"><span>Particles</span><select id="setPart"><option value="low">LOW</option><option value="medium">MEDIUM</option><option value="high">HIGH</option></select></div>
     <div class="setrow"><span>Show FPS</span><input type="checkbox" id="setFps"></div>
     <div class="setrow"><span style="color:#8aa086">Desktop: click to lock mouse &middot; right-click / F scope &middot; wheel zoom &middot; R reload</span></div>
+    <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="row"><button class="mbtn" id="setClose">DONE</button></div>
   </div>
 </div>
@@ -262,35 +268,35 @@ function sShot(pitch){const ac=audio();if(!ac)return;const t=ac.currentTime;cons
   const cs=ac.createBufferSource();cs.buffer=nbuf(ac);
   const cf=ac.createBiquadFilter();cf.type='highpass';cf.frequency.value=1400*P;
   const cg=ac.createGain();cg.gain.setValueAtTime(0.34,t);cg.gain.exponentialRampToValueAtTime(0.001,t+0.09);
-  cs.connect(cf);cf.connect(cg);cg.connect(ac.destination);cs.start(t);cs.stop(t+0.1);
+  cs.connect(cf);cf.connect(cg);cg.connect(aDest(ac));cs.start(t);cs.stop(t+0.1);
   /* body : the working noise burst */
   const s=ac.createBufferSource();s.buffer=nbuf(ac);
   const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(3200*P,t);f.frequency.exponentialRampToValueAtTime(220,t+0.28);
   const g=ac.createGain();g.gain.setValueAtTime(0.5,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.32);
-  s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t);s.stop(t+0.35);
+  s.connect(f);f.connect(g);g.connect(aDest(ac));s.start(t);s.stop(t+0.35);
   /* low thump : chest weight under the crack */
   const bo=ac.createOscillator(),bg=ac.createGain();bo.type='sine';
   bo.frequency.setValueAtTime(110*P,t);bo.frequency.exponentialRampToValueAtTime(48*P,t+0.16);
   bg.gain.setValueAtTime(0.32,t);bg.gain.exponentialRampToValueAtTime(0.001,t+0.2);
-  bo.connect(bg);bg.connect(ac.destination);bo.start(t);bo.stop(t+0.22);
+  bo.connect(bg);bg.connect(aDest(ac));bo.start(t);bo.stop(t+0.22);
   /* valley echo : one delayed, lowpassed tail at -14dB under the body */
   const es=ac.createBufferSource();es.buffer=nbuf(ac);
   const ef=ac.createBiquadFilter();ef.type='lowpass';ef.frequency.value=380;
   const eg=ac.createGain();eg.gain.setValueAtTime(0.0001,t);
   eg.gain.setValueAtTime(0.1,t+0.28);eg.gain.exponentialRampToValueAtTime(0.001,t+0.62);
-  es.connect(ef);ef.connect(eg);eg.connect(ac.destination);es.start(t+0.28);es.stop(t+0.68);}
+  es.connect(ef);ef.connect(eg);eg.connect(aDest(ac));es.start(t+0.28);es.stop(t+0.68);}
 /* short supersonic crack-by : a round snapping past the player's ear */
 function sCrack(vol){const ac=audio();if(!ac)return;const t=ac.currentTime;
   const s=ac.createBufferSource();s.buffer=nbuf(ac);
   const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=2600;f.Q.value=0.8;
   const g=ac.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.07);
-  s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t);s.stop(t+0.09);}
+  s.connect(f);f.connect(g);g.connect(aDest(ac));s.start(t);s.stop(t+0.09);}
 function sTone(fr,dur,type,vol,slide,lp){const ac=audio();if(!ac)return;const t=ac.currentTime;
   const o=ac.createOscillator(),g=ac.createGain();o.type=type||'sine';o.frequency.setValueAtTime(fr,t);
   if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,fr+slide),t+dur);
   g.gain.setValueAtTime(vol||0.18,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
   if(lp){const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=lp;o.connect(f);f.connect(g);}
-  else o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+dur+0.02);}
+  else o.connect(g);g.connect(aDest(ac));o.start(t);o.stop(t+dur+0.02);}
 const sHit=c=>sTone(1150+c*160,0.07,'square',0.12);
 const sThock=()=>sTone(170,0.1,'sine',0.2,-90); // soft kill-confirm thock layered under sKill
 const sKill=()=>{sTone(660,0.12,'triangle',0.2);setTimeout(()=>sTone(440,0.18,'triangle',0.2),90);};
@@ -299,7 +305,7 @@ const sHurt=()=>sTone(110,0.25,'sawtooth',0.22,-60);
 const sClick=()=>sTone(700,0.05,'square',0.08);
 const sEmpty=()=>sTone(180,0.08,'square',0.12);
 /* ---------------- ambient audio : wind loop + distant birds ---------------- */
-let windGain=null,birdT=9;
+let windGain=null,birdT=9,masterGain=null; // masterGain : VOLUME slider's node — every synth path connects through aDest()
 function initAmbient(ac){
   if(windGain)return;
   try{
@@ -308,11 +314,14 @@ function initAmbient(ac){
     const src=ac.createBufferSource();src.buffer=buf;src.loop=true;
     const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=420;
     windGain=ac.createGain();windGain.gain.value=0;
-    src.connect(f);f.connect(windGain);windGain.connect(ac.destination);src.start();
+    src.connect(f);f.connect(windGain);windGain.connect(aDest(ac));src.start();
   }catch(e){windGain=null;}
 }
+function aDest(ac){return masterGain||ac.destination;} // synth output target : the volume node once it exists
 function audio(){if(G.muted)return null; // MUTE : master gate — every synth path funnels through audio() and bails on null
-  try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();if(AC&&AC.state==='running')initAmbient(AC);}catch(e){}return AC;}
+  try{if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();
+    masterGain=AC.createGain();masterGain.gain.value=G.volume;masterGain.connect(AC.destination);} // VOLUME : one master node for the whole mix
+  if(AC.state==='suspended')AC.resume();if(AC&&AC.state==='running')initAmbient(AC);}catch(e){}return AC;}
 function birdChirp(){const ac=AC;if(G.muted||!ac||ac.state!=='running')return;
   const n=2+(Math.random()*2|0);
   for(let i=0;i<n;i++)setTimeout(()=>sTone(rand(2300,3300),0.09,'sine',0.035,-1500),i*150);}
@@ -334,6 +343,7 @@ const G={
   swayT:0,
   invertY:false, sens:1, muted:false, kcam:'on', retColor:'black',
   invertX:false, sensScope:1, autoReload:true, reduceFlash:false, // gameplay settings
+  settingsOpen:false, volume:1, scopeHold:false, reduceShake:false, // QOL batch 2 : settings pause / volume / scope mode / shake
   quality:'auto', shadows:true, grass:true, particleMul:1, showFps:false, // graphics settings
   windDir:0, windSpd:2, windT:0, windDir0:0, // windDir0 : mission base heading; live dir/spd gust around it
   perfN:0, perfT0:0, perfLow:0, perfHigh:0, perfLvl:0, // adaptive-quality tracker (silent)
@@ -475,16 +485,20 @@ const clouds=[];
 
 /* distant mountain silhouette ring : jagged hazy ridge wall at ~760m */
 (function(){
-  const SEG=56,RAD=760,pos=[],idx=[];
+  const SEG=56,RAD=760,pos=[],idx=[],col=[];
+  const cBase=new THREE.Color(0x7c8ba6),cSnow=new THREE.Color(0xe9eff6),cTmp=new THREE.Color();
   for(let i=0;i<=SEG;i++){
     const a=i/SEG*TAU,px=Math.cos(a)*RAD,pz=Math.sin(a)*RAD;
     const h=55+95*Math.abs(Math.sin(i*2.39)*0.5+Math.sin(i*5.17)*0.32+Math.sin(i*9.31)*0.18);
     pos.push(px,-40,pz,px,h,pz);
+    cTmp.copy(cBase).lerp(cSnow,sstep(92,132,h)); // snow-cap tint on the high peaks (vertex colors)
+    col.push(cBase.r,cBase.g,cBase.b,cTmp.r,cTmp.g,cTmp.b);
     if(i<SEG){const b=i*2;idx.push(b,b+1,b+2,b+1,b+3,b+2);}}
   const geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
   geo.setIndex(idx);
-  const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x7c8ba6,side:THREE.DoubleSide,fog:true}));
+  const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,fog:true}));
   scene.add(m);})();
 
 /* distant birds : dark V shapes gliding in slow circles */
@@ -581,22 +595,36 @@ let riverTex=null;
   const blobG=new THREE.IcosahedronGeometry(2,0),blobM=new THREE.MeshLambertMaterial({color:0x4a6a34});
   const trunks=new THREE.InstancedMesh(trunkG,trunkM,spots.length),
         cones=new THREE.InstancedMesh(coneG,coneM,spots.length),
-        blobs=new THREE.InstancedMesh(blobG,blobM,spots.length);
-  let ci=0,bi=0;
+        blobs=new THREE.InstancedMesh(blobG,blobM,spots.length),
+        cones2=new THREE.InstancedMesh(coneG,coneM,spots.length),
+        blobs2=new THREE.InstancedMesh(blobG,blobM,spots.length);
+  let ci=0,bi=0,ci2=0,bi2=0;
+  const tint=new THREE.Color();
   spots.forEach((s,i)=>{const[x,h,z,sc,ry]=s;
-    d.position.set(x,h+1.1*sc,z);d.scale.setScalar(sc);d.rotation.set(0,ry,0);d.updateMatrix();trunks.setMatrixAt(i,d.matrix);
-    if(i%5<3){d.position.set(x,h+(2.2+2.4)*sc,z);d.scale.set(sc*rand(0.85,1.25),sc*rand(0.9,1.4),sc*rand(0.85,1.25));d.updateMatrix();cones.setMatrixAt(ci++,d.matrix);
-      d.scale.set(0.001,0.001,0.001);d.updateMatrix();blobs.setMatrixAt(bi++,d.matrix);}
-    else{d.position.set(x,h+(2.2+1.8)*sc,z);d.scale.set(sc*rand(0.9,1.3),sc*rand(0.8,1.1),sc*rand(0.9,1.3));d.updateMatrix();blobs.setMatrixAt(bi++,d.matrix);
-      d.scale.set(0.001,0.001,0.001);d.updateMatrix();cones.setMatrixAt(ci++,d.matrix);}});
-  cones.count=ci;blobs.count=bi;
-  [trunks,cones,blobs].forEach(m=>{m.castShadow=true;m.instanceMatrix.needsUpdate=true;scene.add(m);});
-  /* rocks */
-  const rockG=new THREE.DodecahedronGeometry(1,0),rockM=new THREE.MeshLambertMaterial({color:0x7b7b72});
-  const rocks=new THREE.InstancedMesh(rockG,rockM,60);
-  for(let i=0;i<60;i++){const x=rand(-280,280),z=rand(-330,20);
-    d.position.set(x,groundH(x,z)+0.2,z);const s=rand(0.4,2.2);d.scale.set(s,s*rand(0.6,1),s);d.rotation.set(rand(0,3),rand(0,3),0);d.updateMatrix();rocks.setMatrixAt(i,d.matrix);}
-  rocks.castShadow=true;rocks.instanceMatrix.needsUpdate=true;scene.add(rocks);
+    tint.setRGB(rand(0.82,1.04),rand(0.9,1.07),rand(0.8,1.0)); // per-tree hue variance (instance color multiplies the material)
+    d.position.set(x,h+1.1*sc,z);d.scale.setScalar(sc);d.rotation.set(0,ry,0);d.updateMatrix();trunks.setMatrixAt(i,d.matrix);trunks.setColorAt(i,tint);
+    if(i%5<3){d.position.set(x,h+(2.2+2.4)*sc,z);d.scale.set(sc*rand(0.85,1.25),sc*rand(0.9,1.4),sc*rand(0.85,1.25));d.updateMatrix();cones.setMatrixAt(ci,d.matrix);cones.setColorAt(ci,tint);ci++;
+      d.position.set(x,h+(2.2+4.5)*sc,z);d.scale.set(sc*rand(0.5,0.7),sc*rand(0.6,0.9),sc*rand(0.5,0.7));d.updateMatrix();cones2.setMatrixAt(ci2,d.matrix);cones2.setColorAt(ci2,tint);ci2++; // layered upper cone
+      d.scale.set(0.001,0.001,0.001);d.updateMatrix();blobs.setMatrixAt(bi,d.matrix);blobs.setColorAt(bi,tint);bi++;blobs2.setMatrixAt(bi2,d.matrix);blobs2.setColorAt(bi2,tint);bi2++;}
+    else{d.position.set(x,h+(2.2+1.8)*sc,z);d.scale.set(sc*rand(0.9,1.3),sc*rand(0.8,1.1),sc*rand(0.9,1.3));d.updateMatrix();blobs.setMatrixAt(bi,d.matrix);blobs.setColorAt(bi,tint);bi++;
+      d.position.set(x+1.1*sc,h+(2.2+2.4)*sc,z+0.5*sc);d.scale.set(sc*rand(0.5,0.75),sc*rand(0.45,0.65),sc*rand(0.5,0.75));d.updateMatrix();blobs2.setMatrixAt(bi2,d.matrix);blobs2.setColorAt(bi2,tint);bi2++; // satellite blob cluster
+      d.scale.set(0.001,0.001,0.001);d.updateMatrix();cones.setMatrixAt(ci,d.matrix);cones.setColorAt(ci,tint);ci++;cones2.setMatrixAt(ci2,d.matrix);cones2.setColorAt(ci2,tint);ci2++;}});
+  cones.count=ci;blobs.count=bi;cones2.count=ci2;blobs2.count=bi2;
+  [trunks,cones,blobs,cones2,blobs2].forEach(m=>{m.castShadow=true;m.instanceMatrix.needsUpdate=true;
+    if(m.instanceColor)m.instanceColor.needsUpdate=true;scene.add(m);});
+  /* rocks : three dodecahedron variants with deterministic per-vertex jitter —
+     beveled, irregular, no two alike (the hash keys off position, so shared
+     vertices move together and the surface never cracks) */
+  const rockM=new THREE.MeshLambertMaterial({color:0x7b7b72});
+  const mkRockGeo=seed=>{const g2=new THREE.DodecahedronGeometry(1,0),pa=g2.attributes.position;
+    for(let vi=0;vi<pa.count;vi++){const vx=pa.getX(vi),vy=pa.getY(vi),vz=pa.getZ(vi);
+      const k=0.78+0.45*Math.abs(Math.sin(vx*12.9+vy*78.2+vz*37.7+seed*17.3));
+      pa.setXYZ(vi,vx*k,vy*k*0.82,vz*k);}
+    g2.computeVertexNormals();return g2;};
+  for(let v=0;v<3;v++){const rocks=new THREE.InstancedMesh(mkRockGeo(v+1),rockM,20);
+    for(let i=0;i<20;i++){const x=rand(-280,280),z=rand(-330,20);
+      d.position.set(x,groundH(x,z)+0.2,z);const s=rand(0.4,2.2);d.scale.set(s,s*rand(0.6,1),s);d.rotation.set(rand(0,3),rand(0,3),0);d.updateMatrix();rocks.setMatrixAt(i,d.matrix);}
+    rocks.castShadow=true;rocks.instanceMatrix.needsUpdate=true;scene.add(rocks);}
   /* ridge bushes near player */
   const bushG=new THREE.IcosahedronGeometry(1,0),bushM=new THREE.MeshLambertMaterial({color:0x39542a});
   const bushes=new THREE.InstancedMesh(bushG,bushM,16);
@@ -617,9 +645,10 @@ let grassMesh=null;const grassBase=[];const _grassD=new THREE.Object3D();const g
     x.fillStyle=gr;x.beginPath();
     x.moveTo(bx-w,64);x.lineTo(bx+w,64);x.lineTo(bx+lean,64-h);x.closePath();x.fill();}
   const tex=new THREE.CanvasTexture(cv);
-  /* merge 3 planes at 60° into one tuft geometry */
+  /* merge 4 planes at 45° into one tuft geometry : a true cross-plane pair
+     (0°/90°) plus the two diagonals — fuller from every angle */
   const geos=[];
-  for(let k=0;k<3;k++){const p=new THREE.PlaneGeometry(1.5,1.05);p.translate(0,0.5,0);p.rotateY(k*Math.PI/3);geos.push(p);}
+  for(let k=0;k<4;k++){const p=new THREE.PlaneGeometry(1.5,1.05);p.translate(0,0.5,0);p.rotateY(k*Math.PI/4);geos.push(p);}
   const posA=[],norA=[],uvA=[],idxA=[];let off=0;
   geos.forEach(p=>{const pa=p.attributes.position.array,na=p.attributes.normal.array,ua=p.attributes.uv.array,ia=p.index.array;
     for(let i=0;i<pa.length;i++)posA.push(pa[i]);
@@ -696,6 +725,16 @@ const campFx={flames:[],smokes:[],light:null}; // campfire flame sprites, smoke 
     for(const sx of[-1,1])for(const sz of[-1,1])
       strut(new THREE.Vector3(sx*(W/2-0.15),H-0.35,sz*LEN/2),
             new THREE.Vector3(sx*(W/2+1.4),0.05,sz*(LEN/2+1.3)),0.025,guyM,t);
+    /* entrance : dark opening triangle + canvas flap tied open + eave strips */
+    const openG=new THREE.BufferGeometry();
+    openG.setAttribute('position',new THREE.Float32BufferAttribute([-0.55,0,0,0.55,0,0,0,1.5,0],3));
+    openG.computeVertexNormals();
+    const openM=new THREE.Mesh(openG,new THREE.MeshBasicMaterial({color:0x0a0c08,side:THREE.DoubleSide}));
+    openM.position.z=LEN/2+0.02;t.add(openM);
+    const flap=new THREE.Mesh(new THREE.PlaneGeometry(0.65,1.45),triM);
+    flap.position.set(0.66,0.72,LEN/2+0.1);flap.rotation.y=0.55;flap.rotation.x=0.12;t.add(flap);
+    for(const sx of[-1,1]){const eave=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.05,LEN),tentM);
+      eave.position.set(sx*1.36,0.05,0);t.add(eave);}
     t.position.set(px,groundH(px,pz),pz);t.rotation.y=ry;g.add(t);}
   makeTent(-14,-CAMP_D-8,0.4);makeTent(12,-CAMP_D-6,2.2);makeTent(2,-CAMP_D+12,1.1);
   /* crates : stacked in varied piles, some stenciled AMMO / RATIONS */
@@ -715,7 +754,9 @@ const campFx={flames:[],smokes:[],light:null}; // campfire flame sprites, smoke 
    [8,-7,0],[9.4,-6.3,0],
    [-3,-13,0],[-1.6,-13.4,0],[-3,-11.7,0],[-2.3,-12.6,1.32],[16,9,0]].forEach((p,ci)=>{
     const c=new THREE.Mesh(crateG,ci===0||ci===2?crateM_Ammo:(ci===6?crateM_Rat:crateM));
-    c.position.set(p[0],oy+0.65+p[2],-CAMP_D+p[1]);c.rotation.y=rand(0,0.7);c.castShadow=true;g.add(c);});
+    c.position.set(p[0],oy+0.65+p[2],-CAMP_D+p[1]);c.rotation.y=rand(0,0.7);c.castShadow=true;g.add(c);
+    for(const fy of[-0.6,0.6]){const fr=new THREE.Mesh(new THREE.BoxGeometry(1.38,0.09,1.38),woodM); // frame bands : corner-bracket reinforcement
+      fr.position.set(p[0],oy+0.65+p[2]+fy,-CAMP_D+p[1]);fr.rotation.y=c.rotation.y;g.add(fr);}});
   /* watchtower */
   const tx=20,tz=-CAMP_D-18,ty=groundH(tx,tz);
   for(const[lx,lz]of[[-1.4,-1.4],[1.4,-1.4],[-1.4,1.4],[1.4,1.4]]){
@@ -728,10 +769,23 @@ const campFx={flames:[],smokes:[],light:null}; // campfire flame sprites, smoke 
   for(let i=0;i<6;i++){
     const rung=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.09,1.2),woodM);
     rung.position.set(tx-2.3,ty+0.9+i*1.15,tz);g.add(rung);}
+  /* platform railing : corner posts (they also carry the roof) + top/mid rails,
+     open on the ladder side */
+  for(const[rx,rz]of[[-1.85,-1.85],[1.85,-1.85],[-1.85,1.85],[1.85,1.85]]){
+    const post=new THREE.Mesh(new THREE.BoxGeometry(0.09,1.3,0.09),woodM);
+    post.position.set(tx+rx,ty+7.82,tz+rz);post.castShadow=true;g.add(post);}
+  for(const ry2 of[8.12,7.7]){
+    const rN=new THREE.Mesh(new THREE.BoxGeometry(3.8,0.07,0.07),woodM);rN.position.set(tx,ty+ry2,tz-1.85);g.add(rN);
+    const rS=new THREE.Mesh(new THREE.BoxGeometry(3.8,0.07,0.07),woodM);rS.position.set(tx,ty+ry2,tz+1.85);g.add(rS);
+    const rE=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.07,3.8),woodM);rE.position.set(tx+1.85,ty+ry2,tz);g.add(rE);}
   /* flag */
   const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,6,6),woodM);pole.position.set(-8,oy+3,-CAMP_D+8);g.add(pole);
   const flag=new THREE.Mesh(new THREE.PlaneGeometry(2,1.2,8,4),new THREE.MeshBasicMaterial({color:0xc02020,side:THREE.DoubleSide}));
   flag.position.set(-6.9,oy+5.2,-CAMP_D+8);g.add(flag);flagMesh=flag; // segmented so the frame loop can wave it
+  const finial=new THREE.Mesh(new THREE.SphereGeometry(0.13,10,8),new THREE.MeshPhongMaterial({color:0xc9a227,shininess:120,specular:0xffe9a8}));
+  finial.position.set(-8,oy+6.12,-CAMP_D+8);g.add(finial); // brass pole finial
+  const hem=new THREE.Mesh(new THREE.BoxGeometry(0.07,1.24,0.035),new THREE.MeshLambertMaterial({color:0x8c1616}));
+  hem.position.set(-1.0,0,0);flag.add(hem); // reinforced cloth hem at the pole edge (wave amplitude is zero there)
   /* campfire : stone ring + crossed logs + layered flickering flame + fire light */
   (function(){
     const fx=2,fz=-CAMP_D-4,fy=groundH(fx,fz);
@@ -741,6 +795,9 @@ const campFx={flames:[],smokes:[],light:null}; // campfire flame sprites, smoke 
       s.position.set(fx+Math.cos(a)*0.85,fy+0.12,fz+Math.sin(a)*0.85);s.castShadow=true;g.add(s);}
     for(const a of[0.5,1.7,2.9]){const log=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.11,1.5,6),woodM);
       log.position.set(fx,fy+0.25,fz);log.rotation.set(Math.PI/2.3,a,0);log.castShadow=true;g.add(log);}
+    /* log pile stacked beside the fire */
+    for(const pp of[[1.75,0.1,0.35],[1.75,0.1,0.57],[1.75,0.27,0.46]]){const pl=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.1,1.15,6),woodM);
+      pl.rotation.x=Math.PI/2;pl.position.set(fx+pp[0],fy+pp[1],fz+pp[2]);pl.castShadow=true;g.add(pl);}
     const mkFlame=(r1,c1)=>{const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
       const gr=x.createRadialGradient(32,36,2,32,32,30);
       gr.addColorStop(0,'rgba(255,244,200,1)');gr.addColorStop(0.35,c1);gr.addColorStop(1,'rgba(255,90,10,0)');
@@ -816,20 +873,36 @@ const rifle=new THREE.Group();
   const lensM=new THREE.MeshPhongMaterial({color:0x0a1a2e,shininess:200,specular:0xaaccff});
   const add=(geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);rifle.add(m);return m;};
   add(new THREE.BoxGeometry(0.1,0.15,0.72),metal,0.27,-0.27,-0.72);            // receiver
+  add(new THREE.BoxGeometry(0.02,0.05,0.15),dark,0.325,-0.26,-0.64);          // ejection port
+  add(new THREE.BoxGeometry(0.03,0.03,0.09),metal2,0.27,-0.2,-0.4);            // charging handle
   /* picatinny rail with cross notches */
   add(new THREE.BoxGeometry(0.055,0.022,0.62),metal2,0.27,-0.185,-0.72);
   for(let i=0;i<7;i++)add(new THREE.BoxGeometry(0.075,0.03,0.028),metal2,0.27,-0.182,-0.99+i*0.09);
+  /* handguard under the barrel with side rail strips */
+  add(new THREE.BoxGeometry(0.09,0.1,0.52),metal2,0.27,-0.315,-1.05);
+  add(new THREE.BoxGeometry(0.02,0.03,0.46),metal,0.325,-0.3,-1.05);
+  add(new THREE.BoxGeometry(0.02,0.03,0.46),metal,0.215,-0.3,-1.05);
   /* fluted barrel : main tube + collar rings */
   const barrel=add(new THREE.CylinderGeometry(0.026,0.026,0.95,10),metal,0.27,-0.245,-1.52);barrel.rotation.x=Math.PI/2;
   for(const cz of[-1.25,-1.52,-1.79]){const ring=add(new THREE.CylinderGeometry(0.033,0.033,0.06,10),metal2,0.27,-0.245,cz);ring.rotation.x=Math.PI/2;}
   /* suppressor */
   const sup=add(new THREE.CylinderGeometry(0.046,0.046,0.38,12),dark,0.27,-0.245,-2.14);sup.rotation.x=Math.PI/2;
   const supCap=add(new THREE.CylinderGeometry(0.038,0.046,0.05,12),metal2,0.27,-0.245,-2.34);supCap.rotation.x=Math.PI/2;
+  /* muzzle brake slots across the suppressor body */
+  add(new THREE.BoxGeometry(0.098,0.018,0.05),dark,0.27,-0.245,-2.26);
+  add(new THREE.BoxGeometry(0.018,0.098,0.05),dark,0.27,-0.245,-2.26);
+  /* folding bipod : two splayed legs under the handguard */
+  for(const bsx of[-1,1]){const leg=add(new THREE.CylinderGeometry(0.011,0.013,0.3,6),metal2,0.27+bsx*0.05,-0.42,-1.18);
+    leg.rotation.z=bsx*0.38;leg.rotation.x=0.25;}
   /* scope : tube, bells, mounting rings, glass lenses */
   const tube=add(new THREE.CylinderGeometry(0.05,0.05,0.42,12),metal,0.27,-0.125,-0.78);tube.rotation.x=Math.PI/2;
+  add(new THREE.CylinderGeometry(0.028,0.03,0.05,10),metal2,0.27,-0.052,-0.78); // elevation turret
+  const turW=add(new THREE.CylinderGeometry(0.026,0.028,0.045,10),metal2,0.203,-0.125,-0.78);turW.rotation.z=Math.PI/2; // windage turret
+  const turP=add(new THREE.CylinderGeometry(0.026,0.028,0.045,10),metal2,0.337,-0.125,-0.78);turP.rotation.z=Math.PI/2; // parallax knob
   const bell=add(new THREE.CylinderGeometry(0.055,0.075,0.13,12),metal,0.27,-0.125,-1.03);bell.rotation.x=Math.PI/2;
   const ocular=add(new THREE.CylinderGeometry(0.062,0.055,0.1,12),metal,0.27,-0.125,-0.52);ocular.rotation.x=Math.PI/2;
   const lensF=add(new THREE.CircleGeometry(0.062,16),lensM,0.27,-0.125,-1.096);lensF.rotation.y=Math.PI;
+  const sheen=add(new THREE.CircleGeometry(0.03,12),new THREE.MeshBasicMaterial({color:0x9fd0ff,transparent:true,opacity:0.4,blending:THREE.AdditiveBlending,depthWrite:false}),0.288,-0.107,-1.099);sheen.rotation.y=Math.PI; // objective lens sheen
   const lensR=add(new THREE.CircleGeometry(0.05,16),lensM,0.27,-0.125,-0.468);
   for(const rz of[-0.66,-0.9]){const ring=add(new THREE.TorusGeometry(0.056,0.013,8,18),metal2,0.27,-0.125,rz);}
   add(new THREE.BoxGeometry(0.05,0.06,0.08),metal2,0.27,-0.185,-0.66);         // mount posts
@@ -839,8 +912,11 @@ const rifle=new THREE.Group();
   add(new THREE.BoxGeometry(0.07,0.055,0.26),tan,0.27,-0.195,-0.26);           // cheek riser
   const butt=add(new THREE.BoxGeometry(0.095,0.24,0.06),dark,0.27,-0.27,0.03);  // butt pad
   const grip=add(new THREE.BoxGeometry(0.055,0.15,0.07),dark,0.27,-0.375,-0.5);grip.rotation.x=0.35;
+  for(let i=0;i<3;i++){const rib=add(new THREE.BoxGeometry(0.058,0.014,0.074),metal2,0.27,-0.345-i*0.032,-0.487-i*0.013);rib.rotation.x=0.35;} // grip ribs
   const mag=add(new THREE.BoxGeometry(0.06,0.17,0.13),metal2,0.27,-0.4,-0.78);mag.rotation.x=0.12;
+  const mag2=add(new THREE.BoxGeometry(0.058,0.13,0.12),metal2,0.27,-0.51,-0.745);mag2.rotation.x=0.34; // curved mag lower segment
   add(new THREE.BoxGeometry(0.03,0.05,0.16),dark,0.27,-0.335,-0.62);          // trigger guard area
+  add(new THREE.BoxGeometry(0.014,0.06,0.02),metal,0.27,-0.36,-0.615);        // trigger blade
   /* bolt : handle + knob (reload animation moves this group's z) */
   const bolt=new THREE.Group();bolt.position.set(0.315,-0.19,-0.72);rifle.add(bolt);
   const bs=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.06,8),metal2);bs.rotation.x=Math.PI/2;bolt.add(bs);
@@ -905,8 +981,11 @@ class Enemy{
     const pantsM=M(0x3f4433),bootM=M(0x1e1c16),vestM=M(0x23251e),packM=M(0x3a3d2a);
     /* legs : hip pivots so the walk cycle swings from the hip */
     const mkLeg=sx=>{const p=new THREE.Group();p.position.set(sx*0.13,0.62,0);g.add(p);
-      bx(0.17,0.5,0.18,pantsM,0,-0.27,0,p);
-      bx(0.19,0.14,0.3,bootM,0,-0.55,0.04,p);
+      bx(0.17,0.5,0.18,pantsM,0,-0.27,0,p);           // thigh
+      bx(0.13,0.3,0.14,pantsM,0,-0.44,0,p);           // tapered shin
+      bx(0.16,0.13,0.06,vestM,0,-0.3,0.1,p);          // knee pad
+      bx(0.19,0.14,0.3,bootM,0,-0.55,0.04,p);         // boot
+      bx(0.19,0.04,0.34,bootM,0,-0.6,0.05,p);         // sole
       return p;};
     this.legL=mkLeg(-1);this.legR=mkLeg(1);
     /* torso : jacket + tactical vest plate + belt + backpack + bedroll */
@@ -915,26 +994,58 @@ class Enemy{
     bx(0.56,0.12,0.4,vestM,0,0.72,0);
     bx(0.36,0.46,0.2,packM,0,1.0,-0.28);
     bx(0.3,0.1,0.06,packM,0,1.32,-0.3);
+    /* plate-carrier detail : mag pouches across the chest, collar, shoulder pads */
+    for(const px of[-0.16,0,0.16])bx(0.11,0.19,0.07,packM,px,1.02,0.23);
+    bx(0.34,0.09,0.26,M(uni),0,1.3,0);                // collar
+    bx(0.17,0.07,0.22,vestM,-0.31,1.27,0);bx(0.17,0.07,0.22,vestM,0.31,1.27,0); // shoulder pads
+    /* backpack detail : rolled bedroll + radio antenna */
+    const broll=new THREE.Mesh(new THREE.CylinderGeometry(0.085,0.085,0.42,8),packM);
+    broll.rotation.z=Math.PI/2;broll.position.set(0,1.28,-0.32);broll.castShadow=true;g.add(broll);
+    const ant=new THREE.Mesh(new THREE.CylinderGeometry(0.011,0.015,0.72,5),M(0x14161a));
+    ant.position.set(0.14,1.6,-0.3);ant.rotation.z=-0.1;g.add(ant);
+    if(this.sniper){ /* ghillie drape : ragged strips over the shoulders + back */
+      const ghM=M(0x4a5a30);
+      bx(0.58,0.34,0.44,ghM,0,1.22,-0.04);
+      for(const gx of[-0.24,-0.08,0.08,0.24])bx(0.05,0.3,0.05,ghM,gx,1.0,0.19);
+      for(const gx of[-0.18,0,0.18])bx(0.05,0.36,0.05,ghM,gx,0.98,-0.3);}
     /* head : pivot group so idle look-around can yaw it */
     this.headG=new THREE.Group();this.headG.position.set(0,1.4,0);g.add(this.headG);
     const hg=this.headG;
     bx(0.24,0.26,0.24,M(skin),0,0,0,hg);
     if(hvt){const b=new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.17,0.08,8),M(0xff2222));
-      b.position.set(0.04,0.18,0);b.rotation.z=-0.14;hg.add(b);}
+      b.position.set(0.04,0.18,0);b.rotation.z=-0.14;hg.add(b);
+      const shades=new THREE.Mesh(new THREE.BoxGeometry(0.23,0.055,0.03),M(0x0c0e12)); // HVT sunglasses
+      shades.position.set(0,0.02,0.125);hg.add(shades);}
+    else if(this.sniper){const hood=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.23,0.2,8),M(0x44502e)); // ghillie hood
+      hood.position.set(0,0.15,-0.02);hood.castShadow=true;hg.add(hood);
+      const hoodLip=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.26,0.05,8),M(0x3c4828));
+      hoodLip.position.set(0,0.06,-0.01);hg.add(hoodLip);}
     else{const hm=new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.21,0.15,8),M(0x2e3324));
       hm.position.set(0,0.17,0);hm.castShadow=true;hg.add(hm);
       const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.24,0.03,8),M(0x2e3324));
-      brim.position.set(0,0.11,0.02);hg.add(brim);}
+      brim.position.set(0,0.11,0.02);hg.add(brim);
+      const strap=new THREE.Mesh(new THREE.CylinderGeometry(0.225,0.225,0.035,8),M(0x1c1f16)); // helmet strap band
+      strap.position.set(0,0.09,0);hg.add(strap);
+      const nvg=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.06,0.05),M(0x1c1f16)); // NVG mount nub
+      nvg.position.set(0,0.15,0.13);hg.add(nvg);}
     /* arms : shoulder pivots, bent to hold a rifle across the chest */
+    const gloveM=M(0x24231f);
     const mkArm=sx=>{const p=new THREE.Group();p.position.set(sx*0.32,1.2,0);g.add(p);
       const up=bx(0.12,0.36,0.13,M(uni),0,-0.18,0,p);up.rotation.x=-0.5;
-      const fo=bx(0.11,0.32,0.12,M(uni),0,-0.32,0.2,p);fo.rotation.x=-1.0;
-      bx(0.1,0.1,0.12,M(skin),0,-0.3,0.38,p);
+      bx(0.13,0.1,0.14,vestM,0,-0.13,0.06,p).rotation.x=-0.5; // elbow pad
+      const fo=bx(0.1,0.32,0.11,M(uni),0,-0.32,0.2,p);fo.rotation.x=-1.0; // tapered forearm
+      bx(0.12,0.07,0.13,gloveM,0,-0.26,0.31,p);       // glove cuff
+      bx(0.1,0.1,0.12,gloveM,0,-0.3,0.38,p);          // gloved hand
       return p;};
     this.armL=mkArm(-1);this.armR=mkArm(1);
-    /* service rifle held across the chest */
-    bx(0.07,0.09,0.85,M(0x1c1c1c),0.06,0.98,0.34);
-    bx(0.06,0.16,0.1,M(0x1c1c1c),0.06,0.88,0.3);
+    /* service rifle held across the chest : body, magazine, optic, stock, barrel */
+    const gunM=M(0x1c1c1c);
+    bx(0.07,0.09,0.85,gunM,0.06,0.98,0.34);
+    bx(0.06,0.16,0.1,gunM,0.06,0.88,0.3);            // magazine
+    bx(0.05,0.07,0.13,gunM,0.06,1.07,0.32);          // optic
+    bx(0.06,0.12,0.2,gunM,0.06,0.96,-0.14);           // stock
+    const gbar=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.3,6),gunM); // barrel + muzzle tip
+    gbar.rotation.x=Math.PI/2;gbar.position.set(0.06,1.0,0.88);g.add(gbar);
     g.scale.setScalar(1.5);
     g.position.set(x,groundH(x,z),z);
     g.rotation.y=rand(0,TAU);
@@ -1239,9 +1350,48 @@ function buildTruck(){
   bx(2.2,0.9,2.3,bodyM,0,1.55,-1.05);        // bed walls
   const wg=new THREE.CylinderGeometry(0.55,0.55,0.4,10);
   const wm=new THREE.MeshLambertMaterial({color:0x1a1a1a});
+  const hubM=new THREE.MeshLambertMaterial({color:0x43433c});
   for(const pair of[[-1.15,1.5],[1.15,1.5],[-1.15,-1.4],[1.15,-1.4]]){
     const w=new THREE.Mesh(wg,wm);w.rotation.z=Math.PI/2;w.position.set(pair[0],0.55,pair[1]);
-    w.castShadow=true;g.add(w);truck.wheels.push(w);}
+    w.castShadow=true;g.add(w);truck.wheels.push(w);
+    const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.23,0.23,0.44,10),hubM); // hub cap
+    hub.rotation.z=Math.PI/2;hub.position.copy(w.position);g.add(hub);truck.wheels.push(hub);
+    const tread=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.075,6,14),wm);      // chunky tread ring
+    tread.rotation.y=Math.PI/2;tread.position.copy(w.position);tread.castShadow=true;g.add(tread);truck.wheels.push(tread);}
+  /* exterior detail : grille, bumpers, light lenses, mirrors, handles, seams */
+  const lensM=new THREE.MeshPhongMaterial({color:0xd9e2da,shininess:160,specular:0xffffff});
+  const tailM=new THREE.MeshLambertMaterial({color:0x8a1a10});
+  bx(1.5,0.42,0.07,darkM,0,1.04,2.22);                       // grille
+  bx(2.3,0.24,0.14,darkM,0,0.52,2.28);                       // front bumper
+  bx(2.3,0.24,0.14,darkM,0,0.52,-2.28);                      // rear bumper
+  bx(0.36,0.17,0.05,lensM,-0.74,1.47,2.21);bx(0.36,0.17,0.05,lensM,0.74,1.47,2.21); // headlight lenses
+  bx(0.32,0.15,0.05,tailM,-0.86,1.62,-2.21);bx(0.32,0.15,0.05,tailM,0.86,1.62,-2.21); // taillights
+  for(const sx of[-1,1]){
+    bx(0.05,0.04,0.3,darkM,sx*1.2,2.08,2.02);                // mirror arm
+    bx(0.06,0.24,0.17,darkM,sx*1.22,2.08,2.18);              // mirror head
+    bx(0.05,0.05,0.24,darkM,sx*1.11,1.6,0.8);                // door handle
+    bx(0.03,0.72,0.04,darkM,sx*1.105,1.375,2.14);}           // door seam
+  const stack=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,1.9,8),darkM); // exhaust stack behind the cab
+  stack.position.set(-1.0,1.75,0.18);stack.castShadow=true;g.add(stack);
+  const stackTip=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.16,8),darkM);
+  stackTip.position.set(-1.0,2.74,0.18);g.add(stackTip);
+  bx(0.52,0.42,0.05,darkM,-1.15,0.32,-2.02);bx(0.52,0.42,0.05,darkM,1.15,0.32,-2.02); // mud flaps
+  const spare=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.3,12),wm); // spare tire on the tailgate
+  spare.rotation.x=Math.PI/2;spare.position.set(0,1.45,-2.38);spare.castShadow=true;g.add(spare);
+  const spareHub=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.32,10),hubM);
+  spareHub.rotation.x=Math.PI/2;spareHub.position.set(0,1.45,-2.38);g.add(spareHub);
+  /* cargo load : crates + a barrel riding in the bed */
+  const cargoM=new THREE.MeshLambertMaterial({color:0x6e5636});
+  bx(0.72,0.72,0.72,cargoM,-0.5,2.36,-1.3);bx(0.6,0.6,0.6,cargoM,0.45,2.3,-0.7);
+  const barrel2=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.8,10),new THREE.MeshLambertMaterial({color:0x5a5142}));
+  barrel2.position.set(0.55,2.4,-1.6);barrel2.castShadow=true;g.add(barrel2);
+  /* cab interior hint : dash, steering wheel + column, seats — glimpsed through the open window band */
+  bx(1.8,0.22,0.38,darkM,0,1.64,1.9);                        // dashboard
+  const swheel=new THREE.Mesh(new THREE.TorusGeometry(0.25,0.03,8,20),darkM);
+  swheel.position.set(0.35,1.98,1.76);swheel.rotation.x=-0.45;g.add(swheel);
+  const scol=bx(0.05,0.05,0.3,darkM,0.35,1.84,1.9);scol.rotation.x=0.5;
+  bx(0.58,0.12,0.52,darkM,0.35,1.3,1.25);bx(0.58,0.66,0.12,darkM,0.35,1.62,0.98); // driver seat
+  bx(0.58,0.12,0.52,darkM,-0.55,1.3,1.25);                   // passenger seat
   /* headlights : two additive cones + one warm point light, night ops only
      (visibility + intensity are driven from truckUpdate by G.night) */
   const hlGrp=new THREE.Group();hlGrp.visible=false;
@@ -1331,6 +1481,16 @@ function buildSabotage(){
       body.position.y=1.15;body.castShadow=true;g.add(body);
       const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.4,0.3,8),darkM);
       cap.position.y=2.45;g.add(cap);
+      const fill=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.14,8),darkM); // filler cap
+      fill.position.y=2.66;g.add(fill);
+      const stripe=new THREE.Mesh(new THREE.CylinderGeometry(0.97,0.97,0.2,12),new THREE.MeshLambertMaterial({color:0xd8a018}));
+      stripe.position.y=0.55;g.add(stripe);              // hazard band
+      const stripe2=new THREE.Mesh(new THREE.CylinderGeometry(0.97,0.97,0.12,12),darkM);
+      stripe2.position.y=0.79;g.add(stripe2);
+      const pipe=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,2.3,8),darkM); // side feed pipe
+      pipe.position.set(1.05,1.15,0);pipe.castShadow=true;g.add(pipe);
+      const valve=new THREE.Mesh(new THREE.TorusGeometry(0.14,0.03,6,12),bandM);     // valve wheel
+      valve.position.set(1.05,2.0,0.12);g.add(valve);
       const base=new THREE.Mesh(new THREE.BoxGeometry(2.1,0.25,2.1),darkM);
       base.position.y=0.12;g.add(base);
     }else{
@@ -1338,6 +1498,12 @@ function buildSabotage(){
       box.position.y=0.6;box.castShadow=true;g.add(box);
       const band=new THREE.Mesh(new THREE.BoxGeometry(1.56,0.3,1.56),bandM);
       band.position.y=0.85;g.add(band);
+      const lid=new THREE.Mesh(new THREE.BoxGeometry(1.58,0.12,1.58),crateM); // shell-box lid
+      lid.position.y=1.26;lid.castShadow=true;g.add(lid);
+      for(const lx of[-0.42,0.42]){const latch=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.22,0.06),darkM);
+        latch.position.set(lx,1.05,0.79);g.add(latch);}   // lid latches
+      const plate=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.3,0.02),bandM); // stencil plate
+      plate.position.set(0,0.5,0.76);g.add(plate);
     }
     g.position.set(s.x,gy,s.z);g.rotation.y=rand(0,TAU);scene.add(g);
     const mk=new THREE.Sprite(new THREE.SpriteMaterial({map:diamondTex,transparent:true,depthWrite:false}));
@@ -1393,7 +1559,7 @@ function sBoom(){const ac=audio();if(!ac)return;const t=ac.currentTime;
   const f=ac.createBiquadFilter();f.type='lowpass';
   f.frequency.setValueAtTime(900,t);f.frequency.exponentialRampToValueAtTime(60,t+0.6);
   const g=ac.createGain();g.gain.setValueAtTime(0.7,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.7);
-  s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t);s.stop(t+0.75);
+  s.connect(f);f.connect(g);g.connect(aDest(ac));s.start(t);s.stop(t+0.75);
   sTone(55,0.5,'sine',0.5,-20);}
 function explodeSab(tg){
   if(!tg.alive)return;
@@ -1720,7 +1886,7 @@ function bindBtn(id,down,up){
   el.addEventListener('mouseup',()=>{el.classList.remove('on');up&&up();});
 }
 bindBtn('btnFire',()=>fireBullet());
-bindBtn('btnScope',()=>setScoped(!G.scoped));
+bindBtn('btnScope',()=>{if(G.scopeHold)setScoped(true);else setScoped(!G.scoped);},()=>{if(G.scopeHold)setScoped(false);}); // SCOPE MODE : TOGGLE taps, HOLD scopes only while pressed
 bindBtn('btnReload',()=>startReload());
 $('zoomSlider').addEventListener('input',e=>{G.zoom=+e.target.value;updateHUD();drawReticle();});
 /* desktop */
@@ -1863,9 +2029,19 @@ function hideCard(){$('card').style.display='none';}
    up to it), which suppresses click on touch devices — the gear was dead
    in-game and DONE was dead with the panel open. Route both through bindBtn
    (touchstart/mousedown) like every other working button. */
-bindBtn('setBtn',()=>{$('card2').style.display='flex';$('setPanel').style.display='block';sClick();});
-bindBtn('setClose',()=>{$('card2').style.display='none';$('setPanel').style.display='none';});
-bindBtn('setX',()=>{$('card2').style.display='none';$('setPanel').style.display='none';sClick();});
+/* SETTINGS PAUSE : opening the panel freezes the world (the frame loop zeroes
+   gdt while settingsOpen && state==='play') — no more getting shot while
+   dragging the sensitivity slider. Closing resumes. The PAUSED chip shows
+   only mid-mission; in the menu there is nothing to pause. */
+function openSettings(){$('card2').style.display='flex';$('setPanel').style.display='block';G.settingsOpen=true;
+  $('pauseChip').style.display=(G.state==='play')?'block':'none';}
+function closeSettings(){$('card2').style.display='none';$('setPanel').style.display='none';G.settingsOpen=false;
+  $('pauseChip').style.display='none';}
+bindBtn('setBtn',()=>{openSettings();sClick();});
+bindBtn('setClose',()=>{closeSettings();});
+bindBtn('setX',()=>{closeSettings();sClick();});
+bindBtn('setRestart',()=>{closeSettings();startMission(G.mission,true);}); // RESTART : same mission, straight back into play
+bindBtn('setAbandon',()=>{closeSettings();startMission(G.mission);}); // ABANDON : back to the mission card / menu state
 $('invY').addEventListener('change',e=>{G.invertY=e.target.checked;lsSet('longshot_invY',G.invertY?'1':'0');});
 $('sens').addEventListener('input',e=>{G.sens=+e.target.value;lsSet('longshot_sens',G.sens);});
 $('setMute').addEventListener('change',e=>{G.muted=e.target.checked;lsSet('longshot_mute',G.muted?'1':'0');if(windGain)windGain.gain.value=G.muted?0:windGain.gain.value;});
@@ -1904,6 +2080,9 @@ function applyGraphics(){
   if(grassMesh)grassMesh.visible=G.grass;
   $('fpsRead').style.display=G.showFps?'block':'none';
 }
+$('setVol').addEventListener('input',e=>{G.volume=+e.target.value;lsSet('longshot_vol',G.volume);if(masterGain)masterGain.gain.value=G.volume;}); // VOLUME slider : scales the master gain live
+$('setScopeMode').addEventListener('change',e=>{G.scopeHold=e.target.value==='hold';lsSet('longshot_scope',G.scopeHold?'hold':'toggle');if(G.scoped)setScoped(false);}); // mode switch unscopes — scope can never stick on
+$('setShake').addEventListener('change',e=>{G.reduceShake=e.target.checked;lsSet('longshot_shake',G.reduceShake?'1':'0');});
 $('invX').addEventListener('change',e=>{G.invertX=e.target.checked;lsSet('longshot_invX',G.invertX?'1':'0');});
 $('sensScope').addEventListener('input',e=>{G.sensScope=+e.target.value;lsSet('longshot_sensS',G.sensScope);});
 $('setAutoR').addEventListener('change',e=>{G.autoReload=e.target.checked;lsSet('longshot_autoR',G.autoReload?'1':'0');});
@@ -1939,6 +2118,9 @@ function restoreSettings(){
   G.grass=lsGet('longshot_grass','1')==='1';$('setGrass').checked=G.grass;
   const pv=lsGet('longshot_part','high');G.particleMul=partMul(pv);$('setPart').value=(pv==='low'||pv==='medium')?pv:'high';
   G.showFps=lsGet('longshot_fps','0')==='1';$('setFps').checked=G.showFps;
+  const vv=lsGet('longshot_vol','');if(vv!==''){G.volume=Math.min(1,Math.max(0,+vv));$('setVol').value=G.volume;} // VOLUME restore (masterGain picks it up at AC creation)
+  G.scopeHold=lsGet('longshot_scope','toggle')==='hold';$('setScopeMode').value=G.scopeHold?'hold':'toggle';
+  G.reduceShake=lsGet('longshot_shake','0')==='1';$('setShake').checked=G.reduceShake;
 }
 restoreSettings();
 /* ---------------- WAKE LOCK : the screen must never dim mid-aim ----------------
@@ -2252,7 +2434,8 @@ function frame(now){
   if(G.slowmo>0){G.slowmo-=dt;G.slowT+=dt;           // killcam slow-mo : ramped in/out, not a hard cut
     ts=1-0.84*sstep(0,0.5,G.slowT)*sstep(0,0.4,Math.max(0,G.slowmo));}
   else G.slowT=0;
-  const gdt=dt*ts;
+  let gdt=dt*ts;
+  if(G.settingsOpen&&G.state==='play')gdt=0; // SETTINGS PAUSE : world clock + all play-state sim freeze while the panel is open
   G.swayT+=gdt;
   const t=G.swayT;
   if(G.state==='play'){
@@ -2320,10 +2503,11 @@ function frame(now){
   let pYaw=0,pPitch=0;
   if(G.punchT>0){G.punchT-=dt;const k=Math.max(0,G.punchT/0.5);pYaw=G.punchYaw*k;pPitch=G.punchPitch*k;}
   if(KC.active&&G.state!=='play')endKillcam(); // mission ended mid-killcam — restore now
-  if(KC.active)kcUpdate(dt);
+  if(KC.active&&!(G.settingsOpen&&G.state==='play'))kcUpdate(dt); // killcam freezes with the world while settings are open
   if(!KC.active){
   camera.position.set(G.px,groundH(G.px,G.pz)+1.7,G.pz);
-  const shX=(Math.random()-0.5)*G.shake*0.06,shY=(Math.random()-0.5)*G.shake*0.06;
+  const shk=G.shake*(G.reduceShake?0.08:1); // REDUCE SHAKE : same shake state, near-zero amplitude at the camera
+  const shX=(Math.random()-0.5)*shk*0.06,shY=(Math.random()-0.5)*shk*0.06;
   G.shake=Math.max(0,G.shake-dt*3.2);
   camera.rotation.set(G.pitch+swP+pPitch+kick*0.045+shX,G.yaw+swY+pYaw+shY,0);
   /* MENU CINEMATIC DRIFT : with the mission card up, the camera leaves the
@@ -2410,7 +2594,7 @@ window.addEventListener('orientationchange',()=>setTimeout(onResize,250));
 buildTruck();
 buildSabotage();
 applyGraphics(); // boot-time graphics application : manual preset, or Auto matching the stock behavior
-startMission(1);
+startMission(missionUnlockMax()); // BOOT TO PROGRESS : the card opens on the player's current mission, not Mission 1 every time
 requestAnimationFrame(frame);
 </script>
 </body>
