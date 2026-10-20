@@ -62,6 +62,7 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #scorePop{position:fixed;left:50%;top:34%;transform:translateX(-50%);z-index:36;pointer-events:none;text-align:center;font-size:26px;font-weight:800;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.8);opacity:0;letter-spacing:1px}
 #scorePop span{display:block;font-size:11px;letter-spacing:3px;color:#ffb0a0;margin-top:3px}
 #scorePop span.qs{color:#ffe9a8}
+#scorePop span.mk{color:#ffd76a;font-size:13px}
 #scorePop.show{animation:spop .9s ease-out forwards}
 @keyframes spop{0%{opacity:0;transform:translate(-50%,14px) scale(.8)}18%{opacity:1;transform:translate(-50%,0) scale(1.08)}30%{transform:translate(-50%,-4px) scale(1)}100%{opacity:0;transform:translate(-50%,-52px) scale(1)}}
 .meter.lowhp>i{animation:lowhp .75s ease-in-out infinite}
@@ -1634,7 +1635,8 @@ function fireBullet(){
   m.lookAt(_tv.copy(m.position).add(dir));
   scene.add(m);
   const vel=RIFLES[G.rifle].vel;
-  bullets.push({m,sp:vel,vx:dir.x*vel,vy:dir.y*vel,vz:dir.z*vel,life:5}); // per-rifle muzzle velocity
+  bullets.push({m,sp:vel,vx:dir.x*vel,vy:dir.y*vel,vz:dir.z*vel,life:5, // per-rifle muzzle velocity
+    pierced:[],kills:0,throughCab:false,tx:m.position.x,ty:m.position.y,tz:m.position.z}); // OVERPENETRATION state + tracer anchor
   G.kickT=0;G.shake=0.55;G.flashT=0.14;G.alarm=Math.min(100,G.alarm+10);
   flashSprite.material.rotation=rand(0,TAU);
   const bl=$('bloom');bl.style.transition='none';bl.style.opacity=G.reduceFlash?0.42:0.85; // REDUCE FLASHES : halve the muzzle bloom
@@ -1651,11 +1653,24 @@ function segPtD2(ax,ay,az,bx,by,bz,px,py,pz){
   const t=clamp(((px-ax)*abx+(py-ay)*aby+(pz-az)*abz)/(abx*abx+aby*aby+abz*abz||1e-9),0,1);
   const dx=px-(ax+abx*t),dy=py-(ay+aby*t),dz=pz-(az+abz*t);
   return dx*dx+dy*dy+dz*dz;}
+/* ---------------- overpenetration ---------------- */
+const _kd=new THREE.Vector3(); // scratch : per-kill travel direction
+const _tpA=new THREE.Vector3(),_tpB=new THREE.Vector3(); // scratch : tracer segment endpoints
+/* one pierced kill for bullet b, resolved inline so the round keeps flying.
+   The cam is only offered on the FIRST kill of the shot (killcam rules as
+   before); the 2nd / 3rd kills pay the multi-kill bonus through scorePop. */
+function pierceKill(b,e,hshot){
+  b.kills++;b.pierced.push(e);
+  _kd.set(b.vx,b.vy,b.vz).normalize();
+  killEnemy(e,_kd,b.kills===1,hshot);
+  if(b.kills===2){G.score+=150;G.missionScore+=150;scorePop(150,false,false,'DOUBLE KILL');}
+  else if(b.kills===3){G.score+=300;G.missionScore+=300;scorePop(300,false,false,'TRIPLE KILL');}
+}
 function bulletUpdate(dt){
   const wvx=Math.sin(G.windDir)*G.windSpd,wvz=Math.cos(G.windDir)*G.windSpd;
   for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];
     const steps=Math.max(1,Math.ceil(b.sp*dt/1.5));const sdt=dt/steps;
-    let hit=null,hitHead=false,ground=false,thit=false,shit=null;
+    let ground=false,thit=false,shit=null,spent=false;
     let nearE=null,nearD2=36; // nearest pass within ~6m that ISN'T a hit -> near-miss reaction
     for(let s=0;s<steps;s++){
       b.vy-=9.8*sdt;b.vx+=wvx*1.6*sdt;b.vz+=wvz*1.6*sdt; // real gravity 9.8 m/s^2 — hold over with the mil-dots
@@ -1664,16 +1679,23 @@ function bulletUpdate(dt){
       const p=b.m.position;
       if(truck.active&&driver.alive){ // driver capsule : chest (r 1.0) + head (r 0.4) spheres vs the bullet segment
         const dc=driver.chest();
-        if(segPtD2(px0,py0,pz0,p.x,p.y,p.z,dc.x,dc.y,dc.z)<1.0){hit=driver;hitHead=false;break;}
-        if(segPtD2(px0,py0,pz0,p.x,p.y,p.z,dc.x,dc.y+0.45,dc.z)<0.16){hit=driver;hitHead=true;break;}}
-      for(const e of enemies){if(!e.alive)continue;
+        const headHit=segPtD2(px0,py0,pz0,p.x,p.y,p.z,dc.x,dc.y+0.45,dc.z)<0.16;
+        if(headHit||segPtD2(px0,py0,pz0,p.x,p.y,p.z,dc.x,dc.y,dc.z)<1.0){
+          b.throughCab=true; // round is on a line through the open cab — the cab walls must not eat it afterwards
+          pierceKill(b,driver,headHit||p.y>dc.y+0.45); // headshot : capsule head sphere, or round passed head-high
+          if(bullets.indexOf(b)<0)return; // mission reset mid-flight cleared every bullet — bail out
+          if(b.kills>=3){spent=true;break;}}}
+      for(const e of enemies){if(!e.alive||b.pierced.indexOf(e)>=0)continue;
         const c=e.chest(),dx=p.x-c.x,dy=p.y-c.y,dz=p.z-c.z,d2=dx*dx+dy*dy+dz*dz;
-        if(d2<1.1){hit=e;break;}
-        if(d2<nearD2){nearD2=d2;nearE=e;}}
+        if(d2<1.1){ // OVERPENETRATION : kill resolves inline, the round flies on (cap 3 kills)
+          pierceKill(b,e,p.y>c.y+0.45);
+          if(bullets.indexOf(b)<0)return;
+          if(b.kills>=3){spent=true;break;}}
+        else if(d2<nearD2){nearD2=d2;nearE=e;}}
+      if(spent)break;
       if(truck.active&&driver.alive){_tv.copy(p).sub(truck.group.position);_tv.y-=1.2;
         if(_tv.lengthSq()<100)truck.lastCrackT=G.swayT;} // round cracked past the truck — the driver reacts
-      if(hit)break;
-      if(truck.active&&truck.group){_tv.copy(p);truck.group.worldToLocal(_tv); // truck body (driver capsule checked above)
+      if(truck.active&&truck.group&&!b.throughCab){_tv.copy(p);truck.group.worldToLocal(_tv); // truck body (driver capsule checked above)
         if(Math.abs(_tv.x)<1.25&&_tv.y>0.2&&_tv.y<2.6&&Math.abs(_tv.z)<2.5){
           const inWin=Math.abs(_tv.x)<1.04&&_tv.y>1.72&&_tv.y<2.38&&_tv.z>0.42&&_tv.z<2.55; // open window band — rounds pass through to the driver
           if(!inWin){thit=true;break;}}}
@@ -1685,18 +1707,23 @@ function bulletUpdate(dt){
     }
     b.life-=dt;
     _td.set(b.vx,b.vy,b.vz);b.m.lookAt(_tv.copy(b.m.position).add(_td));
-    if(hit){const hshot=hitHead||b.m.position.y>hit.chest().y+0.45; // headshot : capsule head sphere, or round landed head-high
-      killEnemy(hit,_td.normalize(),true,hshot);scene.remove(b.m);bullets.splice(i,1);}
-    else{
-      if(nearE)reactToDanger(nearE,nearE.hvt); // suppressive fire : HVTs bolt for cover immediately
-      if(shit){explodeSab(shit);scene.remove(b.m);bullets.splice(i,1);}
+    /* SHOT TRACER : short-lived streak segments along the actually-flown path,
+       fed into the shared tracers pool — wind drift + drop read on misses too */
+    if(G.state==='play'){const tp=b.m.position,tdx=tp.x-b.tx,tdy=tp.y-b.ty,tdz=tp.z-b.tz;
+      if(tdx*tdx+tdy*tdy+tdz*tdz>9){ // >=3m since the last streak point
+        const tline=new THREE.Line(new THREE.BufferGeometry().setFromPoints([_tpA.set(b.tx,b.ty,b.tz),_tpB.copy(tp)]),
+          new THREE.LineBasicMaterial({color:0xffe2a8,transparent:true,opacity:0.9}));
+        scene.add(tline);tracers.push({line:tline,t:0});
+        b.tx=tp.x;b.ty=tp.y;b.tz=tp.z;}}
+    if(b.kills===0&&nearE&&nearE.alive)reactToDanger(nearE,nearE.hvt); // suppressive fire : HVTs bolt for cover immediately
+    if(shit){explodeSab(shit);scene.remove(b.m);bullets.splice(i,1);}
     else if(thit){ // clipped the patrol truck : spark burst + tink, small alarm bump, no kill
       impactPuff(b.m.position,'metal');
       G.alarm=Math.min(100,G.alarm+3);toast('TRUCK HIT — DRIVER STILL UP');
       scene.remove(b.m);bullets.splice(i,1);}
-    else if(ground||b.life<=0){
+    else if(ground||b.life<=0||spent){
       if(ground){impactPuff(b.m.position,'dirt');G.alarm=Math.min(100,G.alarm+8);}
-      scene.remove(b.m);bullets.splice(i,1);}}
+      scene.remove(b.m);bullets.splice(i,1);}
   }
 }
 function impactPuff(p,kind){
@@ -1975,9 +2002,9 @@ function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block'
   clearTimeout(toastTm);toastTm=setTimeout(()=>t.style.display='none',1600);}
 /* SCORE POPUPS : one pooled element near screen center, floats up and fades.
    Restart the CSS animation by re-adding the class. Kills only (sabotage uses toast). */
-function scorePop(pts,hs,quick){
+function scorePop(pts,hs,quick,tag){
   const el=$('scorePop');
-  el.innerHTML='+'+pts+(hs?'<span>HEADSHOT</span>':'')+(quick?'<span class="qs">QUICKSCOPE +25</span>':'');
+  el.innerHTML=(tag?'<span class="mk">'+tag+'</span>':'')+'+'+pts+(hs?'<span>HEADSHOT</span>':'')+(quick?'<span class="qs">QUICKSCOPE +25</span>':'');
   el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
 }
 /* SNIPER WARNING RIM : a red ring around the scope circle while a counter-sniper
@@ -2148,17 +2175,32 @@ const KC={active:false,phase:'',t:0,dur:0,total:0,travel:0,orbA:0,wasScoped:fals
   dir:new THREE.Vector3(),from:new THREE.Vector3(),tgt:new THREE.Vector3(),orbC:new THREE.Vector3(),
   startP:new THREE.Vector3(),retP:new THREE.Vector3(),
   startQ:new THREE.Quaternion(),retQ:new THREE.Quaternion()};
-const _kcA=new THREE.Vector3(),_kcB=new THREE.Vector3(),_kcE=new THREE.Euler(0,0,0,'YXZ');
+const _kcA=new THREE.Vector3(),_kcB=new THREE.Vector3(),_kcP=new THREE.Vector3(),_kcE=new THREE.Euler(0,0,0,'YXZ');
 const kcBullet=(function(){
   const grp=new THREE.Group();
-  grp.add(new THREE.Mesh(new THREE.BoxGeometry(0.3,0.3,2.4),
-    new THREE.MeshBasicMaterial({color:0xffdf9a,transparent:true,opacity:0.95,blending:THREE.AdditiveBlending,depthWrite:false})));
+  /* a REAL round at true scale : a ~93mm spitzer — boat-tail body + copper
+     ogive spun on a lathe around the flight axis, replacing the old 2.4m
+     glowing brick. Profile runs base (y=-45mm) to tip (y=+47mm), diameter
+     peaks at 12mm — the chase cam sits close so it still fills the shot. */
+  const prof=[[0.0012,-0.045],[0.0045,-0.043],[0.006,-0.028],[0.006,0.004],[0.0046,0.024],[0.0022,0.040],[0.0012,0.047]];
+  const mkLathe=(y0,y1,color)=>{
+    const pts=prof.filter(p=>p[1]>=y0-0.0001&&p[1]<=y1+0.0001).map(p=>new THREE.Vector2(p[0],p[1]));
+    const g=new THREE.LatheGeometry(pts,12);g.rotateX(Math.PI/2); // profile axis Y -> flight axis +Z, tip forward
+    return new THREE.Mesh(g,new THREE.MeshStandardMaterial({color,metalness:0.85,roughness:0.32}));};
+  grp.add(mkLathe(-0.045,0.004,0xc9973f)); // brass-jacket body + boat tail
+  grp.add(mkLathe(0.004,0.047,0xdd8f52));  // copper ogive tip
+  /* tracer shimmer : a short comet streak hugging the tail, offset a hair
+     off-axis so the group's spin corkscrews it — the spin stays readable */
+  const streak=new THREE.Mesh(new THREE.CylinderGeometry(0.0035,0.0012,0.11,6,1,true),
+    new THREE.MeshBasicMaterial({color:0xffc978,transparent:true,opacity:0.45,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  streak.geometry.rotateX(Math.PI/2);streak.position.set(0.004,0,-0.105);grp.add(streak);
   const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
   const g=x.createRadialGradient(32,32,2,32,32,30);
   g.addColorStop(0,'rgba(255,226,160,1)');g.addColorStop(0.4,'rgba(255,176,84,.55)');g.addColorStop(1,'rgba(255,140,40,0)');
   x.fillStyle=g;x.fillRect(0,0,64,64);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
-  sp.scale.set(3.2,3.2,1);grp.add(sp);
+  sp.scale.set(0.5,0.5,1);grp.add(sp);
+  grp.userData.glowMat=sp.material;
   grp.visible=false;scene.add(grp);return grp;})();
 function startBulletCam(e,dir){
   if(KC.active)endKillcam(); // re-entry : restore first, then start the new one
@@ -2202,9 +2244,12 @@ function kcUpdate(dt){
     _kcA.copy(KC.from).addScaledVector(KC.dir,KC.travel*k); // bullet position along the shot line
     kcBullet.position.copy(_kcA);
     kcBullet.lookAt(_kcB.copy(_kcA).add(KC.dir));
-    _kcB.copy(_kcA).addScaledVector(KC.dir,-7);_kcB.y+=2.4; // chase cam : behind + above the round
+    KC.spin=(KC.spin||0)+dt*22;kcBullet.rotateZ(KC.spin); // rifling spin around the flight axis — the off-axis streak corkscrews
+    kcBullet.userData.glowMat.rotation=-KC.spin*1.7; // glow shimmer counter-rotates
+    _kcP.set(-KC.dir.z,0,KC.dir.x).normalize(); // horizontal side vector
+    _kcB.copy(_kcA).addScaledVector(KC.dir,-1.2).addScaledVector(_kcP,0.55);_kcB.y+=0.32; // chase cam : tight behind-side of the true-scale round
     camera.position.copy(_kcB);
-    camera.lookAt(_kcA.x+KC.dir.x*12,_kcA.y+KC.dir.y*12,_kcA.z+KC.dir.z*12);
+    camera.lookAt(_kcA.x+KC.dir.x*2.4,_kcA.y+KC.dir.y*2.4,_kcA.z+KC.dir.z*2.4);
     camera.fov=55;camera.updateProjectionMatrix();
     if(k>=1){if(G.kcam==='short'){endKillcam();return;} // SHORT pref : chase only, skip the orbit entirely
       KC.phase='orbit';KC.t=0;KC.dur=1.6;KC.orbC.copy(KC.tgt);KC.orbC.y-=0.4;
