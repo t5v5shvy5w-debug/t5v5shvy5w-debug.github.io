@@ -118,9 +118,11 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 .setrow input[type=checkbox]{width:22px;height:22px}
 .setrow input[type=range]{width:130px}
 #hitmark{position:fixed;left:50%;top:50%;z-index:35;width:36px;height:36px;margin:-18px 0 0 -18px;pointer-events:none;opacity:0}
-#hitmark:before,#hitmark:after{content:"";position:absolute;left:16px;top:0;width:4px;height:36px;background:#ff5040;box-shadow:0 0 7px rgba(0,0,0,.9),0 0 3px #ff5040}
+#hitmark:before,#hitmark:after{content:"";position:absolute;left:16px;top:0;width:4px;height:36px;background:#ffffff;box-shadow:0 0 7px rgba(0,0,0,.9),0 0 3px #ffffff}
 #hitmark:before{transform:rotate(45deg)}#hitmark:after{transform:rotate(-45deg)}
 #hitmark.pop{animation:hpop .3s ease-out}
+#hitmark.kill:before,#hitmark.kill:after{background:#ffd24a;box-shadow:0 0 8px rgba(0,0,0,.9),0 0 4px #ffd24a}
+#hitmark.kill.pop{animation:hpop .55s ease-out}
 #hitmark.hs{width:52px;height:52px;margin:-26px 0 0 -26px}
 #hitmark.hs:before,#hitmark.hs:after{left:23px;width:6px;height:52px;background:#ff1e1e;box-shadow:0 0 9px rgba(0,0,0,.9),0 0 4px #ff1e1e}
 .meter.decaying>i{animation:aldec 1.15s ease-in-out infinite}
@@ -1264,6 +1266,170 @@ function resolveBlockers(g){
     const tp=truck.group.position,dx=p.x-tp.x,dz=p.z-tp.z,rr=3.4,d2=dx*dx+dz*dz;
     if(d2<rr*rr&&d2>0.0001){const d=Math.sqrt(d2);p.x=tp.x+dx/d*rr;p.z=tp.z+dz/d*rr;}}
 }
+/* ---------------- V8.2 WORLD PASS #2 : ridge nest, ring road, river life, sky life, camp dressing ----------------
+   Pure set dressing — no hitboxes, patrol logic or balance touched. Animated
+   bits (haze drift, mast beacon, tower spotlight) tick in worldFxUpdate,
+   called from campFxUpdate every frame. */
+const worldFx={haze:[],mastLamp:null,mastGlow:null,spotPivot:null,spotLight:null};
+(function(){
+  const lam=c=>new THREE.MeshLambertMaterial({color:c});
+  const dummy=new THREE.Object3D(),tmpC=new THREE.Color();
+  /* --- sniper ridge nest : a real prepared position around the spawn lip --- */
+  const bagM=lam(0x97855f),bagM2=lam(0x8a7a52),bagG=new THREE.BoxGeometry(1.15,0.42,0.62),nestZ=15.4;
+  for(let i=0;i<11;i++){const bx=-8+i*1.6; // front lip : two staggered rows + a partial third
+    const b1=new THREE.Mesh(bagG,i%2?bagM:bagM2);b1.position.set(bx,groundH(bx,nestZ)+0.21,nestZ);b1.rotation.y=rand(-0.16,0.16);b1.castShadow=true;scene.add(b1);
+    const b2=new THREE.Mesh(bagG,i%2?bagM2:bagM);b2.position.set(bx+0.5,groundH(bx+0.5,nestZ-0.55)+0.2,nestZ-0.55);b2.rotation.y=rand(-0.16,0.16);b2.castShadow=true;scene.add(b2);
+    if(i%2===0){const b3=new THREE.Mesh(bagG,bagM);b3.position.set(bx+0.25,groundH(bx+0.25,nestZ)+0.62,nestZ-0.28);b3.rotation.y=rand(-0.2,0.2);b3.castShadow=true;scene.add(b3);}}
+  for(const sx of[-1,1])for(let i=0;i<3;i++){const bx=sx*(9.4+i*0.45),bz=17.6+i*1.5; // side wings curling back
+    const b=new THREE.Mesh(bagG,bagM);b.position.set(bx,groundH(bx,bz)+0.21,bz);b.rotation.y=sx*0.7+rand(-0.15,0.15);b.castShadow=true;scene.add(b);}
+  /* ghillie drape : ragged camo blanket hanging over the front bags */
+  (function(){const cv=document.createElement('canvas');cv.width=256;cv.height=96;const x=cv.getContext('2d');
+    x.fillStyle='#59622f';x.fillRect(0,0,256,96);
+    for(let i=0;i<340;i++){const gx=rand(0,256);x.strokeStyle='rgba('+(40+Math.random()*50|0)+','+(58+Math.random()*52|0)+','+(22+Math.random()*26|0)+',0.85)';
+      x.lineWidth=rand(1.5,3.5);x.beginPath();x.moveTo(gx,0);x.lineTo(gx+rand(-7,7),rand(45,96));x.stroke();}
+    for(let i=0;i<50;i++){x.strokeStyle='rgba(146,128,84,0.6)';x.lineWidth=rand(1,2.4);
+      const gx=rand(0,256);x.beginPath();x.moveTo(gx,0);x.lineTo(gx+rand(-5,5),rand(30,80));x.stroke();}
+    const gt=new THREE.CanvasTexture(cv);
+    const gg=new THREE.PlaneGeometry(10.6,1.2,18,2),gp=gg.attributes.position;
+    for(let i=0;i<gp.count;i++){const vx=gp.getX(i),vy=gp.getY(i);
+      gp.setZ(i,0.07*Math.sin(vx*2.6)+rand(-0.02,0.02));
+      if(vy<-0.5)gp.setY(i,vy-rand(0,0.24));} // ragged hanging fringe
+    gg.computeVertexNormals();
+    const drape=new THREE.Mesh(gg,new THREE.MeshLambertMaterial({map:gt,side:THREE.DoubleSide}));
+    drape.position.set(0,groundH(0,nestZ)+0.86,nestZ-0.42);drape.rotation.x=-0.32;drape.castShadow=true;scene.add(drape);})();
+  /* spent brass : ejected casings scattered at the lip */
+  const brassM=new THREE.MeshPhongMaterial({color:0xc9a227,shininess:90,specular:0xffe9a8});
+  const brassG=new THREE.CylinderGeometry(0.02,0.024,0.1,6);
+  for(let i=0;i<16;i++){const bx=rand(-3.4,3.4),bz=rand(15.9,17.8);
+    const c=new THREE.Mesh(brassG,brassM);c.position.set(bx,groundH(bx,bz)+0.03,bz);c.rotation.set(Math.PI/2,0,rand(0,TAU));scene.add(c);}
+  /* flattened dirt patch worn into the nest floor */
+  (function(){const pg=new THREE.CircleGeometry(7.5,20);pg.rotateX(-Math.PI/2);
+    const pp=pg.attributes.position;
+    for(let i=0;i<pp.count;i++)pp.setY(i,groundH(pp.getX(i),pp.getZ(i)+22)+0.05);
+    const patch=new THREE.Mesh(pg,new THREE.MeshLambertMaterial({color:0x77683f,transparent:true,opacity:0.5}));
+    patch.position.set(0,0,22);patch.receiveShadow=true;scene.add(patch);})();
+  /* --- ring road : dirt ribbon on the truck's own ellipse, twin tire ruts --- */
+  (function(){const SEG=80,W=2.3,pos=[],uvA=[],idx=[];
+    const cv=document.createElement('canvas');cv.width=128;cv.height=128;const x2=cv.getContext('2d');
+    x2.fillStyle='#7d6440';x2.fillRect(0,0,128,128);
+    for(let i=0;i<900;i++){x2.fillStyle='rgba('+(60+Math.random()*60|0)+','+(45+Math.random()*45|0)+','+(25+Math.random()*30|0)+','+(0.12+Math.random()*0.2)+')';
+      x2.fillRect(Math.random()*128,Math.random()*128,2+Math.random()*5,1+Math.random()*3);}
+    x2.fillStyle='rgba(52,38,20,0.55)';x2.fillRect(14,0,17,128);x2.fillRect(97,0,17,128); // the ruts (fixed u = across the road)
+    x2.fillStyle='rgba(158,136,94,0.35)';x2.fillRect(57,0,14,128); // worn center strip
+    const tex=new THREE.CanvasTexture(cv);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+    for(let i=0;i<=SEG;i++){const a=i/SEG*TAU,ca=Math.cos(a),sa=Math.sin(a);
+      const cxp=ca*55,czp=-CAMP_D+sa*32,txp=-sa*55,tzp=ca*32,tl=Math.hypot(txp,tzp),nx=tzp/tl,nz=-txp/tl;
+      pos.push(cxp+nx*W,groundH(cxp+nx*W,czp+nz*W)+0.07,czp+nz*W, cxp-nx*W,groundH(cxp-nx*W,czp-nz*W)+0.07,czp-nz*W);
+      uvA.push(0,i*2,1,i*2);
+      if(i<SEG){const b=i*2;idx.push(b,b+1,b+2,b+1,b+3,b+2);}}
+    const g2=new THREE.BufferGeometry();g2.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+    g2.setAttribute('uv',new THREE.Float32BufferAttribute(uvA,2));g2.setIndex(idx);g2.computeVertexNormals();
+    const road=new THREE.Mesh(g2,new THREE.MeshLambertMaterial({map:tex,side:THREE.DoubleSide}));
+    road.receiveShadow=true;scene.add(road);})();
+  /* --- grass color patches + wildflower dots across the valley floor --- */
+  const patchG=new THREE.PlaneGeometry(0.85,0.5);patchG.rotateX(-Math.PI/2);
+  const patches=new THREE.InstancedMesh(patchG,new THREE.MeshLambertMaterial({side:THREE.DoubleSide}),240);
+  let pi=0,guard=0;
+  while(pi<240&&guard++<4000){const x=rand(-240,240),z=rand(-360,-10);
+    if(Math.hypot(x,z+CAMP_D)<24)continue;
+    const e=(x*x)/(57*57)+((z+CAMP_D)*(z+CAMP_D))/(34*34);if(e>0.72&&e<1.35)continue; // keep off the ring road
+    const rcx=64+38*Math.sin(z*0.011)+14*Math.sin(z*0.023+1.7);if(Math.abs(x-rcx)<8)continue; // keep out of the river
+    dummy.position.set(x,groundH(x,z)+0.06,z);dummy.rotation.set(0,rand(0,TAU),0);dummy.scale.setScalar(rand(0.7,2.1));dummy.updateMatrix();
+    patches.setMatrixAt(pi,dummy.matrix);patches.setColorAt(pi,tmpC.setHSL(0.23+rand(-0.03,0.03),0.42,0.3+rand(0,0.14)));pi++;}
+  patches.count=pi;patches.receiveShadow=true;scene.add(patches);
+  const flowers=new THREE.InstancedMesh(new THREE.PlaneGeometry(0.16,0.16),new THREE.MeshBasicMaterial({side:THREE.DoubleSide}),130);
+  let fi=0;guard=0;
+  while(fi<130&&guard++<3000){const x=rand(-200,200),z=rand(-350,-20);
+    if(Math.hypot(x,z+CAMP_D)<26)continue;
+    dummy.position.set(x,groundH(x,z)+rand(0.12,0.3),z);dummy.rotation.set(rand(-0.4,0.4),rand(0,TAU),rand(-0.4,0.4));dummy.scale.setScalar(rand(0.7,1.4));dummy.updateMatrix();
+    flowers.setMatrixAt(fi,dummy.matrix);flowers.setColorAt(fi,tmpC.setHex([0xffffff,0xffd94a,0xc99aff,0xff9ac0][fi%4]));fi++;}
+  flowers.count=fi;scene.add(flowers);
+  /* --- reeds along the river banks (same course formula as the river ribbon) --- */
+  const reedG=new THREE.ConeGeometry(0.07,1.7,5);reedG.translate(0,0.85,0);
+  const reeds=new THREE.InstancedMesh(reedG,new THREE.MeshLambertMaterial({color:0x66713a}),170);
+  let ri=0;
+  for(let i=0;i<=42&&ri<170;i++){const z=-375+365*i/42;
+    const cxr=64+38*Math.sin(z*0.011)+14*Math.sin(z*0.023+1.7);
+    for(const side of[-1,1]){const n=2+(i%2);
+      for(let k=0;k<n&&ri<170;k++){const x=cxr+side*(5.3+rand(0,1.1)),zz=z+rand(-2.5,2.5);
+        dummy.position.set(x,groundH(x,zz)+0.05,zz);dummy.rotation.set(rand(-0.14,0.14),rand(0,TAU),rand(-0.14,0.14));
+        dummy.scale.set(1,rand(0.7,1.35),1);dummy.updateMatrix();reeds.setMatrixAt(ri,dummy.matrix);
+        reeds.setColorAt(ri,tmpC.setHSL(0.19+rand(0,0.05),0.35,0.3+rand(0,0.12)));ri++;}}}
+  reeds.count=ri;scene.add(reeds);
+  /* --- warm dust haze : huge soft sprites idling low over the valley --- */
+  const hzCv=document.createElement('canvas');hzCv.width=hzCv.height=128;const hx=hzCv.getContext('2d');
+  const hg=hx.createRadialGradient(64,64,4,64,64,62);hg.addColorStop(0,'rgba(255,216,160,0.85)');hg.addColorStop(1,'rgba(255,216,160,0)');
+  hx.fillStyle=hg;hx.fillRect(0,0,128,128);
+  const hzTex=new THREE.CanvasTexture(hzCv);
+  for(let i=0;i<7;i++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:hzTex,transparent:true,opacity:0.05,depthWrite:false}));
+    const x=rand(-170,170),z=rand(-330,-70);
+    sp.position.set(x,groundH(x,z)+rand(5,10),z);sp.scale.set(rand(130,210),rand(20,32),1);
+    sp.userData.v=rand(0.5,1.4);scene.add(sp);worldFx.haze.push(sp);}
+  /* a higher, softer cloud layer on top of the existing drifters */
+  if(clouds.length){for(let i=0;i<5;i++){const m=new THREE.Mesh(new THREE.PlaneGeometry(rand(260,380),rand(90,140)),
+      new THREE.MeshBasicMaterial({map:clouds[0].material.map,transparent:true,depthWrite:false,fog:false,opacity:rand(.35,.55)}));
+    m.position.set(rand(-700,700),rand(150,230),rand(-800,-200));m.userData.v=rand(0.25,0.6);scene.add(m);clouds.push(m);}}
+  /* --- distant radio mast on a far foothill, red beacon blinking --- */
+  (function(){const mastX=-168,mastZ=-452,mastY=groundH(mastX,mastZ);
+    const mastG=new THREE.Group(),mastM=lam(0x3c4148);
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.55,44,6),mastM);pole.position.y=22;mastG.add(pole);
+    for(const hy of[14,24,34]){const arm=new THREE.Mesh(new THREE.BoxGeometry(7-(hy-14)*0.16,0.28,0.28),mastM);arm.position.y=hy;mastG.add(arm);
+      const arm2=arm.clone();arm2.rotation.y=Math.PI/2;mastG.add(arm2);}
+    const wire=(a,b)=>{const dv=new THREE.Vector3().subVectors(b,a),ln=dv.length();
+      const m=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,ln,4),mastM);
+      m.position.copy(a).addScaledVector(dv,0.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dv.normalize());mastG.add(m);};
+    for(let k=0;k<3;k++){const a=k/3*TAU+0.5;wire(new THREE.Vector3(0,38,0),new THREE.Vector3(Math.cos(a)*14,0.2,Math.sin(a)*14));}
+    const lampM=new THREE.MeshBasicMaterial({color:0xff2a22});
+    const lamp=new THREE.Mesh(new THREE.SphereGeometry(0.55,8,8),lampM);lamp.position.y=44.6;mastG.add(lamp);
+    const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:hzTex,color:0xff4030,transparent:true,opacity:0.8,depthWrite:false,blending:THREE.AdditiveBlending}));
+    glow.position.y=44.6;glow.scale.set(10,10,1);mastG.add(glow);
+    mastG.position.set(mastX,mastY,mastZ);scene.add(mastG);
+    worldFx.mastLamp=lampM;worldFx.mastGlow=glow.material;})();
+  /* --- wrecked vehicle + fuel drum cluster by the tents --- */
+  (function(){const wreck=new THREE.Group();
+    const rustM=lam(0x74503a),rustM2=lam(0x5d4030),darkM=lam(0x2e2a26);
+    const bed=new THREE.Mesh(new THREE.BoxGeometry(2.1,0.7,2.6),rustM);bed.position.set(0,0.95,-1.15);bed.castShadow=true;wreck.add(bed);
+    const cab=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.95,1.8),rustM2);cab.position.set(0,1.15,1.05);cab.castShadow=true;wreck.add(cab);
+    const shield=new THREE.Mesh(new THREE.PlaneGeometry(1.7,0.62),new THREE.MeshBasicMaterial({color:0x14181c,side:THREE.DoubleSide}));
+    shield.position.set(0,1.62,1.62);shield.rotation.x=-0.28;wreck.add(shield); // smashed windshield
+    const door=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.85,1.05),rustM);
+    door.position.set(1.35,0.95,1.15);door.rotation.y=-0.95;door.castShadow=true;wreck.add(door); // door hanging open
+    const wheelG=new THREE.CylinderGeometry(0.52,0.52,0.34,12);wheelG.rotateZ(Math.PI/2);
+    for(const[wx,wz]of[[-1.02,1.35],[1.02,1.35],[-1.02,-1.5]]){const w=new THREE.Mesh(wheelG,darkM);w.position.set(wx,0.52,wz);w.castShadow=true;wreck.add(w);}
+    const loose=new THREE.Mesh(new THREE.CylinderGeometry(0.52,0.52,0.34,12),darkM); // the fourth wheel, off and lying in the dirt
+    loose.position.set(2.1,0.18,-0.4);loose.rotation.set(0.2,0.4,0.15);loose.castShadow=true;wreck.add(loose);
+    const stub=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,0.5,6),darkM);stub.rotation.z=Math.PI/2;stub.position.set(1.15,0.42,-1.5);wreck.add(stub); // bare axle
+    wreck.position.set(26,groundH(26,-CAMP_D+10),-CAMP_D+10);wreck.rotation.set(-0.03,0.7,0.055);scene.add(wreck);
+    BLOCKERS.push({x:26,z:-CAMP_D+10,r:2.6});
+    const drumM=lam(0x5c6636),drumM2=lam(0x74503a),drumG=new THREE.CylinderGeometry(0.31,0.31,0.92,10);
+    [[0,0,drumM],[0.72,0.3,drumM2],[-0.62,0.42,drumM],[0.18,-0.62,drumM2],[-0.25,0.05,drumM]].forEach(p=>{
+      const d=new THREE.Mesh(drumG,p[2]);d.position.set(-19+p[0],groundH(-19+p[0],-CAMP_D+3+p[1])+0.46,-CAMP_D+3+p[1]);d.castShadow=true;scene.add(d);});
+    const tipped=new THREE.Mesh(drumG,drumM2);tipped.rotation.z=Math.PI/2;
+    tipped.position.set(-17.7,groundH(-17.7,-CAMP_D+3.9)+0.32,-CAMP_D+3.9);tipped.castShadow=true;scene.add(tipped);
+    BLOCKERS.push({x:-19,z:-CAMP_D+3,r:1.5});})();
+  /* --- watchtower spotlight : sweeping cone + real SpotLight, night ops only --- */
+  (function(){const twX=20,twZ=-CAMP_D-18,twY=groundH(twX,twZ);
+    const pivot=new THREE.Group();pivot.position.set(twX,twY+7.6,twZ);scene.add(pivot);
+    const housing=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.42,0.62),lam(0x2c2c2c));pivot.add(housing);
+    const head=new THREE.Group();pivot.add(head);
+    head.quaternion.setFromUnitVectors(new THREE.Vector3(0,-1,0),new THREE.Vector3(0,-0.45,0.89).normalize());
+    const coneG=new THREE.ConeGeometry(11,60,20,1,true);coneG.translate(0,-30,0);
+    const cone=new THREE.Mesh(coneG,new THREE.MeshBasicMaterial({color:0xffe2a8,transparent:true,opacity:0.1,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+    head.add(cone);
+    const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.3,8,8),new THREE.MeshBasicMaterial({color:0xfff2cc}));head.add(bulb);
+    const spot=new THREE.SpotLight(0xffdf9e,0,175,0.19,0.6,1);head.add(spot);spot.position.set(0,0,0);
+    const tgt=new THREE.Object3D();tgt.position.set(0,-60,0);head.add(tgt);spot.target=tgt;
+    pivot.visible=false;
+    worldFx.spotPivot=pivot;worldFx.spotLight=spot;})();
+})();
+function worldFxUpdate(dt){
+  for(const s of worldFx.haze){s.position.x+=s.userData.v*dt;if(s.position.x>280)s.position.x=-280;}
+  if(worldFx.mastLamp){const bl=Math.pow(Math.max(0,Math.sin(G.swayT*2.0)),6); // beacon : long dark, sharp red pulse
+    worldFx.mastLamp.color.setRGB(0.35+0.65*bl,0.05+0.08*bl,0.04+0.05*bl);
+    if(worldFx.mastGlow)worldFx.mastGlow.opacity=0.12+0.8*bl;}
+  if(worldFx.spotPivot){const on=G.night;worldFx.spotPivot.visible=on;
+    if(on){worldFx.spotPivot.rotation.y=Math.sin(G.swayT*0.21)*0.95;worldFx.spotLight.intensity=2.4;}}
+}
 /* under-fire reaction : a near-miss flinches an enemy (crouch dip + startled pause,
    small alarm bump); a second near-miss inside 3s — or a witnessed kill, or ANY
    near-miss on an HVT — sends them sprinting to fresh cover via the same waypoint
@@ -1418,7 +1584,7 @@ function buildTruck(){
   scene.add(g);
 }
 function resetTruck(){
-  truck.a=rand(0,TAU);truck.speed=12;truck.dead=false;truck.active=true;truck.panic=0;truck.lastCrackT=-99;
+  truck.a=rand(0,TAU);truck.speed=4;truck.dead=false;truck.active=true;truck.panic=0;truck.lastCrackT=-99;
   driver.alive=true;driver.discovered=false;driver.group.rotation.x=0;driver.group.visible=true;
   if(driver.marker)driver.marker.visible=true;
   truckUpdate(0);
@@ -1428,16 +1594,17 @@ function truckUpdate(dt){
   if(truck.dead){truck.speed=Math.max(0,truck.speed-4*dt);truck.panic=0;} // rolls to a stop over ~3s
   else{
     /* DRIVER AI : a round cracking past the truck (lastCrackT, fed from
-       bulletUpdate) or a hot alarm (>60%) makes the driver floor it — ~18 m/s
+       bulletUpdate) or a hot alarm (>60%) makes the driver floor it — ~8 m/s
        with a mild evasive swerve. 8 quiet seconds AND alarm under 40% calms
-       him back to the cruise profile. */
+       him back to the cruise profile. (V8.2 SLOWDOWN : cruise ~4 m/s, ~2.5 near
+       the camp heart, panic capped at 8 — a hittable target, per MW.) */
     const threat=G.alarm>60||(G.swayT-truck.lastCrackT)<2.5;
     const calm=(G.swayT-G.lastShotT)>8&&G.alarm<40;
     if(threat)truck.panic=Math.min(1,truck.panic+dt*1.6);
     else if(calm)truck.panic=Math.max(0,truck.panic-dt*0.45);
     const dd=Math.hypot(truck.group.position.x,truck.group.position.z+CAMP_D-25);
-    const cruise=6+6*sstep(15,40,dd); // slow near the camp heart, cruise elsewhere
-    const target=lerp(cruise,18,truck.panic);
+    const cruise=2.5+1.5*sstep(15,40,dd); // slow near the camp heart, cruise elsewhere
+    const target=lerp(cruise,8,truck.panic);
     truck.speed+=(target-truck.speed)*Math.min(1,dt*0.9);
   }
   const px=truck.group.position.x,pz=truck.group.position.z;
@@ -1453,7 +1620,7 @@ function truckUpdate(dt){
   driver.group.rotation.y=truck.group.rotation.y;
   /* dust trail : kicked up behind the rear wheels while rolling */
   truck.dustT+=dt;
-  if(truck.speed>3&&truck.dustT>0.13){truck.dustT=0;
+  if(truck.speed>1.2&&truck.dustT>0.55/Math.max(1,truck.speed)){truck.dustT=0; // dust spacing stays ~0.55m of travel at any speed — no sliding look
     for(const wi of[2,3]){truck.wheels[wi].getWorldPosition(_tk2);_tk2.y-=0.35;
       spawnBurst(_tk2,{color:0xbfae86,n:2,sp0:0.4,sp1:1.3,up0:0.5,up1:1.6,life:0.8,grav:2.2});}}
   /* headlights : night ops only */
@@ -1597,7 +1764,7 @@ function sniperFire(e){
   const fast=(G.aimVel||0)>0.4;
   let p=G.scoped?(fast?0.20:(moving?0.34:0.55)):(fast?0.09:(moving?0.16:0.30));
   p*=clamp(420/dist,0.75,1.1);
-  if(Math.random()<p){damagePlayer(25);showDmgDir(from);}
+  if(Math.random()<p){damagePlayer(25,'COUNTER-SNIPER',dist);showDmgDir(from);}
   else{ // near miss : dust bursts off the ridge + a sharper crack
     const mp=new THREE.Vector3(G.px+rand(-2.5,2.5),groundH(G.px,G.pz)+rand(0.3,1.4),G.pz+rand(-2.5,2.5));
     impactPuff(mp);
@@ -1627,7 +1794,8 @@ function fireBullet(){
     if(!lsGet('lh_tac','')){lsSet('lh_tac','1'); // one-time hint : tactical reloads are faster
       setTimeout(()=>toast('TAC RELOAD IS FASTER — RELOAD EARLY'),1750);}
     return;}
-  if(G.reloading||G.fireCd>0||G.state!=='play')return;
+  if(G.reloading){G.reloading=false;updateHUD();} // RELOAD CANCEL : ammo>0 is guaranteed here (the empty branch returned) — rounds already seated are yours, fire NOW
+  if(G.fireCd>0||G.state!=='play')return;
   G.ammo--;G.shots++;G.fireCd=RIFLES[G.rifle].cool;G.lastShotT=G.swayT;
   const dir=new THREE.Vector3();camera.getWorldDirection(dir);
   const m=new THREE.Mesh(bulletGeo,bulletMat);
@@ -1789,7 +1957,7 @@ function fireEnemyRound(e){
   scene.add(line);tracers.push({line,t:0});
   /* distant shots arrive muffled : volume falls and the lowpass closes with range */
   sTone(rand(500,700),0.12,'sawtooth',clamp(5.4/d,0.02,0.09),-200,clamp(9000-d*55,900,5000));
-  if(Math.random()<0.09)damagePlayer(rand(7,13));
+  if(Math.random()<0.09)damagePlayer(rand(7,13),'PATROL FIRE',d);
 }
 function tracerUpdate(dt){
   for(let i=tracers.length-1;i>=0;i--){const t=tracers[i];t.t+=dt;
@@ -1840,8 +2008,9 @@ function shellUpdate(dt){
     s.m.rotation.x+=s.rx*dt;s.m.rotation.z+=s.rz*dt;
     if(s.t>1.5){scene.remove(s.m);shells.splice(i,1);}}
 }
-function damagePlayer(d){
+function damagePlayer(d,src,dist){
   if(G.state!=='play')return;
+  if(src)G.lastDmg={src,dist:dist||0}; // DEATH RECAP : the fail card names the killer
   G.hp=Math.max(0,G.hp-d);G.lastDmgT=G.swayT;sHurt();
   const el=$('dmg');el.style.opacity=G.reduceFlash?0.45:0.9;setTimeout(()=>el.style.opacity=0,180);
   if(G.hp<=0)missionFail();updateHUD();
@@ -2033,7 +2202,7 @@ function updateHUD(){
   $('hWindArr').textContent=G.windSpd>0.5?(wfrac>0.35?'→':(wfrac<-0.35?'←':'·')):'';
   $('hZoom').textContent=G.scoped?G.zoom.toFixed(1)+'x':'—';
   $('hRifle').textContent=RIFLES[G.rifle].name;
-  $('hAmmo').textContent=G.reloading?'·····':(G.ammo>0?'I'.repeat(G.ammo):'EMPTY');
+  $('hAmmo').textContent=G.ammo>0?'I'.repeat(G.ammo):(G.reloading?'·····':'EMPTY'); // progressive reload : seated rounds show as pips while the rest load
   $('hAmmo').style.color=G.reloading?'':(G.ammo===1?'#ff5a4a':(G.ammo===2?'#ffb13c':(G.ammo<=0?'#ff5a4a':''))); // LOW-AMMO PIPS : amber at 2, red at 1/empty
   $('hAlarm').textContent=Math.round(G.alarm)+'%';
   $('hSab').textContent=G.sabDone+'/'+G.sabTotal;
@@ -2300,8 +2469,8 @@ function killEnemy(e,dir,cam,hshot){
   sHit(G.chain);sKill();sThock();
   if(hshot)sTone(2300,0.09,'square',0.14); // headshot ping — higher and sharper
   const hm=$('hitmark'),kr=$('killring');
-  hm.classList.remove('pop');hm.classList.remove('hs');kr.classList.remove('pop');void hm.offsetWidth;
-  if(hshot)hm.classList.add('hs');
+  hm.classList.remove('pop');hm.classList.remove('hs');hm.classList.remove('kill');kr.classList.remove('pop');void hm.offsetWidth;
+  if(hshot)hm.classList.add('hs');else hm.classList.add('kill'); // KILL CONFIRM : plain kills flash GOLD and linger; headshots keep the red .hs
   hm.classList.add('pop');kr.classList.add('pop');
   toast((hshot?'HEADSHOT — ':'')+(e.hvt?'HVT DOWN':(e.sniper?'SNIPER DOWN':'GUARD DOWN'))+'  +'+pts+(G.chain>1?'  x'+G.chain+' CHAIN':''));
   if(!lsGet('lh_kill','')){lsSet('lh_kill','1'); // one-time hint : bodies get found
@@ -2314,7 +2483,7 @@ function startReload(){
   const r=RIFLES[G.rifle];
   if(G.reloading||G.ammo===r.mag||G.state!=='play')return;
   const dur=G.ammo>0?r.reload*0.7:r.reload; // TACTICAL RELOAD : rounds still in the mag — mag swap only, ~30% faster than a dry full cycle
-  G.reloading=true;G.reloadT=dur;G.reloadMax=dur;sReload();toast(G.ammo>0?'TAC RELOAD…':'RELOADING…');updateHUD();
+  G.reloading=true;G.reloadT=dur;G.reloadMax=dur;G.reloadFrom=G.ammo;sReload();toast(G.ammo>0?'TAC RELOAD…':'RELOADING…');updateHUD(); // PROGRESSIVE : rounds tick in one by one from reloadFrom (frame loop)
 }
 function missionCfg(n){return{hvts:Math.min(2+n,6),guards:4+2*n,wind:1.1+0.85*n,maxZoom:Math.min(9+n,16),
   snipers:n>=4?2:(n>=2?1:0),sabTanks:Math.min(2+n,5)};}
@@ -2356,7 +2525,7 @@ function startMission(n,instant){
   const rifle=RIFLES[G.rifle];
   G.night=(n%3===0);applyEnvironment(); // every 3rd mission is a NIGHT OP
   G.peakAlarm=0;G.missionScore=0;G.lastMoveT=-99; // ghost bonus + sniper accuracy state
-  G.ammo=rifle.mag;G.reloading=false;G.reloadMax=rifle.reload;G.alarm=0;G.converged=false;G.hp=100;G.fireCd=0;
+  G.ammo=rifle.mag;G.reloading=false;G.reloadMax=rifle.reload;G.alarm=0;G.converged=false;G.hp=100;G.fireCd=0;G.lastDmg=null;
   G.chain=0;G.kills=0;G.shots=0;G.hits=0;G.longest=0;G.bestChain=0;
   G.px=0;G.pz=24;G.yaw=0;G.pitch=0.02;G.breath=100;G.breathFx=0;
   G.maxZoom=cfg.maxZoom;G.zoom=Math.min(8,cfg.maxZoom);
@@ -2416,6 +2585,7 @@ function missionFail(){
   G.state='over';setScoped(false);
   showCard('<h1 style="color:#ff8a7a">MISSION FAILED</h1>'+
     '<div class="dnote">THE PATROLS OVERRAN YOUR RIDGE</div>'+
+    '<div class="dnote" style="color:#ffb0a0">KILLED BY '+(G.lastDmg?G.lastDmg.src+((G.lastDmg.src==='COUNTER-SNIPER'&&G.lastDmg.dist)?' — '+Math.round(G.lastDmg.dist)+'M':''):'PATROL FIRE')+'</div>'+ // DEATH RECAP
     '<div class="drows"><div class="drow"><span>SCORE</span><b>'+G.score+'</b></div></div>'+
     '<div class="row"><button class="mbtn" id="retryBtn">RETRY MISSION '+G.mission+'</button></div>');
   $('retryBtn').addEventListener('click',e=>{e.stopPropagation();startMission(G.mission,true);}); // QUICK RETRY : no card stop
@@ -2431,6 +2601,7 @@ $('card').addEventListener('click',()=>{
 
 /* ---------------- main loop ---------------- */
 function campFxUpdate(dt){
+  worldFxUpdate(dt); // V8.2 world pass : haze drift, mast beacon, tower spotlight sweep
   const t=G.swayT;
   for(const f of campFx.flames){
     const s=f.base*(1+0.22*Math.sin(t*23+f.ph)+0.1*Math.sin(t*47+f.ph*2));
@@ -2521,7 +2692,10 @@ function frame(now){
         if(wp!==frame._cfw){$('hChainFill').style.width=wp+'%';frame._cfw=wp;}}
       else if(frame._cwd!=='none'){cw.style.display='none';frame._cwd='none';}}
     if(G.fireCd>0)G.fireCd-=gdt;
-    if(G.reloading){G.reloadT-=gdt;if(G.reloadT<=0){G.reloading=false;G.ammo=RIFLES[G.rifle].mag;updateHUD();}}
+    if(G.reloading){G.reloadT-=gdt; // PROGRESSIVE RELOAD : one round seats every reloadMax/mag seconds, so a cancelled reload keeps what it loaded
+      const rM=RIFLES[G.rifle].mag,want=Math.min(rM,(G.reloadFrom||0)+Math.floor((G.reloadMax-G.reloadT)/(G.reloadMax/rM)+1e-4));
+      if(want>G.ammo){G.ammo=want;updateHUD();}
+      if(G.reloadT<=0){G.reloading=false;G.ammo=rM;updateHUD();}}
     G.windT+=gdt; // gusts : the single live wind source — HUD, ballistics, dust/grass, flag and ambient audio all read these
     G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7))); // ±40% strength, ~20s swell
     G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77); // heading wanders ±15° on the same swell
