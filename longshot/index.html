@@ -2608,6 +2608,7 @@ function startBulletCam(e,dir,hitP,path){
      replays the recorded flight path point-for-point, so the visual round
      drops and drifts exactly like the real one did */
   if(hitP)KC.tgt.copy(hitP);else KC.tgt.copy(e.chest());
+  KC._si=0; // scan cursor starts at the muzzle EVERY cam — a stale cursor from a longer previous flight reads off the end of a shorter path (v9.1 crash)
   if(path&&path.length>=2){KC.path=path;
     KC.cum=[0];for(let i=1;i<path.length;i++)KC.cum.push(KC.cum[i-1]+path[i].distanceTo(path[i-1]));
     KC.travel=KC.cum[KC.cum.length-1];
@@ -2623,7 +2624,7 @@ function startBulletCam(e,dir,hitP,path){
 }
 function endKillcam(){
   if(!KC.active)return;
-  KC.active=false;KC.phase='';
+  KC.active=false;KC.phase='';KC._si=0;
   KC.ts=1;kcRushStop(); // world clock restored + rush silenced — every exit path funnels through here
   kcBullet.visible=false;
   G.slowmo=0;G.punchT=0;
@@ -2654,10 +2655,13 @@ function kcUpdate(dt){
        round rides the same arc (drop + wind drift) the real shot flew, and at
        u=1 it lands exactly on KC.tgt, the true impact point */
     {const d=KC.travel*k,P=KC.path,C=KC.cum;let i=KC._si||0;
+     if(i>C.length-2)i=C.length-2;if(i<0)i=0; // HARD CLAMP : the cursor can never point outside this cam's path, whatever state a previous cam left behind
      while(i<C.length-2&&C[i+1]<d)i++;while(i>0&&C[i]>d)i--;KC._si=i; // monotone scan : d only grows during a chase
-     const seg=(C[i+1]-C[i])||1e-9,f=Math.min(1,Math.max(0,(d-C[i])/seg));
-     _kcA.lerpVectors(P[i],P[i+1],f);
-     _kcB.subVectors(P[i+1],P[i]);if(_kcB.lengthSq()>1e-12)KC.dir.copy(_kcB.normalize());} // true local tangent : bullet aim, side vec, cam offset + look bias all read KC.dir
+     const pA=P[i],pB=P[i+1];
+     if(pA&&pB){const seg=(C[i+1]-C[i])||1e-9,f=Math.min(1,Math.max(0,(d-C[i])/seg));
+       _kcA.lerpVectors(pA,pB,f);
+       _kcB.subVectors(pB,pA);if(_kcB.lengthSq()>1e-12)KC.dir.copy(_kcB.normalize());}
+     else _kcA.copy(KC.tgt);} // true local tangent : bullet aim, side vec, cam offset + look bias all read KC.dir — worst case the round sits on the impact point, never a throw
     kcBullet.position.copy(_kcA);
     kcBullet.lookAt(_kcB.copy(_kcA).add(KC.dir));
     KC.spin=(KC.spin||0)+dt*22*(0.3+0.7*(1-u));kcBullet.rotateZ(KC.spin); // rifling spin — winds down with the round so it reads at bullet-time speed
