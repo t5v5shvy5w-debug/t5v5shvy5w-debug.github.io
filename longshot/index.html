@@ -108,7 +108,7 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 .mbtn{background:#1d2b1d;border:1px solid #5a8a5a;color:#e9f2e4;border-radius:8px;padding:10px 22px;font-size:14px;letter-spacing:2px;font-family:inherit}
 .mbtn:active{transform:scale(.95)}
 #setBtn{position:fixed;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:70;width:40px;height:40px;border-radius:10px;background:rgba(8,12,8,.62);border:1px solid rgba(190,230,190,.35);color:#dfeee0;font-size:19px;display:flex;align-items:center;justify-content:center}
-#setPanel{display:none}
+#setPanel{display:none;max-height:92dvh}
 .setrow{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:12px 0;font-size:13px}
 .sethead{font-size:12px;letter-spacing:3px;color:#8fd68f;margin:18px 0 2px;text-align:left;border-bottom:1px solid #2c4a2c;padding-bottom:5px}
 #fpsRead{position:fixed;left:14px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:50;font:11px monospace;color:#9fe09f;background:rgba(8,12,8,.55);padding:3px 8px;border-radius:6px;display:none;pointer-events:none}
@@ -1690,6 +1690,7 @@ document.addEventListener('touchstart',e=>{
   if(!uiTouch)e.preventDefault();
 },{passive:false});
 document.addEventListener('touchmove',e=>{
+  if(e.target&&e.target.closest&&e.target.closest('#card2'))return; // SETTINGS PANEL SCROLL : never block it or DONE is unreachable
   for(const t of e.changedTouches){
     if(t.identifier===aimId){const[x,y]=touchPos(t);aimByPixels(x-lastAX,y-lastAY);lastAX=x;lastAY=y;}
     else if(t.identifier===joyId&&!G.scoped){ // joystick never moves you while scoped
