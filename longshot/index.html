@@ -215,15 +215,39 @@ let selRifle='longshot'; // rifle browsed on the mission card; locked in when th
 let AC=null,_nb=null;
 function nbuf(ac){if(_nb)return _nb;const b=ac.createBuffer(1,ac.sampleRate*0.5,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;_nb=b;return b;}
 function sShot(){const ac=audio();if(!ac)return;const t=ac.currentTime;
+  /* crack : bright supersonic snap layered on top */
+  const cs=ac.createBufferSource();cs.buffer=nbuf(ac);
+  const cf=ac.createBiquadFilter();cf.type='highpass';cf.frequency.value=1400;
+  const cg=ac.createGain();cg.gain.setValueAtTime(0.34,t);cg.gain.exponentialRampToValueAtTime(0.001,t+0.09);
+  cs.connect(cf);cf.connect(cg);cg.connect(ac.destination);cs.start(t);cs.stop(t+0.1);
+  /* body : the working noise burst */
   const s=ac.createBufferSource();s.buffer=nbuf(ac);
   const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(3200,t);f.frequency.exponentialRampToValueAtTime(220,t+0.28);
   const g=ac.createGain();g.gain.setValueAtTime(0.5,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.32);
-  s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t);s.stop(t+0.35);}
-function sTone(fr,dur,type,vol,slide){const ac=audio();if(!ac)return;const t=ac.currentTime;
+  s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t);s.stop(t+0.35);
+  /* low thump : chest weight under the crack */
+  const bo=ac.createOscillator(),bg=ac.createGain();bo.type='sine';
+  bo.frequency.setValueAtTime(110,t);bo.frequency.exponentialRampToValueAtTime(48,t+0.16);
+  bg.gain.setValueAtTime(0.32,t);bg.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+  bo.connect(bg);bg.connect(ac.destination);bo.start(t);bo.stop(t+0.22);
+  /* valley echo : one delayed, lowpassed tail at -14dB under the body */
+  const es=ac.createBufferSource();es.buffer=nbuf(ac);
+  const ef=ac.createBiquadFilter();ef.type='lowpass';ef.frequency.value=380;
+  const eg=ac.createGain();eg.gain.setValueAtTime(0.0001,t);
+  eg.gain.setValueAtTime(0.1,t+0.28);eg.gain.exponentialRampToValueAtTime(0.001,t+0.62);
+  es.connect(ef);ef.connect(eg);eg.connect(ac.destination);es.start(t+0.28);es.stop(t+0.68);}
+/* short supersonic crack-by : a round snapping past the player's ear */
+function sCrack(vol){const ac=audio();if(!ac)return;const t=ac.currentTime;
+  const s=ac.createBufferSource();s.buffer=nbuf(ac);
+  const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=2600;f.Q.value=0.8;
+  const g=ac.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.07);
+  s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t);s.stop(t+0.09);}
+function sTone(fr,dur,type,vol,slide,lp){const ac=audio();if(!ac)return;const t=ac.currentTime;
   const o=ac.createOscillator(),g=ac.createGain();o.type=type||'sine';o.frequency.setValueAtTime(fr,t);
   if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,fr+slide),t+dur);
   g.gain.setValueAtTime(vol||0.18,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-  o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+dur+0.02);}
+  if(lp){const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=lp;o.connect(f);f.connect(g);}
+  else o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+dur+0.02);}
 const sHit=c=>sTone(1150+c*160,0.07,'square',0.12);
 const sThock=()=>sTone(170,0.1,'sine',0.2,-90); // soft kill-confirm thock layered under sKill
 const sKill=()=>{sTone(660,0.12,'triangle',0.2);setTimeout(()=>sTone(440,0.18,'triangle',0.2),90);};
@@ -265,7 +289,8 @@ const G={
   breathHeld:false, breath:100, breathFx:0,
   swayT:0,
   invertY:false, sens:1,
-  windDir:0, windSpd:2, windT:0,
+  windDir:0, windSpd:2, windT:0, windDir0:0, // windDir0 : mission base heading; live dir/spd gust around it
+  perfN:0, perfT0:0, perfLow:0, perfHigh:0, perfLvl:0, // adaptive-quality tracker (silent)
   slowmo:0, punchT:0, punchYaw:0, punchPitch:0,
   shake:0, flashT:0, cine:false,
   px:0, pz:24,              // player pos on ridge
@@ -816,6 +841,8 @@ class Enemy{
     this.relocT=rand(2,5);this.sprinting=false; // high-alarm relocation state
     this.flinchT=0;this.crouchT=0;this.lastNearT0=-99; // near-miss reaction state
     this.shootCd=rand(1.5,3);this.strafe=rand(0,TAU);
+    this.convA=0;this.convR=80;this.burst=0;this.burstT=0;this.stuckT=0; // converge fan-out + return-fire burst state
+    this.headshot=false;this.dieYaw=0;this.sy0=1.5;this.fallAxisV=new THREE.Vector3(1,0,0); // directional-fall state
     const g=this.group=new THREE.Group();
     const uni=hvt?0xa32424:(this.sniper?0x23262c:0x4c5530),skin=0xc9a07a;
     this.mats=[];
@@ -880,8 +907,18 @@ class Enemy{
         g.position.addScaledVector(this.hitDir,Math.max(0,this.react)*9*dt);
         const k=Math.max(0,this.react/0.28);
         for(const m of this.mats)m.emissive.setRGB(0.55*k,0.06*k,0.06*k);
-      }else if(this.fall<1){ // fall over
-        this.fall=Math.min(1,this.fall+dt*2.4);g.rotation.x=-Math.PI/2*this.fall;this.marker&&(this.marker.visible=false);}
+      }else if(this.fall<1){ // fall over : direction follows the bullet's travel line
+        if(this.headshot){ // headshot : crumple straight down, fast — barely tips
+          this.fall=Math.min(1,this.fall+dt*3.6);
+          g.scale.y=Math.max(0.45,this.sy0*(1-0.55*this.fall));
+          g.rotation.x=-Math.PI/2*0.12*this.fall;
+        }else{ // tip away from the shot : rotate about the world axis perpendicular to the round, over the pre-death yaw
+          this.fall=Math.min(1,this.fall+dt*2.4);
+          const e2=this.fall*this.fall*(3-2*this.fall);
+          _qFall.setFromAxisAngle(this.fallAxisV,Math.PI/2*e2);
+          _qYaw.setFromAxisAngle(_YUP,this.dieYaw);
+          g.quaternion.multiplyQuaternions(_qFall,_qYaw);}
+        this.marker&&(this.marker.visible=false);}
       return;}
     if(this.sniper){this.sniperUpdate(dt);return;}
     if(this.flinchT>0)this.flinchT-=dt; // under-fire reaction timers
@@ -891,14 +928,19 @@ class Enemy{
     const dx=px-g.position.x,dz=pz-g.position.z,distP=Math.hypot(dx,dz);
     let mvx=0,mvz=0,moving=false;
     if(G.converged){
-      if(distP>55){mvx=dx/distP;mvz=dz/distP;moving=true;}
+      /* fan-out : each guard approaches on a personal bearing (convA) and holds
+         at a personal range (convR, 60–110m) instead of bunching on one line */
+      const toA=Math.atan2(dx,dz)+this.convA;
+      if(distP>this.convR){mvx=Math.sin(toA);mvz=Math.cos(toA);moving=true;}
       else{this.strafe+=dt*0.5;mvx=Math.cos(this.strafe)*0.4;mvz=Math.sin(this.strafe)*0.4;moving=true;}
       const sp=3.4;
       g.position.x+=mvx*sp*dt;g.position.z+=mvz*sp*dt;
       g.position.y=groundH(g.position.x,g.position.z);
       g.rotation.y=Math.atan2(dx,dz);
-      if(distP<90){this.shootCd-=dt;
-        if(this.shootCd<=0){this.shootCd=rand(1.8,3.4);enemyShoot(this);}}
+      if(this.burst>0){this.burstT-=dt; // mid-burst : feed the next rounds of the 3-round burst
+        if(this.burstT<=0){this.burstT=0.16;this.burst--;fireEnemyRound(this);}}
+      else if(distP<this.convR+30){this.shootCd-=dt;
+        if(this.shootCd<=0){this.shootCd=rand(2.2,4);enemyShoot(this);}}
     }else{
       if(this.hvt&&!this.isDriver&&G.alarm>50){ // hot zone : foot-HVTs bolt to fresh cover every few seconds
         this.relocT-=dt;
@@ -910,14 +952,18 @@ class Enemy{
         if(this.radio<=0&&Math.random()<dt*0.25)this.radio=rand(2,3.5);} // sometimes raises a hand to the ear
       else{
         const w=this.wps[this.wpi],wx=w[0]-g.position.x,wz=w[1]-g.position.z,wd=Math.hypot(wx,wz);
-        if(wd<2){this.wpi=(this.wpi+1)%this.wps.length;this.sprinting=false;if(Math.random()<0.45)this.pauseT=rand(1,3);}
+        if(wd<2){this.wpi=(this.wpi+1)%this.wps.length;this.sprinting=false;this.stuckT=0;if(Math.random()<0.45)this.pauseT=rand(1,3);}
         else{mvx=wx/wd;mvz=wz/wd;moving=true;
           const sp=this.sprinting?this.speed*2.2:this.speed;
           g.position.x+=mvx*sp*dt;g.position.z+=mvz*sp*dt;
           g.position.y=groundH(g.position.x,g.position.z);
-          g.rotation.y=Math.atan2(mvx,mvz);}
+          g.rotation.y=Math.atan2(mvx,mvz);
+          this.stuckT+=dt;
+          if(this.stuckT>6){this.stuckT=0;this.wpi=(this.wpi+1)%this.wps.length;this.sprinting=false;} // pressed against an obstacle — pick a new lane
+        }
       }
     }
+    resolveBlockers(g); // camp props : slide along tents/crates/tower/tanks instead of clipping through
     const sw=moving?Math.sin(this.walkPhase)*0.55:0;
     this.legL.rotation.x=sw;this.legR.rotation.x=-sw;
     const asw=moving?-Math.sin(this.walkPhase)*0.16:0;   // subtle arm counter-swing
@@ -970,14 +1016,41 @@ class Enemy{
     arr[3]=G.px;arr[4]=camera.position.y-0.1;arr[5]=G.pz;
     this.laser.geometry.attributes.position.needsUpdate=true;
   }
-  die(dir){
+  die(dir,hshot){
     if(!this.alive)return;this.alive=false;this.fall=0.0001;
     if(this.laser)this.laser.visible=false;
     if(this.glint)this.glint.visible=false;
     this.hitDir=dir?dir.clone():new THREE.Vector3(0,0,-1);this.react=0.28;
+    this.headshot=!!hshot;this.dieYaw=this.group.rotation.y;this.sy0=this.group.scale.y;
+    const fx=this.hitDir.x,fz=this.hitDir.z,fl=Math.hypot(fx,fz); // fall axis : perpendicular to the bullet's horizontal travel
+    if(fl>0.01)this.fallAxisV.set(fz/fl,0,-fx/fl);else this.fallAxisV.set(1,0,0);
     const dp=this.group.position.clone();dp.y+=0.5; // dust burst where the body drops
     spawnBurst(dp,{color:0xb8a888,n:10,sp0:0.8,sp1:2.6,up0:0.8,up1:2.6,life:0.9,grav:4});
   }
+}
+/* quaternion temps for the directional-fall branch (no per-frame allocation) */
+const _qFall=new THREE.Quaternion(),_qYaw=new THREE.Quaternion(),_YUP=new THREE.Vector3(0,1,0);
+/* camp obstacle blockers : enemies slide along these circles instead of clipping through props.
+   Sabotage props are appended after buildSabotage defines SAB_SPOTS; the truck registers itself
+   dynamically in resolveBlockers once it has rolled to a stop. */
+const BLOCKERS=[
+  {x:-14,z:-CAMP_D-8,r:2.8},{x:12,z:-CAMP_D-6,r:2.8},{x:2,z:-CAMP_D+12,r:2.8},      // tents
+  {x:-9.3,z:-CAMP_D+4.5,r:2.4},{x:8.7,z:-CAMP_D-6.7,r:2.2},{x:-2.3,z:-CAMP_D-12.6,r:2.4},{x:16,z:-CAMP_D+9,r:1.3}, // crate piles
+  {x:20,z:-CAMP_D-18,r:2.4},                                                        // watchtower
+  {x:-8,z:-CAMP_D+8,r:0.9},                                                         // flag pole
+  {x:2,z:-CAMP_D-4,r:1.6},                                                          // campfire
+];
+/* sabotage fuel tanks + ammo caches get appended to BLOCKERS after buildSabotage's SAB_SPOTS
+   literal executes (a few hundred lines below); the stopped truck registers itself
+   dynamically in resolveBlockers */
+function resolveBlockers(g){
+  const p=g.position;
+  for(let i=0;i<BLOCKERS.length;i++){const b=BLOCKERS[i];
+    const dx=p.x-b.x,dz=p.z-b.z,rr=b.r+0.55,d2=dx*dx+dz*dz;
+    if(d2<rr*rr&&d2>0.0001){const d=Math.sqrt(d2);p.x=b.x+dx/d*rr;p.z=b.z+dz/d*rr;}}
+  if(truck.active&&truck.group&&truck.speed<0.6){ // stopped truck is a wall too
+    const tp=truck.group.position,dx=p.x-tp.x,dz=p.z-tp.z,rr=3.4,d2=dx*dx+dz*dz;
+    if(d2<rr*rr&&d2>0.0001){const d=Math.sqrt(d2);p.x=tp.x+dx/d*rr;p.z=tp.z+dz/d*rr;}}
 }
 /* under-fire reaction : a near-miss flinches an enemy (crouch dip + startled pause,
    small alarm bump); a second near-miss inside 3s — or a witnessed kill, or ANY
@@ -1010,7 +1083,10 @@ function spawnEnemies(cfg){
     spots.push([rand(-20,20)+Math.cos(a)*r,-CAMP_D+Math.sin(a)*r*0.7,true]);}
   for(let i=0;i<cfg.guards;i++){const a=rand(0,TAU),r=rand(24,60);
     spots.push([Math.cos(a)*r*0.8,-CAMP_D+Math.sin(a)*r*0.75,false]);}
-  spots.forEach(s=>enemies.push(new Enemy(s[0],s[1],s[2])));
+  spots.forEach((s,i)=>{const e=new Enemy(s[0],s[1],s[2]);
+    e.convA=(i/Math.max(1,spots.length))*1.7-0.85+rand(-0.15,0.15); // personal approach bearing — the converging squad fans out
+    e.convR=rand(60,110); // personal hold range instead of one shared distance
+    enemies.push(e);});
   /* counter-snipers : #1 owns the watchtower, #2 kneels in a crate nest.
      They count as guards for progress but pay 150 pts — kill them first. */
   const snN=cfg.snipers||0;
@@ -1109,6 +1185,7 @@ const SAB_SPOTS=[
   {kind:'fuel',x:-12,z:-CAMP_D-3},{kind:'fuel',x:-7.5,z:-CAMP_D-6.5},{kind:'fuel',x:17,z:-CAMP_D-11},
   {kind:'fuel',x:-5,z:-CAMP_D-17},{kind:'fuel',x:11,z:-CAMP_D+15},
   {kind:'ammo',x:-9.5,z:-CAMP_D+11},{kind:'ammo',x:14,z:-CAMP_D+3}];
+for(const s of SAB_SPOTS)BLOCKERS.push({x:s.x,z:s.z,r:1.9}); // sabotage props block patrol movement too
 function buildSabotage(){
   const tankM=new THREE.MeshLambertMaterial({color:0xb02818});
   const darkM=new THREE.MeshLambertMaterial({color:0x2a2a2a});
@@ -1221,7 +1298,9 @@ function sniperFire(e){
   else{ // near miss : dust bursts off the ridge + a sharper crack
     const mp=new THREE.Vector3(G.px+rand(-2.5,2.5),groundH(G.px,G.pz)+rand(0.3,1.4),G.pz+rand(-2.5,2.5));
     impactPuff(mp);
-    sTone(rand(1600,2200),0.05,'square',0.1,-900);}
+    sTone(rand(1600,2200),0.05,'square',0.1,-900);
+    const md=Math.hypot(mp.x-G.px,mp.z-G.pz); // crack-by : closer misses snap louder past the ear
+    sCrack(clamp(1.8/(md+0.5),0.3,1)*0.5);}
 }
 /* directional hit indicator : red arrow rotated to the shooter's bearing */
 function showDmgDir(from){
@@ -1349,13 +1428,18 @@ function msmokeUpdate(dt){
     const sc=0.5+k*2.6;p.s.scale.set(sc,sc,1);
     p.s.material.opacity=0.55*(1-k);}
 }
-function enemyShoot(e){
+function enemyShoot(e){ // opens a 3-round burst; rounds 2-3 are fed from the converged branch in update()
+  e.burst=2;e.burstT=0.16;fireEnemyRound(e);
+}
+function fireEnemyRound(e){
   const from=e.chest(),to=new THREE.Vector3(G.px,camera.position.y,G.pz);
-  to.x+=rand(-6,6);to.y+=rand(-3,3);to.z+=rand(-6,6);
+  const d=from.distanceTo(to),sp=clamp(d*0.028,2,11); // spread grows with range
+  to.x+=rand(-sp,sp);to.y+=rand(-sp,sp)*0.5;to.z+=rand(-sp,sp);
   const geo=new THREE.BufferGeometry().setFromPoints([from,to]);
   const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:G.night?0xffa060:0xff7040,transparent:true,opacity:0.95}));
   scene.add(line);tracers.push({line,t:0});
-  sTone(rand(500,700),0.12,'sawtooth',0.06,-200);
+  /* distant shots arrive muffled : volume falls and the lowpass closes with range */
+  sTone(rand(500,700),0.12,'sawtooth',clamp(5.4/d,0.02,0.09),-200,clamp(9000-d*55,900,5000));
   if(Math.random()<0.09)damagePlayer(rand(7,13));
 }
 function tracerUpdate(dt){
@@ -1417,8 +1501,14 @@ function damagePlayer(d){
 const joyEl=$('joy'),knob=$('joyKnob');
 let joyId=null,joyCX=0,joyCY=0;
 let aimId=null,lastAX=0,lastAY=0;
+let _aimLastT=0,_aimF=1; // dynamic sensitivity smoother : slow drags fine, fast flicks full
 function aimByPixels(dx,dy){
-  const s=0.0021*G.sens*(G.scoped?0.4*Math.pow(8/Math.max(2,G.zoom),0.7):1); // finer control as zoom climbs
+  const now=performance.now();
+  if(_aimLastT){const dtE=Math.max(4,now-_aimLastT),spd=Math.hypot(dx,dy)/(dtE/1000); // drag speed, px/s
+    const tf=0.5+0.65*sstep(140,1750,spd); // 0.5x for precise creep, up to ~1.15x on a flick — no assist, no snap
+    _aimF+=(tf-_aimF)*0.45;}
+  _aimLastT=now;
+  const s=0.0021*G.sens*_aimF*(G.scoped?0.4*Math.pow(8/Math.max(2,G.zoom),0.7):1); // speed-aware, stacking with per-zoom scaling
   G.yaw=clamp(G.yaw-dx*s,-0.65,0.65);
   G.pitch=clamp(G.pitch+(G.invertY?dy:-dy)*s,-0.4,0.55);
 }
@@ -1454,7 +1544,7 @@ document.addEventListener('touchmove',e=>{
 },{passive:false});
 function touchEnd(e){
   for(const t of e.changedTouches){
-    if(t.identifier===aimId)aimId=null;
+    if(t.identifier===aimId){aimId=null;_aimLastT=0;}
     if(t.identifier===joyId){joyId=null;knob.style.transform='';}
   }
 }
@@ -1671,7 +1761,7 @@ function kcUpdate(dt){
 
 /* ---------------- combat outcomes ---------------- */
 function killEnemy(e,dir,cam,hshot){
-  e.die(dir);G.kills++;
+  e.die(dir,hshot);G.kills++;
   const now=G.swayT;
   G.chain=(now-G.lastKillT<8)?G.chain+1:1;G.lastKillT=now;
   const dist=camera.position.distanceTo(e.group.position);
@@ -1734,7 +1824,8 @@ function startMission(n){
   G.px=0;G.pz=24;G.yaw=0;G.pitch=0.02;G.breath=100;G.breathFx=0;
   G.maxZoom=cfg.maxZoom;G.zoom=Math.min(8,cfg.maxZoom);
   const zs=$('zoomSlider');zs.max=cfg.maxZoom;zs.value=G.zoom;
-  G.windDir=rand(0,TAU);G.windBase=cfg.wind;G.windT=0;G.windSpd=cfg.wind*rand(0.85,1.15);
+  G.windDir0=rand(0,TAU);G.windDir=G.windDir0; // mission base heading; gusts vary around it live
+  G.windBase=cfg.wind;G.windT=0;G.windSpd=cfg.wind*rand(0.85,1.15);
   bullets.forEach(b=>scene.remove(b.m));bullets.length=0;
   tracers.forEach(t=>{scene.remove(t.line);t.line.geometry.dispose();t.line.material.dispose();});tracers.length=0;
   setScoped(false);
@@ -1816,9 +1907,27 @@ function campFxUpdate(dt){
 let lastT=performance.now();
 function kickEnv(){const T=0.22;if(G.kickT>=T)return 0;const k=G.kickT/T; // recoil spring : fast rise, ~180ms settle
   return Math.sin(Math.min(1,k/0.18)*Math.PI*0.5)*(1-k);}
+/* adaptive quality : rolling FPS over ~1s buckets. Sustained <45 for ~3s steps quality
+   down one notch at a time (pixelRatio 2 -> 1.5 -> 1.2, then shadow-map freeze);
+   sustained >57 for ~6s steps back up. Hysteresis, one variable per step, silent. */
+const PERF_PR=[2,1.5,1.2,1.2];
+function applyPerfLvl(){
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,PERF_PR[G.perfLvl]));
+  if(G.perfLvl>=3){renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;}
+  else{renderer.shadowMap.autoUpdate=true;renderer.shadowMap.needsUpdate=true;}
+}
 function frame(now){
   requestAnimationFrame(frame);
   const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
+  const rawDt=(now-(G._pfPrev||now))/1000;G._pfPrev=now; // unclamped — the tracker must see real frame cost
+  G._pfAcc=(G._pfAcc||0)+rawDt;G._pfN=(G._pfN||0)+1;
+  if(G._pfAcc>=1){
+    const fps=G._pfN/G._pfAcc;G._pfAcc=0;G._pfN=0;
+    if(fps<45){G.perfLow++;G.perfHigh=0;}
+    else if(fps>57){G.perfHigh++;G.perfLow=0;}
+    else{G.perfLow=0;G.perfHigh=0;}
+    if(G.perfLow>=3&&G.perfLvl<3){G.perfLvl++;G.perfLow=0;applyPerfLvl();}
+    else if(G.perfHigh>=6&&G.perfLvl>0){G.perfLvl--;G.perfHigh=0;applyPerfLvl();}}
   let ts=1;
   if(G.slowmo>0){G.slowmo-=dt;G.slowT+=dt;           // killcam slow-mo : ramped in/out, not a hard cut
     ts=1-0.84*sstep(0,0.5,G.slowT)*sstep(0,0.4,Math.max(0,G.slowmo));}
@@ -1829,16 +1938,19 @@ function frame(now){
   if(G.state==='play'){
     const heatFloor=Math.min(40,(G.mission-1)*10); // alarm cools after 6 quiet seconds, down to the mission heat floor
     const quiet=t-G.lastShotT>6&&t-G.lastKillT>6&&t-G.lastNearT>6;
+    const hitMax=G.alarm>=100; // latch : a sabotage blast can spike alarm to 100 on a quiet board; decay must not eat the trigger
     const decaying=quiet&&G.alarm>heatFloor;
     if(decaying)G.alarm=Math.max(heatFloor,G.alarm-1.5*gdt);
     $('alarmFill').parentNode.classList.toggle('decaying',decaying);
-    if(G.alarm>=100&&!G.converged){G.converged=true;toast('ALARM 100% — PATROLS CONVERGING');}
+    if((hitMax||G.alarm>=100)&&!G.converged){G.converged=true;toast('ALARM 100% — PATROLS CONVERGING');}
     if(G.alarm>G.peakAlarm)G.peakAlarm=G.alarm; // ghost-bonus tracking
     if(G.px!==frame._lpx||G.pz!==frame._lpz){G.lastMoveT=t;frame._lpx=G.px;frame._lpz=G.pz;} // movement (sniper accuracy)
     if(G.hp>0&&G.hp<100&&t-G.lastDmgT>5)G.hp=Math.min(100,G.hp+2*gdt);
     if(G.fireCd>0)G.fireCd-=gdt;
     if(G.reloading){G.reloadT-=gdt;if(G.reloadT<=0){G.reloading=false;G.ammo=RIFLES[G.rifle].mag;updateHUD();}}
-    G.windT+=gdt;G.windSpd=Math.max(0.5,G.windBase*(1+0.28*Math.sin(G.windT*0.35)));
+    G.windT+=gdt; // gusts : the single live wind source — HUD, ballistics, dust/grass, flag and ambient audio all read these
+    G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7))); // ±40% strength, ~20s swell
+    G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77); // heading wanders ±15° on the same swell
     for(const e of enemies)e.update(gdt);
     truckUpdate(gdt);
     bulletUpdate(gdt);tracerUpdate(gdt);
@@ -1919,7 +2031,7 @@ function frame(now){
   { /* camp flag wave + river flow : cheap per-frame touches */
     if(flagMesh){const fp=flagMesh.geometry.attributes.position;
       for(let i=0;i<fp.count;i++){const fx0=fp.getX(i),w=(fx0+1)/2;
-        fp.setZ(i,Math.sin(fx0*3.2+t*7)*0.14*w+Math.sin(fx0*6.5+t*11)*0.05*w);}
+        fp.setZ(i,Math.sin(fx0*3.2+t*(4+G.windSpd*2.2))*0.14*w*(0.5+G.windSpd*0.22)+Math.sin(fx0*6.5+t*(7+G.windSpd*3))*0.05*w*(0.5+G.windSpd*0.22));}
       fp.needsUpdate=true;}
     if(riverTex)riverTex.offset.y-=dt*0.045;}
   drawReticle();
