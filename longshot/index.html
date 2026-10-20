@@ -257,8 +257,11 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='10.2'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='10.3'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'10.3',lines:[
+  '<b>IMPACT + STICK</b> — the cam bullet now strikes and stays in him, red at the wound',
+  '<b>BLOOD</b> — a touch more in the air']},
  {v:'10.2',lines:[
   '<b>TRUE IMPACT</b> — the cam bullet now lands ON the body, not in front of it',
   '<b>BLOOD CRANKED</b> — more of it, faster, darker, longer',
@@ -2164,9 +2167,9 @@ const _tpA=new THREE.Vector3(),_tpB=new THREE.Vector3(); // scratch : tracer seg
    read as pale pink specks from the cam (11 tiny cubes, fading from frame
    one) — now 26/42 bigger, darker, faster chunks that HOLD their opacity. */
 function spawnBlood(p,dir,head){
-  spawnBurst(p,{color:0x6d0606,n:head?42:26,sp0:1.2,sp1:head?6.0:4.6,up0:-0.6,up1:head?3.0:2.2,life:0.85,grav:10.5,
-    dirx:dir.x,dirz:dir.z,spread:head?1.9:1.1,sz:[1.5,2.4]}); // droplets : 26 body / 42 headshot of 0.14–0.22m chunks, ~0.85 s under gravity
-  spawnBurst(p,{color:0x8d130c,n:head?12:8,sp0:0.2,sp1:1.4,up0:0.1,up1:0.9,life:0.55,grav:2.5,
+  spawnBurst(p,{color:0x6d0606,n:head?50:32,sp0:1.2,sp1:head?6.0:4.6,up0:-0.6,up1:head?3.0:2.2,life:0.85,grav:10.5,
+    dirx:dir.x,dirz:dir.z,spread:head?1.9:1.1,sz:[1.5,2.4]}); // droplets : 32 body / 50 headshot of 0.14–0.22m chunks, ~0.85 s under gravity (v10.3 : MW — "a tiny bit more wouldn't hurt", so a touch, not a doubling)
+  spawnBurst(p,{color:0x8d130c,n:head?14:10,sp0:0.2,sp1:1.4,up0:0.1,up1:0.9,life:0.55,grav:2.5,
     dirx:dir.x,dirz:dir.z,spread:2.4,sz:[1.0,1.6]}); // mist puff : darker, slightly bigger, still quick
   spawnBurst(p,{color:0xb02020,n:6,add:1,sp0:0.5,sp1:1.6,up0:-0.3,up1:0.8,life:0.18,grav:3,
     sz:[1.6,2.2]}); // splat flash : a punchy additive red blink exactly at contact
@@ -2718,6 +2721,7 @@ document.addEventListener('visibilitychange',()=>{ // hidden : release nothing; 
    startMission / missionComplete / missionFail), firing again, scope toggle, an unknown
    phase, a total-time overrun, and a frame-loop watchdog if state leaves 'play'.        */
 const KC={active:false,phase:'',t:0,dur:0,total:0,travel:0,orbA:0,wasScoped:false,ts:1,rush:null,hshot:false,
+  victim:null,stuck:false,woundL:null,stickL:null,stickLQ:null, // v10.3 : who the cam is about + the wound/stick anchors in the victim's OWN frame — a corpse tips, slumps and (driver) rides a rolling truck, so the stuck round must be glued to the body, never to a world point
   dir:new THREE.Vector3(),from:new THREE.Vector3(),tgt:new THREE.Vector3(),orbC:new THREE.Vector3(),
   startP:new THREE.Vector3(),retP:new THREE.Vector3(),
   startQ:new THREE.Quaternion(),retQ:new THREE.Quaternion()};
@@ -2729,10 +2733,13 @@ const kcBullet=(function(){
      glowing brick. Profile runs base (y=-45mm) to tip (y=+47mm), diameter
      peaks at 12mm — the chase cam sits close so it still fills the shot. */
   const prof=[[0.0012,-0.045],[0.0045,-0.043],[0.006,-0.028],[0.006,0.004],[0.0046,0.024],[0.0022,0.040],[0.0012,0.047]];
+  const shellMats=[]; // shell materials + their fresh colors : the impact beat bloodies them, the next cam restores them
   const mkLathe=(y0,y1,color)=>{
     const pts=prof.filter(p=>p[1]>=y0-0.0001&&p[1]<=y1+0.0001).map(p=>new THREE.Vector2(p[0],p[1]));
     const g=new THREE.LatheGeometry(pts,12);g.rotateX(Math.PI/2); // profile axis Y -> flight axis +Z, tip forward
-    return new THREE.Mesh(g,new THREE.MeshStandardMaterial({color,metalness:0.85,roughness:0.32}));};
+    const mat=new THREE.MeshStandardMaterial({color,metalness:0.85,roughness:0.32});
+    shellMats.push({m:mat,c:color});
+    return new THREE.Mesh(g,mat);};
   grp.add(mkLathe(-0.045,0.004,0xc9973f)); // brass-jacket body + boat tail
   grp.add(mkLathe(0.004,0.047,0xdd8f52));  // copper ogive tip
   /* tracer shimmer : a short comet streak hugging the tail, offset a hair
@@ -2745,9 +2752,24 @@ const kcBullet=(function(){
   g.addColorStop(0,'rgba(255,226,160,1)');g.addColorStop(0.4,'rgba(255,176,84,.55)');g.addColorStop(1,'rgba(255,140,40,0)');
   x.fillStyle=g;x.fillRect(0,0,64,64);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
-  sp.scale.set(0.5,0.5,1);grp.add(sp);
+  sp.scale.set(0.34,0.34,1);grp.add(sp); // v10.3 : 0.5 read as a small sun swallowing the impact — a tighter halo lets the stuck round read
   grp.userData.glowMat=sp.material;
+  grp.userData.shellMats=shellMats;
+  grp.userData.streakMat=streak.material;grp.userData.streakC=0xffc978;
   grp.visible=false;scene.add(grp);return grp;})();
+/* IMPACT RED (v10.3) : at the impact beat the round comes out of the wound
+   bloodied — shell, tracer streak and halo all take the wound red and hold
+   it through the orbit; startBulletCam restores the fresh-round colors. */
+function kcBulletRed(){
+  for(const r of kcBullet.userData.shellMats)r.m.color.setHex(0xb02020);
+  kcBullet.userData.streakMat.color.setHex(0xff3524);
+  kcBullet.userData.glowMat.color.setHex(0xff3524);
+}
+function kcBulletReset(){
+  for(const r of kcBullet.userData.shellMats)r.m.color.setHex(r.c);
+  kcBullet.userData.streakMat.color.setHex(kcBullet.userData.streakC);
+  kcBullet.userData.glowMat.color.setHex(0xffffff);
+}
 /* wind-rush : one looped noise source through a bandpass, alive only while
    the cam runs. Gain/filter track the cam's speed and pitch down with the
    bullet-time ramp; endKillcam stops it on every exit path. */
@@ -2775,6 +2797,7 @@ function startBulletCam(e,dir,hitP,path,hshot){
   KC.active=true;KC.phase='chase';KC.t=0;KC.dur=1.5;KC.total=0;
   KC.dir.copy(dir);
   KC.hshot=!!hshot; // deferred blood (pierceKill skipped its burst for this cam) sprays at the impact beat, headshot-wide if set
+  KC.victim=e||null;KC.stuck=false;KC.stickL=null;KC.stickLQ=null;kcBulletReset(); // fresh round, fresh colors — the impact beat does the bloodied stick
   /* BULLET-CAM 2.1 : the cam target is the TRUE impact point (where the blood
      burst), not a fixed point 1.6m over the victim's feet — and the chase
      replays the recorded flight path point-for-point, so the visual round
@@ -2787,6 +2810,8 @@ function startBulletCam(e,dir,hitP,path,hshot){
     KC.from.copy(path[0]);}
   else{KC.from.copy(camera.position); // no recording (shouldn't happen) — synth a straight 2-point path so the sampler still works
     KC.path=[KC.from.clone(),KC.tgt.clone()];KC.cum=[0,KC.from.distanceTo(KC.tgt)];KC.travel=KC.cum[1];}
+  if(e&&e.group&&e.group.updateWorldMatrix)e.group.updateWorldMatrix(true,false); // matrixWorld can lag the kill frame (respawn, first render) — a stale one would put the "local" wound in the wrong frame entirely
+  KC.woundL=(e&&e.group&&e.group.worldToLocal)?e.group.worldToLocal(KC.tgt.clone()):null; // the wound in the victim's own frame, captured on the kill frame before the body starts to fall — the impact beat re-projects it to wherever the body has got to by then
   KC.wasScoped=G.scoped;
   if(G.scoped){scopeEl.style.display='none';$('zoomWrap').style.display='none';}
   rifle.visible=false;
@@ -2796,7 +2821,7 @@ function startBulletCam(e,dir,hitP,path,hshot){
 }
 function endKillcam(){
   if(!KC.active)return;
-  KC.active=false;KC.phase='';KC._si=0;
+  KC.active=false;KC.phase='';KC._si=0;KC.victim=null;KC.stuck=false;KC.woundL=null;KC.stickL=null;KC.stickLQ=null;
   KC.ts=1;kcRushStop(); // world clock restored + rush silenced — every exit path funnels through here
   kcBullet.visible=false;
   G.slowmo=0;G.punchT=0;
@@ -2812,10 +2837,56 @@ function kcTap(){ // player-driven skip : chase jumps to the orbit, anything lat
   if(!KC.active)return;
   if(KC.phase==='chase'){
     if(G.kcam==='short'){endKillcam();return;} // SHORT pref : chase only — a tap ends it outright
+    kcImpactBeat(); // SKIP-TO-HIT : the tap fast-forwards TO the hit, so the beat fires now — otherwise the round would hang mid-air at the tap point, the exact "floating bullet" MW flagged
     KC.phase='orbit';KC.t=0;KC.dur=1.6;KC.orbC.copy(KC.tgt);KC.orbC.y-=0.4;
     if(KC.orbC.y<0.55)KC.orbC.y=0.55; // low hits (legs/ground-graze) : don't bury the orbit center under the terrain
     KC.orbA=Math.atan2(camera.position.x-KC.orbC.x,camera.position.z-KC.orbC.z);}
   else endKillcam();
+}
+/* IMPACT BEAT (v10.3 — MW, verbatim : "make the bullet actually impact and
+   stick there with it going red at impact and ofc blood particles flying") :
+   the replayed round ARRIVES. It is pulled back along its own flight tangent
+   from the wound so the tip stays buried in the body and the tail sits at
+   the entry surface, its flight orientation frozen (no more rifling spin),
+   and it goes blood-red — shell, streak and halo — holding through the
+   orbit until the return hides it. The wound itself is first RE-PROJECTED
+   from the victim's own frame : between the kill and this beat the world
+   clock ran ~0.35s, so a foot victim has already tipped well away from the
+   recorded hit point and a driver's corpse has been carried off down the
+   road by his wreck — sticking (or bleeding) at the stale world point
+   would float the round over empty ground, the exact shot MW sent in.
+   From the beat on, kcStickFollow rides the round rigidly with the body. */
+function kcImpactBeat(){
+  if(KC.woundL&&KC.victim&&KC.victim.group){KC.victim.group.updateWorldMatrix(true,false);
+    KC.tgt.copy(KC.victim.group.localToWorld(_kcP.copy(KC.woundL)));} // the wound as it is NOW, not where the round found it
+  const pull=KC.hshot?0.15:0.26; // pull-back from the impact point : head seats shallower (smaller target), body puts the tail at the ~0.28-deep torso surface
+  kcBullet.position.copy(KC.tgt).addScaledVector(KC.dir,-pull);
+  kcBullet.lookAt(_kcB.copy(kcBullet.position).add(KC.dir)); // freeze the flight tangent — plain lookAt, the spin dies with the flight
+  KC.stuck=true;
+  if(KC.victim&&KC.victim.group&&KC.victim.group.worldToLocal){ // capture the stick in the victim's frame : position AND orientation ride the body from here
+    KC.stickL=KC.victim.group.worldToLocal(kcBullet.position.clone());
+    KC.stickLQ=KC.victim.group.quaternion.clone().invert().multiply(kcBullet.quaternion);
+  }
+  kcBulletRed();
+  KC.phase='impact';KC.t=0;KC.dur=0.09;KC.ts=0.02; // the ~90ms freeze beat follows, then the orbit (SHORT ends here)
+  kcRushSet(0.02,300);
+  impactPuff(KC.tgt,'dirt',{rMul:0.35,grow:2.5,op0:0.5,fade:2.4,life:0.45}); // MINI puff : a dust kiss at the wound — the stock puff balloons to ~6m and washed out the whole orbit view as a giant cream blob (v10.1 screenshot); the blood burst below is the real impact read
+  spawnBurst(KC.tgt,{color:0xd8c9a3,n:16,sp0:2.5,sp1:6.5,up0:1,up1:4,life:0.7,grav:6});
+  spawnBlood(KC.tgt,KC.dir,KC.hshot); // DEFERRED BLOOD : pierceKill held its burst for this exact frame — the replayed contact bleeds, spray along the path-end tangent
+}
+/* STICK FOLLOW (v10.3) : while the impact freeze and the orbit play, the
+   corpse is still moving — tipping to the ground, slumping onto a wheel, or
+   rolling out inside a wreck. Re-project the stuck round from the victim's
+   own frame every frame and drag the cam anchor (and, in orbit, the orbit
+   center) along by the same delta, so the money shot stays glued to the
+   wound instead of the patch of ground where the kill happened. */
+function kcStickFollow(){
+  if(!KC.stuck||!KC.stickL||!KC.victim||!KC.victim.group)return;
+  KC.victim.group.updateWorldMatrix(true,false);
+  const w=KC.victim.group.localToWorld(_kcP.copy(KC.stickL));
+  _kcB.copy(w).sub(kcBullet.position);
+  if(_kcB.lengthSq()>1e-10){kcBullet.position.copy(w);KC.tgt.add(_kcB);if(KC.phase==='orbit')KC.orbC.add(_kcB);}
+  kcBullet.quaternion.copy(KC.victim.group.quaternion).multiply(KC.stickLQ); // orientation rides too — a round lodged in a tipping body tips with it
 }
 function kcUpdate(dt){
   KC.t+=dt;KC.total+=dt;
@@ -2852,15 +2923,10 @@ function kcUpdate(dt){
     KC.ts=u<0.53?lerp(0.34,0.24,u/0.53):lerp(0.24,0.12,(u-0.53)/0.47);
     const spd=Math.pow(1-u,0.5); // cam speed factor : the rush swells with it and its pitch sags as ts drops
     kcRushSet(0.04+0.30*spd,(420+1500*spd)*(0.35+0.65*(KC.ts/0.34)));
-    if(u>=1){ // IMPACT : freeze + FOV punch + burst on the victim, then orbit (SHORT ends after the impact beat)
-      KC.phase='impact';KC.t=0;KC.dur=0.09;KC.ts=0.02;
-      kcRushSet(0.02,300);
-      impactPuff(KC.tgt,'dirt',{rMul:0.35,grow:2.5,op0:0.5,fade:2.4,life:0.45}); // MINI puff : a dust kiss at the wound — the stock puff balloons to ~6m and washed out the whole orbit view as a giant cream blob (v10.1 screenshot); the cranked blood burst above is the real impact read now
-      spawnBurst(KC.tgt,{color:0xd8c9a3,n:16,sp0:2.5,sp1:6.5,up0:1,up1:4,life:0.7,grav:6});
-      spawnBlood(KC.tgt,KC.dir,KC.hshot); // DEFERRED BLOOD : pierceKill held its burst for this exact frame — the replayed contact bleeds, spray along the path-end tangent
-    }
+    if(u>=1)kcImpactBeat(); // IMPACT : the round arrives — sticks in the wound, goes red, bleeds (kcImpactBeat), then the freeze beat plays and the orbit follows
   }
   else if(KC.phase==='impact'){
+    kcStickFollow(); // the body is already tipping inside the freeze — the stuck round rides it
     KC.ts=0.02; // ~90ms of near-frozen time at the moment of the hit
     camera.fov=78-6*Math.sin(Math.PI*Math.min(1,KC.t/KC.dur));camera.updateProjectionMatrix(); // tight 6° squeeze, released by the orbit ease
     camera.position.x+=(Math.random()-0.5)*0.03;camera.position.y+=(Math.random()-0.5)*0.03; // impact jolt
@@ -2871,6 +2937,7 @@ function kcUpdate(dt){
       KC.orbA=Math.atan2(camera.position.x-KC.orbC.x,camera.position.z-KC.orbC.z);}
   }
   else if(KC.phase==='orbit'){
+    kcStickFollow(); // anchor + orbit center + stuck round all ride the corpse (tip / slump / rolling wreck) — before the camera math below reads orbC
     const k=Math.min(1,KC.t/KC.dur),a=KC.orbA+k*Math.PI*0.67; // ~120° sweep, low + close (4.6m) at victim height, corpse centered
     camera.position.set(KC.orbC.x+Math.sin(a)*4.6,KC.orbC.y+0.6,KC.orbC.z+Math.cos(a)*4.6);
     camera.lookAt(KC.orbC.x,Math.max(0.35,KC.orbC.y-0.5),KC.orbC.z);
