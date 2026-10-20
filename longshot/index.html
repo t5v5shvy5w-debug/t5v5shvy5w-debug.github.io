@@ -79,6 +79,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 #bloom{position:fixed;left:50%;bottom:-12vmin;width:76vmin;height:52vmin;transform:translateX(-50%);z-index:44;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 100%,rgba(255,205,115,.6),rgba(255,150,60,.2) 55%,rgba(255,150,60,0) 75%)}
 .cine{position:fixed;left:0;right:0;height:0;background:#000;z-index:46;transition:height .35s ease;pointer-events:none}
 #ctop{top:0}#cbot{bottom:0}
+#nightTint{position:fixed;inset:0;z-index:41;pointer-events:none;display:none;background:radial-gradient(circle 37vmin at 50% 50%, rgba(70,255,150,.13) 0, rgba(70,255,150,.13) 36.6vmin, rgba(0,0,0,0) 37.4vmin)}
+#dmgDir{position:fixed;left:50%;top:50%;width:0;height:0;z-index:46;pointer-events:none;opacity:0;transition:opacity .18s}
+#dmgDir i{position:absolute;left:-11px;top:-122px;width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:22px solid rgba(255,60,40,.95);filter:drop-shadow(0 0 6px rgba(255,0,0,.85))}
 </style>
 </head>
 <body>
@@ -90,12 +93,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
   <div class="bar">WIND <b id="hWind">—</b> &nbsp;ZOOM <b id="hZoom">—</b></div>
   <div class="bar">AMMO <b id="hAmmo">IIIII</b></div>
   <div class="bar">RIFLE <b id="hRifle">LONGSHOT</b></div>
+  <div class="bar">SABOTAGE <b id="hSab">0/0</b> <b id="hGhost" style="color:#ffe9a8"></b></div>
   <div class="bar meterwrap">ALARM <span class="meter"><i id="alarmFill" style="background:#e8b23a;transform:scaleX(0)"></i></span><b id="hAlarm">0%</b></div>
   <div class="bar meterwrap">HP <span class="meter"><i id="hpFill" style="background:#6fd67f;transform:scaleX(1)"></i></span></div>
 </div>
 <div id="xhair"></div>
 
 <div id="scope"><canvas id="reticle"></canvas></div>
+<div id="nightTint"></div>
 <div id="zoomWrap"><div id="zoomInner"><input id="zoomSlider" type="range" min="2" max="6" step="0.5" value="4"></div></div>
 
 <button class="hbtn" id="btnFire">FIRE</button>
@@ -104,6 +109,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 <div id="joy"><div id="joyKnob"></div></div>
 
 <div id="dmg"></div>
+<div id="dmgDir"><i></i></div>
 <div id="hitmark"></div>
 <div id="killring"></div>
 <div id="bloom"></div>
@@ -221,6 +227,10 @@ const G={
   shake:0, flashT:0, cine:false,
   px:0, pz:24,              // player pos on ridge
   hvtTotal:0,
+  sabDone:0, sabTotal:0,      // sabotage objectives destroyed / active
+  peakAlarm:0, missionScore:0, // ghost-bonus tracking per mission
+  night:false,                // night-ops lighting preset
+  lastMoveT:-99,              // last time the player repositioned (counter-sniper accuracy)
   distTgt:'—',
 };
 $('hBest').textContent=G.best;
@@ -255,12 +265,14 @@ sun.shadow.camera.near=20;sun.shadow.camera.far=700;sun.shadow.bias=-0.0006;
 scene.add(sun);
 
 /* sky dome : gradient + sun glow */
+let skyMesh=null,daySkyTex=null,sunGlow=null;
 (function(){const cv=document.createElement('canvas');cv.width=4;cv.height=256;const x=cv.getContext('2d');
  const gr=x.createLinearGradient(0,0,0,256);
  gr.addColorStop(0,'#2a4a86');gr.addColorStop(0.45,'#7d9fc8');gr.addColorStop(0.7,'#c7ab8e');gr.addColorStop(0.86,'#f2a95e');gr.addColorStop(1,'#ffcf8a');
  x.fillStyle=gr;x.fillRect(0,0,4,256);
  const tex=new THREE.CanvasTexture(cv);
  const sky=new THREE.Mesh(new THREE.SphereGeometry(950,24,14),new THREE.MeshBasicMaterial({map:tex,side:THREE.BackSide,fog:false}));
+ skyMesh=sky;daySkyTex=tex;
  scene.add(sky);})();
 /* sun glow disc : warm additive sprite sitting on the horizon toward the sun */
 (function(){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
@@ -269,7 +281,68 @@ scene.add(sun);
  x.fillStyle=g;x.fillRect(0,0,128,128);
  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,fog:false,blending:THREE.AdditiveBlending}));
  const d=new THREE.Vector3(300,85,-40).normalize().multiplyScalar(690);
- sp.position.copy(d);sp.scale.set(240,240,1);scene.add(sp);})();
+ sp.position.copy(d);sp.scale.set(240,240,1);sunGlow=sp;scene.add(sp);})();
+
+/* ---------------- NIGHT OPS : lighting preset swapped per mission ----------------
+   Every 3rd mission runs at night. ONE scene, two presets: applyEnvironment()
+   retints fog/hemi/moon, swaps the sky-dome texture, toggles stars + moon,
+   warms the tent lanterns and boosts the campfire. No scene duplication. */
+const nightSkyTex=(function(){const cv=document.createElement('canvas');cv.width=4;cv.height=256;const x=cv.getContext('2d');
+ const gr=x.createLinearGradient(0,0,0,256);
+ gr.addColorStop(0,'#01030a');gr.addColorStop(0.5,'#081426');gr.addColorStop(0.78,'#12233c');gr.addColorStop(1,'#1d3049');
+ x.fillStyle=gr;x.fillRect(0,0,4,256);
+ return new THREE.CanvasTexture(cv);})();
+const starsPts=(function(){
+ const N=520,arr=new Float32Array(N*3);
+ for(let i=0;i<N;i++){
+   const a=rand(0,TAU),y=rand(0.06,1),r=Math.sqrt(Math.max(0,1-y*y));
+   arr[i*3]=Math.cos(a)*r*880;arr[i*3+1]=y*880;arr[i*3+2]=Math.sin(a)*r*880;}
+ const geo=new THREE.BufferGeometry();
+ geo.setAttribute('position',new THREE.BufferAttribute(arr,3));
+ const pts=new THREE.Points(geo,new THREE.PointsMaterial({color:0xcfe0ff,size:1.7,sizeAttenuation:false,
+   transparent:true,opacity:0.9,fog:false,depthWrite:false}));
+ pts.visible=false;scene.add(pts);return pts;})();
+const moonSpr=(function(){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+ const g=x.createRadialGradient(64,64,8,64,64,62);
+ g.addColorStop(0,'rgba(232,240,255,1)');g.addColorStop(0.32,'rgba(210,226,255,.95)');
+ g.addColorStop(0.42,'rgba(160,190,240,.35)');g.addColorStop(1,'rgba(140,170,230,0)');
+ x.fillStyle=g;x.fillRect(0,0,128,128);
+ x.fillStyle='rgba(190,205,235,.5)';
+ x.beginPath();x.arc(52,52,5,0,TAU);x.fill();x.beginPath();x.arc(76,70,4,0,TAU);x.fill();x.beginPath();x.arc(66,44,3,0,TAU);x.fill();
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,fog:false}));
+ const d=new THREE.Vector3(-220,300,-140).normalize().multiplyScalar(820);
+ sp.position.copy(d);sp.scale.set(120,120,1);sp.visible=false;scene.add(sp);return sp;})();
+/* warm lanterns at the tents : built dark, lit only on night ops */
+const lanterns=[];
+[[-14,-CAMP_D-8],[12,-CAMP_D-6],[2,-CAMP_D+12]].forEach(p=>{
+  const L=new THREE.PointLight(0xffa050,0,26,2);
+  L.position.set(p[0],groundH(p[0],p[1])+2.1,p[1]);scene.add(L);lanterns.push(L);});
+function updateNightTint(){$('nightTint').style.display=(G.night&&G.scoped)?'block':'none';}
+function applyEnvironment(){
+  const night=G.night;
+  if(night){
+    scene.fog.color.setHex(0x0d1626);scene.fog.near=140;scene.fog.far=760;
+    hemi.color.setHex(0x35496e);hemi.groundColor.setHex(0x0a0c10);hemi.intensity=0.34;
+    sun.color.setHex(0x9db8e8);sun.intensity=0.5;sun.position.set(-220,300,-140);
+    renderer.toneMappingExposure=1.02;
+    if(skyMesh){skyMesh.material.map=nightSkyTex;skyMesh.material.needsUpdate=true;}
+    if(sunGlow)sunGlow.visible=false;
+    starsPts.visible=true;moonSpr.visible=true;
+    for(const c of clouds)c.material.color.setHex(0x2c3a55);
+    for(const L of lanterns)L.intensity=1.5;
+  }else{
+    scene.fog.color.setHex(0xe6c69c);scene.fog.near=260;scene.fog.far=980;
+    hemi.color.setHex(0xffd9b0);hemi.groundColor.setHex(0x5a5a3f);hemi.intensity=0.55;
+    sun.color.setHex(0xffb066);sun.intensity=1.35;sun.position.set(300,85,-40);
+    renderer.toneMappingExposure=1.18;
+    if(skyMesh){skyMesh.material.map=daySkyTex;skyMesh.material.needsUpdate=true;}
+    if(sunGlow)sunGlow.visible=true;
+    starsPts.visible=false;moonSpr.visible=false;
+    for(const c of clouds)c.material.color.setHex(0xffffff);
+    for(const L of lanterns)L.intensity=0;
+  }
+  updateNightTint();
+}
 
 /* clouds */
 const clouds=[];
@@ -665,15 +738,38 @@ const enemies=[];
 const markerTex=(function(){const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
   x.fillStyle='#ff2a2a';x.beginPath();x.moveTo(32,58);x.lineTo(56,18);x.lineTo(8,18);x.closePath();x.fill();
   x.fillStyle='rgba(255,42,42,.35)';x.fillRect(0,0,64,64);return new THREE.CanvasTexture(cv);})();
+/* counter-sniper scope glint : small additive sprite that flashes on the head */
+const glintTex=(function(){const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
+  const g=x.createRadialGradient(32,32,1,32,32,30);
+  g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(0.3,'rgba(220,240,255,.85)');g.addColorStop(1,'rgba(160,200,255,0)');
+  x.fillStyle=g;x.fillRect(0,0,64,64);
+  x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=3;
+  x.beginPath();x.moveTo(32,4);x.lineTo(32,60);x.moveTo(4,32);x.lineTo(60,32);x.stroke();
+  return new THREE.CanvasTexture(cv);})();
+/* sabotage marker : pulsing red diamond */
+const diamondTex=(function(){const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
+  x.strokeStyle='#ff3a2a';x.lineWidth=5;
+  x.beginPath();x.moveTo(32,6);x.lineTo(58,32);x.lineTo(32,58);x.lineTo(6,32);x.closePath();x.stroke();
+  x.fillStyle='rgba(255,58,42,.35)';
+  x.beginPath();x.moveTo(32,6);x.lineTo(58,32);x.lineTo(32,58);x.lineTo(6,32);x.closePath();x.fill();
+  return new THREE.CanvasTexture(cv);})();
+/* guard flashlight cone : cheap additive cone mesh, one shared geo/mat */
+const coneGeo=new THREE.ConeGeometry(1.15,7,12,1,true);
+coneGeo.translate(0,-3.5,0);            // apex at the guard, beam extending down -y
+coneGeo.rotateX(-Math.PI/2+0.16);       // ... swung forward + slightly down
+const coneMat=new THREE.MeshBasicMaterial({color:0xffe9b0,transparent:true,opacity:0.16,
+  blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
 class Enemy{
-  constructor(x,z,hvt){
+  constructor(x,z,hvt,opts){
     this.hvt=hvt;this.alive=true;this.fall=0;
+    this.sniper=!!(opts&&opts.sniper); // counter-sniper : stationary post, aim/fire cycle
+    this.aimPhase='idle';this.aimT=rand(1.5,3);this.laser=null;this.glint=null;this.postY=null;this.chestOff=null;
     this.speed=rand(1.3,1.8);this.walkPhase=rand(0,TAU);this.pauseT=rand(0,2);
     this.radio=0;this.headYaw=0; // idle radio-call pose + head scan state
     this.relocT=rand(2,5);this.sprinting=false; // high-alarm relocation state
     this.shootCd=rand(1.5,3);this.strafe=rand(0,TAU);
     const g=this.group=new THREE.Group();
-    const uni=hvt?0xa32424:0x4c5530,skin=0xc9a07a;
+    const uni=hvt?0xa32424:(this.sniper?0x23262c:0x4c5530),skin=0xc9a07a;
     this.mats=[];
     const M=c=>{const m=new THREE.MeshLambertMaterial({color:c});this.mats.push(m);return m;};
     const bx=(w,h,d,mat,x,y,z,parent)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
@@ -721,8 +817,13 @@ class Enemy{
     this.wpi=(rand(0,n)|0);
     if(hvt){const mk=new THREE.Sprite(new THREE.SpriteMaterial({map:markerTex,transparent:true,depthWrite:false}));
       mk.scale.set(1.6,1.6,1);mk.position.y=2.6;g.add(mk);this.marker=mk;}
+    if(this.sniper){ // scope glint : flashing scope reflection — the tell
+      const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:glintTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+      gl.scale.set(0.5,0.5,1);gl.position.set(0.2,0.04,0.16);hg.add(gl);this.glint=gl;}
+    else{ // guard flashlight cone : cheap additive beam, night ops only
+      const cone=new THREE.Mesh(coneGeo,coneMat);cone.position.set(0,1.15,0.3);cone.visible=G.night;g.add(cone);}
   }
-  chest(){const p=this.group.position;return new THREE.Vector3(p.x,p.y+1.55,p.z);}
+  chest(){const p=this.group.position;return new THREE.Vector3(p.x,p.y+(this.chestOff==null?1.55:this.chestOff),p.z);}
   update(dt){
     const g=this.group;
     if(!this.alive){
@@ -734,6 +835,7 @@ class Enemy{
       }else if(this.fall<1){ // fall over
         this.fall=Math.min(1,this.fall+dt*2.4);g.rotation.x=-Math.PI/2*this.fall;this.marker&&(this.marker.visible=false);}
       return;}
+    if(this.sniper){this.sniperUpdate(dt);return;}
     this.walkPhase+=dt*7;
     const px=G.px,pz=G.pz;
     const dx=px-g.position.x,dz=pz-g.position.z,distP=Math.hypot(dx,dz);
@@ -780,21 +882,74 @@ class Enemy{
     this.headG.rotation.y=this.headYaw;
     g.position.y=groundH(g.position.x,g.position.z)+(moving?Math.abs(Math.sin(this.walkPhase))*0.06:0);
   }
+  /* counter-sniper behavior : hold the post, face the ridge, cycle
+     idle -> aim 1.5s (glint swells + laser shimmer) -> fire -> cool */
+  sniperUpdate(dt){
+    const g=this.group;
+    if(this.postY!=null)g.position.y=this.postY;
+    const dx=G.px-g.position.x,dz=G.pz-g.position.z;
+    g.rotation.y=Math.atan2(dx,dz);
+    if(this.glint){
+      if(this.aimPhase==='aim'){
+        const pr=1-this.aimT/1.5; // aim progress 0..1
+        this.glint.material.opacity=0.75+0.25*pr;
+        const gs=0.5+0.55*pr;this.glint.scale.set(gs,gs,1);
+      }else{
+        this.glint.material.opacity=0.3+0.28*Math.sin(G.swayT*2.3+this.walkPhase);
+        this.glint.scale.set(0.5,0.5,1);}}
+    this.aimT-=dt;
+    if(this.aimPhase==='idle'){
+      if(this.aimT<=0){this.aimPhase='aim';this.aimT=1.5;this.showLaser(true);}
+    }else if(this.aimPhase==='aim'){
+      this.updateLaser();
+      if(this.aimT<=0){this.aimPhase='cool';this.aimT=rand(2.6,4.4);this.showLaser(false);sniperFire(this);}
+    }else if(this.aimT<=0){this.aimPhase='idle';this.aimT=rand(1.4,2.6);}
+  }
+  showLaser(on){
+    if(on&&!this.laser){
+      const geo=new THREE.BufferGeometry();
+      geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
+      this.laser=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0xff4438,transparent:true,opacity:0.22,depthWrite:false}));
+      scene.add(this.laser);this.updateLaser();}
+    if(this.laser)this.laser.visible=on;
+  }
+  updateLaser(){
+    if(!this.laser)return;
+    const a=this.chest(),arr=this.laser.geometry.attributes.position.array;
+    arr[0]=a.x;arr[1]=a.y;arr[2]=a.z;
+    arr[3]=G.px;arr[4]=camera.position.y-0.1;arr[5]=G.pz;
+    this.laser.geometry.attributes.position.needsUpdate=true;
+  }
   die(dir){
     if(!this.alive)return;this.alive=false;this.fall=0.0001;
+    if(this.laser)this.laser.visible=false;
+    if(this.glint)this.glint.visible=false;
     this.hitDir=dir?dir.clone():new THREE.Vector3(0,0,-1);this.react=0.28;
     const dp=this.group.position.clone();dp.y+=0.5; // dust burst where the body drops
     spawnBurst(dp,{color:0xb8a888,n:10,sp0:0.8,sp1:2.6,up0:0.8,up1:2.6,life:0.9,grav:4});
   }
 }
 function spawnEnemies(cfg){
-  enemies.forEach(e=>{if(e!==driver)scene.remove(e.group);});enemies.length=0;
+  enemies.forEach(e=>{if(e!==driver)scene.remove(e.group);
+    if(e.laser){scene.remove(e.laser);e.laser.geometry.dispose();e.laser.material.dispose();e.laser=null;}});
+  enemies.length=0;
   const spots=[];
   for(let i=0;i<Math.max(1,cfg.hvts-1);i++){const a=rand(0,TAU),r=rand(6,22);
     spots.push([rand(-20,20)+Math.cos(a)*r,-CAMP_D+Math.sin(a)*r*0.7,true]);}
   for(let i=0;i<cfg.guards;i++){const a=rand(0,TAU),r=rand(24,60);
     spots.push([Math.cos(a)*r*0.8,-CAMP_D+Math.sin(a)*r*0.75,false]);}
   spots.forEach(s=>enemies.push(new Enemy(s[0],s[1],s[2])));
+  /* counter-snipers : #1 owns the watchtower, #2 kneels in a crate nest.
+     They count as guards for progress but pay 150 pts — kill them first. */
+  const snN=cfg.snipers||0;
+  for(let i=0;i<snN;i++){
+    if(i===0){const sn=new Enemy(20,-CAMP_D-18,false,{sniper:true});
+      sn.postY=groundH(20,-CAMP_D-18)+7.35;sn.group.position.set(20,sn.postY,-CAMP_D-18);
+      enemies.push(sn);}
+    else{const sn=new Enemy(16,-CAMP_D+13,false,{sniper:true});
+      sn.group.scale.set(1.5,1.12,1.5);sn.chestOff=1.0;sn.prone=true;
+      enemies.push(sn);}
+  }
   resetTruck();            // the truck's driver takes the last HVT slot
   enemies.push(driver);
   G.hvtTotal=cfg.hvts;
@@ -873,6 +1028,140 @@ function truckUpdate(dt){
   driver.group.rotation.y=truck.group.rotation.y;
 }
 
+/* ---------------- V6 systems : sabotage + counter-snipers + ghost ----------------
+   Sabotage props are built ONCE (pooled); each mission activates a subset.
+   Explosions kill through killEnemy so score/chain/completion stay unified,
+   and chain-detonations are queued in game time (chainQ) rather than timers. */
+const sabTargets=[],chainQ=[];
+const SAB_SPOTS=[
+  {kind:'fuel',x:-12,z:-CAMP_D-3},{kind:'fuel',x:-7.5,z:-CAMP_D-6.5},{kind:'fuel',x:17,z:-CAMP_D-11},
+  {kind:'fuel',x:-5,z:-CAMP_D-17},{kind:'fuel',x:11,z:-CAMP_D+15},
+  {kind:'ammo',x:-9.5,z:-CAMP_D+11},{kind:'ammo',x:14,z:-CAMP_D+3}];
+function buildSabotage(){
+  const tankM=new THREE.MeshLambertMaterial({color:0xb02818});
+  const darkM=new THREE.MeshLambertMaterial({color:0x2a2a2a});
+  const crateM=new THREE.MeshLambertMaterial({color:0x5a4a26});
+  const bandM=new THREE.MeshLambertMaterial({color:0xa32424});
+  for(const s of SAB_SPOTS){
+    const g=new THREE.Group(),gy=groundH(s.x,s.z);
+    if(s.kind==='fuel'){
+      const body=new THREE.Mesh(new THREE.CylinderGeometry(0.95,0.95,2.3,12),tankM);
+      body.position.y=1.15;body.castShadow=true;g.add(body);
+      const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.4,0.3,8),darkM);
+      cap.position.y=2.45;g.add(cap);
+      const base=new THREE.Mesh(new THREE.BoxGeometry(2.1,0.25,2.1),darkM);
+      base.position.y=0.12;g.add(base);
+    }else{
+      const box=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.2,1.5),crateM);
+      box.position.y=0.6;box.castShadow=true;g.add(box);
+      const band=new THREE.Mesh(new THREE.BoxGeometry(1.56,0.3,1.56),bandM);
+      band.position.y=0.85;g.add(band);
+    }
+    g.position.set(s.x,gy,s.z);g.rotation.y=rand(0,TAU);scene.add(g);
+    const mk=new THREE.Sprite(new THREE.SpriteMaterial({map:diamondTex,transparent:true,depthWrite:false}));
+    mk.scale.set(1.5,1.5,1);mk.position.set(s.x,gy+(s.kind==='fuel'?3.6:2.6),s.z);scene.add(mk);
+    sabTargets.push({kind:s.kind,group:g,marker:mk,alive:false,
+      pos:new THREE.Vector3(s.x,gy+(s.kind==='fuel'?1.2:0.7),s.z),r:s.kind==='fuel'?1.55:1.3,ph:rand(0,TAU)});
+  }
+}
+function resetSabotage(cfg){
+  let tanks=0;G.sabDone=0;
+  for(const tg of sabTargets){
+    if(tg.kind==='fuel'){tg.alive=tanks<cfg.sabTanks;tanks++;}
+    else tg.alive=true;
+    tg.group.visible=tg.alive;tg.marker.visible=tg.alive;}
+  G.sabTotal=sabTargets.filter(t=>t.alive).length;
+  chainQ.length=0;
+}
+function sabAlive(){let n=0;for(const tg of sabTargets)if(tg.alive)n++;return n;}
+function checkMissionDone(){
+  if(G.state==='play'&&hvtsAlive()===0&&sabAlive()===0)
+    setTimeout(()=>{if(G.state==='play')missionComplete();},1500);
+}
+/* explosion FX : one pooled fireball sprite + shockwave ring + shared light */
+const booms=[];
+const boomTex=(function(){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+  const g=x.createRadialGradient(64,64,4,64,64,62);
+  g.addColorStop(0,'rgba(255,246,210,1)');g.addColorStop(0.3,'rgba(255,180,70,.9)');
+  g.addColorStop(0.65,'rgba(255,110,25,.5)');g.addColorStop(1,'rgba(255,70,10,0)');
+  x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(cv);})();
+const boomRingGeo=new THREE.RingGeometry(0.86,1,40);
+const boomLight=new THREE.PointLight(0xff8a40,0,70,2);scene.add(boomLight);
+function boomFx(p){
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:boomTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+  sp.position.copy(p);sp.position.y+=0.7;sp.scale.set(2.5,2.5,1);scene.add(sp);
+  const ring=new THREE.Mesh(boomRingGeo,new THREE.MeshBasicMaterial({color:0xffc37a,transparent:true,opacity:0.85,
+    side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));
+  ring.rotation.x=-Math.PI/2;ring.position.set(p.x,p.y-0.75,p.z);scene.add(ring);
+  booms.push({sp,ring,t:0});
+  boomLight.position.copy(p);boomLight.position.y+=1.5;boomLight.intensity=9;
+}
+function boomUpdate(dt){
+  for(let i=booms.length-1;i>=0;i--){const b=booms[i];b.t+=dt;const k=b.t/0.55;
+    if(k>=1){scene.remove(b.sp);scene.remove(b.ring);b.sp.material.dispose();b.ring.material.dispose();booms.splice(i,1);continue;}
+    const s=2.5+k*15;b.sp.scale.set(s,s,1);b.sp.material.opacity=1-k;
+    const rs=1+k*10;b.ring.scale.set(rs,rs,1);b.ring.material.opacity=0.85*(1-k);}
+  boomLight.intensity=Math.max(0,boomLight.intensity-dt*24);
+  for(let i=0;i<sabTargets.length;i++){const tg=sabTargets[i]; // objective markers pulse
+    if(tg.alive){const pu=0.68+0.32*Math.sin(G.swayT*4+tg.ph);
+      tg.marker.material.opacity=pu;const ms=1.35+0.25*Math.sin(G.swayT*4+tg.ph);tg.marker.scale.set(ms,ms,1);}}
+}
+function sBoom(){const ac=audio();if(!ac)return;const t=ac.currentTime;
+  const s=ac.createBufferSource();s.buffer=nbuf(ac);s.loop=true;
+  const f=ac.createBiquadFilter();f.type='lowpass';
+  f.frequency.setValueAtTime(900,t);f.frequency.exponentialRampToValueAtTime(60,t+0.6);
+  const g=ac.createGain();g.gain.setValueAtTime(0.7,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.7);
+  s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t);s.stop(t+0.75);
+  sTone(55,0.5,'sine',0.5,-20);}
+function explodeSab(tg){
+  if(!tg.alive)return;
+  tg.alive=false;tg.group.visible=false;tg.marker.visible=false;
+  G.sabDone++;G.score+=50;G.missionScore+=50;
+  G.alarm=Math.min(100,G.alarm+25);
+  sBoom();boomFx(tg.pos);
+  spawnBurst(tg.pos,{color:0xffa03c,n:40,sp0:2,sp1:9,up0:2,up1:9,life:1.1,grav:7,add:1});   // ember storm
+  spawnBurst(tg.pos,{color:0x554a3a,n:16,sp0:1,sp1:5,up0:3,up1:7,life:1.3,grav:3});          // debris
+  const kr=tg.kind==='fuel'?9:7.5;
+  for(const e of enemies){if(!e.alive)continue;
+    if(e.chest().distanceTo(tg.pos)<kr){
+      _td.copy(e.group.position).sub(tg.pos);_td.y=0;
+      if(_td.lengthSq()<0.01)_td.set(0,0,1);_td.normalize();
+      killEnemy(e,_td);}}
+  if(truck.active&&truck.group&&truck.group.position.distanceTo(tg.pos)<kr+2)truck.dead=true; // blast stops the truck
+  if(tg.kind==='fuel')for(const o of sabTargets)
+    if(o!==tg&&o.alive&&o.kind==='fuel'&&o.pos.distanceTo(tg.pos)<12)chainQ.push({tg:o,t:0.4});
+  toast((tg.kind==='fuel'?'FUEL TANK':'AMMO CACHE')+' DESTROYED +50');
+  updateHUD();checkMissionDone();
+}
+/* counter-sniper shot at the player : hit chance scales with distance;
+   scoped-and-still is the easiest target, moving is the hardest */
+function sniperFire(e){
+  const from=e.chest(),to=new THREE.Vector3(G.px,camera.position.y-0.1,G.pz);
+  const geo=new THREE.BufferGeometry().setFromPoints([from,to]);
+  const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:G.night?0xffc080:0xffa050,transparent:true,opacity:1}));
+  scene.add(line);tracers.push({line,t:-0.1});
+  sTone(rand(900,1200),0.14,'sawtooth',0.07,-500); // incoming crack
+  const dist=from.distanceTo(to);
+  const moving=(G.swayT-G.lastMoveT)<0.9;
+  let p=G.scoped?(moving?0.34:0.55):(moving?0.16:0.30);
+  p*=clamp(420/dist,0.75,1.1);
+  if(Math.random()<p){damagePlayer(25);showDmgDir(from);}
+  else{ // near miss : dust bursts off the ridge + a sharper crack
+    const mp=new THREE.Vector3(G.px+rand(-2.5,2.5),groundH(G.px,G.pz)+rand(0.3,1.4),G.pz+rand(-2.5,2.5));
+    impactPuff(mp);
+    sTone(rand(1600,2200),0.05,'square',0.1,-900);}
+}
+/* directional hit indicator : red arrow rotated to the shooter's bearing */
+function showDmgDir(from){
+  const dx=from.x-G.px,dz=from.z-G.pz,dl=Math.hypot(dx,dz)||1;
+  const fx=-Math.sin(G.yaw),fz=-Math.cos(G.yaw);
+  const rel=Math.atan2(fx*(dz/dl)-fz*(dx/dl),fx*(dx/dl)+fz*(dz/dl))*180/Math.PI;
+  const el=$('dmgDir');
+  el.style.transform='rotate('+rel+'deg)';el.style.opacity=1;
+  clearTimeout(showDmgDir._t);
+  showDmgDir._t=setTimeout(()=>{el.style.opacity=0;},650);
+}
+
 /* ---------------- player projectiles ---------------- */
 const bullets=[],tracers=[],puffs=[];
 const bulletGeo=new THREE.BoxGeometry(0.07,0.07,1.5);
@@ -902,7 +1191,7 @@ function bulletUpdate(dt){
   const wvx=Math.sin(G.windDir)*G.windSpd,wvz=Math.cos(G.windDir)*G.windSpd;
   for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];
     const steps=Math.max(1,Math.ceil(b.sp*dt/1.5));const sdt=dt/steps;
-    let hit=null,ground=false,thit=false;
+    let hit=null,ground=false,thit=false,shit=null;
     for(let s=0;s<steps;s++){
       b.vy-=9.8*sdt;b.vx+=wvx*1.6*sdt;b.vz+=wvz*1.6*sdt; // real gravity 9.8 m/s^2 — hold over with the mil-dots
       b.m.position.x+=b.vx*sdt;b.m.position.y+=b.vy*sdt;b.m.position.z+=b.vz*sdt;
@@ -913,11 +1202,16 @@ function bulletUpdate(dt){
       if(hit)break;
       if(truck.active&&truck.group){_tv.copy(p);truck.group.worldToLocal(_tv); // truck body (driver sphere already checked above)
         if(Math.abs(_tv.x)<1.25&&_tv.y>0.2&&_tv.y<2.6&&Math.abs(_tv.z)<2.5){thit=true;break;}}
+      for(const tg of sabTargets){if(!tg.alive)continue; // sabotage props : sphere test like the enemy chest check
+        const dx=p.x-tg.pos.x,dy=p.y-tg.pos.y,dz=p.z-tg.pos.z;
+        if(dx*dx+dy*dy+dz*dz<tg.r*tg.r){shit=tg;break;}}
+      if(shit)break;
       if(p.y<groundH(p.x,p.z)-0.2){ground=true;break;}
     }
     b.life-=dt;
     _td.set(b.vx,b.vy,b.vz);b.m.lookAt(_tv.copy(b.m.position).add(_td));
-    if(hit){killEnemy(hit,_td.normalize());scene.remove(b.m);bullets.splice(i,1);}
+    if(hit){killEnemy(hit,_td.normalize(),true);scene.remove(b.m);bullets.splice(i,1);}
+    else if(shit){explodeSab(shit);scene.remove(b.m);bullets.splice(i,1);}
     else if(thit){ // clipped the patrol truck : spark burst + tink, small alarm bump, no kill
       spawnBurst(b.m.position,{color:0xffb13c,n:8,sp0:3,sp1:7,up0:2,up1:5,life:0.45,grav:13,add:1});
       sTone(rand(2100,2600),0.06,'square',0.05);
@@ -981,7 +1275,7 @@ function enemyShoot(e){
   const from=e.chest(),to=new THREE.Vector3(G.px,camera.position.y,G.pz);
   to.x+=rand(-6,6);to.y+=rand(-3,3);to.z+=rand(-6,6);
   const geo=new THREE.BufferGeometry().setFromPoints([from,to]);
-  const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0xff7040,transparent:true,opacity:0.95}));
+  const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:G.night?0xffa060:0xff7040,transparent:true,opacity:0.95}));
   scene.add(line);tracers.push({line,t:0});
   sTone(rand(500,700),0.12,'sawtooth',0.06,-200);
   if(Math.random()<0.09)damagePlayer(rand(7,13));
@@ -1133,7 +1427,7 @@ function setScoped(on){
   $('xhair').style.display=on?'none':'block';
   rifle.visible=!on;
   camera.fov=on?68/G.zoom:68;camera.updateProjectionMatrix();
-  updateHUD();
+  updateNightTint();updateHUD();
 }
 function targetDistance(){
   const fwd=new THREE.Vector3();camera.getWorldDirection(fwd);
@@ -1190,6 +1484,8 @@ function updateHUD(){
   $('hRifle').textContent=RIFLES[G.rifle].name;
   $('hAmmo').textContent=G.reloading?'·····':(G.ammo>0?'I'.repeat(G.ammo):'EMPTY');
   $('hAlarm').textContent=Math.round(G.alarm)+'%';
+  $('hSab').textContent=G.sabDone+'/'+G.sabTotal;
+  $('hGhost').textContent=(G.state==='play'&&G.alarm<25)?'· GHOST ELIGIBLE':'';
   $('alarmFill').style.transform='scaleX('+(G.alarm/100)+')';
   $('alarmFill').style.background=G.alarm>=100?'#e83a2a':(G.alarm>60?'#e87a2a':'#e8b23a');
   $('hpFill').style.transform='scaleX('+(G.hp/100)+')';
@@ -1288,30 +1584,31 @@ function kcUpdate(dt){
 }
 
 /* ---------------- combat outcomes ---------------- */
-function killEnemy(e,dir){
+function killEnemy(e,dir,cam){
   e.die(dir);G.kills++;
   const now=G.swayT;
   G.chain=(now-G.lastKillT<8)?G.chain+1:1;G.lastKillT=now;
   const dist=camera.position.distanceTo(e.group.position);
   G.hits++;if(dist>G.longest)G.longest=dist;if(G.chain>G.bestChain)G.bestChain=G.chain;
-  const pts=Math.round((100+dist*0.6)*G.chain);
-  G.score+=pts;
+  const pts=e.sniper?150:Math.round((100+dist*0.6)*G.chain); // counter-snipers pay a flat 150 bounty
+  G.score+=pts;G.missionScore+=pts;
   G.alarm=Math.min(100,G.alarm+6);
   sHit(G.chain);sKill();
   const hm=$('hitmark'),kr=$('killring');
   hm.classList.remove('pop');kr.classList.remove('pop');void hm.offsetWidth;
   hm.classList.add('pop');kr.classList.add('pop');
-  toast((e.hvt?'HVT DOWN':'GUARD DOWN')+'  +'+pts+(G.chain>1?'  x'+G.chain+' CHAIN':''));
-  if(dist>300)startBulletCam(e,dir); // BULLET-CAM : chase the round, orbit the drop, blend home
+  toast((e.hvt?'HVT DOWN':(e.sniper?'SNIPER DOWN':'GUARD DOWN'))+'  +'+pts+(G.chain>1?'  x'+G.chain+' CHAIN':''));
+  if(cam&&dist>300)startBulletCam(e,dir); // BULLET-CAM : only for actual bullet kills, never explosion kills
   updateHUD();
-  if(hvtsAlive()===0&&G.state==='play')setTimeout(()=>{if(G.state==='play')missionComplete();},1500);
+  checkMissionDone();
 }
 function startReload(){
   const r=RIFLES[G.rifle];
   if(G.reloading||G.ammo===r.mag||G.state!=='play')return;
   G.reloading=true;G.reloadT=r.reload;G.reloadMax=r.reload;sReload();toast('RELOADING…');updateHUD();
 }
-function missionCfg(n){return{hvts:Math.min(2+n,6),guards:4+2*n,wind:1.1+0.85*n,maxZoom:Math.min(9+n,16)};}
+function missionCfg(n){return{hvts:Math.min(2+n,6),guards:4+2*n,wind:1.1+0.85*n,maxZoom:Math.min(9+n,16),
+  snipers:n>=4?2:(n>=2?1:0),sabTanks:Math.min(2+n,5)};}
 function rifleCardHTML(){
   return '<div class="riflebox"><div class="rrow"><button class="mbtn" id="rifPrev">&#9664;</button>'+
     '<div class="rinfo"><b id="rifName"></b><span id="rifStats"></span></div>'+
@@ -1338,6 +1635,8 @@ function startMission(n){
   endKillcam();
   G.mission=n;const cfg=missionCfg(n);
   const rifle=RIFLES[G.rifle];
+  G.night=(n%3===0);applyEnvironment(); // every 3rd mission is a NIGHT OP
+  G.peakAlarm=0;G.missionScore=0;G.lastMoveT=-99; // ghost bonus + sniper accuracy state
   G.ammo=rifle.mag;G.reloading=false;G.reloadMax=rifle.reload;G.alarm=0;G.converged=false;G.hp=100;G.fireCd=0;
   G.chain=0;G.kills=0;G.shots=0;G.hits=0;G.longest=0;G.bestChain=0;
   G.px=0;G.pz=24;G.yaw=0;G.pitch=0.02;G.breath=100;G.breathFx=0;
@@ -1348,12 +1647,16 @@ function startMission(n){
   tracers.forEach(t=>{scene.remove(t.line);t.line.geometry.dispose();t.line.material.dispose();});tracers.length=0;
   setScoped(false);
   spawnEnemies(cfg);
+  resetSabotage(cfg); // activate this mission's fuel tanks + ammo caches
   G.state='menu';
   selRifle=G.rifle;
-  showCard('<h1>MISSION '+n+'</h1><h2>ELIMINATE ALL RED HVTs</h2>'+
-    '<p>'+cfg.hvts+' high-value targets, ~340m out in the valley outpost — guards patrol the camp, and one HVT drives the patrol truck.<br>'+
-    'Real ballistics: the bullet drops for real — hold over with the mil-dots and lead for wind. '+rifle.mag+' rounds per mag.<br>'+
-    'If the ALARM hits 100%, the patrols will come for you.</p>'+
+  showCard('<h1>MISSION '+n+(G.night?' — NIGHT OP':'')+'</h1><h2>ELIMINATE ALL RED HVTs · DESTROY '+G.sabTotal+' SABOTAGE TARGETS</h2>'+
+    '<p>'+cfg.hvts+' high-value targets, ~340m out in the valley outpost — guards patrol the camp, and one HVT drives the patrol truck.'+
+    (cfg.snipers?' <b>'+cfg.snipers+' counter-sniper'+(cfg.snipers>1?'s':'')+' on overwatch — watch for scope glints and take them out first.</b>':'')+'<br>'+
+    'Real ballistics: the bullet drops for real — hold over with the mil-dots and lead for wind. '+rifle.mag+' rounds per mag.'+
+    ' Hit the red fuel tanks and ammo caches: explosions chain-detonate and wipe anything close — but the blast spikes the alarm.<br>'+
+    'Finish with the alarm under 25% for a GHOST 2× score bonus.'+
+    ' If the ALARM hits 100%, the patrols will come for you.</p>'+
     rifleCardHTML()+
     '<div class="tap">TAP TO START</div>');
   renderRiflePicker();
@@ -1364,17 +1667,22 @@ function startMission(n){
 function missionComplete(){
   endKillcam();
   G.state='win';setScoped(false);
+  const ghost=G.peakAlarm<25; // GHOST BONUS : finished essentially undetected
+  let ghostLine='';
+  if(ghost){const bonus=G.missionScore;G.score+=bonus;
+    ghostLine='<div class="debrief"><div><span style="color:#ffe9a8">GHOST — UNDETECTED</span><b>2× MISSION SCORE &nbsp;+'+bonus+'</b></div></div>';}
   if(G.score>G.best){G.best=G.score;localStorage.setItem('longshot_best',G.best);}
   lsSet('longshot_rifles',Math.max(rifleMaxMission(),G.mission)); // unlock progress
   const acc=G.shots>0?Math.round(G.hits/G.shots*100)+'%':'—';
   showCard('<h1>MISSION '+G.mission+' COMPLETE</h1>'+
     '<p>SCORE <b>'+G.score+'</b> &nbsp; BEST <b>'+G.best+'</b><br>'+
-    'Next: more guards, stronger wind, stronger scope.</p>'+
+    'Peak alarm ' + Math.round(G.peakAlarm) + '%. Next: more guards, stronger wind, stronger scope.</p>'+
     '<div class="debrief">'+
     '<div><span>ACCURACY</span><b>'+acc+'</b></div>'+
     '<div><span>LONGEST KILL</span><b>'+Math.round(G.longest)+'m</b></div>'+
     '<div><span>BEST CHAIN</span><b>x'+G.bestChain+'</b></div>'+
     '</div>'+
+    ghostLine+
     '<div class="row"><button class="mbtn" id="nextBtn">MISSION '+(G.mission+1)+' &rarr;</button></div>');
   $('nextBtn').addEventListener('click',e=>{e.stopPropagation();startMission(G.mission+1);});
   updateHUD();
@@ -1401,7 +1709,7 @@ function campFxUpdate(dt){
     const s=f.base*(1+0.22*Math.sin(t*23+f.ph)+0.1*Math.sin(t*47+f.ph*2));
     f.s.scale.set(s,s*1.5,1);
     f.s.material.opacity=0.85+0.15*Math.sin(t*31+f.ph);}
-  if(campFx.light)campFx.light.intensity=1.25+0.45*Math.sin(t*29)+0.3*Math.sin(t*53+1.3);
+  if(campFx.light)campFx.light.intensity=(1.25+0.45*Math.sin(t*29)+0.3*Math.sin(t*53+1.3))*(G.night?2.1:1);
   for(const p of campFx.smokes){ // smoke column : rise, expand, fade, recycle
     p.life+=dt;
     if(p.life>=p.max){p.life=0;p.max=rand(2.6,3.6);
@@ -1426,6 +1734,8 @@ function frame(now){
   if(G.state==='play'){
     if(G.alarm<100&&t-G.lastShotT>4)G.alarm=Math.max(0,G.alarm-1.6*gdt);
     if(G.alarm>=100&&!G.converged){G.converged=true;toast('ALARM 100% — PATROLS CONVERGING');}
+    if(G.alarm>G.peakAlarm)G.peakAlarm=G.alarm; // ghost-bonus tracking
+    if(G.px!==frame._lpx||G.pz!==frame._lpz){G.lastMoveT=t;frame._lpx=G.px;frame._lpz=G.pz;} // movement (sniper accuracy)
     if(G.hp>0&&G.hp<100&&t-G.lastDmgT>5)G.hp=Math.min(100,G.hp+2*gdt);
     if(G.fireCd>0)G.fireCd-=gdt;
     if(G.reloading){G.reloadT-=gdt;if(G.reloadT<=0){G.reloading=false;G.ammo=RIFLES[G.rifle].mag;updateHUD();}}
@@ -1433,12 +1743,14 @@ function frame(now){
     for(const e of enemies)e.update(gdt);
     truckUpdate(gdt);
     bulletUpdate(gdt);tracerUpdate(gdt);
+    for(let i=chainQ.length-1;i>=0;i--){chainQ[i].t-=gdt; // chained fuel detonations
+      if(chainQ[i].t<=0){const tq=chainQ[i].tg;chainQ.splice(i,1);if(tq.alive)explodeSab(tq);}}
     if(((frame._hf=(frame._hf||0)+1)%10)===0)updateHUD();
   }
   if(windGain)windGain.gain.value=(G.state==='play'?0.012+G.windSpd*0.007:0.008); // wind loop follows wind speed
   birdT-=dt;if(birdT<0){birdT=rand(8,20);birdChirp();}
   puffUpdate(dt);sparkUpdate(dt);shellUpdate(dt);
-  msmokeUpdate(dt);campFxUpdate(dt);
+  msmokeUpdate(dt);campFxUpdate(dt);boomUpdate(dt);
   const swY=0,swP=0; // scope sway removed entirely — MW's call
   G.kick=Math.max(0,G.kick-dt*4.5);
   let pYaw=0,pPitch=0;
@@ -1466,7 +1778,7 @@ function frame(now){
     rifle.position.y+=-Math.sin(ph*Math.PI)*0.06;
   }else{rifle.userData.bolt.position.z=-0.72;rifle.rotation.z=0;}
   if(G.flashT>0){G.flashT-=dt;const k=Math.max(0,G.flashT/0.14);
-    muzzleFlash.intensity=7*k;flashSprite.visible=k>0;
+    muzzleFlash.intensity=(G.night?11:7)*k;flashSprite.visible=k>0;
     flashSprite.material.opacity=k;flashSprite.scale.set(2.3,2.3,1);}
   else{muzzleFlash.intensity=0;flashSprite.visible=false;}
   muzzleFlash.position.copy(camera.position);
@@ -1501,6 +1813,7 @@ function onResize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=inner
 window.addEventListener('resize',onResize);
 window.addEventListener('orientationchange',()=>setTimeout(onResize,250));
 buildTruck();
+buildSabotage();
 startMission(1);
 requestAnimationFrame(frame);
 </script>
