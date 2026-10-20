@@ -115,6 +115,12 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 .sethead{font-size:12px;letter-spacing:3px;color:#8fd68f;margin:18px 0 2px;text-align:left;border-bottom:1px solid #2c4a2c;padding-bottom:5px}
 #fpsRead{position:fixed;left:14px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:50;font:11px monospace;color:#9fe09f;background:rgba(8,12,8,.55);padding:3px 8px;border-radius:6px;display:none;pointer-events:none}
 #pauseChip{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top));transform:translateX(-50%);z-index:65;font:600 12px ui-monospace,monospace;letter-spacing:4px;color:#ffe9a8;background:rgba(8,12,8,.62);border:1px solid rgba(255,233,168,.4);padding:5px 14px 5px 18px;border-radius:20px;display:none;pointer-events:none}
+/* ---------- v10.0 front door : What's New splash + cold-open black ---------- */
+#wnSplash{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(2,5,2,.55);padding:12px}
+#wnLines{text-align:left;margin:8px 0 2px}
+#wnLines p{font-size:13.5px;line-height:1.55;color:#d7e6d2;margin-bottom:7px;letter-spacing:.4px}
+#wnLines p b{color:#ffe9a8;font-weight:700}
+#intro{position:fixed;inset:0;background:#000;z-index:95;opacity:1}
 .setrow input[type=checkbox]{width:22px;height:22px}
 .setrow input[type=range]{width:130px}
 #hitmark{position:fixed;left:50%;top:50%;z-index:35;width:36px;height:36px;margin:-18px 0 0 -18px;pointer-events:none;opacity:0}
@@ -193,6 +199,12 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 <div id="fpsRead"></div>
 <div id="setBtn">&#9881;</div>
 
+<div id="wnSplash"><div class="panel" id="wnPanel">
+  <h1 id="wnHead">WHAT'S NEW</h1>
+  <div id="wnLines"></div>
+  <div class="row"><button class="mbtn" id="wnBtn">GOT IT</button></div>
+</div></div>
+<div id="intro"></div>
 <div id="card"><div class="panel" id="cardPanel"></div></div>
 <div id="card2" style="display:none;position:fixed;inset:0;z-index:80;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:20px">
   <div class="panel" id="setPanel">
@@ -244,6 +256,14 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
+const LS_VER='10.0'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'10.0',lines:[
+  '<b>NEW OPENING</b> — cinematic ridge intro every time you boot up',
+  '<b>LIVING VALLEY</b> — the camp patrols and the truck move behind the menu now',
+  '<b>HALLOWEEN</b> — pumpkins at the camp through Nov 1',
+  '<b>v9.3</b> — Ragdoll 3.0 deaths + blood on bullet-cam impact',
+  '<b>v9.1</b> — bullet cam now replays your bullet\u2019s true flight path']}];
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const lerp=(a,b,t)=>a+(b-a)*t;
 const rand=(a,b)=>a+Math.random()*(b-a);
@@ -361,6 +381,7 @@ const G={
   peakAlarm:0, missionScore:0, // ghost-bonus tracking per mission
   night:false,                // night-ops lighting preset
   menuBlend:0,                // menu cinematic drift blend 0..1
+  introT:0, introInit:false, introSettled:false, // v10.0 COLD OPEN : seconds into the boot intro (introT<0 = done) + one-time setup/settle flags
   aimVel:0,                   // smoothed aim speed (counter-snipers lead a moving target)
   reposAcc:0, reposFX:0, reposFZ:24, lostX:0, lostZ:24, contactLostT:-99, // reposition-breaks-contact : unscopped travel since scope-in, last-known spot, lose-tail expiry
   scopeT:-99,                 // last scope-in time (quickscope window)
@@ -451,6 +472,38 @@ const lanterns=[];
 [[-14,-CAMP_D-8],[12,-CAMP_D-6],[2,-CAMP_D+12]].forEach(p=>{
   const L=new THREE.PointLight(0xffa050,0,26,2);
   L.position.set(p[0],groundH(p[0],p[1])+2.1,p[1]);scene.add(L);lanterns.push(L);});
+/* ---------------- HALLOWEEN (Oct 20 – Nov 1, local) : carved pumpkins at the camp + the ridge nest ---------------- */
+const HWN=(()=>{const d=new Date();const m=d.getMonth(),day=d.getDate();return (m===9&&day>=20)||(m===10&&day<=1);})();
+const hwnGlows=[]; // pumpkin candle glows : flickered in campFxUpdate — empty (zero cost) outside the season
+if(HWN){
+  const pkGlowTex=(()=>{const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
+    const g=x.createRadialGradient(32,32,2,32,32,30);
+    g.addColorStop(0,'rgba(255,226,160,1)');g.addColorStop(0.4,'rgba(255,176,84,.55)');g.addColorStop(1,'rgba(255,140,40,0)');
+    x.fillStyle=g;x.fillRect(0,0,64,64);
+    return new THREE.CanvasTexture(cv);})();
+  const pkSkin=new THREE.MeshLambertMaterial({color:0xc75e12});
+  const pkStemM=new THREE.MeshLambertMaterial({color:0x44511f});
+  const pkFaceM=new THREE.MeshBasicMaterial({color:0x1a0d04});
+  const mkPumpkin=(x,z,s)=>{
+    const g=new THREE.Group();g.position.set(x,groundH(x,z),z);g.scale.setScalar(s);
+    const body=new THREE.Mesh(new THREE.SphereGeometry(0.55,14,11),pkSkin); // flattened round, lit from within by the glow sprite
+    body.scale.y=0.78;body.position.y=0.43;body.castShadow=true;g.add(body);
+    const stem=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.075,0.24,7),pkStemM);
+    stem.position.set(0.03,0.88,0);stem.rotation.z=0.28;g.add(stem);
+    for(const sx of[-1,1]){const eye=new THREE.Mesh(new THREE.ConeGeometry(0.10,0.06,3),pkFaceM); // carved triangle eyes, proud of the skin (surface z at this height is ~0.503)
+      eye.position.set(sx*0.19,0.52,0.515);eye.rotation.x=Math.PI/2-0.15;eye.rotation.z=sx*0.3;g.add(eye);}
+    const mouth=new THREE.Mesh(new THREE.BoxGeometry(0.17,0.06,0.03),pkFaceM); // jagged grin : three segments, middle dropped (surface z ~0.520 here)
+    mouth.position.set(0,0.29,0.53);g.add(mouth);
+    for(const sx of[-1,1]){const seg=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.055,0.03),pkFaceM);
+      seg.position.set(sx*0.135,0.325,0.525);seg.rotation.z=-sx*0.5;g.add(seg);}
+    const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:pkGlowTex,color:0xff9a3c,transparent:true,opacity:0.22,depthWrite:false,blending:THREE.AdditiveBlending}));
+    glow.position.set(0,0.43,0);glow.scale.set(1.25,1.25,1);g.add(glow); // centered inside the body : the sprite's core is occluded, leaving a warm rim halo
+    hwnGlows.push({s:glow,base:1.25,ph:rand(0,9)});
+    scene.add(g);};
+  mkPumpkin(-12.6,-CAMP_D-6.5,1.0);  // camp : beside the west lantern
+  mkPumpkin(13.4,-CAMP_D-4.4,0.85);  // camp : beside the east lantern
+  mkPumpkin(3.6,17.2,0.8);           // the ridge nest : at the sandbags, watching the valley with you
+}
 function updateNightTint(){$('nightTint').style.display=(G.night&&G.scoped)?'block':'none';}
 function applyEnvironment(){
   const night=G.night;
@@ -463,7 +516,7 @@ function applyEnvironment(){
     if(sunGlow)sunGlow.visible=false;
     starsPts.visible=true;moonSpr.visible=true;
     for(const c of clouds)c.material.color.setHex(0x2c3a55);
-    for(const L of lanterns)L.intensity=1.5;
+    for(const L of lanterns){L.intensity=1.5;L.color.setHex(HWN?0xff7722:0xffa050);} // HALLOWEEN : night lanterns burn pumpkin-orange in season
   }else{
     scene.fog.color.setHex(0xe6c69c);scene.fog.near=260;scene.fog.far=980;
     hemi.color.setHex(0xffd9b0);hemi.groundColor.setHex(0x5a5a3f);hemi.intensity=0.55;
@@ -473,7 +526,7 @@ function applyEnvironment(){
     if(sunGlow)sunGlow.visible=true;
     starsPts.visible=false;moonSpr.visible=false;
     for(const c of clouds)c.material.color.setHex(0xffffff);
-    for(const L of lanterns)L.intensity=0;
+    for(const L of lanterns){L.intensity=0;L.color.setHex(0xffa050);}
   }
   updateNightTint();
 }
@@ -1262,6 +1315,16 @@ class Enemy{
      idle -> aim 1.5s (glint swells + laser shimmer) -> fire -> cool */
   sniperUpdate(dt){
     const g=this.group;
+    if(G.state==='menu'){ // LIVING VALLEY : hold the post, face the ridge, idle glint only — the aim cycle (and sniperFire) is never reached in menu
+      if(this.postY!=null)g.position.y=this.postY;
+      const mdx=G.px-g.position.x,mdz=G.pz-g.position.z;
+      g.rotation.y=Math.atan2(mdx,mdz);
+      if(this.glint){this.glintT-=dt;
+        if(this.glintT<=0){this.glintT=rand(0.4,2.8);this.glintF=1;}
+        this.glintF=Math.max(0,this.glintF-dt*2.4);
+        this.glint.material.opacity=0.08+0.85*this.glintF;
+        const mgs=0.45+0.3*this.glintF;this.glint.scale.set(mgs,mgs,1);}
+      return;}
     if(this.aimPhase==='reloc'){ // SHOOT-AND-SCOOT : sprint to the fresh post, settle, resume the cycle
       const r=this.relocP,dx=r.x-g.position.x,dz=r.z-g.position.z,d=Math.hypot(dx,dz);
       this.walkPhase+=dt*9;
@@ -2937,6 +3000,9 @@ function campFxUpdate(dt){
     const s=f.base*(1+0.22*Math.sin(t*23+f.ph)+0.1*Math.sin(t*47+f.ph*2));
     f.s.scale.set(s,s*1.5,1);
     f.s.material.opacity=0.85+0.15*Math.sin(t*31+f.ph);}
+  for(const f of hwnGlows){ // HALLOWEEN : candle flicker inside the carved pumpkins (empty array out of season)
+    const s=f.base*(1+0.15*Math.sin(t*19+f.ph)+0.07*Math.sin(t*43+f.ph*2));
+    f.s.scale.set(s,s,1);f.s.material.opacity=0.3+0.07*Math.sin(t*27+f.ph);}
   if(campFx.light)campFx.light.intensity=(1.25+0.45*Math.sin(t*29)+0.3*Math.sin(t*53+1.3))*(G.night?2.1:1);
   for(const p of campFx.smokes){ // smoke column : rise, expand, fade, recycle
     p.life+=dt;
@@ -2983,6 +3049,7 @@ function frame(now){
   if(KC.active)ts=KC.ts; // KILLCAM 2.0 : while the cam runs it choreographs the world clock directly (cruise / bullet-time / freeze / release)
   let gdt=dt*ts;
   if(G.settingsOpen&&G.state==='play')gdt=0; // SETTINGS PAUSE : world clock + all play-state sim freeze while the panel is open
+  if(G.introT>=0)G.introT+=dt; // COLD OPEN : the intro timer runs on the frame loop's own real dt — no timers to strand it
   G.swayT+=gdt;
   const t=G.swayT;
   if(G.state==='play'){
@@ -3039,6 +3106,14 @@ function frame(now){
       if(chainQ[i].t<=0){const tq=chainQ[i].tg;chainQ.splice(i,1);if(tq.alive)explodeSab(tq);}}
     if(((frame._hf=(frame._hf||0)+1)%10)===0)updateHUD();
   }
+  else if(G.state==='menu'){ /* LIVING VALLEY : patrols walk their routes and the truck cruises
+     behind the mission card — the menu previews the live mission, so positions carry straight
+     into play (the card click never respawns). Combat is structurally off here : patrol fire
+     only exists in the converged branch (needs alarm 100), corpse discovery needs a corpse,
+     HVT relocation needs alarm >50, and sniperUpdate hard-returns before its aim cycle. */
+    for(const e of enemies)e.update(gdt);
+    truckUpdate(gdt);
+  }
   { /* CONTEXTUAL HUD FADE : 4 quiet seconds in play and the panel drops to 45%;
        any HUD value change (tracked in updateHUD) pops it back to full */
     const wantFade=G.state==='play'&&updateHUD._chgT!=null&&(performance.now()/1000-updateHUD._chgT)>4;
@@ -3063,9 +3138,11 @@ function frame(now){
   /* MENU CINEMATIC DRIFT : with the mission card up, the camera leaves the
      ridge and pans a slow ~25s arc across the outpost. On tap-to-start the
      blend eases it back home. Slow and subtle — no shake, no sickness. */
-  if(G.state==='menu')G.menuBlend=Math.min(1,G.menuBlend+dt/1.6);
+  if(G.introT>=0)G.menuBlend=0; // COLD OPEN : the drift is held at zero — it eases in fresh once the intro hands off
+  else if(G.state==='menu')G.menuBlend=Math.min(1,G.menuBlend+dt/1.6);
   else G.menuBlend=Math.max(0,G.menuBlend-dt/1.1);
-  if(G.menuBlend>0&&G.state==='menu'){
+  if(G.introT>=0){updateIntro(dt);} // COLD OPEN : the glide owns the camera until it hands off to the drift
+  else if(G.menuBlend>0&&G.state==='menu'){
     _qPlay.copy(camera.quaternion);
     const a=t*TAU/25;
     _md.set(Math.sin(a)*46,0,-CAMP_D+62+Math.cos(a)*22);
@@ -3142,6 +3219,54 @@ function frame(now){
 function onResize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();sizeReticle();}
 window.addEventListener('resize',onResize);
 window.addEventListener('orientationchange',()=>setTimeout(onResize,250));
+/* ---------------- v10.0 FRONT DOOR : cold-open intro + What's New splash ----------------
+   The intro runs ONCE per page load (boot only — startMission never touches it).
+   It is driven from the frame loop's camera block while G.introT>=0; endIntro()
+   (natural end or any tap on the intro layer) hands the camera back to the
+   menu drift and fires the What's New check. */
+const _ip0=new THREE.Vector3(),_ip1=new THREE.Vector3(),_iq0=new THREE.Quaternion(),_iq1=new THREE.Quaternion(),_im4=new THREE.Matrix4(),_ie=new THREE.Euler();
+function introSetup(){
+  _ip1.set(G.px,groundH(G.px,G.pz)+1.7,G.pz); // player eye : the glide's home
+  _ip0.set(G.px+9,_ip1.y+13,G.pz+36); // high and behind the nest, looking down the valley at the camp
+  _im4.lookAt(_ip0,_campLook,_YUP);_iq0.setFromRotationMatrix(_im4); // same lookAt construction the drift uses
+  _iq1.setFromEuler(_ie.set(G.pitch,G.yaw,0)); // EXACTLY the frame loop's own menu orientation — no pop at handoff
+}
+function updateIntro(dt){
+  if(!G.introInit){G.introInit=true;introSetup();}
+  const u=clamp(G.introT/3.2,0,1),e=u*u*(3-2*u);
+  camera.position.lerpVectors(_ip0,_ip1,e);
+  camera.position.y+=Math.sin(u*Math.PI)*1.2; // a gentle arc over the ridge lip
+  camera.quaternion.slerpQuaternions(_iq0,_iq1,e);
+  rifle.visible=u>=0.85; // hidden for the glide; it joins at the settle (the drift re-hides it as it takes over)
+  if(u>=0.85&&!G.introSettled){G.introSettled=true;
+    sTone(95,0.35,'sine',0.16,-35); // one distant shot at the settle — felt more than heard (bails silently pre-gesture)
+    if(glbState.active){glbState.cycle=true;glbState.cycPrev=0;glbState.cased=false;glbState.clicked=false; // the working bolt : same trigger as fireBullet
+      G.fireCd=RIFLES[G.rifle].cool;}} // the cycle clock IS fireCd — prime it so the bolt actually runs its course
+  if(G.introSettled&&G.fireCd>0)G.fireCd=Math.max(0,G.fireCd-dt); // menu never decays fireCd — drive the cycle clock by hand for the rest of the intro
+  $('intro').style.opacity=String(1-clamp(G.introT/0.8,0,1)); // the black lifts over the first ~0.8s of the glide
+  if(u>=1)endIntro();
+}
+function endIntro(){
+  if(G.introT<0)return;
+  G.introT=-1;G.fireCd=0; // never strand a primed cooldown into the player's first real shot
+  const el=$('intro');el.style.opacity='0';el.style.display='none';
+  checkWhatsNew(); // the splash (if this version is unseen) reveals itself over the mission card
+}
+function checkWhatsNew(){
+  if(lsGet('longshot_seenver','')===LS_VER)return;
+  const e=WN_ENTRIES[0];if(!e)return;
+  $('wnHead').textContent='WHAT\u2019S NEW \u2014 v'+e.v;
+  $('wnLines').innerHTML=e.lines.map(l=>'<p>\u2022 '+l+'</p>').join('');
+  $('wnSplash').style.display='flex';
+}
+function dismissWhatsNew(){lsSet('longshot_seenver',LS_VER);$('wnSplash').style.display='none';}
+$('wnBtn').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();dismissWhatsNew();},{passive:false}); // BOTH event paths audited (settings saga) : touch dismisses here, click dismisses on desktop — never neither
+$('wnBtn').addEventListener('click',e=>{e.stopPropagation();dismissWhatsNew();});
+{const iel=$('intro');
+ const skip=e=>{if(G.introT>=0){e.preventDefault();e.stopPropagation();endIntro();}}; // a skip tap lands on the intro layer only — it can never fall through to the card and start the mission
+ iel.addEventListener('pointerdown',skip);
+ iel.addEventListener('touchstart',skip,{passive:false});}
+
 buildTruck();
 buildSabotage();
 applyGraphics(); // boot-time graphics application : manual preset, or Auto matching the stock behavior
