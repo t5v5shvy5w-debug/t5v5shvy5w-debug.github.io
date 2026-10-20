@@ -257,8 +257,12 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='10.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='10.2'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'10.2',lines:[
+  '<b>TRUE IMPACT</b> — the cam bullet now lands ON the body, not in front of it',
+  '<b>BLOOD CRANKED</b> — more of it, faster, darker, longer',
+  '<b>DEATH POLISH</b> — legs crumple with the fall instead of folding early']},
  {v:'10.1',lines:[
   '<b>AUTO-UPDATE</b> — the game now checks for new builds itself. No more stale copies',
   '<b>NEW OPENING</b> — cinematic ridge intro every time you boot up',
@@ -1470,18 +1474,26 @@ class Enemy{
       this.legL.rotation.x=this.legR.rotation.x=0.55;
     }else{
       if(this.blast&&!this.thudded){this.thudded=true;this.groundThud(1.5);} // blast landing = the ground-contact beat
-      const bk=sstep(0.09,0.38,T); // BUCKLE : knees fold under the body — per-leg fold factors, one side gives more than the other
-      this.legL.rotation.x=-1.15*bk*this.legFoldL;this.legR.rotation.x=-1.15*bk*this.legFoldR;
       if(T<0.35)tip=tipMax*0.24*sstep(0.09,0.35,T); // pitch starts as the knees go
       else if(T<0.72){const u=(T-0.35)/0.37;tip=tipMax*(0.24+0.76*u*u);} // DROP : u^2 — gravity curve, not a leaf drift
       else tip=tipMax-0.055*Math.sin(Math.PI*clamp((T-0.72)/0.3,0,1))*Math.exp(-(T-0.72)*3); // one-bounce settle on contact
+      const tipN=tip/tipMax;
+      /* LEGS FOLD WITH THE FALL (v10.2) : the old buckle was purely time-based
+         — sstep(0.09,0.38,T) slammed the knees to FULL fold while the torso
+         was still upright, the "sitting on an invisible chair" pose in MW's
+         screenshot. The fold envelope is now the MAX of a softened early
+         buckle (0.35× — just enough to unlock the knees) and a curve keyed to
+         the TIP itself, so the legs crumple AS the body goes over and only
+         reach full fold when the fall does. Base magnitude softened ~15%
+         (1.15 → 0.98); the per-leg fold factors still make one side give more. */
+      const bkF=Math.max(0.35*sstep(0.09,0.38,T),sstep(0.25,0.85,tipN));
+      this.legL.rotation.x=-0.98*bkF*this.legFoldL;this.legR.rotation.x=-0.98*bkF*this.legFoldR;
       /* REST-LIFT + HIP SLIDE : as the tip commits past halfway, ease the whole
          group UP by `rise` (the buckle sink alone left corpses ~0.2m buried)
          and slide a touch along the fall line, so the rotation reads as a
          pivot at the hips instead of a hinge at the ankles. Final rest y is
          dy0 - (headshot crumple) + rise — lying ON the ground. Blast corpses
          anchor the slide at wherever they landed. */
-      const tipN=tip/tipMax;
       if(this.landX===null){this.landX=g.position.x;this.landZ=g.position.z;}
       g.position.y=this.dy0-(Math.sin(Math.PI*clamp((T-0.09)/0.66,0,1))*0.17+(hs?0.10*sstep(0.3,0.7,T):0))+this.rise*sstep(0.55,1,tipN);
       const sl=0.30*sstep(0.35,1,tipN);
@@ -2130,23 +2142,36 @@ function segPtD2(ax,ay,az,bx,by,bz,px,py,pz){
   const t=clamp(((px-ax)*abx+(py-ay)*aby+(pz-az)*abz)/(abx*abx+aby*aby+abz*abz||1e-9),0,1);
   const dx=px-(ax+abx*t),dy=py-(ay+aby*t),dz=pz-(az+abz*t);
   return dx*dx+dy*dy+dz*dz;}
+/* same segment math, but returns only the clamped t of the CLOSEST point on
+   the segment to (px,py,pz). pierceKill needs WHERE on this substep's flight
+   the round actually reached the body — the raw bullet position can sit up to
+   ~1m in FRONT of the chest (the hit sphere tripping early), which parked the
+   bullet-cam round in empty air (v10.1 screenshot) */
+function segPtClosestT(ax,ay,az,bx,by,bz,px,py,pz){
+  const abx=bx-ax,aby=by-ay,abz=bz-az;
+  return clamp(((px-ax)*abx+(py-ay)*aby+(pz-az)*abz)/(abx*abx+aby*aby+abz*abz||1e-9),0,1);}
 /* ---------------- overpenetration ---------------- */
 const _kd=new THREE.Vector3(); // scratch : per-kill travel direction
 const _tpA=new THREE.Vector3(),_tpB=new THREE.Vector3(); // scratch : tracer segment endpoints
 /* one pierced kill for bullet b, resolved inline so the round keeps flying.
    The cam is only offered on the FIRST kill of the shot (killcam rules as
    before); the 2nd / 3rd kills pay the multi-kill bonus through scorePop. */
-/* BLOOD : flesh hits only — dark red droplets biased along the bullet's travel
-   direction through the shared burst pool, plus one quick red mist puff.
-   Headshots spray wider and harder. Truck metal stays sparks-only (impactPuff),
-   and every pierce kill gets its own burst via the pierceKill hook below. */
+/* BLOOD : flesh hits only — a heavy spray of dark droplets biased along the
+   bullet's travel direction through the shared burst pool, a red mist puff,
+   and a one-frame additive splat flash at contact. Headshots spray wider and
+   harder. Truck metal stays sparks-only (impactPuff), and every pierce kill
+   gets its own burst via the pierceKill hook below. v10.2 CRANK : the v9 spray
+   read as pale pink specks from the cam (11 tiny cubes, fading from frame
+   one) — now 26/42 bigger, darker, faster chunks that HOLD their opacity. */
 function spawnBlood(p,dir,head){
-  spawnBurst(p,{color:0x7d0d0d,n:head?18:11,sp0:0.7,sp1:head?3.6:2.6,up0:-0.5,up1:head?1.8:1.2,life:0.5,grav:9.5,
-    dirx:dir.x,dirz:dir.z,spread:head?1.6:0.9}); // droplets : 11 body / 18 headshot, ~0.5 s, gravity falloff
-  spawnBurst(p,{color:0xa02318,n:5,sp0:0.15,sp1:0.8,up0:0.1,up1:0.7,life:0.38,grav:2.5,
-    dirx:dir.x,dirz:dir.z,spread:2.4}); // mist puff : slow, light, gone fast
+  spawnBurst(p,{color:0x6d0606,n:head?42:26,sp0:1.2,sp1:head?6.0:4.6,up0:-0.6,up1:head?3.0:2.2,life:0.85,grav:10.5,
+    dirx:dir.x,dirz:dir.z,spread:head?1.9:1.1,sz:[1.5,2.4]}); // droplets : 26 body / 42 headshot of 0.14–0.22m chunks, ~0.85 s under gravity
+  spawnBurst(p,{color:0x8d130c,n:head?12:8,sp0:0.2,sp1:1.4,up0:0.1,up1:0.9,life:0.55,grav:2.5,
+    dirx:dir.x,dirz:dir.z,spread:2.4,sz:[1.0,1.6]}); // mist puff : darker, slightly bigger, still quick
+  spawnBurst(p,{color:0xb02020,n:6,add:1,sp0:0.5,sp1:1.6,up0:-0.3,up1:0.8,life:0.18,grav:3,
+    sz:[1.6,2.2]}); // splat flash : a punchy additive red blink exactly at contact
 }
-function pierceKill(b,e,hshot){
+function pierceKill(b,e,hshot,hitP){
   b.kills++;b.pierced.push(e);
   _kd.set(b.vx,b.vy,b.vz).normalize();
   /* BLOOD-ON-CAM : if this kill is about to trigger the bullet cam, the burst
@@ -2155,12 +2180,12 @@ function pierceKill(b,e,hshot){
      instant the replayed round makes contact. The gate mirrors killEnemy's
      cam gate exactly (first kill of the shot, >300m, killcam not off). */
   const camWillRun=(b.kills===1&&camera.position.distanceTo(e.group.position)>300&&G.kcam!=='off');
-  if(!camWillRun)spawnBlood(b.m.position,_kd,hshot);
-  /* BULLET-CAM 2.1 : the truth — the exact point the round touched flesh, plus
-     a snapshot of the flown path ending at that point. Only the FIRST kill of
+  if(!camWillRun)spawnBlood(hitP,_kd,hshot);
+  /* BULLET-CAM 2.1 : the truth — hitP is the closest point on the bullet's own
+     substep segment to the chest (ON the body, found by bulletUpdate), plus a
+     snapshot of the flown path ending at that point. Only the FIRST kill of
      the shot may drive the cam (killEnemy's cam flag does the gating). */
-  const hitP=b.m.position.clone();
-  const camPath=b.path.slice();camPath.push(hitP);
+  const camPath=b.path.slice();camPath.push(hitP.clone());
   killEnemy(e,_kd,b.kills===1,hshot,false,hitP,camPath);
   if(b.kills===2){G.score+=150;G.missionScore+=150;scorePop(150,false,false,'DOUBLE KILL');}
   else if(b.kills===3){G.score+=300;G.missionScore+=300;scorePop(300,false,false,'TRIPLE KILL');}
@@ -2181,13 +2206,23 @@ function bulletUpdate(dt){
         const headHit=segPtD2(px0,py0,pz0,p.x,p.y,p.z,dc.x,dc.y+0.45,dc.z)<0.16;
         if(headHit||segPtD2(px0,py0,pz0,p.x,p.y,p.z,dc.x,dc.y,dc.z)<1.0){
           b.throughCab=true; // round is on a line through the open cab — the cab walls must not eat it afterwards
-          pierceKill(b,driver,headHit||p.y>dc.y+0.45); // headshot : capsule head sphere, or round passed head-high
+          /* TRUE IMPACT : closest point on this substep's segment to whichever
+             sphere tripped (head if it did, else chest) — ON the driver, not
+             up to ~1m in front of him where the capsule test first trips */
+          const tcy=headHit?dc.y+0.45:dc.y;
+          const tt=segPtClosestT(px0,py0,pz0,p.x,p.y,p.z,dc.x,tcy,dc.z);
+          const hitP=new THREE.Vector3(px0+(p.x-px0)*tt,py0+(p.y-py0)*tt,pz0+(p.z-pz0)*tt);
+          pierceKill(b,driver,headHit||p.y>dc.y+0.45,hitP); // headshot : capsule head sphere, or round passed head-high
           if(bullets.indexOf(b)<0)return; // mission reset mid-flight cleared every bullet — bail out
           if(b.kills>=3){spent=true;break;}}}
       for(const e of enemies){if(!e.alive||b.pierced.indexOf(e)>=0)continue;
         const c=e.chest(),dx=p.x-c.x,dy=p.y-c.y,dz=p.z-c.z,d2=dx*dx+dy*dy+dz*dz;
         if(d2<1.1){ // OVERPENETRATION : kill resolves inline, the round flies on (cap 3 kills)
-          pierceKill(b,e,p.y>c.y+0.45);
+          /* TRUE IMPACT : closest point on this substep's segment to the chest
+             center — the round's position here can be ~1m short of the body */
+          const tt=segPtClosestT(px0,py0,pz0,p.x,p.y,p.z,c.x,c.y,c.z);
+          const hitP=new THREE.Vector3(px0+(p.x-px0)*tt,py0+(p.y-py0)*tt,pz0+(p.z-pz0)*tt);
+          pierceKill(b,e,p.y>c.y+0.45,hitP);
           if(bullets.indexOf(b)<0)return;
           if(b.kills>=3){spent=true;break;}}
         else if(d2<nearD2){nearD2=d2;nearE=e;}}
@@ -2230,11 +2265,16 @@ function bulletUpdate(dt){
       scene.remove(b.m);bullets.splice(i,1);}
   }
 }
-function impactPuff(p,kind){
-  const metal=kind==='metal';
-  const m=new THREE.Mesh(new THREE.SphereGeometry(metal?0.32:0.62,8,8),
+function impactPuff(p,kind,prof){
+  const metal=kind==='metal',pr=prof||{};
+  const m=new THREE.Mesh(new THREE.SphereGeometry((metal?0.32:0.62)*(pr.rMul||1),8,8),
     new THREE.MeshBasicMaterial({color:metal?0xd8d8d8:0xcbb98f,transparent:true,opacity:0.9}));
-  m.position.copy(p);scene.add(m);puffs.push({m,t:0});
+  m.position.copy(p);scene.add(m);
+  /* per-puff profile : the defaults reproduce the stock puff exactly; the
+     bullet-cam impact passes a MINI profile (see kcUpdate) — the stock puff
+     balloons to ~6m wide, which from the cam's 4.6m orbit filled the whole
+     frame as a giant cream wash (v10.1 screenshot) */
+  puffs.push({m,t:0,grow:pr.grow||7,op0:pr.op0!=null?pr.op0:0.85,fade:pr.fade||1.6,life:pr.life||0.55});
   if(!metal)spawnBurst(p,{color:0xbfae86,n:12,sp0:1,sp1:3.6,up0:1,up1:3.8,life:1.0,grav:5}); // dirt clods
   spawnBurst(p,{color:0xffb13c,n:metal?10:6,sp0:3,sp1:7,up0:2,up1:5,life:0.45,grav:13,add:1}); // sparks
   sTone(metal?140:95,0.16,'sine',0.14,-40);
@@ -2243,8 +2283,8 @@ function impactPuff(p,kind){
 }
 function puffUpdate(dt){
   for(let i=puffs.length-1;i>=0;i--){const p=puffs[i];p.t+=dt;
-    p.m.scale.setScalar(1+p.t*7);p.m.material.opacity=Math.max(0,0.85-p.t*1.6);
-    if(p.t>0.55){scene.remove(p.m);p.m.material.dispose();puffs.splice(i,1);}}
+    p.m.scale.setScalar(1+p.t*p.grow);p.m.material.opacity=Math.max(0,p.op0-p.t*p.fade);
+    if(p.t>p.life){scene.remove(p.m);p.m.material.dispose();puffs.splice(i,1);}}
 }
 /* ---------------- muzzle smoke : pooled soft sprites that linger + drift after each shot ---------------- */
 const msmoke=[];
@@ -2308,6 +2348,7 @@ function spawnBurst(p,o){
   for(let i=0;i<bn;i++){
     const m=new THREE.Mesh(sparkGeo,new THREE.MeshBasicMaterial({color:o.color,transparent:true,depthWrite:false,
       blending:o.add?THREE.AdditiveBlending:THREE.NormalBlending}));
+    if(o.sz)m.scale.setScalar(rand(o.sz[0],o.sz[1])); // per-burst particle size range (blood chunks run 1.5–2.4× the 0.09m spark cube); absent = stock size for every legacy caller
     m.position.copy(p);
     const a=(o.dirx!=null)?Math.atan2(o.dirz,o.dirx)+rand(-(o.spread||0.9),o.spread||0.9):rand(0,TAU),sp=rand(o.sp0,o.sp1); // optional travel-direction bias (blood spray)
     sparks.push({m,vx:Math.cos(a)*sp,vy:rand(o.up0,o.up1),vz:Math.sin(a)*sp,t:0,
@@ -2319,7 +2360,7 @@ function sparkUpdate(dt){
     s.vy-=s.grav*dt;
     s.m.position.x+=s.vx*dt;s.m.position.y+=s.vy*dt;s.m.position.z+=s.vz*dt;
     s.m.rotation.x+=dt*9;s.m.rotation.y+=dt*7;
-    s.m.material.opacity=Math.max(0,1-s.t/s.life);
+    s.m.material.opacity=Math.max(0,Math.min(1,(1-s.t/s.life)*1.6)); // HOLD then fade : full opacity for the first ~37% of life — the old linear 1→0 fade made every burst (blood worst of all) look anemic from the first frame
     if(s.t>=s.life){scene.remove(s.m);s.m.material.dispose();sparks.splice(i,1);}}
 }
 const shells=[];
@@ -2814,7 +2855,7 @@ function kcUpdate(dt){
     if(u>=1){ // IMPACT : freeze + FOV punch + burst on the victim, then orbit (SHORT ends after the impact beat)
       KC.phase='impact';KC.t=0;KC.dur=0.09;KC.ts=0.02;
       kcRushSet(0.02,300);
-      impactPuff(KC.tgt,'dirt'); // impact dust + shock on the victim
+      impactPuff(KC.tgt,'dirt',{rMul:0.35,grow:2.5,op0:0.5,fade:2.4,life:0.45}); // MINI puff : a dust kiss at the wound — the stock puff balloons to ~6m and washed out the whole orbit view as a giant cream blob (v10.1 screenshot); the cranked blood burst above is the real impact read now
       spawnBurst(KC.tgt,{color:0xd8c9a3,n:16,sp0:2.5,sp1:6.5,up0:1,up1:4,life:0.7,grav:6});
       spawnBlood(KC.tgt,KC.dir,KC.hshot); // DEFERRED BLOOD : pierceKill held its burst for this exact frame — the replayed contact bleeds, spray along the path-end tangent
     }
