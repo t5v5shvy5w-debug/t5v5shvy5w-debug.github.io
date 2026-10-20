@@ -601,3 +601,20 @@ body:has(#roomScreen:not(.hidden)) #friendsBtn{display:none}
 #ultControl.ready{animation:ultPulse 1.2s ease-in-out infinite}
 @keyframes ultPulse{0%,100%{box-shadow:0 0 28px rgba(80,150,255,.4),0 6px 16px rgba(0,0,0,.4)}50%{box-shadow:0 0 44px rgba(120,190,255,.7),0 6px 16px rgba(0,0,0,.4)}}
 #ultControl span{font-size:12px;color:#fff;text-shadow:0 0 10px rgba(150,200,255,.8)}
+
+/* === ULTIMATE Button V10.35: actually feels ultimate === */
+#ultControl{position:relative;width:88px!important;height:88px!important;border-radius:50%!important;background:radial-gradient(circle at 35% 30%,rgba(50,50,70,.9),rgba(10,10,20,.95))!important;border:2px solid rgba(100,100,120,.3)!important;overflow:visible!important}
+#ultControl .ult-ring{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);transform:rotate(-90deg);pointer-events:none}
+#ultControl .ult-ring-bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:4}
+#ultControl .ult-ring-fg{fill:none;stroke:var(--ult-color,#4d7cff);stroke-width:4;stroke-linecap:round;stroke-dasharray:238.7;stroke-dashoffset:238.7;transition:stroke-dashoffset .2s;filter:drop-shadow(0 0 6px var(--ult-color,#4d7cff))}
+#ultControl span{position:relative;z-index:2;font-size:11px!important;font-weight:800;color:#8a8a9a!important;text-shadow:none!important;transition:all .3s}
+/* Charging: ring fills with element color */
+#ultControl.charging .ult-ring-fg{stroke:var(--ult-color,#4d7cff)}
+/* READY: epic mode */
+#ultControl.ready{background:radial-gradient(circle at 35% 30%,var(--ult-color,#4d7cff),rgba(10,10,30,.95))!important;border-color:#fff!important;animation:ultEpic 1s ease-in-out infinite}
+#ultControl.ready span{color:#fff!important;font-size:13px!important;text-shadow:0 0 12px #fff,0 2px 4px rgba(0,0,0,.5)!important}
+#ultControl.ready .ult-ring-fg{stroke:#fff;stroke-dashoffset:0!important;filter:drop-shadow(0 0 10px #fff)}
+#ultControl.ready::before{content:'';position:absolute;inset:-12px;border-radius:50%;border:2px solid var(--ult-color,#4d7cff);opacity:0;animation:ultShock 1s ease-out infinite;pointer-events:none}
+@keyframes ultEpic{0%,100%{transform:scale(1);box-shadow:0 0 30px var(--ult-color,#4d7cff)}50%{transform:scale(1.08);box-shadow:0 0 60px var(--ult-color,#4d7cff),0 0 100px var(--ult-color,#4d7cff)}}
+@keyframes ultShock{0%{transform:scale(.8);opacity:.8}100%{transform:scale(1.4);opacity:0}}
+#ultControl:active{transform:scale(.92)!important}

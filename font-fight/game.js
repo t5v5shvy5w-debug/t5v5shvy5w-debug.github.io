@@ -1736,9 +1736,18 @@ function showVersus(a, b, metaText, isGuest) {
     $("matchup").innerHTML = `ELEMENT MATCHUP<b>${matchupText()}</b>`;
     const ub = $("ultControl"),
       db = $("dashControl");
-    ub.classList.toggle("ready", a.energy >= 100);
+    const energy = Math.min(a.energy, 100);
+    const isReady = a.energy >= 100;
+    ub.classList.toggle("ready", isReady);
+    ub.classList.toggle("charging", !isReady && energy > 0);
+    // Ring progress (238.7 = 2π×38)
+    const ring = ub.querySelector(".ult-ring-fg");
+    if (ring) ring.style.strokeDashoffset = 238.7 * (1 - energy / 100);
+    // Element color
+    const ultColor = FX[chosen[0].id] ? FX[chosen[0].id].c : "#4d7cff";
+    ub.style.setProperty("--ult-color", ultColor);
     ub.querySelector("span").textContent =
-      a.energy >= 100 ? "ULT READY" : `ULT ${Math.floor(a.energy)}%`;
+      isReady ? "ULT READY" : `ULT ${Math.floor(energy)}%`;
     db.classList.toggle("cooling", a.dashCD > 0);
     db.querySelector("span").textContent =
       a.dashCD > 0 ? `DASH ${a.dashCD.toFixed(1)}` : "DASH";

@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bangers&family=Black+Ops+One&family=Bungee&family=Cinzel:wght@800&family=Creepster&family=Faster+One&family=Fjalla+One&family=Frijole&family=Graduate&family=Honk&family=Iceberg&family=Jersey+10&family=Kaushan+Script&family=Luckiest+Guy&family=Metal+Mania&family=Monoton&family=Nosifer&family=Orbitron:wght@800&family=Permanent+Marker&family=Pirata+One&family=Press+Start+2P&family=Racing+Sans+One&family=Rubik+Glitch&family=Russo+One&family=Silkscreen:wght@700&family=Special+Elite&family=UnifrakturCook:wght@700&family=VT323&family=Alfa+Slab+One&family=Titan+One&family=Righteous&family=Audiowide&family=Wallpoet&family=Eater&family=Butcherman&family=Geostar+Fill&family=Rubik+Burned&family=Fascinate+Inline&family=Lacquer&family=Staatliches&family=Bowlby+One&family=Chakra+Petch&family=Zen+Dots&display=swap">
-<link rel="stylesheet" href="style.css?v=1034">
+<link rel="stylesheet" href="style.css?v=1035">
 
 <title>Font Fight Arena v2</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,7 +33,13 @@
     </div>
     <div class="wn-body">
       <div class="wn-entry">
-        <div class="wn-ver-row"><span class="wn-ver wn-ver-new">V10.34</span><span class="wn-date">Oct 19, 2026</span><span class="wn-tag">LATEST</span></div>
+        <div class="wn-ver-row"><span class="wn-ver wn-ver-new">V10.35</span><span class="wn-date">Oct 19, 2026</span><span class="wn-tag">LATEST</span></div>
+        <ul>
+          <li><b>ULT button goes epic</b> — charge ring, element colors, shockwave pulse when ready</li>
+        </ul>
+      </div>
+      <div class="wn-entry">
+        <div class="wn-ver-row"><span class="wn-ver wn-ver">V10.34</span><span class="wn-date">Oct 19, 2026</span></div>
         <ul>
           <li><b>Redesigned controls</b> — bigger joystick, punchier buttons, pulsing ULT when ready</li>
         </ul>
@@ -281,7 +287,7 @@
     </div>
   </div>
 </div>
-<div id="ver">V10.34</div><button id="friendsBtn">PLAY WITH FRIEND</button>
+<div id="ver">V10.35</div><button id="friendsBtn">PLAY WITH FRIEND</button>
 <div id="app">
 <section id="selectScreen" class="screen overlay">
   <div id="netBar"><label>NAME <span class="namewrap"><span id="nameHint">add a number</span><input id="netNameInput" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false"></span></label><span id="netIdLine"></span></div>
@@ -301,7 +307,10 @@
     <div class="roundbox"><b id="roundTxt">ROUND 1</b><span>best of three</span><button id="pauseTop">PAUSE</button></div>
     <div class="fighter-hud right" id="hudR"><div class="hudname"><span class="hudword" id="nameR"></span><span class="roundwins" id="winsR">○○</span></div><div class="hp-track"><div class="hp-ghost" id="hpGhostR"></div><div class="hp-fill" id="hpR"></div><span class="hp-num" id="hpNumR"></span></div><div class="ult-track"><div class="ult-fill" id="ultR"></div></div></div>
   </div>
-  <div id="stage"><canvas id="cv"></canvas><div id="koTitle" class="ko-title">K.O.</div><div class="desktop-help">MOVE WASD / ARROWS · ATTACK SPACE · DASH SHIFT · ULT E</div><div class="touch-hud" aria-label="Combat controls"><div class="joystick" id="joystickPad" aria-label="Movement joystick"><div class="joystick-knob" id="joystickKnob"></div></div><div class="action-cluster"><button class="combat-btn ultimate" id="ultControl" aria-label="Ultimate attack"><span>ULT 0%</span></button><button class="combat-btn dash" id="dashControl" aria-label="Dash"><span>DASH</span></button><button class="combat-btn attack" id="attackControl" aria-label="Basic attack"><span>ATTACK<small>SPACE</small></span></button></div></div></div>
+  <div id="stage"><canvas id="cv"></canvas><div id="koTitle" class="ko-title">K.O.</div><div class="desktop-help">MOVE WASD / ARROWS · ATTACK SPACE · DASH SHIFT · ULT E</div><div class="touch-hud" aria-label="Combat controls"><div class="joystick" id="joystickPad" aria-label="Movement joystick"><div class="joystick-knob" id="joystickKnob"></div></div><div class="action-cluster"><button class="combat-btn ultimate" id="ultControl" aria-label="Ultimate attack">
+  <svg class="ult-ring" viewBox="0 0 84 84"><circle class="ult-ring-bg" cx="42" cy="42" r="38"/><circle class="ult-ring-fg" cx="42" cy="42" r="38"/></svg>
+  <span>ULT 0%</span>
+</button><button class="combat-btn dash" id="dashControl" aria-label="Dash"><span>DASH</span></button><button class="combat-btn attack" id="attackControl" aria-label="Basic attack"><span>ATTACK<small>SPACE</small></span></button></div></div></div>
   <div class="battlebar"><div class="matchup" id="matchup">ELEMENT MATCHUP<b>Even</b></div><div class="log" id="battleLog">You control fighter one.</div><div class="arena-controls"><button id="pauseBtn">Pause</button><button id="skipBtn">Skip round</button><button class="soundbtn" id="soundBtn" aria-label="Toggle sound">Sound</button></div></div>
 </section>
 <section id="versus" class="overlay hidden">
@@ -367,9 +376,9 @@
 </div>
 </div>
 
-<script src="qrcode.js?v=1034"></script>
-<script src="game.js?v=1034"></script>
-<script src="ui.js?v=1034"></script>
-<script src="fx.js?v=1034" defer></script>
+<script src="qrcode.js?v=1035"></script>
+<script src="game.js?v=1035"></script>
+<script src="ui.js?v=1035"></script>
+<script src="fx.js?v=1035" defer></script>
 </body>
 </html>
