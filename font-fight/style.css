@@ -574,3 +574,30 @@ body:has(#roomScreen:not(.hidden)) #friendsBtn{display:none}
 .map-meta{display:flex;align-items:center;gap:8px}
 .map-size{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);text-transform:uppercase;letter-spacing:1px}
 .map-desc{font-size:12px;color:#8899bb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* === Control Redesign V10.34 === */
+/* Joystick: bigger, glowing ring, premium knob */
+.joystick{width:132px!important;height:132px!important;border:2px solid rgba(120,200,255,.25)!important;border-radius:50%!important;background:radial-gradient(circle at 50% 40%,rgba(30,80,130,.25),rgba(5,15,30,.65) 70%)!important;box-shadow:0 0 30px rgba(60,150,255,.12),inset 0 0 30px rgba(0,0,0,.4)!important;backdrop-filter:blur(2px)}
+.joystick::before{content:'';position:absolute;inset:12px;border:1px solid rgba(120,200,255,.12);border-radius:50%;pointer-events:none}
+.joystick-knob{width:58px!important;height:58px!important;border-radius:50%!important;background:radial-gradient(circle at 35% 30%,rgba(100,180,255,.9),rgba(20,70,120,.95) 60%,rgba(10,40,80,.95))!important;border:2px solid rgba(150,220,255,.7)!important;box-shadow:0 0 20px rgba(80,170,255,.5),0 4px 12px rgba(0,0,0,.4)!important}
+.joystick-knob::after{content:'';position:absolute;top:50%;left:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:rgba(255,255,255,.6);box-shadow:0 0 8px #fff}
+
+/* Combat buttons: hierarchy, press feedback */
+.combat-btn{border-radius:50%!important;display:grid!important;place-items:center!important;touch-action:none!important;transition:transform .08s ease,box-shadow .08s ease!important;position:relative;overflow:hidden}
+.combat-btn:active{transform:scale(.9)!important}
+.combat-btn span{font-weight:800;letter-spacing:1px;line-height:1.2;text-align:center;pointer-events:none}
+
+/* ATTACK: primary, biggest */
+.combat-btn.attack{width:84px!important;height:84px!important;background:radial-gradient(circle at 35% 30%,rgba(40,90,150,.95),rgba(8,30,55,.95))!important;border:2px solid rgba(120,200,255,.5)!important;box-shadow:0 0 24px rgba(70,150,255,.25),0 6px 16px rgba(0,0,0,.4)!important}
+.combat-btn.attack span{font-size:13px;color:#e8f4ff;text-shadow:0 0 8px rgba(120,200,255,.6)}
+.combat-btn.attack small{display:block;font-size:9px;font-weight:600;color:#7a9abb;letter-spacing:2px;margin-top:2px}
+
+/* DASH: secondary, smaller */
+.combat-btn.dash{width:68px!important;height:68px!important;background:radial-gradient(circle at 35% 30%,rgba(50,60,90,.9),rgba(12,16,30,.95))!important;border:2px solid rgba(150,150,180,.35)!important;box-shadow:0 4px 12px rgba(0,0,0,.4)!important}
+.combat-btn.dash span{font-size:12px;color:#c8d4e8}
+
+/* ULT: special, element-colored glow, pulses when ready */
+#ultControl{width:76px!important;height:76px!important;border-radius:22px!important;background:radial-gradient(circle at 35% 30%,rgba(60,120,220,.95),rgba(10,40,100,.95))!important;border:2px solid rgba(120,180,255,.6)!important;box-shadow:0 0 28px rgba(80,150,255,.4),0 6px 16px rgba(0,0,0,.4)!important}
+#ultControl.ready{animation:ultPulse 1.2s ease-in-out infinite}
+@keyframes ultPulse{0%,100%{box-shadow:0 0 28px rgba(80,150,255,.4),0 6px 16px rgba(0,0,0,.4)}50%{box-shadow:0 0 44px rgba(120,190,255,.7),0 6px 16px rgba(0,0,0,.4)}}
+#ultControl span{font-size:12px;color:#fff;text-shadow:0 0 10px rgba(150,200,255,.8)}
