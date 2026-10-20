@@ -110,6 +110,8 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #setBtn{position:fixed;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:70;width:40px;height:40px;border-radius:10px;background:rgba(8,12,8,.62);border:1px solid rgba(190,230,190,.35);color:#dfeee0;font-size:19px;display:flex;align-items:center;justify-content:center}
 #setPanel{display:none}
 .setrow{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:12px 0;font-size:13px}
+.sethead{font-size:12px;letter-spacing:3px;color:#8fd68f;margin:18px 0 2px;text-align:left;border-bottom:1px solid #2c4a2c;padding-bottom:5px}
+#fpsRead{position:fixed;left:14px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:50;font:11px monospace;color:#9fe09f;background:rgba(8,12,8,.55);padding:3px 8px;border-radius:6px;display:none;pointer-events:none}
 .setrow input[type=checkbox]{width:22px;height:22px}
 .setrow input[type=range]{width:130px}
 #hitmark{position:fixed;left:50%;top:50%;z-index:35;width:36px;height:36px;margin:-18px 0 0 -18px;pointer-events:none;opacity:0}
@@ -182,6 +184,7 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 <div class="cine" id="cbot"></div>
 <div id="toast"></div>
 <div id="scorePop"></div>
+<div id="fpsRead"></div>
 <div id="setBtn">&#9881;</div>
 
 <div id="card"><div class="panel" id="cardPanel"></div></div>
@@ -189,10 +192,20 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
   <div class="panel" id="setPanel">
     <h1>SETTINGS</h1>
     <div class="setrow"><span>Invert Y aim</span><input type="checkbox" id="invY"></div>
+    <div class="setrow"><span>Invert X aim</span><input type="checkbox" id="invX"></div>
     <div class="setrow"><span>Aim sensitivity</span><input type="range" id="sens" min="0.5" max="2" step="0.1" value="1"></div>
+    <div class="setrow"><span>Scoped sensitivity</span><input type="range" id="sensScope" min="0.5" max="2" step="0.1" value="1"></div>
     <div class="setrow"><span>Mute all sound</span><input type="checkbox" id="setMute"></div>
+    <div class="setrow"><span>Auto-reload on empty</span><input type="checkbox" id="setAutoR" checked></div>
+    <div class="setrow"><span>Reduce flashes</span><input type="checkbox" id="setFlash"></div>
     <div class="setrow"><span>Killcam</span><select id="setKcam"><option value="on">ON</option><option value="short">SHORT</option><option value="off">OFF</option></select></div>
     <div class="setrow"><span>Reticle color</span><select id="setRet"><option value="black">BLACK</option><option value="red">RED</option><option value="green">GREEN</option></select></div>
+    <div class="sethead">GRAPHICS</div>
+    <div class="setrow"><span>Quality</span><select id="setQual"><option value="auto">AUTO</option><option value="low">LOW</option><option value="medium">MEDIUM</option><option value="high">HIGH</option><option value="ultra">ULTRA</option></select></div>
+    <div class="setrow"><span>Shadows</span><input type="checkbox" id="setShad" checked></div>
+    <div class="setrow"><span>Grass</span><input type="checkbox" id="setGrass" checked></div>
+    <div class="setrow"><span>Particles</span><select id="setPart"><option value="low">LOW</option><option value="medium">MEDIUM</option><option value="high">HIGH</option></select></div>
+    <div class="setrow"><span>Show FPS</span><input type="checkbox" id="setFps"></div>
     <div class="setrow"><span style="color:#8aa086">Desktop: click to lock mouse &middot; right-click / F scope &middot; wheel zoom &middot; R reload</span></div>
     <div class="row"><button class="mbtn" id="setClose">DONE</button></div>
   </div>
@@ -318,6 +331,8 @@ const G={
   breathHeld:false, breath:100, breathFx:0,
   swayT:0,
   invertY:false, sens:1, muted:false, kcam:'on', retColor:'black',
+  invertX:false, sensScope:1, autoReload:true, reduceFlash:false, // gameplay settings
+  quality:'auto', shadows:true, grass:true, particleMul:1, showFps:false, // graphics settings
   windDir:0, windSpd:2, windT:0, windDir0:0, // windDir0 : mission base heading; live dir/spd gust around it
   perfN:0, perfT0:0, perfLow:0, perfHigh:0, perfLvl:0, // adaptive-quality tracker (silent)
   slowmo:0, punchT:0, punchYaw:0, punchPitch:0,
@@ -1359,7 +1374,7 @@ function boomFx(p){
     side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));
   ring.rotation.x=-Math.PI/2;ring.position.set(p.x,p.y-0.75,p.z);scene.add(ring);
   booms.push({sp,ring,t:0});
-  boomLight.position.copy(p);boomLight.position.y+=1.5;boomLight.intensity=9;
+  boomLight.position.copy(p);boomLight.position.y+=1.5;boomLight.intensity=G.reduceFlash?4.5:9; // REDUCE FLASHES : halve the explosion light pop
 }
 function boomUpdate(dt){
   for(let i=booms.length-1;i>=0;i--){const b=booms[i];b.t+=dt;const k=b.t/0.55;
@@ -1454,11 +1469,12 @@ function fireBullet(){
   bullets.push({m,sp:vel,vx:dir.x*vel,vy:dir.y*vel,vz:dir.z*vel,life:5}); // per-rifle muzzle velocity
   G.kickT=0;G.shake=0.55;G.flashT=0.14;G.alarm=Math.min(100,G.alarm+10);
   flashSprite.material.rotation=rand(0,TAU);
-  const bl=$('bloom');bl.style.transition='none';bl.style.opacity=0.85;
+  const bl=$('bloom');bl.style.transition='none';bl.style.opacity=G.reduceFlash?0.42:0.85; // REDUCE FLASHES : halve the muzzle bloom
   requestAnimationFrame(()=>{bl.style.transition='opacity .2s';bl.style.opacity=0;});
   ejectShell();
   puffMuzzleSmoke();
   sShot(RIFLES[G.rifle].pitch);updateHUD();
+  if(G.ammo===0&&G.autoReload)startReload(); // AUTO-RELOAD setting : empty mag starts the reload on its own
 }
 /* point-to-segment distance squared : the driver capsule test uses the bullet's
    substep SEGMENT so 800+ m/s rounds can't jump over the hit sphere between samples */
@@ -1589,7 +1605,8 @@ function tracerUpdate(dt){
 const sparks=[];
 const sparkGeo=new THREE.BoxGeometry(0.09,0.09,0.09);
 function spawnBurst(p,o){
-  for(let i=0;i<(o.n||10);i++){
+  const bn=Math.max(1,Math.round((o.n||10)*(G.particleMul||1))); // PARTICLES setting : global burst-count multiplier
+  for(let i=0;i<bn;i++){
     const m=new THREE.Mesh(sparkGeo,new THREE.MeshBasicMaterial({color:o.color,transparent:true,depthWrite:false,
       blending:o.add?THREE.AdditiveBlending:THREE.NormalBlending}));
     m.position.copy(p);
@@ -1631,7 +1648,7 @@ function shellUpdate(dt){
 function damagePlayer(d){
   if(G.state!=='play')return;
   G.hp=Math.max(0,G.hp-d);G.lastDmgT=G.swayT;sHurt();
-  const el=$('dmg');el.style.opacity=0.9;setTimeout(()=>el.style.opacity=0,180);
+  const el=$('dmg');el.style.opacity=G.reduceFlash?0.45:0.9;setTimeout(()=>el.style.opacity=0,180);
   if(G.hp<=0)missionFail();updateHUD();
 }
 
@@ -1646,17 +1663,19 @@ function aimByPixels(dx,dy){
     const tf=0.5+0.65*sstep(140,1750,spd); // 0.5x for precise creep, up to ~1.15x on a flick — no assist, no snap
     _aimF+=(tf-_aimF)*0.45;}
   _aimLastT=now;
-  const s=0.0021*G.sens*_aimF*(G.scoped?0.4*Math.pow(8/Math.max(2,G.zoom),0.7):1); // speed-aware, stacking with per-zoom scaling
-  G.yaw=clamp(G.yaw-dx*s,-0.65,0.65);
+  const s=0.0021*G.sens*_aimF*(G.scoped?0.4*G.sensScope*Math.pow(8/Math.max(2,G.zoom),0.7):1); // speed-aware, stacking with per-zoom scaling; scoped factor scaled by the scoped-sens setting
+  G.yaw=clamp(G.yaw+(G.invertX?dx:-dx)*s,-0.65,0.65);
   G.pitch=clamp(G.pitch+(G.invertY?dy:-dy)*s,-0.4,0.55);
 }
 function touchPos(t){return[t.clientX,t.clientY];}
 document.addEventListener('touchstart',e=>{
   if(KC.active){kcTap();e.preventDefault();return;} // tap during bullet-cam : chase -> orbit, orbit -> end
   if(G.state!=='play')return;
+  let uiTouch=false;
   for(const t of e.changedTouches){
     const[x,y]=touchPos(t),el=document.elementFromPoint(x,y);
     if(el&&(el.classList.contains('hbtn')||el.id==='zoomSlider'||el.closest('#zoomWrap')))continue;
+    if(el&&el.closest('#card2')){uiTouch=true;continue;} // SETTINGS PANEL : a tap here must reach the inputs — never swallow it into the aim handler
     const jr=joyEl.getBoundingClientRect();
     if(G.scoped||x>innerWidth*0.5||y<innerHeight*0.45){
       /* scoped : EVERY free touch aims (both thumbs) — the joystick is locked
@@ -1668,7 +1687,7 @@ document.addEventListener('touchstart',e=>{
       if(aimId===null){aimId=t.identifier;lastAX=x;lastAY=y;}
     }
   }
-  e.preventDefault();
+  if(!uiTouch)e.preventDefault();
 },{passive:false});
 document.addEventListener('touchmove',e=>{
   for(const t of e.changedTouches){
@@ -1836,13 +1855,69 @@ function updateHUD(){
 }
 function showCard(html){$('cardPanel').innerHTML=html;$('card').style.display='flex';}
 function hideCard(){$('card').style.display='none';}
-$('setBtn').addEventListener('click',e=>{e.stopPropagation();$('card2').style.display='flex';$('setPanel').style.display='block';sClick();});
-$('setClose').addEventListener('click',()=>{$('card2').style.display='none';$('setPanel').style.display='none';});
+/* GEAR FIX : these used bare 'click' listeners, but the document touchstart
+   handler preventDefaults during play (and taps inside the open panel bubble
+   up to it), which suppresses click on touch devices — the gear was dead
+   in-game and DONE was dead with the panel open. Route both through bindBtn
+   (touchstart/mousedown) like every other working button. */
+bindBtn('setBtn',()=>{$('card2').style.display='flex';$('setPanel').style.display='block';sClick();});
+bindBtn('setClose',()=>{$('card2').style.display='none';$('setPanel').style.display='none';});
 $('invY').addEventListener('change',e=>{G.invertY=e.target.checked;lsSet('longshot_invY',G.invertY?'1':'0');});
 $('sens').addEventListener('input',e=>{G.sens=+e.target.value;lsSet('longshot_sens',G.sens);});
 $('setMute').addEventListener('change',e=>{G.muted=e.target.checked;lsSet('longshot_mute',G.muted?'1':'0');if(windGain)windGain.gain.value=G.muted?0:windGain.gain.value;});
 $('setKcam').addEventListener('change',e=>{G.kcam=e.target.value;lsSet('longshot_kcam',G.kcam);});
 $('setRet').addEventListener('change',e=>{G.retColor=e.target.value;lsSet('longshot_retc',G.retColor);});
+/* ---------------- GRAPHICS SETTINGS ----------------
+   QUALITY presets lock pixelRatio (+ shadow resolution) and switch the
+   adaptive-perf stepping OFF; AUTO hands control back to the adaptive
+   tracker untouched. SHADOWS/GRASS toggle live scene state, PARTICLES
+   scales every spawnBurst count, SHOW FPS surfaces the perf tracker's
+   own per-second number. */
+const QUALITY_PR={low:0.75,medium:1,high:1.5,ultra:2};
+const QUALITY_SHADOW={low:512,medium:1024,high:2048,ultra:2048};
+function partMul(v){return v==='low'?0.4:(v==='medium'?0.7:1);}
+function setShadowSize(sz){
+  if(sun.shadow.mapSize.x===sz)return;
+  sun.shadow.mapSize.set(sz,sz);
+  if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;} // force realloc at the new size
+  renderer.shadowMap.needsUpdate=true;
+}
+function applyShadows(){
+  sun.castShadow=G.shadows;
+  renderer.shadowMap.enabled=G.shadows;
+  scene.traverse(o=>{if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];
+    for(const m of ms)m.needsUpdate=true;}}); // materials recompile with shadows on/off
+  renderer.shadowMap.needsUpdate=true;
+}
+function applyGraphics(){
+  if(G.quality==='auto'){G.perfLvl=0;G.perfLow=0;G.perfHigh=0;applyPerfLvl();}
+  else{
+    renderer.shadowMap.autoUpdate=true; // manual presets never freeze the shadow map
+    renderer.setPixelRatio(QUALITY_PR[G.quality]||1);
+    setShadowSize(QUALITY_SHADOW[G.quality]||1024);
+  }
+  applyShadows();
+  if(grassMesh)grassMesh.visible=G.grass;
+  $('fpsRead').style.display=G.showFps?'block':'none';
+}
+$('invX').addEventListener('change',e=>{G.invertX=e.target.checked;lsSet('longshot_invX',G.invertX?'1':'0');});
+$('sensScope').addEventListener('input',e=>{G.sensScope=+e.target.value;lsSet('longshot_sensS',G.sensScope);});
+$('setAutoR').addEventListener('change',e=>{G.autoReload=e.target.checked;lsSet('longshot_autoR',G.autoReload?'1':'0');});
+$('setFlash').addEventListener('change',e=>{G.reduceFlash=e.target.checked;lsSet('longshot_flash',G.reduceFlash?'1':'0');});
+$('setQual').addEventListener('change',e=>{
+  G.quality=e.target.value;lsSet('longshot_qual',G.quality);
+  if(G.quality!=='auto'){ // the preset also lands matching sub-setting defaults (still overridable below)
+    G.shadows=G.quality!=='low';$('setShad').checked=G.shadows;lsSet('longshot_shad',G.shadows?'1':'0');
+    G.grass=G.quality!=='low';$('setGrass').checked=G.grass;lsSet('longshot_grass',G.grass?'1':'0');
+    const pv=G.quality==='low'?'low':(G.quality==='medium'?'medium':'high');
+    G.particleMul=partMul(pv);$('setPart').value=pv;lsSet('longshot_part',pv);
+  }
+  applyGraphics();
+});
+$('setShad').addEventListener('change',e=>{G.shadows=e.target.checked;lsSet('longshot_shad',G.shadows?'1':'0');applyShadows();});
+$('setGrass').addEventListener('change',e=>{G.grass=e.target.checked;lsSet('longshot_grass',G.grass?'1':'0');if(grassMesh)grassMesh.visible=G.grass;});
+$('setPart').addEventListener('change',e=>{G.particleMul=partMul(e.target.value);lsSet('longshot_part',e.target.value);});
+$('setFps').addEventListener('change',e=>{G.showFps=e.target.checked;lsSet('longshot_fps',G.showFps?'1':'0');$('fpsRead').style.display=G.showFps?'block':'none';});
 /* SETTINGS RESTORE : everything in the panel persists to localStorage and
    comes back at boot. Called once here, before startMission(1). */
 function restoreSettings(){
@@ -1851,6 +1926,15 @@ function restoreSettings(){
   G.muted=lsGet('longshot_mute','0')==='1';$('setMute').checked=G.muted;
   const kc=lsGet('longshot_kcam','on');G.kcam=(kc==='short'||kc==='off')?kc:'on';$('setKcam').value=G.kcam;
   const rc=lsGet('longshot_retc','black');G.retColor=(rc==='red'||rc==='green')?rc:'black';$('setRet').value=G.retColor;
+  G.invertX=lsGet('longshot_invX','0')==='1';$('invX').checked=G.invertX;
+  const ss=lsGet('longshot_sensS','');if(ss!==''){G.sensScope=+ss;$('sensScope').value=G.sensScope;}
+  G.autoReload=lsGet('longshot_autoR','1')==='1';$('setAutoR').checked=G.autoReload;
+  G.reduceFlash=lsGet('longshot_flash','0')==='1';$('setFlash').checked=G.reduceFlash;
+  const q=lsGet('longshot_qual','auto');G.quality=(q==='low'||q==='medium'||q==='high'||q==='ultra')?q:'auto';$('setQual').value=G.quality;
+  G.shadows=lsGet('longshot_shad','1')==='1';$('setShad').checked=G.shadows;
+  G.grass=lsGet('longshot_grass','1')==='1';$('setGrass').checked=G.grass;
+  const pv=lsGet('longshot_part','high');G.particleMul=partMul(pv);$('setPart').value=(pv==='low'||pv==='medium')?pv:'high';
+  G.showFps=lsGet('longshot_fps','0')==='1';$('setFps').checked=G.showFps;
 }
 restoreSettings();
 /* ---------------- WAKE LOCK : the screen must never dim mid-aim ----------------
@@ -2153,11 +2237,13 @@ function frame(now){
   G._pfAcc=(G._pfAcc||0)+rawDt;G._pfN=(G._pfN||0)+1;
   if(G._pfAcc>=1){
     const fps=G._pfN/G._pfAcc;G._pfAcc=0;G._pfN=0;
+    G._fps=fps;if(G.showFps)$('fpsRead').textContent=Math.round(fps)+' FPS'; // SHOW FPS : the tracker's own 1s bucket
     if(fps<45){G.perfLow++;G.perfHigh=0;}
     else if(fps>57){G.perfHigh++;G.perfLow=0;}
     else{G.perfLow=0;G.perfHigh=0;}
-    if(G.perfLow>=3&&G.perfLvl<3){G.perfLvl++;G.perfLow=0;applyPerfLvl();}
-    else if(G.perfHigh>=6&&G.perfLvl>0){G.perfLvl--;G.perfHigh=0;applyPerfLvl();}}
+    if(G.quality==='auto'){ // a manual QUALITY preset locks the stepping off entirely
+      if(G.perfLow>=3&&G.perfLvl<3){G.perfLvl++;G.perfLow=0;applyPerfLvl();}
+      else if(G.perfHigh>=6&&G.perfLvl>0){G.perfLvl--;G.perfHigh=0;applyPerfLvl();}}}
   let ts=1;
   if(G.slowmo>0){G.slowmo-=dt;G.slowT+=dt;           // killcam slow-mo : ramped in/out, not a hard cut
     ts=1-0.84*sstep(0,0.5,G.slowT)*sstep(0,0.4,Math.max(0,G.slowmo));}
@@ -2268,8 +2354,8 @@ function frame(now){
     rifle.position.y+=-Math.sin(ph*Math.PI)*0.06;
   }else{rifle.userData.bolt.position.z=-0.72;rifle.rotation.z=0;}
   if(G.flashT>0){G.flashT-=dt;const k=Math.max(0,G.flashT/0.14);
-    muzzleFlash.intensity=(G.night?11:7)*k;flashSprite.visible=k>0;
-    flashSprite.material.opacity=k;flashSprite.scale.set(2.3,2.3,1);}
+    muzzleFlash.intensity=(G.night?11:7)*k*(G.reduceFlash?0.5:1);flashSprite.visible=k>0;
+    flashSprite.material.opacity=k*(G.reduceFlash?0.5:1);flashSprite.scale.set(2.3,2.3,1);}
   else{muzzleFlash.intensity=0;flashSprite.visible=false;}
   muzzleFlash.position.copy(camera.position);
   for(const c of clouds){c.position.x+=c.userData.v*dt;if(c.position.x>700)c.position.x=-700;}
@@ -2319,6 +2405,7 @@ window.addEventListener('resize',onResize);
 window.addEventListener('orientationchange',()=>setTimeout(onResize,250));
 buildTruck();
 buildSabotage();
+applyGraphics(); // boot-time graphics application : manual preset, or Auto matching the stock behavior
 startMission(1);
 requestAnimationFrame(frame);
 </script>
