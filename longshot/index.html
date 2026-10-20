@@ -1178,7 +1178,13 @@ function buildTruck(){
   const glassM=new THREE.MeshPhongMaterial({color:0x101820,shininess:120,specular:0x8899aa});
   const bx=(w,h,d,m,x,y,z)=>{const q=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);q.position.set(x,y,z);q.castShadow=true;g.add(q);return q;};
   bx(2.2,0.5,4.6,bodyM,0,0.85,0);            // chassis / bed base
-  bx(2.2,1.5,1.9,darkM,0,1.75,1.25);         // cab
+  /* open cab : doors, roof, back + front panels — the window band is OPEN on
+     both sides so the driver is visible and hittable (not a sealed box) */
+  bx(0.12,0.75,1.9,darkM,-1.04,1.375,1.25);  // cab doors
+  bx(0.12,0.75,1.9,darkM,1.04,1.375,1.25);
+  bx(2.2,0.15,1.9,darkM,0,2.425,1.25);       // cab roof
+  bx(2.2,1.5,0.12,darkM,0,1.75,0.36);        // cab back panel
+  bx(2.2,0.7,0.12,darkM,0,1.35,2.14);        // cab front below windshield
   bx(1.9,0.7,0.12,glassM,0,2.05,2.22);       // windshield
   bx(2.2,0.9,2.3,bodyM,0,1.55,-1.05);        // bed walls
   const wg=new THREE.CylinderGeometry(0.55,0.55,0.4,10);
@@ -1418,16 +1424,28 @@ function fireBullet(){
   puffMuzzleSmoke();
   sShot(RIFLES[G.rifle].pitch);updateHUD();
 }
+/* point-to-segment distance squared : the driver capsule test uses the bullet's
+   substep SEGMENT so 800+ m/s rounds can't jump over the hit sphere between samples */
+function segPtD2(ax,ay,az,bx,by,bz,px,py,pz){
+  const abx=bx-ax,aby=by-ay,abz=bz-az;
+  const t=clamp(((px-ax)*abx+(py-ay)*aby+(pz-az)*abz)/(abx*abx+aby*aby+abz*abz||1e-9),0,1);
+  const dx=px-(ax+abx*t),dy=py-(ay+aby*t),dz=pz-(az+abz*t);
+  return dx*dx+dy*dy+dz*dz;}
 function bulletUpdate(dt){
   const wvx=Math.sin(G.windDir)*G.windSpd,wvz=Math.cos(G.windDir)*G.windSpd;
   for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];
     const steps=Math.max(1,Math.ceil(b.sp*dt/1.5));const sdt=dt/steps;
-    let hit=null,ground=false,thit=false,shit=null;
+    let hit=null,hitHead=false,ground=false,thit=false,shit=null;
     let nearE=null,nearD2=36; // nearest pass within ~6m that ISN'T a hit -> near-miss reaction
     for(let s=0;s<steps;s++){
       b.vy-=9.8*sdt;b.vx+=wvx*1.6*sdt;b.vz+=wvz*1.6*sdt; // real gravity 9.8 m/s^2 — hold over with the mil-dots
+      const px0=b.m.position.x,py0=b.m.position.y,pz0=b.m.position.z;
       b.m.position.x+=b.vx*sdt;b.m.position.y+=b.vy*sdt;b.m.position.z+=b.vz*sdt;
       const p=b.m.position;
+      if(truck.active&&driver.alive){ // driver capsule : chest (r 1.0) + head (r 0.4) spheres vs the bullet segment
+        const dc=driver.chest();
+        if(segPtD2(px0,py0,pz0,p.x,p.y,p.z,dc.x,dc.y,dc.z)<1.0){hit=driver;hitHead=false;break;}
+        if(segPtD2(px0,py0,pz0,p.x,p.y,p.z,dc.x,dc.y+0.45,dc.z)<0.16){hit=driver;hitHead=true;break;}}
       for(const e of enemies){if(!e.alive)continue;
         const c=e.chest(),dx=p.x-c.x,dy=p.y-c.y,dz=p.z-c.z,d2=dx*dx+dy*dy+dz*dz;
         if(d2<1.1){hit=e;break;}
@@ -1435,8 +1453,10 @@ function bulletUpdate(dt){
       if(truck.active&&driver.alive){_tv.copy(p).sub(truck.group.position);_tv.y-=1.2;
         if(_tv.lengthSq()<100)truck.lastCrackT=G.swayT;} // round cracked past the truck — the driver reacts
       if(hit)break;
-      if(truck.active&&truck.group){_tv.copy(p);truck.group.worldToLocal(_tv); // truck body (driver sphere already checked above)
-        if(Math.abs(_tv.x)<1.25&&_tv.y>0.2&&_tv.y<2.6&&Math.abs(_tv.z)<2.5){thit=true;break;}}
+      if(truck.active&&truck.group){_tv.copy(p);truck.group.worldToLocal(_tv); // truck body (driver capsule checked above)
+        if(Math.abs(_tv.x)<1.25&&_tv.y>0.2&&_tv.y<2.6&&Math.abs(_tv.z)<2.5){
+          const inWin=Math.abs(_tv.x)<1.04&&_tv.y>1.72&&_tv.y<2.38&&_tv.z>0.42&&_tv.z<2.55; // open window band — rounds pass through to the driver
+          if(!inWin){thit=true;break;}}}
       for(const tg of sabTargets){if(!tg.alive)continue; // sabotage props : sphere test like the enemy chest check
         const dx=p.x-tg.pos.x,dy=p.y-tg.pos.y,dz=p.z-tg.pos.z;
         if(dx*dx+dy*dy+dz*dz<tg.r*tg.r){shit=tg;break;}}
@@ -1445,7 +1465,7 @@ function bulletUpdate(dt){
     }
     b.life-=dt;
     _td.set(b.vx,b.vy,b.vz);b.m.lookAt(_tv.copy(b.m.position).add(_td));
-    if(hit){const hshot=b.m.position.y>hit.chest().y+0.45; // headshot : round landed head-high
+    if(hit){const hshot=hitHead||b.m.position.y>hit.chest().y+0.45; // headshot : capsule head sphere, or round landed head-high
       killEnemy(hit,_td.normalize(),true,hshot);scene.remove(b.m);bullets.splice(i,1);}
     else{
       if(nearE)reactToDanger(nearE,nearE.hvt); // suppressive fire : HVTs bolt for cover immediately
