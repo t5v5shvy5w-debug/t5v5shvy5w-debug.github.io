@@ -535,9 +535,8 @@ body:has(#roomScreen:not(.hidden)) #friendsBtn{display:none}
 #versus .vs-fx-light{background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(255,220,120,.20),transparent 70%),linear-gradient(180deg,#0d0a02,#1f1805)!important}
 #versus .vs-fx-nature{background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(60,220,120,.20),transparent 70%),linear-gradient(180deg,#02120a,#062a14)!important}
 #versus .vs-fx-cosmic{background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(160,110,255,.22),transparent 70%),linear-gradient(180deg,#050510,#0d0620)!important}
-/* Diagonal slash */
-#versus .vs-slash{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:6;overflow:hidden}
-#versus .vs-slash::before{content:'';position:absolute;top:-10%;left:65%;width:3px;height:120%;transform:rotate(24deg);background:linear-gradient(180deg,var(--slash-c1,#ff6a00),#fff,var(--slash-c2,#aaffff));box-shadow:0 0 20px var(--slash-c1,#ff6a00),0 0 40px #fff,0 0 20px var(--slash-c2,#aaffff)}
+/* Diagonal slash - drawn by VSFX canvas, CSS div hidden */
+#versus .vs-slash{display:none}
 
 /* Net loading modal (creating/joining) */
 #netLoading{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;background:rgba(0,0,10,.7);backdrop-filter:blur(4px)}
@@ -551,3 +550,12 @@ body:has(#roomScreen:not(.hidden)) #friendsBtn{display:none}
 .netload-sub{font:400 14px system-ui;color:#8899bb;margin-bottom:24px}
 .netload-cancel{background:transparent;border:1px solid #444;color:#8899bb;border-radius:10px;padding:10px 24px;font:600 14px system-ui;cursor:pointer;transition:all .2s}
 .netload-cancel:hover{border-color:#ff4444;color:#ff6666}
+
+/* VS layering fix: canvas between backgrounds and text */
+#versus .vs-side{z-index:auto!important}
+#versus #vsCanvas{z-index:2!important}
+#versus .vfighter{position:relative;z-index:3!important}
+#versus .vs-el{position:relative;z-index:3!important}
+#versus .vs-clash{z-index:3!important}
+#versus .vmeta{position:relative;z-index:3!important}
+#versus .count{position:relative;z-index:3!important}

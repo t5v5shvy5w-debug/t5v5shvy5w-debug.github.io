@@ -482,13 +482,13 @@
   
   // VS element style configs (visuals only, no particles)
   const VS_STYLE = {
-    Fire: { name:'linear-gradient(180deg,#fff 0%,#ffe080 30%,#ffaa00 60%,#ff4400 100%)', glow:'#ff6a00', label:'#ffaa00', slash:'#ff6a00' },
-    Storm: { name:'linear-gradient(180deg,#fff 0%,#fffbd0 30%,#ffe34c 60%,#aa88ff 100%)', glow:'#ffee55', label:'#ffe34c', slash:'#ffee55' },
-    Ice: { name:'linear-gradient(180deg,#fff 0%,#e8fdff 30%,#aaeeff 60%,#5edcff 100%)', glow:'#66ccff', label:'#aaeeff', slash:'#66ccff' },
-    Shadow: { name:'linear-gradient(180deg,#e8d8ff 0%,#c080ff 40%,#8040cc 100%)', glow:'#a060ff', label:'#c080ff', slash:'#a060ff', outline:'#1a0033' },
-    Light: { name:'linear-gradient(180deg,#fff 0%,#fff8d0 30%,#ffe080 60%,#ffcc44 100%)', glow:'#ffe080', label:'#ffe080', slash:'#ffe080' },
-    Nature: { name:'linear-gradient(180deg,#eaffea 0%,#a0ff80 40%,#3cdc78 70%,#1a8844 100%)', glow:'#44dd77', label:'#a0ff80', slash:'#44dd77' },
-    Cosmic: { name:'linear-gradient(180deg,#fff 0%,#e8d8ff 30%,#c080ff 60%,#8040ff 100%)', glow:'#b478ff', label:'#c080ff', slash:'#b478ff' },
+    Fire: { color:'#ffffff', glow:'#ff6a00', label:'#ffaa00', slash:'#ff6a00' },
+    Storm: { color:'#ffffff', glow:'#ffee55', label:'#ffe34c', slash:'#ffee55' },
+    Ice: { color:'#ffffff', glow:'#66ccff', label:'#aaeeff', slash:'#66ccff' },
+    Shadow: { color:'#e8d8ff', glow:'#a060ff', label:'#c080ff', slash:'#a060ff', outline:'#1a0033' },
+    Light: { color:'#ffffff', glow:'#ffe080', label:'#ffe080', slash:'#ffe080' },
+    Nature: { color:'#ffffff', glow:'#44dd77', label:'#a0ff80', slash:'#44dd77' },
+    Cosmic: { color:'#ffffff', glow:'#b478ff', label:'#c080ff', slash:'#b478ff' },
   };
 
 function showVersus(a, b, metaText, isGuest) {
@@ -503,8 +503,8 @@ function showVersus(a, b, metaText, isGuest) {
     const st1 = VS_STYLE[a.element] || VS_STYLE.Fire;
     const st2 = VS_STYLE[b.element] || VS_STYLE.Fire;
     const v1el = $("v1"), v2el = $("v2");
-    v1el.style.cssText = `font-family:"${a.font}";background:${st1.name};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:0 0 30px ${st1.glow},0 0 80px ${st1.glow}${st1.outline ? `,0 0 4px ${st1.outline},2px 2px 0 ${st1.outline}` : ''}`;
-    v2el.style.cssText = `font-family:"${b.font}";background:${st2.name};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:0 0 30px ${st2.glow},0 0 80px ${st2.glow}${st2.outline ? `,0 0 4px ${st2.outline},2px 2px 0 ${st2.outline}` : ''}`;
+    v1el.style.cssText = `font-family:"${a.font}";color:${st1.color};text-shadow:0 0 20px ${st1.glow},0 0 60px ${st1.glow},0 2px 4px rgba(0,0,0,.8)`;
+    v2el.style.cssText = `font-family:"${b.font}";color:${st2.color};text-shadow:0 0 20px ${st2.glow},0 0 60px ${st2.glow},0 2px 4px rgba(0,0,0,.8)`;
     $("vsEl1").textContent = a.element.toUpperCase();
     $("vsEl1").style.color = st1.label;
     $("vsEl1").style.textShadow = `0 0 12px ${st1.glow}`;
