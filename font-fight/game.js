@@ -2532,7 +2532,21 @@ function showVersus(a, b, metaText, isGuest) {
     if (!netRoom) $("friendsPanel").classList.remove("hidden");
     netIdLine();
   }
-  function roomCreate() {
+  
+  // Loading modal for creating/joining (replaces boring netPopup)
+  let netLoadCancelFn = null;
+  function netShowLoading(title, sub, onCancel) {
+    $("netLoadTitle").textContent = title;
+    $("netLoadSub").textContent = sub;
+    netLoadCancelFn = onCancel || null;
+    $("netLoading").classList.remove("hidden");
+  }
+  function netHideLoading() {
+    $("netLoading").classList.add("hidden");
+    netLoadCancelFn = null;
+  }
+
+function roomCreate() {
     if (netRoom) {
       netPopup("In a room", "Leave the current room first.", null, null, true);
       return;
@@ -2554,21 +2568,17 @@ function showVersus(a, b, metaText, isGuest) {
     const code = String(Math.floor(1000 + Math.random() * 9000));
     netLog("roomCreate: code", code);
     roomKillPeer();
-    netPopup(
-      "Creating",
-      "Making room " + code + "…",
-      () => {
-        roomKillPeer();
-        roomMenu();
-      },
-      null,
-      true,
-    );
+    netShowLoading("Forging arena…", "Reserving your room", () => {
+      roomKillPeer();
+      netHideLoading();
+      roomMenu();
+    });
     netRoomPeer = new Peer("ffa-room-" + code, iceCfg());
     let opened = false;
     const openT = setTimeout(() => {
       if (!opened) {
         roomKillPeer();
+        netHideLoading();
         netPopup(
           "Room",
           "Lobby server not answering. Check your connection and try again.",
@@ -2582,7 +2592,7 @@ function showVersus(a, b, metaText, isGuest) {
       opened = true;
       clearTimeout(openT);
       netLog("roomCreate: peer open, room ffa-room-" + code + " live");
-      $("netPopup").classList.add("hidden");
+      netHideLoading();
       netRoomCode = code;
       isHost = true;
       netRoom = {
@@ -2608,7 +2618,8 @@ function showVersus(a, b, metaText, isGuest) {
     netRoomPeer.on("connection", roomAttachGuest);
     netRoomPeer.on("error", (e) => {
       if (e && e.type === "unavailable-id") roomCreate();
-      else
+      else {
+        netHideLoading();
         netPopup(
           "Room",
           "Could not create the room. Try again.",
@@ -2616,6 +2627,7 @@ function showVersus(a, b, metaText, isGuest) {
           null,
           true,
         );
+      }
     });
   }
   function roomJoin(code) {
@@ -2648,20 +2660,15 @@ function showVersus(a, b, metaText, isGuest) {
     let joined = false,
       opened = false;
     const fail = (t, tx) => {
+      netHideLoading();
       $("netPopup").classList.add("hidden");
       roomKillPeer();
       netRoom = null;
       netPopup(t, tx, () => roomMenu(), null, true);
     };
-    netPopup(
-      "Joining",
-      "Dialing room " + code + "…",
-      () => {
-        fail("Cancelled", "Join cancelled.", () => roomMenu());
-      },
-      null,
-      true,
-    );
+    netShowLoading("Joining room…", "Dialing your rival", () => {
+      fail("Cancelled", "Join cancelled.", () => roomMenu());
+    });
     netLog("roomJoin: dialing ffa-room-" + code);
     netRoomPeer = new Peer(iceCfg());
     const openT = setTimeout(() => {
@@ -2695,6 +2702,7 @@ function showVersus(a, b, metaText, isGuest) {
       c.on("open", () => {
         joined = true;
         netLog("roomJoin: conn OPEN");
+        netHideLoading();
         $("netPopup").classList.add("hidden");
         $("friendsPanel").classList.add("hidden");
         netSend({ t: "room-hello", from: netMe(), pick: netOwnPick });
@@ -3639,6 +3647,7 @@ function showVersus(a, b, metaText, isGuest) {
   $("leaveRoomBtn").onclick = netLeaveRoom;
   $("npAccept").onclick = () => {
     $("netPopup").classList.add("hidden");
+  $("netLoadCancel").onclick = () => { if (netLoadCancelFn) netLoadCancelFn(); };
     sfx("ui");
     if (npA) {
       const f = npA;
