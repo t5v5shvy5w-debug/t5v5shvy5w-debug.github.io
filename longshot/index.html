@@ -218,11 +218,14 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
     <div class="setrow"><span>Show FPS</span><input type="checkbox" id="setFps"></div>
     <div class="setrow"><span style="color:#8aa086">Desktop: click to lock mouse &middot; right-click / F scope &middot; wheel zoom &middot; R reload</span></div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
+    <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <div class="row"><button class="mbtn" id="setClose">DONE</button></div>
   </div>
 </div>
 
 <script src="three.min.js"></script>
+<script src="gltf-loader.js"></script>
+<script src="models/sniper-data.js"></script>
 <script>
 'use strict';
 /* ---- on-screen error catcher: crashes show in a red box, readable on a phone ---- */
@@ -935,6 +938,109 @@ const flashSprite=(function(){const cv=document.createElement('canvas');cv.width
   x.fillStyle=g;x.fillRect(0,0,64,64);
   const m=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
   m.scale.set(0.9,0.9,1);m.visible=false;camera.add(m);m.position.copy(rifle.userData.muzzle);return m;})();
+
+/* ---------------- GLB rifle viewmodel (Precision Rifle Chassis, CC BY) ----------------
+   Loads models/sniper.glb async and swaps it in for the procedural rifle.
+   The procedural rifle stays visible until the GLB is fully in, and stays
+   FOREVER if anything about the load fails — the game never depends on it.
+   Model facts (measured from the file): geometry is baked in raw Blender
+   space (length axis Y, muzzle -Y, stock +Y, scope toward -Z, bolt handle
+   +X, total span 17.326 units) and the PCR root node carries BOTH the 0.01
+   scale AND an Rx(90) rotation that converts it — so the loaded scene
+   already stands muzzle -Z / up +Y. Children of PCR (the bolt pivot, the
+   magazine) still live in the raw space: their Y is the bore axis, +Z is
+   world-down. */
+const glbState={active:false,cycle:false,cycPrev:0,cased:false,clicked:false,
+  rot:0,off:0,magOff:0,pivot:null,pivotRestY:0,mag:null,magRestZ:0,stockMats:[],fill:null};
+function glbApplyTint(){
+  if(!glbState.active||!glbState.stockMats.length)return;
+  const c=new THREE.Color(RIFLES[G.rifle].stock);
+  c.lerp(new THREE.Color(0xffffff),0.45); // SUBTLE variant tint : dark texture x lifted stock hue
+  for(const m of glbState.stockMats)m.color.copy(c);
+}
+function boltLiftCurve(p){ // handle up early, hold through the pull, down as it closes
+  if(p<0.02)return 0; if(p<0.16)return sstep(0.02,0.16,p);
+  if(p<0.55)return 1; if(p<0.72)return 1-sstep(0.55,0.72,p); return 0;}
+function boltTravelCurve(p){ // slide back behind the lift, return before the handle drops
+  if(p<0.16)return 0; if(p<0.34)return sstep(0.16,0.34,p);
+  if(p<0.5)return 1; if(p<0.68)return 1-sstep(0.5,0.68,p); return 0;}
+function updateGlbViewmodel(dt){
+  if(!glbState.active||!glbState.pivot)return;
+  let rotT=0,offT=0;
+  if(glbState.cycle){ // BOLT CYCLE : progress is the fire-cooldown itself — the next shot unlocks as the bolt closes, by construction
+    const cool=RIFLES[G.rifle].cool;
+    const p=clamp(1-Math.max(0,G.fireCd)/cool,0,1);
+    if(!glbState.cased&&p>=0.17){glbState.cased=true; // pull-back moment : brass leaves from the bolt itself
+      const v=new THREE.Vector3();glbState.pivot.getWorldPosition(v);ejectShell(v);}
+    if(!glbState.clicked&&p>=0.72){glbState.clicked=true;sTone(2300,0.03,'square',0.028);} // settle click as it locks
+    rotT=boltLiftCurve(p)*0.87;offT=boltTravelCurve(p)*0.71; // 0.87 rad ≈ 50° lift ; 0.71 local units ≈ 0.09 m of bolt travel
+    if(p>=1)glbState.cycle=false;
+  }else if(G.reloading){ // RELOAD : bolt rides open while the mag swaps, closes as it completes
+    const ph=clamp(1-G.reloadT/G.reloadMax,0,1);
+    const o=ph<0.18?sstep(0,0.18,ph):(ph>0.8?1-sstep(0.8,1,ph):1);
+    rotT=o*0.87;offT=o*0.71;
+  }
+  const k=1-Math.exp(-dt*18);
+  glbState.rot+=(rotT-glbState.rot)*k;glbState.off+=(offT-glbState.off)*k;
+  if(!glbState.cycle&&!G.reloading&&Math.abs(glbState.rot)<0.0005&&Math.abs(glbState.off)<0.002){glbState.rot=0;glbState.off=0;} // exact rest, no drift
+  glbState.pivot.rotation.y=glbState.rot; // pivot lives in PCR space : its Y is the bore axis
+  glbState.pivot.position.y=glbState.pivotRestY+glbState.off;
+  let magT=0; // MAGAZINE : dip is a pure function of reload progress — a cancelled reload just eases home and always ends seated
+  if(G.reloading){const ph=clamp(1-G.reloadT/G.reloadMax,0,1);
+    magT=(ph<0.25?sstep(0,0.25,ph):(ph>0.6?1-sstep(0.6,0.9,ph):1))*0.67;} // 0.67 local units ≈ 0.085 m dip (PCR +Z is world-down)
+  const km=1-Math.exp(-dt*14);
+  glbState.magOff+=(magT-glbState.magOff)*km;
+  if(!G.reloading&&Math.abs(glbState.magOff)<0.002)glbState.magOff=0;
+  glbState.mag.position.z=glbState.magRestZ+glbState.magOff;
+}
+/* soft camera fill so the near-black GLB finish reads — 3.2 m falloff, so only the viewmodel picks it up */
+glbState.fill=new THREE.PointLight(0xcfe0ff,0,3.2,1);
+glbState.fill.position.set(0.35,-0.08,0.15);
+camera.add(glbState.fill);
+(function loadGlbRifle(){
+  if(typeof THREE.GLTFLoader!=='function'){console.warn('[longshot] GLTFLoader missing — procedural rifle stays');return;}
+  const S_TOT=2.2/17.326; // world scale : a ~2.2 m viewmodel, framed like the procedural rifle
+  const glbOk=function(gltf){
+    try{
+      const wrap=new THREE.Group();
+      wrap.scale.setScalar(S_TOT/0.01); // PCR root already carries 0.01
+      wrap.position.set(0.27,-0.245-2.061*S_TOT,-0.72-2.647*S_TOT); // bore line + receiver land where the old rifle's sit
+      const orient=new THREE.Group(); // NO rotation here : the PCR root itself carries the exporter's Rx(90) axis conversion, so the loaded scene already stands muzzle -Z / up +Y — adding another quarter-turn double-rotates it
+      orient.add(gltf.scene);wrap.add(orient);
+      gltf.scene.traverse(o=>{if(o.isMesh)o.frustumCulled=false;});
+      rifle.add(wrap);
+      const boltN=gltf.scene.getObjectByName('bolt'),asmN=gltf.scene.getObjectByName('Bolt_Assembly');
+      const magN=gltf.scene.getObjectByName('Magazine_Standard'),glassN=gltf.scene.getObjectByName('Glass');
+      if(!boltN||!asmN||!magN)throw new Error('expected nodes missing (bolt/Bolt_Assembly/Magazine_Standard)');
+      /* bolt pivot : parked ON the bore axis in PCR space, both bolt nodes
+         re-parented under it with world transforms preserved — rotating /
+         sliding the pivot cycles the real bolt and nothing else */
+      const pivot=new THREE.Group();pivot.position.set(0,2.75,-1.95);
+      gltf.scene.add(pivot);
+      rifle.updateMatrixWorld(true);
+      pivot.attach(boltN);pivot.attach(asmN);
+      glbState.pivot=pivot;glbState.pivotRestY=pivot.position.y;
+      glbState.mag=magN;glbState.magRestZ=magN.position.z;
+      if(glassN){glassN.material=glassN.material.clone(); // scope glass : a hint of blue emissive sheen so it reads as glass
+        glassN.material.emissive=new THREE.Color(0x14324a);glassN.material.emissiveIntensity=0.85;
+        glassN.material.roughness=0.12;}
+      const stockN=gltf.scene.getObjectByName('Stock_Sopmod'),bufN=gltf.scene.getObjectByName('Buffer_Tube');
+      const seen={}; // clone the stock-subtree materials once so the per-rifle tint never touches the shared set
+      const grab=o=>{if(o){o.traverse(n=>{if(n.isMesh&&!seen[n.material.uuid]){seen[n.material.uuid]=1;
+        n.material=n.material.clone();glbState.stockMats.push(n.material);}});}};
+      grab(stockN);grab(bufN);
+      for(const ch of rifle.children)if(ch!==wrap)ch.visible=false; // procedural rifle retires
+      glbState.active=true;
+      glbState.fill.intensity=0.9;
+      rifle.userData.muzzle.set(0.27,-0.245,-2.124); // flash sprite rides the real muzzle now
+      glbApplyTint();
+    }catch(err){console.warn('[longshot] GLB rifle setup failed — procedural rifle stays',err);}
+  };
+  const glbErr=function(err){console.warn('[longshot] GLB rifle failed to load — procedural rifle stays',err);};
+  if(window.SNIPER_B64){try{const bin=atob(window.SNIPER_B64);const buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);new THREE.GLTFLoader().parse(buf.buffer,'',glbOk,glbErr);}catch(err){glbErr(err);}}
+  else new THREE.GLTFLoader().load('models/sniper.glb',glbOk,undefined,glbErr);
+})();
+
 /* ---------------- enemies ---------------- */
 const enemies=[];
 const markerTex=(function(){const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
@@ -1818,6 +1924,7 @@ function explodeSab(tg){
     if(e.chest().distanceTo(tg.pos)<kr){
       _td.copy(e.group.position).sub(tg.pos);_td.y=0;
       if(_td.lengthSq()<0.01)_td.set(0,0,1);_td.normalize();
+      spawnBurst(e.chest(),{color:0x7d0d0d,n:5,sp0:1,sp1:3,up0:1,up1:3.5,life:0.5,grav:9}); // blast kill : a few red flecks in the fire/dust, no more
       killEnemy(e,_td,false,false,true);}} // blast kill : DEATH 2.0 launches the body on an arc
   if(truck.active&&truck.group&&truck.group.position.distanceTo(tg.pos)<kr+2)truck.dead=true; // blast stops the truck
   if(tg.kind==='fuel')for(const o of sabTargets)
@@ -1885,7 +1992,8 @@ function fireBullet(){
   flashSprite.material.rotation=rand(0,TAU);
   const bl=$('bloom');bl.style.transition='none';bl.style.opacity=G.reduceFlash?0.42:0.85; // REDUCE FLASHES : halve the muzzle bloom
   requestAnimationFrame(()=>{bl.style.transition='opacity .2s';bl.style.opacity=0;});
-  ejectShell();
+  if(glbState.active){glbState.cycle=true;glbState.cycPrev=0;glbState.cased=false;glbState.clicked=false;} // GLB BOLT : cycle runs off fireCd; the casing leaves at pull-back, not at the shot
+  else ejectShell();
   puffMuzzleSmoke();
   sShot(RIFLES[G.rifle].pitch);updateHUD();
   if(G.ammo===0&&G.autoReload)startReload(); // AUTO-RELOAD setting : empty mag starts the reload on its own
@@ -1903,9 +2011,20 @@ const _tpA=new THREE.Vector3(),_tpB=new THREE.Vector3(); // scratch : tracer seg
 /* one pierced kill for bullet b, resolved inline so the round keeps flying.
    The cam is only offered on the FIRST kill of the shot (killcam rules as
    before); the 2nd / 3rd kills pay the multi-kill bonus through scorePop. */
+/* BLOOD : flesh hits only — dark red droplets biased along the bullet's travel
+   direction through the shared burst pool, plus one quick red mist puff.
+   Headshots spray wider and harder. Truck metal stays sparks-only (impactPuff),
+   and every pierce kill gets its own burst via the pierceKill hook below. */
+function spawnBlood(p,dir,head){
+  spawnBurst(p,{color:0x7d0d0d,n:head?18:11,sp0:0.7,sp1:head?3.6:2.6,up0:-0.5,up1:head?1.8:1.2,life:0.5,grav:9.5,
+    dirx:dir.x,dirz:dir.z,spread:head?1.6:0.9}); // droplets : 11 body / 18 headshot, ~0.5 s, gravity falloff
+  spawnBurst(p,{color:0xa02318,n:5,sp0:0.15,sp1:0.8,up0:0.1,up1:0.7,life:0.38,grav:2.5,
+    dirx:dir.x,dirz:dir.z,spread:2.4}); // mist puff : slow, light, gone fast
+}
 function pierceKill(b,e,hshot){
   b.kills++;b.pierced.push(e);
   _kd.set(b.vx,b.vy,b.vz).normalize();
+  spawnBlood(b.m.position,_kd,hshot);
   killEnemy(e,_kd,b.kills===1,hshot);
   if(b.kills===2){G.score+=150;G.missionScore+=150;scorePop(150,false,false,'DOUBLE KILL');}
   else if(b.kills===3){G.score+=300;G.missionScore+=300;scorePop(300,false,false,'TRIPLE KILL');}
@@ -2049,7 +2168,7 @@ function spawnBurst(p,o){
     const m=new THREE.Mesh(sparkGeo,new THREE.MeshBasicMaterial({color:o.color,transparent:true,depthWrite:false,
       blending:o.add?THREE.AdditiveBlending:THREE.NormalBlending}));
     m.position.copy(p);
-    const a=rand(0,TAU),sp=rand(o.sp0,o.sp1);
+    const a=(o.dirx!=null)?Math.atan2(o.dirz,o.dirx)+rand(-(o.spread||0.9),o.spread||0.9):rand(0,TAU),sp=rand(o.sp0,o.sp1); // optional travel-direction bias (blood spray)
     sparks.push({m,vx:Math.cos(a)*sp,vy:rand(o.up0,o.up1),vz:Math.sin(a)*sp,t:0,
       life:o.life||0.7,grav:o.grav==null?9:o.grav});
     scene.add(m);}
@@ -2065,8 +2184,8 @@ function sparkUpdate(dt){
 const shells=[];
 const shellGeo=new THREE.BoxGeometry(0.05,0.05,0.13);
 const shellMat=new THREE.MeshBasicMaterial({color:0xd8a83a});
-function ejectShell(){
-  const ep=new THREE.Vector3(0.36,-0.18,-0.5);camera.localToWorld(ep);
+function ejectShell(fromPos){
+  const ep=fromPos?fromPos.clone():(function(){const v=new THREE.Vector3(0.36,-0.18,-0.5);camera.localToWorld(v);return v;})();
   const m=new THREE.Mesh(shellGeo,shellMat);m.position.copy(ep);
   const right=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
   const upv=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion);
@@ -2644,6 +2763,7 @@ function applyRifleZoom(){
   G.zoom=clamp(Math.max(G.zoom||8,r.zmin),r.zmin,r.zmax);
   const zs=$('zoomSlider');zs.min=r.zmin;zs.max=r.zmax;zs.value=G.zoom;
   if(rifle.userData.stockMat)rifle.userData.stockMat.color.setHex(r.stock);
+  glbApplyTint();
 }
 function missionUnlockMax(){return rifleMaxMission()+1;} // selectable missions : completed + 1
 function missionBest(n){try{const mb=JSON.parse(lsGet('longshot_mbest','{}'))||{};return mb['m'+n]||0;}catch(e){return 0;}}
@@ -2891,6 +3011,7 @@ function frame(now){
     rifle.rotation.z=Math.sin(ph*Math.PI)*0.14;
     rifle.position.y+=-Math.sin(ph*Math.PI)*0.06;
   }else{rifle.userData.bolt.position.z=-0.72;rifle.rotation.z=0;}
+  updateGlbViewmodel(dt); // GLB rifle : bolt cycle + magazine (no-op until the model lands)
   if(G.flashT>0){G.flashT-=dt;const k=Math.max(0,G.flashT/0.14);
     muzzleFlash.intensity=(G.night?11:7)*k*(G.reduceFlash?0.5:1);flashSprite.visible=k>0;
     flashSprite.material.opacity=k*(G.reduceFlash?0.5:1);flashSprite.scale.set(2.3,2.3,1);}
