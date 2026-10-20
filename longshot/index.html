@@ -42,25 +42,40 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 /* ---------- overlays ---------- */
 #dmg{position:fixed;inset:0;z-index:45;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center, rgba(0,0,0,0) 52%, rgba(210,10,10,.6) 100%)}
 #toast{position:fixed;left:50%;bottom:170px;transform:translateX(-50%);z-index:60;background:rgba(10,14,10,.78);color:#ffe9a8;font-size:13px;letter-spacing:2px;padding:8px 18px;border-radius:6px;border:1px solid rgba(255,220,150,.35);display:none;pointer-events:none}
-#card{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:20px}
-.panel{background:#0e130d;border:1px solid #3c5c3c;color:#e9f2e4;border-radius:14px;padding:28px 32px;text-align:center;max-width:88%;box-shadow:0 12px 60px rgba(0,0,0,.6)}
-.panel h1{font-size:22px;letter-spacing:3px;margin-bottom:10px;color:#fff}
+#card{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:rgba(2,5,2,.86);backdrop-filter:blur(7px) saturate(.6);-webkit-backdrop-filter:blur(7px) saturate(.6);padding:12px}
+.panel{background:#0b100b;border:1px solid #3c5c3c;color:#e9f2e4;border-radius:14px;padding:22px 20px 24px;text-align:center;width:100%;max-width:min(92vw,470px);max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 12px 60px rgba(0,0,0,.65)}
+.panel h1{font-size:20px;letter-spacing:2.5px;margin-bottom:10px;color:#fff}
 .panel h2{font-size:15px;letter-spacing:2px;margin-bottom:14px;color:#ffb0a0}
 .panel p{font-size:13px;line-height:1.7;color:#b9cbb4;margin-bottom:8px}
-.panel .tap{margin-top:16px;font-size:14px;letter-spacing:3px;color:#9fe09f;animation:blink 1.4s infinite}
+.panel .tap{display:inline-block;margin-top:18px;padding:13px 34px;border:1.5px solid #6fae6f;border-radius:10px;background:rgba(34,58,34,.6);font-size:15px;letter-spacing:4px;color:#c8f2c8;animation:blink 1.4s infinite;cursor:pointer}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
 .panel .row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-.riflebox{margin:14px 0 4px;padding:10px 12px;border:1px solid #3a5a3a;border-radius:8px;background:rgba(10,20,10,.5)}
-.rrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.rrow .mbtn{padding:8px 14px}
-.rinfo{text-align:center;flex:1}
-.rinfo b{font-size:16px;letter-spacing:2px;color:#ffe9a8}
-.rinfo span{display:block;font-size:11px;color:#9fc09f;margin-top:4px}
-.rlocks{margin-top:8px;font-size:10px;color:#7a9a7a;text-align:center;line-height:1.7;letter-spacing:1px}
-.debrief{display:flex;gap:14px;justify-content:center;margin:12px 0 4px;flex-wrap:wrap}
-.debrief div{text-align:center}
-.debrief span{display:block;font-size:10px;letter-spacing:2px;color:#8aa086}
-.debrief b{font-size:16px;color:#ffe9a8}
+.riflebox{margin:14px 0 2px;padding:10px 12px;border:1px solid #3a5a3a;border-radius:8px;background:rgba(10,20,10,.5);text-align:center}
+.rhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.rhead .mbtn{padding:7px 12px;font-size:11px;flex:0 0 auto}
+.rhead b{font-size:17px;letter-spacing:2.5px;color:#ffe9a8;flex:1}
+.rstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.rs{background:rgba(255,255,255,.035);border:1px solid rgba(140,180,140,.16);border-radius:6px;padding:6px 4px}
+.rs span{display:block;font-size:9px;letter-spacing:2px;color:#8aa086;margin-bottom:2px}
+.rs b{font-size:14.5px;color:#ffe9a8;letter-spacing:1px}
+.rlocks{margin-top:9px;font-size:10px;color:#7a9a7a;text-align:center;line-height:1.9;letter-spacing:1px}
+.rlocks .rok{color:#8fd68f}
+.obj{margin:2px 0 4px;padding:10px 12px;border:1px solid rgba(255,90,70,.45);background:rgba(60,12,8,.32);border-radius:8px}
+.obj span{display:block;font-size:10px;letter-spacing:3px;color:#ff9a8a;margin-bottom:6px}
+.obj b{display:block;font-size:14.5px;letter-spacing:1.5px;line-height:1.55;color:#ffb0a0}
+.intel{margin:12px 0 2px;text-align:left}
+.irow{display:flex;gap:10px;padding:7px 2px;border-top:1px solid rgba(140,180,140,.14);align-items:baseline}
+.il{flex:0 0 84px;font-size:9.5px;letter-spacing:2px;color:#8aa086;padding-top:1px}
+.iv{flex:1;font-size:12.5px;line-height:1.55;color:#e9f2e4}
+.irow.warn .il{color:#ff8a7a}.irow.warn .iv{color:#ffb0a0}
+.drows{margin:12px 0 2px;text-align:left}
+.drow{display:flex;justify-content:space-between;align-items:baseline;padding:7px 2px;border-top:1px solid rgba(140,180,140,.14)}
+.drow span{font-size:10px;letter-spacing:2px;color:#8aa086}
+.drow b{font-size:16px;color:#ffe9a8;letter-spacing:1px}
+.dnote{font-size:11px;color:#8aa086;margin-top:10px;letter-spacing:1px}
+.ghost{margin:10px 0 2px;padding:10px 12px;border:1px solid rgba(255,220,150,.5);background:rgba(60,48,10,.32);border-radius:8px}
+.ghost span{display:block;font-size:11px;letter-spacing:3px;color:#ffe9a8;margin-bottom:4px}
+.ghost b{font-size:15px;color:#fff;letter-spacing:1px}
 .mbtn{background:#1d2b1d;border:1px solid #5a8a5a;color:#e9f2e4;border-radius:8px;padding:10px 22px;font-size:14px;letter-spacing:2px;font-family:inherit}
 .mbtn:active{transform:scale(.95)}
 #setBtn{position:fixed;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:70;width:40px;height:40px;border-radius:10px;background:rgba(8,12,8,.62);border:1px solid rgba(190,230,190,.35);color:#dfeee0;font-size:19px;display:flex;align-items:center;justify-content:center}
@@ -1610,19 +1625,21 @@ function startReload(){
 function missionCfg(n){return{hvts:Math.min(2+n,6),guards:4+2*n,wind:1.1+0.85*n,maxZoom:Math.min(9+n,16),
   snipers:n>=4?2:(n>=2?1:0),sabTanks:Math.min(2+n,5)};}
 function rifleCardHTML(){
-  return '<div class="riflebox"><div class="rrow"><button class="mbtn" id="rifPrev">&#9664;</button>'+
-    '<div class="rinfo"><b id="rifName"></b><span id="rifStats"></span></div>'+
-    '<button class="mbtn" id="rifNext">&#9654;</button></div>'+
-    '<div class="rlocks" id="rifLocks"></div></div>';
+  return '<div class="riflebox"><div class="rhead"><button class="mbtn" id="rifPrev">&#9664;</button><b id="rifName"></b><button class="mbtn" id="rifNext">&#9654;</button></div>'+
+    '<div class="rstats" id="rifStats"></div><div class="rlocks" id="rifLocks"></div></div>';
 }
 function renderRiflePicker(){
   const r=RIFLES[selRifle];
   $('rifName').textContent=r.name;
-  $('rifStats').textContent=r.desc+' MAG '+r.mag+' · '+r.vel+' m/s · '+r.reload+'s reload · '+r.cool+'s cycle';
+  $('rifStats').innerHTML=
+    '<div class="rs"><span>MAG</span><b>'+r.mag+'</b></div>'+
+    '<div class="rs"><span>VELOCITY</span><b>'+r.vel+' m/s</b></div>'+
+    '<div class="rs"><span>RELOAD</span><b>'+r.reload+'s</b></div>'+
+    '<div class="rs"><span>CYCLE</span><b>'+r.cool+'s</b></div>';
   $('rifLocks').innerHTML=RIFLE_ORDER.map(k=>{
     const rr=RIFLES[k];
-    if(rr.unlock&&!rifleUnlocked(k))return '<div>LOCKED — '+rr.name+' (COMPLETE MISSION '+rr.unlock+')</div>';
-    return '<div style="color:#8fd68f">'+rr.name+(k===selRifle?' — SELECTED':'')+'</div>';
+    if(rr.unlock&&!rifleUnlocked(k))return '<div>LOCKED — '+rr.name+' · CLEAR MISSION '+rr.unlock+'</div>';
+    return '<div class="rok">'+rr.name+(k===selRifle?' — SELECTED':' — READY')+'</div>';
   }).join('');
 }
 function cycleRifle(d){
@@ -1650,13 +1667,16 @@ function startMission(n){
   resetSabotage(cfg); // activate this mission's fuel tanks + ammo caches
   G.state='menu';
   selRifle=G.rifle;
-  showCard('<h1>MISSION '+n+(G.night?' — NIGHT OP':'')+'</h1><h2>ELIMINATE ALL RED HVTs · DESTROY '+G.sabTotal+' SABOTAGE TARGETS</h2>'+
-    '<p>'+cfg.hvts+' high-value targets, ~340m out in the valley outpost — guards patrol the camp, and one HVT drives the patrol truck.'+
-    (cfg.snipers?' <b>'+cfg.snipers+' counter-sniper'+(cfg.snipers>1?'s':'')+' on overwatch — watch for scope glints and take them out first.</b>':'')+'<br>'+
-    'Real ballistics: the bullet drops for real — hold over with the mil-dots and lead for wind. '+rifle.mag+' rounds per mag.'+
-    ' Hit the red fuel tanks and ammo caches: explosions chain-detonate and wipe anything close — but the blast spikes the alarm.<br>'+
-    'Finish with the alarm under 25% for a GHOST 2× score bonus.'+
-    ' If the ALARM hits 100%, the patrols will come for you.</p>'+
+  showCard('<h1>MISSION '+n+(G.night?' — NIGHT OP':'')+'</h1>'+
+    '<div class="obj"><span>OBJECTIVE</span><b>ELIMINATE ALL RED HVTs</b><b>DESTROY '+G.sabTotal+' SABOTAGE TARGETS</b></div>'+
+    '<div class="intel">'+
+    '<div class="irow"><span class="il">RANGE</span><span class="iv">'+cfg.hvts+' HVTs · ~340m out · 1 drives the patrol truck</span></div>'+
+    (cfg.snipers?'<div class="irow"><span class="il">SNIPERS</span><span class="iv">'+cfg.snipers+' on overwatch — watch the glint, drop them first</span></div>':'')+
+    '<div class="irow"><span class="il">BALLISTICS</span><span class="iv">Real drop — hold over on the mil-dots · lead for wind</span></div>'+
+    '<div class="irow"><span class="il">SABOTAGE</span><span class="iv">Blasts chain-detonate, wipe anything close, spike the alarm</span></div>'+
+    '<div class="irow"><span class="il">GHOST</span><span class="iv">Finish under 25% alarm → 2× score</span></div>'+
+    '<div class="irow warn"><span class="il">WARNING</span><span class="iv">Alarm hits 100% — patrols come for YOU</span></div>'+
+    '</div>'+
     rifleCardHTML()+
     '<div class="tap">TAP TO START</div>');
   renderRiflePicker();
@@ -1670,19 +1690,21 @@ function missionComplete(){
   const ghost=G.peakAlarm<25; // GHOST BONUS : finished essentially undetected
   let ghostLine='';
   if(ghost){const bonus=G.missionScore;G.score+=bonus;
-    ghostLine='<div class="debrief"><div><span style="color:#ffe9a8">GHOST — UNDETECTED</span><b>2× MISSION SCORE &nbsp;+'+bonus+'</b></div></div>';}
+    ghostLine='<div class="ghost"><span>GHOST — UNDETECTED</span><b>2× MISSION SCORE &nbsp;+'+bonus+'</b></div>';}
   if(G.score>G.best){G.best=G.score;localStorage.setItem('longshot_best',G.best);}
   lsSet('longshot_rifles',Math.max(rifleMaxMission(),G.mission)); // unlock progress
   const acc=G.shots>0?Math.round(G.hits/G.shots*100)+'%':'—';
   showCard('<h1>MISSION '+G.mission+' COMPLETE</h1>'+
-    '<p>SCORE <b>'+G.score+'</b> &nbsp; BEST <b>'+G.best+'</b><br>'+
-    'Peak alarm ' + Math.round(G.peakAlarm) + '%. Next: more guards, stronger wind, stronger scope.</p>'+
-    '<div class="debrief">'+
-    '<div><span>ACCURACY</span><b>'+acc+'</b></div>'+
-    '<div><span>LONGEST KILL</span><b>'+Math.round(G.longest)+'m</b></div>'+
-    '<div><span>BEST CHAIN</span><b>x'+G.bestChain+'</b></div>'+
-    '</div>'+
     ghostLine+
+    '<div class="drows">'+
+    '<div class="drow"><span>SCORE</span><b>'+G.score+'</b></div>'+
+    '<div class="drow"><span>BEST</span><b>'+G.best+'</b></div>'+
+    '<div class="drow"><span>ACCURACY</span><b>'+acc+'</b></div>'+
+    '<div class="drow"><span>LONGEST KILL</span><b>'+Math.round(G.longest)+'m</b></div>'+
+    '<div class="drow"><span>BEST CHAIN</span><b>x'+G.bestChain+'</b></div>'+
+    '<div class="drow"><span>PEAK ALARM</span><b>'+Math.round(G.peakAlarm)+'%</b></div>'+
+    '</div>'+
+    '<div class="dnote">NEXT: MORE GUARDS · STRONGER WIND · STRONGER SCOPE</div>'+
     '<div class="row"><button class="mbtn" id="nextBtn">MISSION '+(G.mission+1)+' &rarr;</button></div>');
   $('nextBtn').addEventListener('click',e=>{e.stopPropagation();startMission(G.mission+1);});
   updateHUD();
@@ -1691,7 +1713,8 @@ function missionFail(){
   endKillcam();
   G.state='over';setScoped(false);
   showCard('<h1 style="color:#ff8a7a">MISSION FAILED</h1>'+
-    '<p>The patrols overran your ridge.<br>SCORE <b>'+G.score+'</b></p>'+
+    '<div class="dnote">THE PATROLS OVERRAN YOUR RIDGE</div>'+
+    '<div class="drows"><div class="drow"><span>SCORE</span><b>'+G.score+'</b></div></div>'+
     '<div class="row"><button class="mbtn" id="retryBtn">RETRY MISSION '+G.mission+'</button></div>');
   $('retryBtn').addEventListener('click',e=>{e.stopPropagation();startMission(G.mission);});
 }
