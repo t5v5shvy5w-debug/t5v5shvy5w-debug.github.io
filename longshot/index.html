@@ -114,6 +114,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 <script src="three.min.js"></script>
 <script>
 'use strict';
+/* ---- on-screen error catcher: crashes show in a red box, readable on a phone ---- */
+function showFatal(msg){
+  var b=document.getElementById('errbox');
+  if(!b){b=document.createElement('div');b.id='errbox';
+    b.style.cssText='position:fixed;z-index:999;top:10px;left:10px;right:10px;background:#a00;color:#fff;font:12px/1.5 monospace;padding:10px 12px;border-radius:8px;white-space:pre-wrap;word-break:break-word';
+    (document.body||document.documentElement).appendChild(b);}
+  b.style.display='block';
+  b.textContent=(b.textContent?b.textContent+'\n':'')+msg;
+  b.onclick=function(){b.style.display='none';};
+}
+window.addEventListener('error',function(e){showFatal('ERROR: '+(e.message||'unknown')+(e.lineno?(' (line '+e.lineno+')'):''));});
+window.addEventListener('unhandledrejection',function(e){var r=e.reason;showFatal('PROMISE ERROR: '+((r&&r.message)||r||'unknown'));});
+if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min.js (Three.js r128, fixed version) did not load. Check your connection, then reload the page.');throw new Error('THREE undefined');}
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
@@ -187,7 +200,9 @@ $('hBest').textContent=G.best;
 
 /* ---------------- three.js setup ---------------- */
 const wrap=$('c');
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+let renderer=null;
+try{renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});}
+catch(e){showFatal('WEBGL UNAVAILABLE — this device/browser could not start WebGL, so the 3D view cannot render. Try again in Safari with WebGL enabled.');throw e;}
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;
