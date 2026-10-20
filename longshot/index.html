@@ -57,38 +57,30 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 /* ---------- overlays ---------- */
 #dmg{position:fixed;inset:0;z-index:45;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center, rgba(0,0,0,0) 52%, rgba(210,10,10,.6) 100%)}
 #toast{position:fixed;left:50%;bottom:170px;transform:translateX(-50%);z-index:60;background:rgba(10,14,10,.78);color:#ffe9a8;font-size:13px;letter-spacing:2px;padding:8px 18px;border-radius:6px;border:1px solid rgba(255,220,150,.35);display:none;pointer-events:none}
-#card{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:rgba(2,5,2,.86);backdrop-filter:blur(7px) saturate(.6);-webkit-backdrop-filter:blur(7px) saturate(.6);padding:12px}
-.panel{background:#0b100b;border:1px solid #3c5c3c;color:#e9f2e4;border-radius:14px;padding:22px 20px 24px;text-align:center;width:100%;max-width:min(92vw,470px);max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 12px 60px rgba(0,0,0,.65)}
-.panel h1{font-size:20px;letter-spacing:2.5px;margin-bottom:10px;color:#fff}
+#card{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:rgba(2,5,2,.6);backdrop-filter:blur(5px) saturate(.6);-webkit-backdrop-filter:blur(5px) saturate(.6);padding:12px}
+.panel{background:#0b100b;border:1px solid #3c5c3c;color:#e9f2e4;border-radius:14px;padding:18px 16px 20px;text-align:center;width:100%;max-width:min(92vw,470px);max-height:72dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 12px 60px rgba(0,0,0,.65)}
+.panel h1{font-size:20px;letter-spacing:2.5px;margin-bottom:8px;color:#fff}
 .panel h2{font-size:15px;letter-spacing:2px;margin-bottom:14px;color:#ffb0a0}
 .panel p{font-size:13px;line-height:1.7;color:#b9cbb4;margin-bottom:8px}
-.panel .tap{display:inline-block;margin-top:18px;padding:13px 34px;border:1.5px solid #6fae6f;border-radius:10px;background:rgba(34,58,34,.6);font-size:15px;letter-spacing:4px;color:#c8f2c8;animation:blink 1.4s infinite;cursor:pointer}
+.panel .tap{display:inline-block;margin-top:14px;padding:12px 32px;border:1.5px solid #6fae6f;border-radius:10px;background:rgba(34,58,34,.6);font-size:15px;letter-spacing:4px;color:#c8f2c8;animation:blink 1.4s infinite;cursor:pointer}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
 .panel .row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-.riflebox{margin:14px 0 2px;padding:10px 12px;border:1px solid #3a5a3a;border-radius:8px;background:rgba(10,20,10,.5);text-align:center}
+.riflebox{margin:10px 0 2px;padding:8px 10px;border:1px solid #3a5a3a;border-radius:8px;background:rgba(10,20,10,.5);text-align:center}
 .rhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .rhead .mbtn{padding:7px 12px;font-size:11px;flex:0 0 auto}
 .rhead b{font-size:17px;letter-spacing:2.5px;color:#ffe9a8;flex:1}
-.rstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
-.rs{background:rgba(255,255,255,.035);border:1px solid rgba(140,180,140,.16);border-radius:6px;padding:6px 4px}
-.rs span{display:block;font-size:9px;letter-spacing:2px;color:#8aa086;margin-bottom:2px}
-.rs b{font-size:14.5px;color:#ffe9a8;letter-spacing:1px}
-.rlocks{margin-top:9px;font-size:10px;color:#7a9a7a;text-align:center;line-height:1.9;letter-spacing:1px}
-.rlocks .rok{color:#8fd68f}
+.rstats{margin-top:8px;font-size:12px;letter-spacing:2px;color:#ffe9a8;text-align:center}
+.rlocks{margin-top:7px;font-size:10px;color:#7a9a7a;text-align:center;letter-spacing:1.5px;line-height:1.6}
 .obj{margin:2px 0 4px;padding:10px 12px;border:1px solid rgba(255,90,70,.45);background:rgba(60,12,8,.32);border-radius:8px}
 .obj span{display:block;font-size:10px;letter-spacing:3px;color:#ff9a8a;margin-bottom:6px}
 .obj b{display:block;font-size:14.5px;letter-spacing:1.5px;line-height:1.55;color:#ffb0a0}
-.intel{margin:12px 0 2px;text-align:left}
-.irow{display:flex;gap:10px;padding:7px 2px;border-top:1px solid rgba(140,180,140,.14);align-items:baseline}
-.il{flex:0 0 84px;font-size:9.5px;letter-spacing:2px;color:#8aa086;padding-top:1px}
-.iv{flex:1;font-size:12.5px;line-height:1.55;color:#e9f2e4}
-.irow.warn .il{color:#ff8a7a}.irow.warn .iv{color:#ffb0a0}
-.drows{margin:12px 0 2px;text-align:left}
-.drow{display:flex;justify-content:space-between;align-items:baseline;padding:7px 2px;border-top:1px solid rgba(140,180,140,.14)}
+.tip{margin-top:10px;font-size:11px;line-height:1.5;color:#8aa086;letter-spacing:1px;text-align:center}
+.drows{margin:8px 0 2px;text-align:left}
+.drow{display:flex;justify-content:space-between;align-items:baseline;padding:5px 2px;border-top:1px solid rgba(140,180,140,.14)}
 .drow span{font-size:10px;letter-spacing:2px;color:#8aa086}
 .drow b{font-size:16px;color:#ffe9a8;letter-spacing:1px}
-.dnote{font-size:11px;color:#8aa086;margin-top:10px;letter-spacing:1px}
-.ghost{margin:10px 0 2px;padding:10px 12px;border:1px solid rgba(255,220,150,.5);background:rgba(60,48,10,.32);border-radius:8px}
+.dnote{font-size:11px;color:#8aa086;margin-top:7px;letter-spacing:1px}
+.ghost{margin:8px 0 2px;padding:8px 10px;border:1px solid rgba(255,220,150,.5);background:rgba(60,48,10,.32);border-radius:8px}
 .ghost span{display:block;font-size:11px;letter-spacing:3px;color:#ffe9a8;margin-bottom:4px}
 .ghost b{font-size:15px;color:#fff;letter-spacing:1px}
 .mbtn{background:#1d2b1d;border:1px solid #5a8a5a;color:#e9f2e4;border-radius:8px;padding:10px 22px;font-size:14px;letter-spacing:2px;font-family:inherit}
@@ -1661,16 +1653,11 @@ function rifleCardHTML(){
 function renderRiflePicker(){
   const r=RIFLES[selRifle];
   $('rifName').textContent=r.name;
-  $('rifStats').innerHTML=
-    '<div class="rs"><span>MAG</span><b>'+r.mag+'</b></div>'+
-    '<div class="rs"><span>VELOCITY</span><b>'+r.vel+' m/s</b></div>'+
-    '<div class="rs"><span>RELOAD</span><b>'+r.reload+'s</b></div>'+
-    '<div class="rs"><span>CYCLE</span><b>'+r.cool+'s</b></div>';
-  $('rifLocks').innerHTML=RIFLE_ORDER.map(k=>{
-    const rr=RIFLES[k];
-    if(rr.unlock&&!rifleUnlocked(k))return '<div>LOCKED — '+rr.name+' · CLEAR MISSION '+rr.unlock+'</div>';
-    return '<div class="rok">'+rr.name+(k===selRifle?' — SELECTED':' — READY')+'</div>';
-  }).join('');
+  $('rifStats').textContent=r.mag+' RD · '+r.vel+' m/s · '+r.reload+'s RELOAD';
+  const locked=RIFLE_ORDER.filter(k=>RIFLES[k].unlock&&!rifleUnlocked(k));
+  $('rifLocks').textContent=locked.length?
+    locked.map(k=>RIFLES[k].name+' — CLEAR M'+RIFLES[k].unlock).join(' · '):
+    r.name+' — READY';
 }
 function cycleRifle(d){
   const un=RIFLE_ORDER.filter(rifleUnlocked);
@@ -1699,14 +1686,7 @@ function startMission(n){
   selRifle=G.rifle;
   showCard('<h1>MISSION '+n+(G.night?' — NIGHT OP':'')+'</h1>'+
     '<div class="obj"><span>OBJECTIVE</span><b>ELIMINATE ALL RED HVTs</b><b>DESTROY '+G.sabTotal+' SABOTAGE TARGETS</b></div>'+
-    '<div class="intel">'+
-    '<div class="irow"><span class="il">RANGE</span><span class="iv">'+cfg.hvts+' HVTs · ~340m out · 1 drives the patrol truck</span></div>'+
-    (cfg.snipers?'<div class="irow"><span class="il">SNIPERS</span><span class="iv">'+cfg.snipers+' on overwatch — watch the glint, drop them first</span></div>':'')+
-    '<div class="irow"><span class="il">BALLISTICS</span><span class="iv">Real drop — hold over on the mil-dots · lead for wind</span></div>'+
-    '<div class="irow"><span class="il">SABOTAGE</span><span class="iv">Blasts chain-detonate, wipe anything close, spike the alarm</span></div>'+
-    '<div class="irow"><span class="il">GHOST</span><span class="iv">Finish under 25% alarm → 2× score</span></div>'+
-    '<div class="irow warn"><span class="il">WARNING</span><span class="iv">Alarm hits 100% — patrols come for YOU</span></div>'+
-    '</div>'+
+    '<div class="tip">Ghost: alarm under 25% = 2× score · 100% = they hunt you</div>'+
     rifleCardHTML()+
     '<div class="tap">TAP TO START</div>');
   renderRiflePicker();
