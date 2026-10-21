@@ -516,8 +516,12 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='10.8'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='10.9'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'10.9',lines:[ // MYTHIC PARTICLES : the mythics shed energy now — on all three
+  '<b>MYTHIC PARTICLES</b> — VOIDCURRENT crackles with electric sparks and arc-flares, INFERNO CORE sheds rising embers and drifting ash, STARFORGE drifts in gold-violet stardust',
+  '<b>BORN ON THE METAL</b> — every particle lives on the gun itself, in the lobby preview and in your hands in-game',
+  '<b>DESIGN UNTOUCHED</b> — the emissive finishes, rings, scopes, tracers and kill effects are exactly as approved']},
  {v:'10.8',lines:[ // MYTHIC FX : the effects now live ON the gun — no more bubble wrap
   '<b>MYTHIC FX REBUILT</b> — the bubble is gone: VOIDCURRENT, INFERNO CORE and STARFORGE effects now flow across the gun itself — electric arcs, molten cracks, living nebula on the metal',
   '<b>FORM-FITTING ACCENTS</b> — barrel-hugging holo rings, a gold halo and tight-orbit star orbs',
@@ -4329,6 +4333,7 @@ function pvCenterModel(root){ // LOBBY FIX : the old pvFrameModel measured the b
    hard, the camera pulls back instead — distance kills the perspective
    blow-up at its source. Portrait keeps the home distance and its v10.6 look. */
 const PV_FIT_TX=0.86,PV_FIT_TY=0.78,PV_CAM_D0=3.8117; // LOBBY POLISH : projected-extent targets (gate allows 0.90) + the v10.6 camera distance
+const PV_FIT_SKINS={tx:0.88,ty:0.87}; // SKINS CLOSER (v10.9) : MW — the SKINS preview sat too far away. ONLY the skins slot fits tighter (~+11% on screen where the height target binds) ; feasibility worst-case stays <=0.895 x / 0.885 y (incl. the +0.03 float pad), inside the 0.90 no-crop gate at every sway/drag angle. Home/LOADOUT keep the v10.8 targets exactly.
 const PV_EXPO={longshot:1.12,varmint:1.12,thunder:1.34}; // LOBBY POLISH : per-model preview exposure — THUNDER's factory paint is near-black, it needs the help
 const _pvDir=new THREE.Vector3(),_pvVec=new THREE.Vector3(),_pvWorst={x:0,y:0};
 function pvMeasureAt(sc,D){ // worst |ndc| of the model box at (scale, camera distance) ; yaw 0..90 deg \u2014 a box's extents are 90-deg periodic, so this covers sway AND full drag rotations. View-space math by hand, NOT Vector3.project : at the scales these wide slots invite, corners swing BEHIND the lens plane, where project() flips them to garbage infinities and a naive solver oscillates between collapse and overshoot \u2014 here the divide uses a floored depth, so the reading stays finite, graded and monotone in scale.
@@ -4357,6 +4362,8 @@ function pvMeasureAt(sc,D){ // worst |ndc| of the model box at (scale, camera di
 }
 function pvFitPreview(){ // LOBBY POLISH : true-projection auto-fit (see the block comment above) ; also sizes/places the pedestal glow
   if(!pv.fit||!pv.size)return;
+  const skinsSlot=!!(pvCanvas&&pvCanvas.parentNode&&pvCanvas.parentNode.id==='pvSkins'); // SKINS CLOSER (v10.9) : per-slot targets — the canvas's parent IS the slot it is mounted in
+  const TX=skinsSlot?PV_FIT_SKINS.tx:PV_FIT_TX,TY=skinsSlot?PV_FIT_SKINS.ty:PV_FIT_TY;
   const aspect=pvCam.aspect||1.5;
   const visH=2*PV_CAM_D0*Math.tan(pvCam.fov*Math.PI/360),visW=visH*aspect;
   let maxE=0;for(let a=0;a<=90;a+=5){const r=a*Math.PI/180,e=pv.size.x*Math.abs(Math.cos(r))+pv.size.z*Math.abs(Math.sin(r));if(e>maxE)maxE=e;}
@@ -4368,18 +4375,18 @@ function pvFitPreview(){ // LOBBY POLISH : true-projection auto-fit (see the blo
     const cap=flat*(D/PV_CAM_D0)*1.3;
     for(let it=0;it<5;it++){
       const w=pvMeasureAt(sc,D);
-      const f=Math.min(PV_FIT_TX/Math.max(w.x,1e-3),PV_FIT_TY/Math.max(w.y,1e-3));
+      const f=Math.min(TX/Math.max(w.x,1e-3),TY/Math.max(w.y,1e-3)); // SKINS CLOSER : per-slot targets (TX/TY locals)
       if(f>0.99&&f<1.02)break;
       sc*=Math.pow(f,0.85); // damped — projection is not linear in scale when the gun is long against the leash
       if(sc<0.03){sc=0.03;break;}
       if(sc>cap)sc=cap;
     }
     let w=pvMeasureAt(sc,D);
-    for(let g=0;g<6&&(w.x>PV_FIT_TX||w.y>PV_FIT_TY);g++){sc*=0.82;w=pvMeasureAt(sc,D);} // guarantee pass : whatever the iteration did, the shipped fit is feasible
-    const feas=(w.x<=PV_FIT_TX+0.015&&w.y<=PV_FIT_TY+0.015);
+    for(let g=0;g<6&&(w.x>TX||w.y>TY);g++){sc*=0.82;w=pvMeasureAt(sc,D);} // guarantee pass : whatever the iteration did, the shipped fit is feasible
+    const feas=(w.x<=TX+0.015&&w.y<=TY+0.015);
     const cand={sc:sc,D:D,mx:w.x,my:w.y,feas:feas};
     if(!best||(cand.feas&&!best.feas)||(cand.feas===best.feas&&cand.mx>best.mx))best=cand;
-    if(ci===0&&feas&&w.x>PV_FIT_TX*0.9)break; // the home distance already fills the frame — keep the v10.6 portrait look untouched
+    if(ci===0&&feas&&w.x>TX*0.9)break; // the home distance already fills the frame — keep the v10.6 portrait look untouched
   }
   _pvDir.copy(pvCam.position).normalize();
   pvCam.position.copy(_pvDir).multiplyScalar(best.D);pvCam.lookAt(0,0,0);pvCam.updateMatrixWorld(true);
@@ -4750,20 +4757,35 @@ function fxDimsFor(key){const rec=VMODELS[key];const base=(rec&&rec.fxBox)?rec.f
   D.verts=(rec&&rec.fxVerts)?rec.fxVerts:null; // MYTHIC FX R2 : surface anchors (rifle space) — the particle sheath pins itself to these
   return D;}
 function fxPoints(parent,o){ // one bounded ambient particle layer hugging the gun — R2 : built as FIVE z-band Points sharing one material. A single gun-length Points geometry gets ONE world AABB, whose empty corners inflate under sway rotation and clipped the bbox gate even with every particle on the metal ; five short band boxes track the gun's real silhouette far tighter.
-  const mat=new THREE.PointsMaterial({size:o.size,map:o.tex,transparent:true,opacity:0.9,depthWrite:false,blending:THREE.AdditiveBlending,color:o.color,sizeAttenuation:true});
+  // MYTHIC PARTICLES (v10.9) : per-particle brightness rides a vertex-color attribute (additive blending : black = invisible), so crackle / flicker / twinkle / flare lifecycles are per-particle while the layer stays ONE draw call per band. Modes : 'spark' (void crackle + hop), 'ember' (inferno rise + sway + flicker), 'ash' (slow dim rise), 'dust' (star slow orbit + twinkle), 'flare' (rare bright spike on a near-dark anchor).
+  const mat=new THREE.PointsMaterial({size:o.size,map:o.tex,transparent:true,opacity:(o.opacity!=null?o.opacity:0.95),depthWrite:false,blending:THREE.AdditiveBlending,color:o.color,sizeAttenuation:true,vertexColors:true});
   const V=(o.area.verts&&o.area.verts.length>30)?o.area.verts:null;
   const zLo=o.area.cz-o.area.len/2,band=(o.area.len||1)/5;
   const bandOf=z=>Math.min(4,Math.max(0,Math.floor((z-zLo)/band)));
   const buckets=[[],[],[],[],[]],bandVis=[[],[],[],[],[]];
   if(V)for(let vi=0;vi<V.length/3;vi++)bandVis[bandOf(V[vi*3+2])].push(vi);
   const useBands=bandVis.every(b=>b.length>0);
+  const pal=o.palette||null;
+  function extra(sd){ // MYTHIC PARTICLES : lifecycle fields shared by every mode + both seed paths
+    sd.bph=rand(0,TAU);sd.bspd=rand(1.2,3.0);sd.cyc=rand(1.4,3.4);sd.dir=Math.random()<0.5?-1:1;
+    sd.orad=rand(0.016,0.034);sd.nextHop=rand(0,1);
+    if(pal){const p=pal[Math.floor(rand(0,pal.length))];sd.pr=p[0];sd.pg=p[1];sd.pb=p[2];}else{sd.pr=1;sd.pg=1;sd.pb=1;}
+    return sd;
+  }
   for(let i=0;i<o.n;i++){
     if(V){ // MYTHIC FX R2 : surface-anchor seed — a real vertex of this gun + a small random offset direction ; the particle lives ON the metal
       const th=rand(0,TAU),ph2=Math.acos(rand(-1,1)),sp=Math.sin(ph2);
       const bd=useBands?Math.floor(rand(0,5)):0,pool=useBands?bandVis[bd]:bandVis[0].concat(bandVis[1],bandVis[2],bandVis[3],bandVis[4]);
-      buckets[useBands?bd:0].push({vi:pool[Math.floor(rand(0,pool.length))],ux:sp*Math.cos(th),uy:sp*Math.sin(th),uz:Math.cos(ph2),pad:rand(0.002,0.012),ph:rand(0,TAU),rise:0,spd:rand(0.3,1)});
+      const sd=extra({vi:pool[Math.floor(rand(0,pool.length))],ux:sp*Math.cos(th),uy:sp*Math.sin(th),uz:Math.cos(ph2),pad:rand(0.002,0.012),ph:rand(0,TAU),rise:0,spd:rand(0.3,1)});
+      // MYTHIC PARTICLES : dust-orbit basis — two unit vectors perpendicular to the anchor normal (u x h, then u x p1)
+      const hx=Math.abs(sd.uy)<0.9?0:1,hy=Math.abs(sd.uy)<0.9?1:0;
+      let p1x=-sd.uz*hy,p1y=sd.uz*hx,p1z=sd.ux*hy-sd.uy*hx;
+      const pl=Math.sqrt(p1x*p1x+p1y*p1y+p1z*p1z)||1;p1x/=pl;p1y/=pl;p1z/=pl;
+      sd.p1x=p1x;sd.p1y=p1y;sd.p1z=p1z;
+      sd.p2x=sd.uy*p1z-sd.uz*p1y;sd.p2y=sd.uz*p1x-sd.ux*p1z;sd.p2z=sd.ux*p1y-sd.uy*p1x;
+      buckets[useBands?bd:0].push(sd);
     }else{ // fallback sheath seed (no profile captured) : angle around the barrel axis at a z along the gun, radius = profile + pad
-      const sd={th:rand(0,TAU),z:rand(zLo,zLo+band*5),pad:rand(0.006,0.045),rise:0,spd:rand(0.3,1)};
+      const sd=extra({th:rand(0,TAU),z:rand(zLo,zLo+band*5),pad:rand(0.006,0.045),rise:0,spd:rand(0.3,1)});
       buckets[bandOf(sd.z)].push(sd);
     }
   }
@@ -4772,10 +4794,11 @@ function fxPoints(parent,o){ // one bounded ambient particle layer hugging the g
     const seeds=buckets[b];if(!seeds.length)continue;
     const geo=new THREE.BufferGeometry();
     geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(seeds.length*3),3));
+    geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(seeds.length*3),3)); // MYTHIC PARTICLES : per-particle brightness (starts black ; fxUpdate lights it on the first tick)
     const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;parent.add(pts);
-    parts.push({geo:geo,seeds:seeds,vis:useBands?bandVis[b]:bandVis[0].concat(bandVis[1],bandVis[2],bandVis[3],bandVis[4])});
+    parts.push({geo:geo,seeds:seeds,col:geo.attributes.color,vis:useBands?bandVis[b]:bandVis[0].concat(bandVis[1],bandVis[2],bandVis[3],bandVis[4])});
   }
-  return {parts:parts,mat:mat,verts:V,ax:(o.area.ax!=null?o.area.ax:o.area.cx),ay:(o.area.ay!=null?o.area.ay:o.area.cy),rAt:(o.area.rAt||null),rFlat:(o.area.h||0.4)*0.30,drift:o.drift,tw:(o.twinkle==null?null:o.twinkle),baseOp:0.9};
+  return {parts:parts,mat:mat,verts:V,ax:(o.area.ax!=null?o.area.ax:o.area.cx),ay:(o.area.ay!=null?o.area.ay:o.area.cy),rAt:(o.area.rAt||null),rFlat:(o.area.h||0.4)*0.30,drift:o.drift,mode:o.mode||'ambient',riseMax:(o.riseMax!=null?o.riseMax:0.05),baseOp:(o.opacity!=null?o.opacity:0.95)};
 }
 function makeSkinFX(kind,D){ // MYTHIC FX (v10.8) : accents + particles ONLY — the flow lives on the gun's materials (fxApplyMats) ; NOTHING here encloses the gun
   const g=new THREE.Group();g.userData.isSkinFX=true;
@@ -4799,17 +4822,20 @@ function makeSkinFX(kind,D){ // MYTHIC FX (v10.8) : accents + particles ONLY —
     const rings=D.rings||[];
     if(rings[0])ringAccent(rings[0],0x6f9dff,0.95,0.0075,0.50,0.9); // two counter-rotating holo rings, both ON the barrel
     if(rings[1])ringAccent(rings[1],0x6f9dff,0.85,0.0055,-0.35,-0.65);
-    up.points.push(fxPoints(g,{n:25,tex:makeDotTexture('rgba(195,225,255,1)','rgba(60,110,255,0)'),color:0x9fc4ff,size:0.035,area:area,drift:{y:0.05,swirl:0.25}}));
+    up.points.push(fxPoints(g,{n:56,tex:makeStarTexture(),color:0xbfdcff,size:0.062,area:area,drift:{y:0.05,swirl:0.25},mode:'spark'})); // MYTHIC PARTICLES : 56 crackling sparks — bright blue-white, hopping anchor to anchor ; STAR sprite, not a dot : the arc flow already glitters with dots, so the sparks read by SHAPE (4-point crosses) against it
+    up.points.push(fxPoints(g,{n:12,tex:makeStarTexture(),color:0xd8ecff,size:0.115,area:area,drift:{y:0.03,swirl:0.2},mode:'flare'})); // MYTHIC PARTICLES : 12 arc-flares — near-dark until one spikes bright
   }else if(kind==='inferno'){
     const sm=new THREE.Sprite(new THREE.SpriteMaterial({map:makeDotTexture('rgba(255,170,80,0.85)','rgba(255,90,20,0)'),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0.5}));
     sm.scale.set(0.34,0.245,1);sm.position.set(cx,cy,cz+len*0.16);g.add(sm); // heat glow AT the receiver — a sprite, not a volume (R2 : 0.45 -> 0.34 — as a camera-facing quad its world AABB is view-dependent and the big quad clipped the bbox gate in some drift phases)
     up.pulseSpr={m:sm,base:0.5,spd:2.1};
-    up.points.push(fxPoints(g,{n:40,tex:makeDotTexture('rgba(255,214,150,1)','rgba(255,90,20,0)'),color:0xffb060,size:0.03,area:area,drift:{y:0.22,swirl:0.1}}));
+    up.points.push(fxPoints(g,{n:84,tex:makeDotTexture('rgba(255,214,150,1)','rgba(255,90,20,0)'),color:0xffb060,size:0.056,area:area,drift:{y:0.045,swirl:0.1},mode:'ember',riseMax:0.085})); // MYTHIC PARTICLES : 84 embers — buoyant rise off the metal, sway + flicker, fade at the top of the climb
+    up.points.push(fxPoints(g,{n:24,tex:makeDotTexture('rgba(230,200,170,0.9)','rgba(140,100,70,0)'),color:0xa88a68,size:0.03,area:area,drift:{y:0.028,swirl:0.16},mode:'ash',riseMax:0.10})); // MYTHIC PARTICLES : 24 ash motes — slower, dimmer, longer drift
   }else if(kind==='star'){
     const rings=D.rings||[];
     if(rings[0])ringAccent(rings[0],0xf2c233,0.9,0.0065,0.42,0.55); // ONE gold halo, barrel-measured — not a giant floating ellipse
-    up.points.push(fxPoints(g,{n:34,tex:makeStarTexture(),color:0xffffff,size:0.045,area:area,drift:{y:0.02,swirl:0.15},twinkle:0}));
-    up.points.push(fxPoints(g,{n:26,tex:makeStarTexture(),color:0xf2d98a,size:0.035,area:area,drift:{y:0.03,swirl:-0.2},twinkle:2.1}));
+    up.points.push(fxPoints(g,{n:80,tex:makeStarTexture(),color:0xffffff,size:0.068,area:area,drift:{y:0.02,swirl:0.15},mode:'dust',palette:[[1,1,1],[0.72,0.58,1],[1,0.87,0.55],[0.62,0.78,1]]})); // MYTHIC PARTICLES : 80 stardust motes — slow orbit hugging the metal, per-particle twinkle, white / violet / pale-gold / ice palette
+    up.points.push(fxPoints(g,{n:56,tex:makeStarTexture(),color:0xf2c233,size:0.055,area:area,drift:{y:0.03,swirl:-0.2},mode:'dust'})); // MYTHIC PARTICLES : 56 gold motes counter-drifting
+    up.points.push(fxPoints(g,{n:14,tex:makeStarTexture(),color:0xffeecf,size:0.125,area:area,drift:{y:0.02,swirl:0.1},mode:'flare'})); // MYTHIC PARTICLES : 14 star-flares — the richest skin gets the biggest occasional sparkle
     const zo=(D.orbZ!=null?D.orbZ:cz+len*0.10),orad=(D.orbR||0.06)+0.030,orx=(D.w||0.14)/2+0.028; // orbs orbit the barrel axis CLOSE to the receiver (R2 : the orbit is an ELLIPSE matched to the receiver cross-section — a round orbit sized by the scope-dominated profile radius swung the orbs +0.070 past the gun's thin sides in local x)
     for(let i=0;i<3;i++){
       const om=new THREE.Mesh(new THREE.SphereGeometry([0.020,0.016,0.012][i],10,8),
@@ -4828,24 +4854,60 @@ function fxUpdate(group,t,dt){ // accents + particles only — the emissive flow
     let ox=o.cx+Math.cos(a)*o.rx,oy=o.cy+Math.sin(a)*o.ry; // elliptical orbit matched to the receiver cross-section
     if(up.clamp){ox=clamp(ox,up.clamp.x0,up.clamp.x1);oy=clamp(oy,up.clamp.y0,up.clamp.y1);} // MYTHIC FX R2 : the orbit is clipped to the measured gun box — an edge-on sway phase used to swing an orb +0.107 past the bbox gate
     o.m.position.set(ox,oy,o.zc+Math.sin(a*0.7)*0.02);}
-  for(const L of up.points){
+  for(const L of up.points){ // MYTHIC PARTICLES (v10.9) : per-mode lifecycles — positions stay glued near the metal (bbox gate), all the LIFE is in the motion + per-particle brightness written to the color attribute
     for(const part of L.parts){
-      const pos=part.geo.attributes.position;
+      const pos=part.geo.attributes.position,col=part.col;
       for(let i=0;i<part.seeds.length;i++){const sd=part.seeds[i];
-        sd.rise+=L.drift.y*dt*(0.5+sd.spd);
-        if(L.verts){ // MYTHIC FX R2 : surface anchors — jitter a breath around a real vertex ; embers lift <=0.025 then recycle onto a fresh vertex IN THE SAME z-BAND (recycling across bands would stretch the band's geometry box and re-inflate the gate). Total reach from the metal <= ~0.04.
-          if(sd.rise>0.025){sd.rise=0;sd.vi=part.vis[Math.floor(rand(0,part.vis.length))];}
-          const j=sd.pad+0.004*Math.sin(t*(0.7+sd.spd)+sd.ph),b=sd.vi*3;
-          pos.setXYZ(i,L.verts[b]+sd.ux*j,L.verts[b+1]+sd.uy*j+sd.rise,L.verts[b+2]+sd.uz*j);
-        }else{ // fallback sheath around the barrel axis (no anchors captured)
+        let bright=0.8;
+        if(L.verts){ // surface anchors (R2) — state first : a recycle / hop re-seats the anchor before it is read
+          if(L.mode==='ember'||L.mode==='ash'){
+            sd.rise+=L.drift.y*dt*(0.5+sd.spd);
+            if(sd.rise>L.riseMax){sd.rise=0;sd.vi=part.vis[Math.floor(rand(0,part.vis.length))];}
+          }else if(L.mode==='spark'){
+            if(t>sd.nextHop){sd.nextHop=t+rand(0.25,1.15);sd.vi=part.vis[Math.floor(rand(0,part.vis.length))];sd.pad=rand(0.004,0.016);}
+          }
+          const b=sd.vi*3,vx=L.verts[b],vy=L.verts[b+1],vz=L.verts[b+2];
+          if(L.mode==='ember'||L.mode==='ash'){
+            const fr=sd.rise/L.riseMax,swA=(L.mode==='ash'?0.016:0.010)*fr; // sway grows as the particle leaves the metal
+            pos.setXYZ(i,vx+sd.ux*sd.pad+Math.cos(sd.ph)*swA*Math.sin(t*(1.2+sd.spd)+sd.ph),
+                         vy+sd.uy*sd.pad+sd.rise,
+                         vz+sd.uz*sd.pad+Math.sin(sd.ph)*swA*Math.sin(t*(1.05+sd.spd*0.8)+sd.ph*1.3));
+            if(L.mode==='ember'){const f=Math.sin(t*(5+sd.spd*5)+sd.ph)*Math.sin(t*2.9+sd.ph*1.7);
+              bright=(0.62+0.38*f)*(fr>0.65?1-0.7*(fr-0.65)/0.35:1)*(fr<0.1?0.4+6*fr:1);} // flicker, fade-in at birth, fade-out at the top
+            else bright=(0.30+0.12*Math.sin(t*0.9+sd.ph))*(fr>0.8?1-0.5*(fr-0.8)/0.2:1);
+          }else if(L.mode==='spark'){
+            const j=sd.pad+0.005*Math.sin(t*21+sd.ph*9)+0.003*Math.sin(t*47+sd.ph); // high-frequency jitter ON the metal — the crackle
+            pos.setXYZ(i,vx+sd.ux*j,vy+sd.uy*j+0.004*Math.sin(t*3+sd.ph),vz+sd.uz*j);
+            const c=Math.sin(t*13+sd.ph)*Math.sin(t*7.7+sd.ph*1.3);
+            bright=(0.48+0.52*Math.pow(Math.abs(c),0.55))*(1+1.25*Math.pow(Math.max(0,Math.sin(t*1.7+sd.ph*2.9)),24));
+          }else if(L.mode==='flare'){
+            const j=sd.pad+0.003*Math.sin(t*9+sd.ph);
+            pos.setXYZ(i,vx+sd.ux*j,vy+sd.uy*j,vz+sd.uz*j);
+            const p01=((t/sd.cyc)+sd.bph)%1,spk=p01<0.09?Math.sin(Math.PI*p01/0.09):0;
+            bright=0.03+1.45*spk*spk; // near-dark 91% of its cycle, then one bright spike
+          }else{ // dust — slow orbit around the anchor point + per-particle twinkle
+            const a=t*(0.25+sd.spd*0.35)*sd.dir+sd.ph,ca=Math.cos(a),sa=Math.sin(a);
+            pos.setXYZ(i,vx+(sd.p1x*ca+sd.p2x*sa)*sd.orad+sd.ux*sd.pad*0.5,
+                         vy+(sd.p1y*ca+sd.p2y*sa)*sd.orad+sd.uy*sd.pad*0.5+0.006*Math.sin(t*0.7+sd.ph),
+                         vz+(sd.p1z*ca+sd.p2z*sa)*sd.orad+sd.uz*sd.pad*0.5);
+            bright=0.38+0.62*Math.pow(0.5+0.5*Math.sin(t*sd.bspd+sd.bph),2);
+          }
+        }else{ // fallback sheath around the barrel axis (no anchors captured) — same brightness voices, sheath motion
           sd.th+=L.drift.swirl*dt*(0.6+sd.spd);
-          if(sd.rise>0.05){sd.rise=0;sd.th=rand(0,TAU);}
+          sd.rise+=L.drift.y*dt*(0.5+sd.spd);
+          if(sd.rise>(L.riseMax||0.05)){sd.rise=0;sd.th=rand(0,TAU);}
           const rr=(L.rAt?L.rAt(sd.z):L.rFlat)+sd.pad;
           pos.setXYZ(i,L.ax+Math.cos(sd.th)*rr,L.ay+Math.sin(sd.th)*rr+sd.rise,sd.z);
-        }}
-      pos.needsUpdate=true;
+          if(L.mode==='ember')bright=0.62+0.38*Math.sin(t*(5+sd.spd*5)+sd.ph)*Math.sin(t*2.9+sd.ph*1.7);
+          else if(L.mode==='flare'){const p01=((t/sd.cyc)+sd.bph)%1,spk=p01<0.09?Math.sin(Math.PI*p01/0.09):0;bright=0.03+1.45*spk*spk;}
+          else if(L.mode==='dust')bright=0.38+0.62*Math.pow(0.5+0.5*Math.sin(t*sd.bspd+sd.bph),2);
+          else if(L.mode==='spark')bright=0.48+0.52*Math.pow(Math.abs(Math.sin(t*13+sd.ph)*Math.sin(t*7.7+sd.ph*1.3)),0.55);
+          else bright=(L.mode==='ash'?0.34:0.8);
+        }
+        col.setXYZ(i,sd.pr*bright,sd.pg*bright,sd.pb*bright);
+      }
+      pos.needsUpdate=true;col.needsUpdate=true;
     }
-    if(L.tw!=null)L.mat.opacity=L.baseOp*(0.68+0.32*Math.sin(t*2.6+L.tw)); // counter-phased twinkle layers
   }
 }
 function fxDispose(group){
@@ -4902,6 +4964,7 @@ function syncPvSkinFX(){
       ax:(D.ax-D.cx)*k,ay:(D.ay-D.cy)*k,
       rings:(D.rings||[]).map(r=>({z:(r.z-D.cz)*k,r:r.r*k})),orbR:(D.orbR||0.06)*k,orbZ:(D.orbZ!=null?(D.orbZ-D.cz)*k:0)}); // LOBBY POLISH : preview FX is built RECENTERED in holder space — pvCenterModel parks every model's bbox center on the holder origin, so this lands on any rifle (the PCR wrap clone carries a x12.7 root scale that flung a wrap-space group metres off-frame)
     holder.add(grp);grp.position.set(0,0,0);
+    {const seenM=new Set();grp.traverse(o=>{if(o.isPoints&&o.material&&!seenM.has(o.material)){seenM.add(o.material);o.material.size*=2.6;}});} // MYTHIC PARTICLES (v10.9) : PointsMaterial size is depth-attenuated in world units and does NOT inherit the fit scale the gun geometry gets — at preview distances the particles rendered ~3 px and washed out against the emissive finish. Preview surface only : point sizes x2.6 (materials deduped — the five band Points of a layer share one).
     pvSkinFX={id:want,group:grp};
   }
 }
