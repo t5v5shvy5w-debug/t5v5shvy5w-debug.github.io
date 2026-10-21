@@ -131,6 +131,24 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #hitmark.kill.pop{animation:hpop .55s ease-out}
 #hitmark.hs{width:52px;height:52px;margin:-26px 0 0 -26px}
 #hitmark.hs:before,#hitmark.hs:after{left:23px;width:6px;height:52px;background:#ff1e1e;box-shadow:0 0 9px rgba(0,0,0,.9),0 0 4px #ff1e1e}
+/* LOBBY POLISH : LOADOUT panel + stat bars (scoped — SETTINGS keeps its stock panel) */
+#tabLoadout .upanel{border:1px solid transparent;background:linear-gradient(#0b0f0c,#0b0f0c) padding-box,linear-gradient(160deg,#5a8a5a,#22331f) border-box;box-shadow:0 14px 34px rgba(0,0,0,.5)}
+#tabLoadout .sbar{background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.06));border-radius:99px;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+#tabLoadout .sbar>i{background:linear-gradient(180deg,#a9ec9f,#63c163);border-radius:99px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+/* LOBBY POLISH : per-skin hitmarker colors (INFERNO orange / STARFORGE gold-violet) — persistent classes from the skin apply path; the kill path's pop/kill/hs classes ride on top */
+#hitmark.skhm-inferno:before,#hitmark.skhm-inferno:after{background:#ff9a3c;box-shadow:0 0 7px rgba(0,0,0,.9),0 0 4px #ff7a26}
+#hitmark.skhm-inferno.kill:before,#hitmark.skhm-inferno.kill:after{background:#ff7a26;box-shadow:0 0 8px rgba(0,0,0,.9),0 0 5px #ff7a26}
+#hitmark.skhm-star:before,#hitmark.skhm-star:after{background:#d9b8ff;box-shadow:0 0 7px rgba(0,0,0,.9),0 0 4px #b45cff}
+#hitmark.skhm-star.kill:before,#hitmark.skhm-star.kill:after{background:#ffd76a;box-shadow:0 0 8px rgba(0,0,0,.9),0 0 5px #b45cff}
+/* LOBBY POLISH : MYTHIC kill-effect unlock popup — drops in at the top, non-blocking, safe-area aware */
+#killFxPop{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translate(-50%,-150%);z-index:93;display:flex;align-items:center;gap:12px;background:rgba(8,10,8,.93);border:1px solid #ff4040;border-radius:14px;padding:10px 18px 10px 12px;pointer-events:none;opacity:0;box-shadow:0 10px 30px rgba(0,0,0,.55),0 0 18px rgba(255,64,64,.25);transition:transform .45s cubic-bezier(.2,1.35,.4,1),opacity .35s ease}
+#killFxPop.show{transform:translate(-50%,0);opacity:1}
+#killFxPop .kfxBadge{width:34px;height:34px;border-radius:50%;background:#ff4040;display:flex;align-items:center;justify-content:center;flex:none}
+#killFxPop .kfxBadge svg{width:20px;height:20px;display:block}
+#killFxPop .kfxTxt{display:flex;flex-direction:column;line-height:1.3}
+#killFxPop .kfxTxt b{font-size:15px;letter-spacing:3px;color:#ffffff}
+#killFxPop .kfxTxt small{font-size:9.5px;letter-spacing:2.4px;color:#ffb3b3}
+#killFxPop .kfxTxt em{font-style:normal;font-size:10.5px;letter-spacing:2.4px}
 .meter.decaying>i{animation:aldec 1.15s ease-in-out infinite}
 .meter.regening>i{animation:hpreg 1.1s ease-in-out infinite}
 @keyframes hpreg{0%,100%{opacity:1}50%{opacity:.45}}
@@ -173,7 +191,7 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 @keyframes lobbyIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 #gameTitle{position:relative;font-size:clamp(34px,10.5vw,46px);letter-spacing:7px;color:#f5e6a8;font-weight:800;text-shadow:0 0 18px rgba(245,230,168,.35),0 2px 0 rgba(0,0,0,.6);margin:0;line-height:1.1}
 #gameSub{position:relative;font-size:12px;letter-spacing:6px;color:#9fc79f;margin-top:2px} /* LOBBY FIX : subtitle letter-spacing 10px → 6px, no longer looks stretched */
-.pvSlot{position:relative;width:100%;flex:1;min-height:96px} /* LOBBY FIX : min-height trimmed so iPhone SE keeps every row */
+.pvSlot{position:relative;width:100%;flex:1;min-height:96px;background:radial-gradient(ellipse 72% 64% at 50% 46%,rgba(126,166,126,.13),rgba(70,92,70,.05) 55%,rgba(0,0,0,0) 76%)} /* LOBBY FIX : min-height trimmed so iPhone SE keeps every row */ /* LOBBY POLISH : soft stage spotlight behind the rifle — it sits on a stage now, not in a grey void (the preview canvas is alpha, so this shows through) */
 .pvSlot canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;touch-action:none;z-index:1} /* LOBBY FIX : canvas rides ABOVE the reticle ring layer */
 /* LOBBY FIX : scope reticle — smaller + fainter (~18% opacity), centered behind the RIFLE inside the preview slot, never touching text */
 .pvRing{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:200px;height:200px;opacity:.18;pointer-events:none;z-index:0}
@@ -218,9 +236,17 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 .chip{padding:8px 16px;border-radius:20px;border:1px solid #3f5f45;background:#0b0f0c;color:#8aa086;font-family:inherit;font-size:11px;letter-spacing:2px;cursor:pointer;text-transform:uppercase}
 .chip.on{background:#1d3a1d;color:#bff5bf;border-color:#6fd67f}
 #skinGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.skcard{background:#0b0f0c;border:1px solid #3f5f45;border-radius:14px;padding:9px;text-align:left;font-family:inherit;color:#dfe9da;cursor:pointer;text-transform:uppercase;width:100%}
+.skcard{background:#0b0f0c;border:1px solid #3f5f45;border-left:3px solid var(--rar,#3f5f45);border-radius:14px;padding:9px;text-align:left;font-family:inherit;color:#dfe9da;cursor:pointer;text-transform:uppercase;width:100%;box-shadow:0 0 10px var(--rarA,rgba(0,0,0,0))} /* LOBBY POLISH : rarity accent edge + a whisper of rarity glow */
 .skcard:active{transform:scale(.97)}
-.skcard.sel{border-color:#f5e6a8;box-shadow:0 0 12px rgba(245,230,168,.25)}
+.skcard.sel{border-color:var(--rar,#f5e6a8);box-shadow:0 0 0 1.5px var(--rar,#f5e6a8),0 8px 20px rgba(0,0,0,.5),0 0 16px var(--rarA,rgba(0,0,0,0));transform:translateY(-2px)} /* LOBBY POLISH : selected = rarity ring + lift */
+.skcard.mythic .swatch{overflow:hidden}
+.skcard.mythic .swatch:after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.38) 48%,rgba(255,255,255,0) 62%);transform:translateX(-130%);animation:skSheen 2.8s ease-in-out infinite;pointer-events:none} /* LOBBY POLISH : MYTHIC cards get a slow animated sheen sweep */
+@keyframes skSheen{0%{transform:translateX(-130%)}55%,100%{transform:translateX(130%)}}
+.skfx{margin-top:7px;font-size:9.5px;letter-spacing:1.8px;color:#a88f8f}
+.skfxbar{display:block;height:4px;background:rgba(255,255,255,.12);border-radius:2px;margin-top:4px;overflow:hidden}
+.skfxbar i{display:block;height:100%;background:#ff4040;border-radius:2px}
+.skfxbtn{display:inline-block;padding:6px 10px;border:1px solid var(--rar,#ff4040);border-radius:8px;color:#ffd9d9;background:rgba(255,64,64,.08);font-size:9.5px;letter-spacing:1.8px}
+.skfxbtn.on{color:var(--rar,#ff4040);border-color:var(--rar,#ff4040);background:rgba(255,255,255,.04)}
 .swatch{height:58px;border-radius:9px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12)}
 .swatch svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.5}
 .skname{font-size:11.5px;letter-spacing:1.2px;margin-top:8px;color:#e9f2e4;line-height:1.3}
@@ -302,6 +328,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
 <div id="dmg"></div>
 <div id="dmgDir"><i></i></div>
 <div id="hitmark"></div>
+<div id="killFxPop"><span class="kfxBadge"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#0b0f0c" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="kfxTxt"><b>100 KILLS</b><small>KILL EFFECT UNLOCKED</small><em id="killFxPopName"></em></span></div><!-- LOBBY POLISH : MYTHIC unlock ceremony popup -->
 <div id="killring"></div>
 <div id="bloom"></div>
 <div class="cine" id="ctop"></div>
@@ -407,7 +434,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="tabPanel" id="tabSkins"><div class="uiscroll" style="display:flex;flex-direction:column">
       <div class="uhead">SKINS</div>
       <div class="pvSlot" id="pvSkins" style="flex:none;height:170px"></div>
-      <div id="skinPvName" style="text-align:center;font-size:12px;letter-spacing:2.5px;color:#cfe3c8;margin:6px 0 12px"></div>
+      <div id="skinPvName" style="text-align:center;font-size:12px;letter-spacing:2.5px;color:#cfe3c8;margin:4px 0 8px"></div><!-- LOBBY POLISH : tighter header, more grid shows -->
       <div class="chips" id="skinChips">
         <button class="chip on" data-f="all">ALL</button>
         <button class="chip" data-f="owned">OWNED</button>
@@ -489,8 +516,12 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='10.6'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='10.7'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'10.7',lines:[ // LOBBY POLISH : menu glow-up + MYTHIC skins
+  '<b>LOBBY POLISH</b> — the preview rifle now fits every screen, lit like real metal',
+  '<b>MYTHIC SKINS</b> — VOIDCURRENT 6,000 CR · INFERNO CORE 15,000 CR · STARFORGE 30,000 CR — animated effects, custom scopes, tracers',
+  '<b>KILL EFFECTS</b> — land 100 kills wearing INFERNO or STARFORGE, then equip its kill effect from its SKINS card — it fires only while you wear that skin']},
  {v:'10.6',lines:[ // LOBBY FIX : lobby polish release
   '<b>LOBBY POLISH</b> — the rifle now sits centered and sways gently — drag it to spin',
   '<b>NEW LIGHTING</b> — the preview rifle reads as real metal, not a silhouette',
@@ -1284,10 +1315,10 @@ const glbState={key:'longshot',active:false,cycle:false,cycPrev:0,cased:false,cl
 const _white45=new THREE.Color(0xffffff);
 function tintMatsInto(mats,perRifleDefault,rifleKey,sk){ // v10.5 : one tint path for every rifle model
   if(sk&&sk.tint!=null){
-    const c=new THREE.Color(sk.tint);c.lerp(_white45,0.45); // SUBTLE variant tint : dark texture x lifted stock hue
+    const c=new THREE.Color(sk.tint);c.lerp(_white45,(sk.lift!=null)?sk.lift:0.45); // SUBTLE variant tint : dark texture x lifted stock hue /* LOBBY POLISH : mythic skins carry lift≈0.1 — their base stays DARK so the effect package pops */
     for(const m of mats){m.color.copy(c);skinProps(m,sk);}
   }else if(perRifleDefault){ // PCR : Default Steel = the per-rifle tint (the v10.4 look, unchanged)
-    const c=new THREE.Color(skinTintFor(rifleKey,sk));c.lerp(_white45,0.45);
+    const c=new THREE.Color(skinTintFor(rifleKey,sk));c.lerp(_white45,(sk&&sk.lift!=null)?sk.lift:0.45);
     for(const m of mats){m.color.copy(c);skinProps(m,sk);}
   }else{ // sourced models : Default Steel restores the model's own factory colors
     for(const m of mats){if(m.userData._skCol!=null)m.color.setHex(m.userData._skCol);skinProps(m,sk);}
@@ -1397,6 +1428,7 @@ function setupModel(key,scene){ // normalize a freshly parsed GLB into a parked 
     inner.scale.setScalar(2.2/(Math.max(size.x,size.y,size.z)||1)); // same 2.2 m viewmodel length as the PCR
     holder.updateMatrixWorld(true);
     box=new THREE.Box3().setFromObject(inner);
+    const sizeC=box.getSize(new THREE.Vector3()); // LOBBY POLISH : post-scale wrap-space dims for the mythic FX layout
     const c=box.getCenter(new THREE.Vector3());
     inner.position.x+=VM_TARGET_C.x-c.x;inner.position.y+=VM_TARGET_C.y-c.y;inner.position.z+=VM_TARGET_C.z-c.z;
     holder.updateMatrixWorld(true);
@@ -1416,6 +1448,7 @@ function setupModel(key,scene){ // normalize a freshly parsed GLB into a parked 
     if(cfg.boltName){const bn=scene.getObjectByName(cfg.boltName);if(bn){const pv=vmPivot(bn,'bolt');if(pv){rec.pivot=pv.pivot;rec.boltApply=pv.apply;}}}
     if(!rec.pivot){const anch=new THREE.Group();anch.position.set(rec.muzzleV.x,rec.muzzleV.y+0.12,rec.muzzleV.z+1.05);wrap.add(anch);rec.pivot=anch;} // boltless model : casings still leave from the receiver
     if(cfg.magName){const mn=scene.getObjectByName(cfg.magName);if(mn){const pv=vmPivot(mn,'mag');if(pv)rec.magApply=pv.apply;}}
+    rec.fxBox={cx:VM_TARGET_C.x,cy:VM_TARGET_C.y,cz:VM_TARGET_C.z,h:sizeC.y,w:sizeC.x,len:sizeC.z}; // LOBBY POLISH : wrap-space dims — the center is VM_TARGET_C by construction (a live setFromObject here would read scene-world coords through the camera-mounted rifle group and fling the FX metres away)
     rec.wrap=wrap;rec.status='ready';
   }catch(err){rec.status='failed';console.warn('[longshot] model setup failed for '+key+' — PCR fallback',err);}
 }
@@ -1499,6 +1532,7 @@ function ensureModel(key){ // lazy-load a rifle's data file + GLB on first need 
       const lrec=VMODELS.longshot; // v10.5 : register as rifle #1's model record, then show the equipped rifle
       lrec.wrap=wrap;lrec.pivot=pivot;lrec.pivotRestY=pivot.position.y;lrec.mag=magN;lrec.magRestZ=magN.position.z;
       lrec.tintMats=glbState.stockMats;lrec.status='ready';
+      lrec.fxBox={cx:0.272,cy:-0.294,cz:-1.024,h:0.40,w:0.15,len:2.2}; // LOBBY POLISH : PCR rifle-space dims from the build's own measured constants (bbox center VM_TARGET_C, 2.2 span, muzzle -2.124) — MYTHIC FX sleeves
       setViewModel(G.rifle);
     }catch(err){console.warn('[longshot] GLB rifle setup failed — procedural rifle stays',err);}
   };
@@ -2639,8 +2673,10 @@ function bulletUpdate(dt){
     if(G.state==='play'){const tp=b.m.position,tdx=tp.x-b.tx,tdy=tp.y-b.ty,tdz=tp.z-b.tz;
       if(tdx*tdx+tdy*tdy+tdz*tdz>9){ // >=3m since the last streak point
         const tline=new THREE.Line(new THREE.BufferGeometry().setFromPoints([_tpA.set(b.tx,b.ty,b.tz),_tpB.copy(tp)]),
-          new THREE.LineBasicMaterial({color:0xffe2a8,transparent:true,opacity:0.9}));
+          new THREE.LineBasicMaterial({color:tracerCol,transparent:true,opacity:0.9})); // LOBBY POLISH : tracer color follows the equipped skin (warm default)
         scene.add(tline);tracers.push({line:tline,t:0});
+        if(scopeFx==='inferno'||scopeFx==='star'){ // LOBBY POLISH : MYTHIC tracer trails — bounded by this same 3 m gate (at most one small burst per bullet per frame) ; visuals only, ballistics untouched
+          spawnBurst(tp,{color:scopeFx==='inferno'?0xff7a26:0xe9d8ff,n:scopeFx==='inferno'?3:4,add:1,sp0:0.1,sp1:0.7,up0:-0.2,up1:0.3,life:scopeFx==='inferno'?0.32:0.5,grav:0,sz:[1.1,1.7]});}
         b.tx=tp.x;b.ty=tp.y;b.tz=tp.z;}}
     if(b.kills===0&&nearE&&nearE.alive)reactToDanger(nearE,nearE.hvt); // suppressive fire : HVTs bolt for cover immediately
     if(shit){explodeSab(shit);scene.remove(b.m);bullets.splice(i,1);}
@@ -2906,6 +2942,8 @@ function drawReticle(){
   x.save();
   x.beginPath();x.arc(cx,cy,R,0,TAU);x.clip();
   const rc=G.retColor==='red'?['rgba(208,36,22,0.94)','rgba(208,36,22,0.92)','rgba(208,36,22,0.94)']:G.retColor==='green'?['rgba(40,205,95,0.94)','rgba(40,205,95,0.92)','rgba(40,205,95,0.94)']:['rgba(12,12,12,0.92)','rgba(12,12,12,0.9)','rgba(15,15,15,0.92)']; // reticle color pref
+  if(scopeFx==='inferno'){rc[0]='rgba(255,150,50,0.95)';rc[1]='rgba(255,122,38,0.92)';rc[2]='rgba(255,170,80,0.95)';} // LOBBY POLISH : INFERNO scope — amber/ember reticle
+  else if(scopeFx==='star'){rc[0]='rgba(216,180,255,0.95)';rc[1]='rgba(242,194,51,0.92)';rc[2]='rgba(233,216,255,0.95)';} // LOBBY POLISH : STARFORGE scope — violet-gold reticle
   x.strokeStyle=rc[0];x.lineWidth=1.6;
   x.beginPath();x.moveTo(cx-R,cy);x.lineTo(cx+R,cy);x.moveTo(cx,cy-R);x.lineTo(cx,cy+R);x.stroke();
   x.fillStyle=rc[1];
@@ -2921,6 +2959,28 @@ function drawReticle(){
   x.beginPath();x.arc(cx,cy,R*0.985,-2.4,-1.7);x.stroke();
   x.strokeStyle='rgba(160,200,255,0.25)';x.lineWidth=8;
   x.beginPath();x.arc(cx,cy,R*0.965,-2.35,-1.75);x.stroke();
+  if(scopeFx==='inferno'){ // LOBBY POLISH : cracked-heat glow ring at the lens edge + a warm tint wash
+    x.save();x.globalCompositeOperation='lighter';
+    const wg=x.createRadialGradient(cx,cy,R*0.2,cx,cy,R);wg.addColorStop(0,'rgba(255,110,26,0)');wg.addColorStop(0.85,'rgba(255,110,26,0.10)');wg.addColorStop(1,'rgba(255,140,40,0.22)');
+    x.fillStyle=wg;x.beginPath();x.arc(cx,cy,R,0,TAU);x.fill();
+    x.strokeStyle='rgba(255,140,50,0.85)';x.lineWidth=2.4;x.shadowColor='#ff7a26';x.shadowBlur=9;
+    for(let i=0;i<7;i++){const a0=STAR_SPECKS[i*2][0]*TAU; // deterministic crack arcs around the rim
+      x.beginPath();x.arc(cx,cy,R*0.985,a0,a0+0.16+STAR_SPECKS[i*2+1][1]*0.3);x.stroke();}
+    x.restore();
+  }else if(scopeFx==='star'){ // LOBBY POLISH : starfield specks twinkling at the lens edge + nebula wash + a slow swirl accent
+    x.save();x.globalCompositeOperation='lighter';
+    const ng=x.createRadialGradient(cx-R*0.3,cy-R*0.25,R*0.1,cx,cy,R);ng.addColorStop(0,'rgba(140,80,255,0.10)');ng.addColorStop(0.6,'rgba(90,40,180,0.05)');ng.addColorStop(1,'rgba(242,194,51,0.10)');
+    x.fillStyle=ng;x.beginPath();x.arc(cx,cy,R,0,TAU);x.fill();
+    const tw=performance.now()/1000;
+    for(let i=0;i<STAR_SPECKS.length;i++){const sp=STAR_SPECKS[i],a=sp[0]*TAU,rr=R*(0.90+sp[1]*0.085);
+      x.globalAlpha=0.35+0.6*Math.abs(Math.sin(tw*0.9+sp[2]*7));
+      x.fillStyle='#ffffff';x.beginPath();x.arc(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,sp[2]*1.6+0.6,0,TAU);x.fill();}
+    x.globalAlpha=1;x.strokeStyle='rgba(242,194,51,0.8)';x.lineWidth=2.6;x.shadowColor='#b45cff';x.shadowBlur=8;
+    const sa=tw*0.14; // the swirl accent creeps around the rim
+    x.beginPath();x.arc(cx,cy,R*0.975,sa,sa+0.85);x.stroke();
+    x.beginPath();x.arc(cx,cy,R*0.955,sa+2.6,sa+3.1);x.stroke();
+    x.restore();
+  }
   x.restore();
   x.strokeStyle='#000';x.lineWidth=3;
   x.beginPath();x.arc(cx,cy,R,0,TAU);x.stroke();
@@ -3186,7 +3246,7 @@ function startBulletCam(e,dir,hitP,path,hshot){
   KC.active=true;KC.phase='chase';KC.t=0;KC.dur=1.5;KC.total=0;
   KC.dir.copy(dir);
   KC.hshot=!!hshot; // deferred blood (pierceKill skipped its burst for this cam) sprays at the impact beat, headshot-wide if set
-  KC.victim=e||null;KC.stuck=false;KC.stickL=null;KC.stickLQ=null;kcBulletReset(); // fresh round, fresh colors — the impact beat does the bloodied stick
+  KC.victim=e||null;KC.stuck=false;KC.stickL=null;KC.stickLQ=null;KC.fxSkin=null;kcBulletReset(); // fresh round, fresh colors — the impact beat does the bloodied stick /* LOBBY POLISH : fxSkin reset with the rest — an armed kill effect never leaks into the next cam */
   /* BULLET-CAM 2.1 : the cam target is the TRUE impact point (where the blood
      burst), not a fixed point 1.6m over the victim's feet — and the chase
      replays the recorded flight path point-for-point, so the visual round
@@ -3262,6 +3322,7 @@ function kcImpactBeat(){
   impactPuff(KC.tgt,'dirt',{rMul:0.35,grow:2.5,op0:0.5,fade:2.4,life:0.45}); // MINI puff : a dust kiss at the wound — the stock puff balloons to ~6m and washed out the whole orbit view as a giant cream blob (v10.1 screenshot); the blood burst below is the real impact read
   spawnBurst(KC.tgt,{color:0xd8c9a3,n:16,sp0:2.5,sp1:6.5,up0:1,up1:4,life:0.7,grav:6});
   spawnBlood(KC.tgt,KC.dir,KC.hshot); // DEFERRED BLOOD : pierceKill held its burst for this exact frame — the replayed contact bleeds, spray along the path-end tangent
+  if(KC.fxSkin){fireKillFx(KC.fxSkin,KC.tgt);KC.fxSkin=null;} // LOBBY POLISH : an armed MYTHIC kill effect detonates on this same impact beat, layered over the blood
 }
 /* STICK FOLLOW (v10.3) : while the impact freeze and the orbit play, the
    corpse is still moving — tipping to the ground, slumping onto a wheel, or
@@ -3386,6 +3447,7 @@ function killEnemy(e,dir,cam,hshot,blast,hitP,camPath){
   if(!lsGet('lh_kill','')){lsSet('lh_kill','1'); // one-time hint : bodies get found
     setTimeout(()=>toast('BODIES GET FOUND — KEEP THE ALARM DOWN'),1750);}
   if(cam&&dist>300&&G.kcam!=='off')startBulletCam(e,dir,hitP,camPath,hshot); // BULLET-CAM : only for actual bullet kills, never explosion kills (killcam pref can disable); hshot rides along so the deferred blood sprays headshot-wide on impact
+  skinKillHook(e,hitP,cam&&dist>300&&G.kcam!=='off'); // LOBBY POLISH — MYTHIC grind : counts the kill for the WORN grind skin and fires its kill effect if armed — purely additive, reads state only, scoring untouched
   updateHUD();
   checkMissionDone();
 }
@@ -3646,7 +3708,7 @@ function frame(now){
     if(wantFade!==frame._hudF){frame._hudF=wantFade;$('hud').style.opacity=wantFade?'0.45':'1';}}
   if(windGain)windGain.gain.value=G.muted?0:(G.state==='play'?0.012+G.windSpd*0.007:0.008); // wind loop follows wind speed (and mute)
   birdT-=dt;if(birdT<0){birdT=rand(8,20);birdChirp();}
-  puffUpdate(dt);sparkUpdate(dt);shellUpdate(dt);
+  puffUpdate(dt);sparkUpdate(dt);shellUpdate(dt);skinFxTick(dt); // LOBBY POLISH : skinFxTick — viewmodel mythic FX time + kill-effect transients
   msmokeUpdate(dt);campFxUpdate(dt);boomUpdate(dt);
   const swY=0,swP=0; // scope sway removed entirely — MW's call
   G.kickT+=dt;
@@ -3819,8 +3881,14 @@ const SKINS=[
  {id:'crimson', name:'Crimson Strike',rarity:'epic',      price:800,  tint:0x8d1a1a, metal:0.45, rough:0.42, emissive:0x000000},
  {id:'neon',    name:'Neon Circuit',  rarity:'epic',      price:900,  tint:0x1c2f4a, metal:0.50, rough:0.38, emissive:0x1e90ff},
  {id:'gold',    name:'Gold Plated',   rarity:'legendary', price:1500, tint:0xd4af37, metal:0.90, rough:0.25, emissive:0x000000, rankReq:3},
+ /* LOBBY POLISH — MYTHIC tier : not tints — animated effect packages (Phase 5 block below).
+    fx = the effect kind ; lift = how little the base tint is washed toward white (dark base so the
+    effects pop) ; killFx = the 100-kills grind pair (kill effect unlock + per-skin enable). */
+ {id:'void',    name:'VOIDCURRENT', rarity:'mythic',    price:6000,  tint:0x131a3a, metal:0.65, rough:0.34, emissive:0x0a1c66, fx:'void', lift:0.10, rankReq:3},
+ {id:'inferno', name:'INFERNO CORE',rarity:'mythic',    price:15000, tint:0x1c0f0a, metal:0.35, rough:0.58, emissive:0x000000, fx:'inferno', lift:0.10, rankReq:4, killFx:true},
+ {id:'starforge',name:'STARFORGE',  rarity:'mythic',    price:30000, tint:0x17102b, metal:0.70, rough:0.30, emissive:0x1a0b33, fx:'star', lift:0.10, rankReq:6, killFx:true},
 ];
-const RARITY_C={common:'#9a9a9a',rare:'#4aa3ff',epic:'#b45cff',legendary:'#f2c233'};
+const RARITY_C={common:'#9a9a9a',rare:'#4aa3ff',epic:'#b45cff',legendary:'#f2c233',mythic:'#ff4040'}; /* LOBBY POLISH : mythic = CODM-mythic red */
 const RANKS=[{xp:0,name:'RECRUIT'},{xp:100,name:'MARKSMAN'},{xp:250,name:'SHARPSHOOTER'},{xp:500,name:'SNIPER'},{xp:900,name:'GHOST'},{xp:1400,name:'PHANTOM'},{xp:2000,name:'LEGEND'}];
 const RIFLE_SVG='<svg width="74" height="26" viewBox="0 0 74 26" fill="#0b0f0c"><path d="M2 15h39l4-3h9v3h18v3H54v2H32l-2 3h-5l2-3H11l-2 2H5l1-4H2z"/><circle cx="48" cy="9" r="3.4" fill="none" stroke="#0b0f0c" stroke-width="1.6"/></svg>';
 const STAR_SVG='<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.6 1.3 6.7L12 17.5l-6 3.3 1.3-6.7-5-4.6 6.8-.8z"/></svg>';
@@ -3856,6 +3924,18 @@ function applyRifleLook(){ // in-game viewmodel : the equipped skin beats the pe
   const sk=equippedSkin();
   if(rifle.userData.stockMat)rifle.userData.stockMat.color.setHex(skinTintFor(G.rifle,sk));
   glbApplyTint();
+  /* LOBBY POLISH : MYTHIC combat dressing (visual only — ballistics + scoring untouched) :
+     scope theme, hitmarker class, muzzle flash + bullet + tracer colors, the
+     viewmodel effect group and the scope-glass tint all follow the equipped fx */
+  const kind=sk&&sk.fx?sk.fx:null;
+  scopeFx=kind||'';
+  const hm=$('hitmark');hm.classList.toggle('skhm-inferno',kind==='inferno');hm.classList.toggle('skhm-star',kind==='star');
+  muzzleFlash.color.setHex(kind==='inferno'?0xff8c3a:(kind==='star'?0xd9a8ff:0xffc46a));
+  flashSprite.material.color.setHex(kind==='inferno'?0xffa040:(kind==='star'?0xcfa0ff:0xffffff));
+  bulletMat.color.setHex(kind==='inferno'?0xff8c30:(kind==='star'?0xfff2c8:0xffc76a));
+  tracerCol=kind==='inferno'?0xff9a3c:(kind==='star'?0xf6dcff:0xffe2a8);
+  syncVmSkinFX();
+  tintScopeGlass(kind);
 }
 /* ---- mission meta helpers (display only — same generators the game uses) ---- */
 function ghostMissions(){try{const a=JSON.parse(lsGet('longshot_ghostMissions','[]'));if(Array.isArray(a))return a;}catch(e){}return[];}
@@ -3915,6 +3995,7 @@ function renderHome(){
 function openTab(name){
   if(curTab===name)name=null;
   curTab=name;
+  pvSkinId=equippedSkin().id; // LOBBY POLISH : entering any tab re-syncs the previewed skin to the EQUIPPED one (SKINS taps then change the selection from there) — preview and labels can never disagree again
   $('homeView').style.display=name?'none':'flex';
   const map={loadout:'tabLoadout',skins:'tabSkins',missions:'tabMissions',settings:'tabSettings'};
   for(const k in map)$(map[k]).classList.toggle('open',k===name);
@@ -3999,25 +4080,45 @@ function loEquipPress(){
 
 /* ---- SKINS tab ---- */
 let pvSkinId='default',skinFilter='all';
+function swatchStyle(s){ // LOBBY POLISH : the swatch sells the FINISH, not just a hue — metallics get a diagonal gloss + a bright specular band ; matte/camo stay flat with a faint weave ; Default Steel is a fixed blue-grey METAL (never the current rifle's wood color again)
+  if(s.fx==='void')return 'background:linear-gradient(120deg,#02021a 0%,#01008a 42%,#2a4bff 50%,#01008a 58%,#05052e 100%)';
+  if(s.fx==='inferno')return 'background:linear-gradient(120deg,#160a06 0%,#571f08 38%,#ff7a26 50%,#8a2f0c 62%,#1c0d06 100%)';
+  if(s.fx==='star')return 'background:linear-gradient(120deg,#0d0618 0%,#3a1a6e 36%,#f2c233 50%,#6a3cc9 64%,#120826 100%)';
+  if(s.id==='default')return 'background:linear-gradient(115deg,#5d6a75 0%,#9fb2c1 34%,#e8f1f8 48%,#8b98a5 60%,#454f58 100%)';
+  const hex=s.tint,base=hexCss(hex);
+  if((s.metal!=null&&s.metal>=0.45)||s.rarity==='epic'||s.rarity==='legendary')
+    return 'background:linear-gradient(115deg,'+hexCss(shadeHex(hex,0.42))+' 0%,'+base+' 36%,'+hexCss(shadeHex(hex,1.5))+' 49%,'+base+' 62%,'+hexCss(shadeHex(hex,0.42))+' 100%)';
+  return 'background:repeating-linear-gradient(45deg,rgba(255,255,255,0.05) 0 6px,rgba(255,255,255,0) 6px 12px),linear-gradient(135deg,'+base+','+hexCss(shadeHex(hex,0.5))+')';
+}
+function skFxCardHtml(s){ // LOBBY POLISH : MYTHIC grind readout — kill progress until the 100-kill unlock, then the per-skin enable toggle (Amendment 3 : exclusive to this skin)
+  const kc=skinKills()[s.id]||0;
+  if(kc<KILLFX_NEED)return '<span class="skfx" style="display:block">KILL EFFECT · KILLS '+kc+' / '+KILLFX_NEED+'<span class="skfxbar"><i style="width:'+Math.min(100,kc)+'%"></i></span></span>';
+  const on=killFxOn(s.id);
+  return '<span class="skfx" style="display:block"><span class="skfxbtn'+(on?' on':'')+'" data-fx="'+s.id+'">'+(on?'KILL EFFECT EQUIPPED — TAP TO DISABLE':'EQUIP KILL EFFECT')+'</span></span>';
+}
+function toggleKillFx(id){setKillFxOn(id,!killFxOn(id));renderSkins();tick();buzz(8);} // LOBBY POLISH : per-skin enable flag — fires only while THIS skin is worn
 function renderSkins(){
   const sk=skinDef(pvSkinId),owned=skinsOwned(),rk=rankFor(xpTotal());
   $('skinPvName').innerHTML='<b style="color:'+RARITY_C[sk.rarity]+'">'+sk.rarity.toUpperCase()+'</b> · '+sk.name;
   const grid=$('skinGrid');let h='';
-  for(const s of SKINS){
+  const order=SKINS.filter(s=>s.rarity==='mythic').concat(SKINS.filter(s=>s.rarity!=='mythic')); // LOBBY POLISH : MYTHIC tier leads the grid ; everything else keeps config order
+  for(const s of order){
     const isOwn=owned.indexOf(s.id)>=0,isEq=lsGet('longshot_skin','default')===s.id;
     if(skinFilter==='owned'&&!isOwn)continue;
     if(skinFilter==='locked'&&isOwn)continue;
-    const hex=s.tint!=null?s.tint:RIFLES[G.rifle].stock;
-    h+='<button class="skcard'+(s.id===pvSkinId?' sel':'')+'" data-sk="'+s.id+'">'+
-      '<span class="swatch" style="display:block;background:linear-gradient(135deg,'+hexCss(hex)+','+hexCss(shadeHex(hex,0.45))+')">'+RIFLE_SVG+'</span>'+
+    h+='<button class="skcard'+(s.id===pvSkinId?' sel':'')+(s.rarity==='mythic'?' mythic':'')+'" data-sk="'+s.id+'" style="--rar:'+RARITY_C[s.rarity]+';--rarA:'+RARITY_C[s.rarity]+'3d">'+
+      '<span class="swatch" style="display:block;'+swatchStyle(s)+'">'+RIFLE_SVG+'</span>'+
       '<span class="skname" style="display:block">'+s.name+'</span>'+
       '<span class="rarbar" style="display:block;background:'+RARITY_C[s.rarity]+'"></span>'+
       '<span class="skstate '+(isEq?'eq':(isOwn?'own':''))+'" style="display:block">'+(isEq?'EQUIPPED':(isOwn?'OWNED':(s.price+' CR'+(s.rankReq?' · RANK '+RANKS[s.rankReq].name:''))))+'</span>'+
+      (s.killFx?skFxCardHtml(s):'')+
       '</button>';
   }
   grid.innerHTML=h||'<p style="grid-column:1/-1;text-align:center;color:#8aa086;font-size:11px;letter-spacing:2px">NOTHING HERE</p>';
   const cards=grid.querySelectorAll('.skcard');
   for(const c of cards)bindEl(c,()=>{pvSkinId=c.getAttribute('data-sk');applyPvTint();renderSkins();tick();});
+  const fbs=grid.querySelectorAll('.skfxbtn'); // LOBBY POLISH : the kill-effect toggle is its own control — bindEl stops propagation, so the card's select handler never fires
+  for(const fb of fbs)bindEl(fb,()=>{toggleKillFx(fb.getAttribute('data-fx'));});
   const b=$('skinAction'),isOwn=owned.indexOf(sk.id)>=0,isEq=lsGet('longshot_skin','default')===sk.id;
   if(isEq){b.textContent='EQUIPPED';b.className='ubtn eq';}
   else if(isOwn){b.textContent='EQUIP';b.className='ubtn';}
@@ -4068,7 +4169,7 @@ let confirmFn=null;
 function openConfirm(head,text,fn){$('cfHead').textContent=head;$('cfText').textContent=text;confirmFn=fn;$('confirmRoot').style.display='flex';}
 function closeConfirm(){$('confirmRoot').style.display='none';confirmFn=null;}
 function resetProgress(){ // progress keys only — settings + seen-version survive, then a clean reload
-  const keys=['longshot_best','longshot_mbest','longshot_mtime','longshot_rifles','longshot_rifle','longshot_credits','longshot_xp','longshot_skinsOwned','longshot_skin','longshot_ghostMissions','longshot_menuMission','longshot_grant105'];
+  const keys=['longshot_best','longshot_mbest','longshot_mtime','longshot_rifles','longshot_rifle','longshot_credits','longshot_xp','longshot_skinsOwned','longshot_skin','longshot_ghostMissions','longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn']; // LOBBY POLISH : mythic grind counters + per-skin kill-effect enables wipe too
   for(const k of keys){try{localStorage.removeItem(k);}catch(e){}}
   location.reload();
 }
@@ -4087,20 +4188,39 @@ function pvInit(){
   try{pvRenderer=new THREE.WebGLRenderer({canvas:pvCanvas,antialias:true,alpha:true});}
   catch(e){pvCanvas=null;return;}
   pvRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); // LOBBY FIX : pixel ratio capped at 2
+  pvRenderer.outputEncoding=THREE.sRGBEncoding;pvRenderer.toneMapping=THREE.ACESFilmicToneMapping;pvRenderer.toneMappingExposure=1.12; // LOBBY POLISH : filmic preview pipeline — kills the washed-out cardboard read
   pvScene=new THREE.Scene();
   pvCam=new THREE.PerspectiveCamera(38,1.5,0.1,60);pvCam.position.set(0,0.3,3.8);pvCam.lookAt(0,0,0);
   /* LOBBY FIX : lobby lighting rig — soft hemisphere base, ONE warm key from the
      FRONT-LEFT, ONE cool rim from BEHIND so the barrel/scope edges pop, plus a
      whisper of low front fill. Replaces the flat right-side key that left the
      rifles reading as black silhouettes. */
-  pvScene.add(new THREE.HemisphereLight(0xe8f1ff,0x27301f,0.95));
-  const key=new THREE.DirectionalLight(0xffd9a8,1.35);key.position.set(-3,2.6,4.2);pvScene.add(key);
-  const rim=new THREE.DirectionalLight(0x7fb2ff,0.95);rim.position.set(2.6,1.6,-3.6);pvScene.add(rim);
-  const fill=new THREE.DirectionalLight(0xbfd4ff,0.3);fill.position.set(0,-1,3);pvScene.add(fill);
+  pvScene.add(new THREE.HemisphereLight(0xe8f1ff,0x27301f,0.55)); /* LOBBY POLISH : hemi 0.95 -> 0.55 under ACES */
+  const key=new THREE.DirectionalLight(0xffd9a8,1.15);key.position.set(-3,2.6,4.2);pvScene.add(key); /* LOBBY POLISH : key 1.35 -> 1.15 — models shape instead of blowing tinted stocks out to cardboard */
+  const rim=new THREE.DirectionalLight(0x7fb2ff,1.35);rim.position.set(2.6,1.6,-3.6);pvScene.add(rim); /* LOBBY POLISH : rim 0.95 -> 1.35 — edges carve out of the dark */
+  const fill=new THREE.DirectionalLight(0xbfd4ff,0.35);fill.position.set(0,-1,3);pvScene.add(fill);
+  /* LOBBY POLISH : a tiny gradient "room" baked into a PMREM environment for
+     the PREVIEW scene only — metals finally pick up real reflections (a long
+     overhead strip, a warm key blob, a cool rim blob) instead of reading as
+     flat color. One-time and preview-scoped : the viewmodel never sees it. */
+  try{
+    const ecv=document.createElement('canvas');ecv.width=64;ecv.height=32;const eg=ecv.getContext('2d');
+    const egr=eg.createLinearGradient(0,0,0,32);
+    egr.addColorStop(0,'#cfd8e6');egr.addColorStop(0.42,'#5a6672');egr.addColorStop(0.58,'#2c3136');egr.addColorStop(1,'#0b0d0f');
+    eg.fillStyle=egr;eg.fillRect(0,0,64,32);
+    eg.fillStyle='#ffd9a8';eg.fillRect(2,9,10,8);
+    eg.fillStyle='#7fb2ff';eg.fillRect(51,7,11,8);
+    eg.fillStyle='#ffffff';eg.fillRect(26,1,12,3);
+    const esc=new THREE.Scene();
+    esc.add(new THREE.Mesh(new THREE.SphereGeometry(10,16,12),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(ecv),side:THREE.BackSide})));
+    const pm=new THREE.PMREMGenerator(pvRenderer);
+    pvScene.environment=pm.fromScene(esc,0.04).texture;
+    pm.dispose();
+  }catch(e){/* garnish only — the light rig still carries the look if this fails */}
   /* LOBBY FIX : soft glowing pedestal ellipse under the rifle (canvas radial
      gradient on a flat plane) — the rifle sits ON light instead of floating */
   {const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
-   const g=x.createRadialGradient(64,64,4,64,64,62);g.addColorStop(0,'rgba(190,255,190,0.5)');g.addColorStop(0.55,'rgba(140,220,150,0.16)');g.addColorStop(1,'rgba(140,220,150,0)');
+   const g=x.createRadialGradient(64,64,4,64,64,62);g.addColorStop(0,'rgba(190,255,190,0.40)');g.addColorStop(0.38,'rgba(150,235,160,0.15)');g.addColorStop(0.72,'rgba(130,215,140,0.05)');g.addColorStop(1,'rgba(130,215,140,0)'); /* LOBBY POLISH : tighter core, layered falloff — a pool of light, not a smear */
    x.fillStyle=g;x.fillRect(0,0,128,128);
    pv.ped=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false}));
    pv.ped.rotation.x=-Math.PI/2;pvScene.add(pv.ped);}
@@ -4114,6 +4234,7 @@ function pvInit(){
   pvCanvas.addEventListener('pointerup',end);pvCanvas.addEventListener('pointercancel',end);
   window.addEventListener('resize',()=>pvResize()); // LOBBY FIX : re-fit on resize …
   window.addEventListener('orientationchange',()=>setTimeout(pvResize,60)); // LOBBY FIX : … and on orientation change
+  if(window.ResizeObserver){try{const ro=new ResizeObserver(()=>{pvResize();});for(const rid of['pvHome','pvLoadout','pvSkins']){const rel=document.getElementById(rid);if(rel)ro.observe(rel);}}catch(e){}} // LOBBY POLISH : re-fit the moment any preview slot changes size
 }
 function pvCenterModel(root){ // LOBBY FIX : the old pvFrameModel measured the box through the (possibly scaled) stage group, so the center was wrong and the rifle ORBITED its spin axis, cropped at the edge. Now: measure the DETACHED model, shift it so its bounding-box center sits exactly on the group origin, and yaw it so the long axis lies across the screen. The model is never rotated after this — the GROUP is.
   const box=new THREE.Box3().setFromObject(root);
@@ -4126,14 +4247,76 @@ function pvCenterModel(root){ // LOBBY FIX : the old pvFrameModel measured the b
   else pv.size={x:s.x,y:s.y,z:s.z};
   return holder;
 }
-function pvFitPreview(){ // LOBBY FIX : auto-fit — scale so the model's longest side fills ~85% of the preview width at ANY rotation (worst-case Y-extent sampled), fully visible with margins on both sides ; also sizes/places the pedestal glow
+/* LOBBY POLISH : TRUE-PROJECTION fit (replaces the v10.6 formula). That formula
+   divided the frustum size at the model's CENTER plane by the model's rest
+   size — flat math that assumes the model is tiny next to the camera distance.
+   In the wide, short tab slots the height term allowed scale 5.0 : an 11-unit
+   rifle on a 3.81-unit camera leash. The first sway swing put the near end
+   ~1 unit from the lens and perspective blew the true extents to 1.83x
+   half-width / 3.11x half-height (measured on real vertices, ls107 Phase 0) —
+   exactly the on-device crop. Now the model's actual box is projected through
+   the real camera across yaw samples and the scale iterates until the worst
+   projection meets target ; if fitting at the home distance means shrinking
+   hard, the camera pulls back instead — distance kills the perspective
+   blow-up at its source. Portrait keeps the home distance and its v10.6 look. */
+const PV_FIT_TX=0.86,PV_FIT_TY=0.78,PV_CAM_D0=3.8117; // LOBBY POLISH : projected-extent targets (gate allows 0.90) + the v10.6 camera distance
+const PV_EXPO={longshot:1.12,varmint:1.12,thunder:1.34}; // LOBBY POLISH : per-model preview exposure — THUNDER's factory paint is near-black, it needs the help
+const _pvDir=new THREE.Vector3(),_pvVec=new THREE.Vector3(),_pvWorst={x:0,y:0};
+function pvMeasureAt(sc,D){ // worst |ndc| of the model box at (scale, camera distance) ; yaw 0..90 deg \u2014 a box's extents are 90-deg periodic, so this covers sway AND full drag rotations. View-space math by hand, NOT Vector3.project : at the scales these wide slots invite, corners swing BEHIND the lens plane, where project() flips them to garbage infinities and a naive solver oscillates between collapse and overshoot \u2014 here the divide uses a floored depth, so the reading stays finite, graded and monotone in scale.
+  _pvDir.copy(pvCam.position).normalize();
+  const zx=_pvDir.x,zy=_pvDir.y,zz=_pvDir.z;
+  let xx=zz,xy=0,xz=-zx;const xl=Math.hypot(xx,xy,xz)||1;xx/=xl;xy/=xl;xz/=xl; // camera right = normalize(cross(up, zAxis))
+  const yx=zy*xz-zz*xy,yy=zz*xx-zx*xz,yz=zx*xy-zy*xx; // camera up = cross(zAxis, right)
+  const tanV=Math.tan(pvCam.fov*Math.PI/360),tanH=tanV*(pvCam.aspect||1.5);
+  const cxp=_pvDir.x*D,cyp=_pvDir.y*D,czp=_pvDir.z*D;
+  const hx=pv.size.x*sc/2,hy=pv.size.y*sc/2,hz=pv.size.z*sc/2;
+  let mx=0,my=0;
+  for(let a=0;a<=90;a+=6){
+    const th=a*Math.PI/180,co=Math.cos(th),si=Math.sin(th);
+    for(let i=0;i<8;i++){
+      const lx=(i&1?hx:-hx),ly=(i&2?hy:-hy),lz=(i&4?hz:-hz);
+      const wx=lx*co+lz*si,wy=ly,wz=-lx*si+lz*co;
+      const dx=wx-cxp,dy=wy-cyp,dz=wz-czp;
+      const vx=dx*xx+dy*xy+dz*xz,vy=dx*yx+dy*yy+dz*yz;
+      let dep=-(dx*zx+dy*zy+dz*zz);if(dep<0.3)dep=0.3; // view depth (camera forward = -zAxis), floored
+      const ax=Math.abs(vx)/(dep*tanH),ay=Math.abs(vy)/(dep*tanV);
+      if(ax>mx)mx=ax;if(ay>my)my=ay;
+    }
+  }
+  _pvWorst.x=mx;_pvWorst.y=my+0.03; // +pad : the \u00b10.035 float rides on top of the fit
+  return _pvWorst;
+}
+function pvFitPreview(){ // LOBBY POLISH : true-projection auto-fit (see the block comment above) ; also sizes/places the pedestal glow
   if(!pv.fit||!pv.size)return;
-  const aspect=pvCam.aspect||1.5,D=pvCam.position.length();
-  const visH=2*D*Math.tan(pvCam.fov*Math.PI/360),visW=visH*aspect;
+  const aspect=pvCam.aspect||1.5;
+  const visH=2*PV_CAM_D0*Math.tan(pvCam.fov*Math.PI/360),visW=visH*aspect;
   let maxE=0;for(let a=0;a<=90;a+=5){const r=a*Math.PI/180,e=pv.size.x*Math.abs(Math.cos(r))+pv.size.z*Math.abs(Math.sin(r));if(e>maxE)maxE=e;}
-  const sc=Math.min(0.80*visW/(maxE||1),0.74*visH/(pv.size.y||1)); // LOBBY FIX : 0.80 target — perspective widens near corners a touch past the flat math, landing the widest rendered point at ~85% of the width with a real margin (probe-measured)
-  pv.fit.scale.setScalar(sc);
-  if(pv.ped){const w=pv.size.x*sc*1.04;pv.ped.scale.set(w,w*0.30,1);pv.ped.position.y=-(pv.size.y*sc)/2-0.05;}
+  const flat=Math.min(0.80*visW/(maxE||1),0.74*visH/(pv.size.y||1)); // the v10.6 estimate — demoted to a starting guess
+  let best=null;
+  const cands=[PV_CAM_D0,PV_CAM_D0*1.5,PV_CAM_D0*2.2];
+  for(let ci=0;ci<cands.length;ci++){
+    const D=cands[ci];let sc=flat*(D/PV_CAM_D0);
+    const cap=flat*(D/PV_CAM_D0)*1.3;
+    for(let it=0;it<5;it++){
+      const w=pvMeasureAt(sc,D);
+      const f=Math.min(PV_FIT_TX/Math.max(w.x,1e-3),PV_FIT_TY/Math.max(w.y,1e-3));
+      if(f>0.99&&f<1.02)break;
+      sc*=Math.pow(f,0.85); // damped — projection is not linear in scale when the gun is long against the leash
+      if(sc<0.03){sc=0.03;break;}
+      if(sc>cap)sc=cap;
+    }
+    let w=pvMeasureAt(sc,D);
+    for(let g=0;g<6&&(w.x>PV_FIT_TX||w.y>PV_FIT_TY);g++){sc*=0.82;w=pvMeasureAt(sc,D);} // guarantee pass : whatever the iteration did, the shipped fit is feasible
+    const feas=(w.x<=PV_FIT_TX+0.015&&w.y<=PV_FIT_TY+0.015);
+    const cand={sc:sc,D:D,mx:w.x,my:w.y,feas:feas};
+    if(!best||(cand.feas&&!best.feas)||(cand.feas===best.feas&&cand.mx>best.mx))best=cand;
+    if(ci===0&&feas&&w.x>PV_FIT_TX*0.9)break; // the home distance already fills the frame — keep the v10.6 portrait look untouched
+  }
+  _pvDir.copy(pvCam.position).normalize();
+  pvCam.position.copy(_pvDir).multiplyScalar(best.D);pvCam.lookAt(0,0,0);pvCam.updateMatrixWorld(true);
+  pv.fitD=best.D;pv.fitScale=best.sc; // LOBBY POLISH : probes read the solved fit here
+  pv.fit.scale.setScalar(best.sc);
+  if(pv.ped){const w=pv.size.x*best.sc*0.98;pv.ped.scale.set(w,w*0.27,1);pv.ped.position.y=-(pv.size.y*best.sc)/2-0.05;} // LOBBY POLISH : pedestal tracks the FITTED width, tighter than before
 }
 function pvSkinVertex(mesh,i,target){ // one vertex, skinned, in the mesh's local space (three's skinning recipe, inlined so it works on r128)
   const geo=mesh.geometry,si=geo.attributes.skinIndex,sw=geo.attributes.skinWeight;
@@ -4168,6 +4351,7 @@ function pvBakeSkinnedFrom(cloneRoot,srcRoot){ // a cloned SkinnedMesh keeps poi
 }
 function pvBuildModel(key){ // v10.5 : the turntable shows the browsed/equipped rifle's OWN model, cloned from its parked wrap
   const rec=VMODELS[key];if(!rec||!rec.wrap)return;
+  pvFxDetach(); // LOBBY POLISH : the old holder (FX group inside) is about to be cleared — dispose the package first
   while(pv.fit.children.length)pv.fit.remove(pv.fit.children[0]); // LOBBY FIX : models live in the fit group now
   pv.stockGLB.length=0;pv.stockProc.length=0;
   const clone=rec.wrap.clone(true);clone.visible=true;
@@ -4186,8 +4370,10 @@ function pvBuildModel(key){ // v10.5 : the turntable shows the browsed/equipped 
         if(m.roughness>0.62)m.roughness=0.62;
       }}}});
   pv.fit.add(pvCenterModel(clone));pv.isGlb=true;pv.isModel=true;pv.built=true;pv.shownKey=key;pvFitPreview();applyPvTint(); // LOBBY FIX : centered + auto-fit
+  pvRenderer.toneMappingExposure=PV_EXPO[key]||1.12; // LOBBY POLISH : per-model preview exposure
 }
 function pvBuildProc(){
+  pvFxDetach(); // LOBBY POLISH : dispose the old FX package before the holder is cleared
   while(pv.fit.children.length)pv.fit.remove(pv.fit.children[0]); // LOBBY FIX : fit group
   pv.stockGLB.length=0;pv.stockProc.length=0;
   const holder=new THREE.Group();
@@ -4197,6 +4383,7 @@ function pvBuildProc(){
   pv.fit.add(pvCenterModel(holder)); // LOBBY FIX : same centering as the GLB path
   pv.fit.traverse(m=>{if(m.isMesh&&m.userData.isStock){m.material=m.material.clone();pv.stockProc.push(m.material);}});
   pv.isGlb=false;pv.isModel=false;pv.shownKey='proc';pv.built=true;pvFitPreview();applyPvTint(); // LOBBY FIX : auto-fit
+  pvRenderer.toneMappingExposure=PV_EXPO[pvRifleKey()]||1.12; // LOBBY POLISH : per-model preview exposure
 }
 function pvTick(dt){ // called from the main frame loop ; renders only while the preview is actually on screen
   if(!pvCanvas)pvInit();
@@ -4204,6 +4391,8 @@ function pvTick(dt){ // called from the main frame loop ; renders only while the
   const mr=$('menuRoot');
   if(!mr||mr.style.display==='none')return; // LOBBY FIX : in-game — preview loop fully paused
   if(!pvCanvas.getClientRects||!pvCanvas.getClientRects().length)return; // LOBBY FIX : canvas parked in a hidden slot (MISSIONS / SETTINGS tabs) — paused. HOME / LOADOUT / SKINS keep their live turntable because the canvas is visibly mounted there.
+  if(pvCanvas.parentNode){const _r=pvCanvas.parentNode.getBoundingClientRect(); // LOBBY POLISH : slot size changed under us (rotate / re-parent / tab settle) — re-fit THIS frame ; a fit computed at another size never survives into a visible state
+    if(Math.abs(_r.width-(pv._lw||0))>1||Math.abs(_r.height-(pv._lh||0))>1)pvResize();}
   const key=pvRifleKey();
   if(pv.shownKey!==key){
     const rec=VMODELS[key];
@@ -4226,6 +4415,7 @@ function pvTick(dt){ // called from the main frame loop ; renders only while the
   pv.spin.rotation.y=pv.dragYaw+pv.swayAmp*Math.sin(now*0.5)*0.52;
   pvGrp.position.y=Math.sin(now*0.85)*0.035;
   pv.frames++; // LOBBY FIX : render counter — probes assert this stalls while the preview is off-screen
+  if(pvSkinFX)fxUpdate(pvSkinFX.group,now,dt); // LOBBY POLISH : the preview's MYTHIC package animates on the preview clock
   pvRenderer.render(pvScene,pvCam);
 }
 function mountPreview(slot){
@@ -4237,6 +4427,7 @@ function pvResize(){
   if(!pvRenderer||!pvCanvas||!pvCanvas.parentNode)return;
   const r=pvCanvas.parentNode.getBoundingClientRect();
   const w=Math.max(50,r.width),h=Math.max(50,r.height);
+  pv._lw=w;pv._lh=h; // LOBBY POLISH : cached for pvTick's per-frame size-change guard
   pvRenderer.setSize(w,h,false);
   pvCam.aspect=w/h;pvCam.updateProjectionMatrix();
   pvFitPreview(); // LOBBY FIX : every resize re-runs the auto-fit for the new aspect
@@ -4249,7 +4440,278 @@ function applyPvTint(){ // preview tint : the PREVIEWED skin (pvSkinId) on the b
     tintMatsInto(pv.stockGLB,!!(rec&&rec.perRifleDefault),pvRifleKey(),sk); // v10.5 : same per-model tint rules as the viewmodel
   }
   for(const m of pv.stockProc)m.color.setHex(hex);
+  syncPvSkinFX(); // LOBBY POLISH : the preview's MYTHIC effect package follows the previewed skin + browsed rifle
 }
+
+/* ================= LOBBY POLISH — MYTHIC SKINS (Phase 5) =================
+   Three skins above legendary. They are NOT tints : each is an animated
+   effect package (procedural canvas textures + additive geometry + bounded
+   particle Points) built in RIFLE SPACE — every rifle shares the same
+   rifle-space dims (2.2 span, center VM_TARGET_C family), so one package
+   fits all three, in the menu preview AND the in-game viewmodel.
+   STRICT HIERARCHY (MW) : STARFORGE >> INFERNO CORE >> VOIDCURRENT.
+     VOIDCURRENT : flow sleeve + holo ring + ~25 sparks. Nothing else.
+     INFERNO     : breathing crack sleeve + core glow + ~40 embers, PLUS a
+                   scope theme, incendiary tracers and a kill effect.
+     STARFORGE   : TWO counter-scrolling nebula sleeves + halo ring + 3
+                   orbiting orbs + ~60 twinkles, PLUS the best scope, the
+                   prettiest tracers and a bigger kill effect (nova + ring).
+   Kill effects (Amendment 3 — EXCLUSIVE to their skin) : 100 kills WHILE
+   WEARING the skin unlocks its effect (top popup ceremony, no auto-fire) ;
+   MW then enables it on that skin's SKINS card (longshot_killFxOn) ; it
+   fires only while that skin is worn + unlocked + enabled. Counters live in
+   longshot_skinKills. Both keys are in the RESET PROGRESS clear list. */
+const KILLFX_NEED=100;
+let scopeFx='',tracerCol=0xffe2a8; // equipped skin's fx kind + live tracer color (drawReticle / bulletUpdate read these)
+function skinKills(){try{const o=JSON.parse(lsGet('longshot_skinKills','{}'));return(o&&typeof o==='object'&&!Array.isArray(o))?o:{};}catch(e){return{};}}
+function killFxOn(id){try{const o=JSON.parse(lsGet('longshot_killFxOn','{}'));return!!(o&&o[id]);}catch(e){return false;}}
+function setKillFxOn(id,on){let o={};try{o=JSON.parse(lsGet('longshot_killFxOn','{}'))||{};}catch(e){o={};}o[id]=!!on;lsSet('longshot_killFxOn',JSON.stringify(o));}
+/* deterministic specks for the STARFORGE scope (fixed layout — no per-frame RNG) */
+const STAR_SPECKS=(()=>{let s=1337;const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};const a=[];for(let i=0;i<26;i++)a.push([rnd(),rnd(),rnd()]);return a;})();
+/* ---- procedural textures (zero external assets) ---- */
+function fxCanvasTex(w,h,draw){const cv=document.createElement('canvas');cv.width=w;cv.height=h;draw(cv.getContext('2d'),w,h);const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;}
+function makeArcTexture(){ // VOIDCURRENT : jagged electric arcs on transparency
+  return fxCanvasTex(256,256,(x,w,h)=>{
+    x.clearRect(0,0,w,h);
+    for(let i=0;i<26;i++){
+      let px=-10,py=rand(0,h);x.beginPath();x.moveTo(px,py);
+      while(px<w+10){px+=rand(8,26);py+=rand(-16,16);x.lineTo(px,py);}
+      x.strokeStyle='rgba(70,110,255,0.22)';x.lineWidth=5;x.shadowColor='#2a4bff';x.shadowBlur=8;x.stroke();
+      x.strokeStyle='rgba(195,225,255,0.95)';x.lineWidth=1.4;x.stroke();
+    }
+    for(let i=0;i<44;i++){x.fillStyle='rgba(150,190,255,'+rand(0.12,0.4).toFixed(2)+')';x.fillRect(rand(0,w),rand(0,h),rand(1,3),rand(1,3));}
+  });
+}
+function makeCrackTexture(){ // INFERNO : a glowing fissure network
+  return fxCanvasTex(256,256,(x,w,h)=>{
+    x.clearRect(0,0,w,h);
+    function crack(cx,cy,ang,len,wid){
+      let px=cx,py=cy,a=ang;x.beginPath();x.moveTo(px,py);
+      const steps=Math.max(2,Math.floor(len/9));
+      for(let s=0;s<steps;s++){a+=rand(-0.5,0.5);px+=Math.cos(a)*9;py+=Math.sin(a)*9;x.lineTo(px,py);
+        if(Math.random()<0.3&&wid>0.8)crack(px,py,a+rand(-1.1,1.1),len*0.45,wid*0.6);}
+      x.strokeStyle='rgba(255,90,20,0.35)';x.lineWidth=wid*2.6;x.shadowColor='#ff5a14';x.shadowBlur=10;x.stroke();
+      x.strokeStyle='rgba(255,200,115,0.95)';x.lineWidth=wid;x.stroke();
+    }
+    for(let i=0;i<9;i++)crack(rand(0,w),rand(0,h),rand(0,Math.PI*2),rand(60,150),rand(1.1,2.2));
+    const g=x.createRadialGradient(w/2,h/2,8,w/2,h/2,150);g.addColorStop(0,'rgba(255,110,30,0.20)');g.addColorStop(1,'rgba(255,110,30,0)');
+    x.fillStyle=g;x.fillRect(0,0,w,h);
+  });
+}
+function makeNebulaTexture(){ // STARFORGE : nebula clouds + star dust
+  return fxCanvasTex(256,256,(x,w,h)=>{
+    x.clearRect(0,0,w,h);
+    const cols=['rgba(122,60,255,','rgba(255,90,200,','rgba(242,194,51,','rgba(70,120,255,'];
+    for(let i=0;i<26;i++){const cx=rand(0,w),cy=rand(0,h),r=rand(18,64),c=cols[i%cols.length];
+      const g=x.createRadialGradient(cx,cy,1,cx,cy,r);g.addColorStop(0,c+'0.30)');g.addColorStop(1,c+'0)');
+      x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,7);x.fill();}
+    for(let i=0;i<90;i++){x.fillStyle='rgba(255,255,255,'+rand(0.25,0.95).toFixed(2)+')';const s=rand(0.6,1.9);x.fillRect(rand(0,w),rand(0,h),s,s);}
+  });
+}
+function makeDotTexture(inner,outer){ // soft round sprite
+  const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
+  const g=x.createRadialGradient(32,32,1,32,32,30);g.addColorStop(0,inner);g.addColorStop(1,outer);
+  x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(cv);
+}
+function makeStarTexture(){ // 4-point sparkle sprite
+  const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
+  const g=x.createRadialGradient(32,32,1,32,32,30);g.addColorStop(0,'rgba(255,255,255,0.9)');g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=g;x.fillRect(0,0,64,64);
+  x.strokeStyle='rgba(255,255,255,0.95)';x.lineWidth=3;x.beginPath();
+  x.moveTo(32,3);x.lineTo(32,61);x.moveTo(3,32);x.lineTo(61,32);x.stroke();
+  return new THREE.CanvasTexture(cv);
+}
+/* ---- the packages ---- */
+function fxDimsFor(key){const rec=VMODELS[key];if(rec&&rec.fxBox)return rec.fxBox;return {cx:0.272,cy:-0.27,cz:-1.02,h:0.42,w:0.16,len:2.2};}
+function fxPoints(parent,o){ // one bounded ambient particle layer hugging the gun
+  const geo=new THREE.BufferGeometry();
+  const pos=new Float32Array(o.n*3),seeds=[];
+  for(let i=0;i<o.n;i++)seeds.push({ang:rand(0,TAU),rad:rand(o.area.R*0.35,o.area.R),y:rand(o.area.cy-o.area.h/2,o.area.cy+o.area.h/2),z:rand(o.area.cz-o.area.len/2,o.area.cz+o.area.len/2),spd:rand(0.3,1)});
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const mat=new THREE.PointsMaterial({size:o.size,map:o.tex,transparent:true,opacity:0.9,depthWrite:false,blending:THREE.AdditiveBlending,color:o.color,sizeAttenuation:true});
+  const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;parent.add(pts);
+  return {pts:pts,geo:geo,mat:mat,n:o.n,seeds:seeds,cx:o.area.cx,cz:o.area.cz,
+    yMin:o.area.cy-o.area.h/2-0.04,yMax:o.area.cy+o.area.h/2+0.22,drift:o.drift,tw:(o.twinkle==null?null:o.twinkle),baseOp:0.9};
+}
+function makeSkinFX(kind,D){
+  const g=new THREE.Group();g.userData.isSkinFX=true;
+  const cx=D.cx,cy=D.cy,cz=D.cz,len=D.len||2.2,R=Math.max(D.w||0.14,D.h||0.4)*0.50+0.010; // LOBBY POLISH : sleeve hugs the gun (radius just past the receiver half-height) — a fat tube read as a fluorescent slab swallowing the rifle
+  const up={points:[],spin:[],orbs:[],flowTex:null,flowSpd:0,pulse:null,pulseSpr:null};
+  g.userData.fx=up;
+  const area={cx:cx,cy:cy,cz:cz,h:(D.h||0.4)+0.10,R:R,len:len};
+  if(kind==='void'){
+    up.flowTex=makeArcTexture();up.flowSpd=0.5;
+    const mat=new THREE.MeshBasicMaterial({map:up.flowTex,transparent:true,opacity:0.62,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+    const geo=new THREE.CylinderGeometry(R,R*0.92,len*0.86,20,1,true);geo.rotateX(Math.PI/2);
+    const m=new THREE.Mesh(geo,mat);m.position.set(cx,cy,cz-len*0.04);m.frustumCulled=false;g.add(m);
+    const rMat=new THREE.MeshBasicMaterial({color:0x5f8dff,transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(R+0.055,0.008,8,40),rMat);ring.position.set(cx,cy,cz-len*0.36);ring.frustumCulled=false;g.add(ring);
+    up.spin.push({m:ring,axis:'z',spd:0.9});
+    const ring2=new THREE.Mesh(new THREE.TorusGeometry(R+0.032,0.004,8,40),rMat.clone());ring2.position.set(cx,cy,cz-len*0.36);ring2.rotation.x=0.55;ring2.frustumCulled=false;g.add(ring2);
+    up.spin.push({m:ring2,axis:'z',spd:-0.6});
+    up.points.push(fxPoints(g,{n:25,tex:makeDotTexture('rgba(195,225,255,1)','rgba(60,110,255,0)'),color:0x9fc4ff,size:0.035,area:area,drift:{y:0.05,swirl:0.25}}));
+  }else if(kind==='inferno'){
+    up.flowTex=makeCrackTexture(); // cracks do not scroll — they BREATHE
+    const mat=new THREE.MeshBasicMaterial({map:up.flowTex,transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+    const geo=new THREE.CylinderGeometry(R*1.02,R*1.06,len*0.94,20,1,true);geo.rotateX(Math.PI/2);
+    const m=new THREE.Mesh(geo,mat);m.position.set(cx,cy,cz);m.frustumCulled=false;g.add(m);
+    up.pulse={mat:mat,base:0.8,spd:2.1};
+    const sm=new THREE.Sprite(new THREE.SpriteMaterial({map:makeDotTexture('rgba(255,170,80,0.85)','rgba(255,90,20,0)'),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0.5}));
+    sm.scale.set(0.55,0.4,1);sm.position.set(cx,cy,cz+len*0.18);g.add(sm);
+    up.pulseSpr={m:sm,base:0.5,spd:2.1};
+    up.points.push(fxPoints(g,{n:40,tex:makeDotTexture('rgba(255,214,150,1)','rgba(255,90,20,0)'),color:0xffb060,size:0.03,area:area,drift:{y:0.22,swirl:0.1}}));
+  }else if(kind==='star'){
+    const mat1=new THREE.MeshBasicMaterial({map:makeNebulaTexture(),transparent:true,opacity:0.66,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+    const geo1=new THREE.CylinderGeometry(R,R*0.94,len*0.9,20,1,true);geo1.rotateX(Math.PI/2);
+    const m1=new THREE.Mesh(geo1,mat1);m1.position.set(cx,cy,cz-len*0.03);m1.frustumCulled=false;g.add(m1);
+    up.spin.push({m:m1,axis:'z',spd:0.05}); // the whole nebula sleeve creeps around the barrel axis …
+    const mat2=new THREE.MeshBasicMaterial({map:makeNebulaTexture(),transparent:true,opacity:0.45,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+    const geo2=new THREE.CylinderGeometry(R+0.035,R+0.035,len*0.8,20,1,true);geo2.rotateX(Math.PI/2);
+    const m2=new THREE.Mesh(geo2,mat2);m2.position.set(cx,cy,cz-len*0.03);m2.frustumCulled=false;g.add(m2);
+    up.spin.push({m:m2,axis:'z',spd:-0.08}); // … while the outer layer counter-swirls — the depth tell of the top tier
+    const hMat=new THREE.MeshBasicMaterial({color:0xf2c233,transparent:true,opacity:0.75,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+    const halo=new THREE.Mesh(new THREE.TorusGeometry(R+0.11,0.006,8,48),hMat);halo.position.set(cx,cy,cz-len*0.30);halo.rotation.x=0.9;halo.frustumCulled=false;g.add(halo);
+    up.spin.push({m:halo,axis:'z',spd:0.5});
+    up.points.push(fxPoints(g,{n:34,tex:makeStarTexture(),color:0xffffff,size:0.045,area:area,drift:{y:0.02,swirl:0.15},twinkle:0}));
+    const area2={cx:cx,cy:cy,cz:cz,h:(D.h||0.4)+0.10,R:R*0.9,len:len*0.95};
+    up.points.push(fxPoints(g,{n:26,tex:makeStarTexture(),color:0xf2d98a,size:0.035,area:area2,drift:{y:0.03,swirl:-0.2},twinkle:2.1}));
+    for(let i=0;i<3;i++){
+      const om=new THREE.Sprite(new THREE.SpriteMaterial({map:makeDotTexture('rgba(255,242,205,1)','rgba(160,90,255,0)'),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+      const s=[0.14,0.10,0.08][i];om.scale.set(s,s,1);g.add(om);
+      up.orbs.push({m:om,ph:i*2.1,rad:R+[0.10,0.15,0.07][i],spd:[0.7,0.5,0.9][i],cx:cx,cy:cy,zc:cz+len*0.16,tilt:[0.4,1.1,2.2][i]});
+    }
+  }
+  return g;
+}
+function fxUpdate(group,t,dt){
+  const up=group.userData.fx;if(!up)return;
+  if(up.flowTex&&up.flowSpd)up.flowTex.offset.y=(t*up.flowSpd)%1; // the current crawls along the gun
+  if(up.pulse){const b=0.72+0.28*Math.sin(t*up.pulse.spd);up.pulse.mat.opacity=up.pulse.base*b;}
+  if(up.pulseSpr){const b=0.72+0.28*Math.sin(t*up.pulseSpr.spd);up.pulseSpr.m.material.opacity=up.pulseSpr.base*b;const s=0.55*(0.94+0.09*b);up.pulseSpr.m.scale.set(s,s*0.72,1);}
+  for(const s of up.spin)s.m.rotation[s.axis]+=s.spd*dt;
+  for(const o of up.orbs){const a=t*o.spd+o.ph;
+    o.m.position.set(o.cx+Math.cos(a)*o.rad,o.cy+Math.sin(a)*o.rad*Math.cos(o.tilt),o.zc+Math.sin(a)*o.rad*Math.sin(o.tilt));}
+  for(const L of up.points){
+    const pos=L.geo.attributes.position;
+    for(let i=0;i<L.n;i++){const sd=L.seeds[i];
+      sd.ang+=L.drift.swirl*dt*(0.6+sd.spd);sd.y+=L.drift.y*dt*(0.5+sd.spd);
+      if(sd.y>L.yMax){sd.y=L.yMin;sd.ang=rand(0,TAU);}
+      pos.setXYZ(i,L.cx+Math.cos(sd.ang)*sd.rad,sd.y,sd.z+Math.sin(sd.ang)*sd.rad*0.35);}
+    pos.needsUpdate=true;
+    if(L.tw!=null)L.mat.opacity=L.baseOp*(0.68+0.32*Math.sin(t*2.6+L.tw)); // counter-phased twinkle layers
+  }
+}
+function fxDispose(group){
+  group.traverse(o=>{
+    if(o.geometry)o.geometry.dispose();
+    if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];
+      for(const m of ms){if(m.map)m.map.dispose();m.dispose();}}
+  });
+}
+function fxSetParticlesVisible(group,vis){group.traverse(o=>{if(o.isPoints)o.visible=vis;});}
+/* ---- viewmodel FX : child of `rifle`, so it rides the gun in play ---- */
+let vmSkinFX=null;
+function tintScopeGlass(kind){ // best-effort scope-lens tint to match the mythic scope theme (PCR 'Glass' node ; others no-op if they carry no glass)
+  const rec=VMODELS[glbState.key];if(!rec||!rec.wrap)return;
+  rec.wrap.traverse(o=>{
+    if(!o.isMesh)return;
+    const ms=Array.isArray(o.material)?o.material:[o.material];
+    for(const m of ms){
+      if(!m||!m.emissive)continue;
+      if(!((o.name&&/glass/i.test(o.name))||(m.name&&/glass/i.test(m.name))))continue;
+      if(!m.userData._glO)m.userData._glO={e:m.emissive.getHex(),i:m.emissiveIntensity};
+      if(kind==='inferno'){m.emissive.setHex(0x571f08);m.emissiveIntensity=0.9;}
+      else if(kind==='star'){m.emissive.setHex(0x2a1a4a);m.emissiveIntensity=0.9;}
+      else if(kind==='void'){m.emissive.setHex(0x0a1c5a);m.emissiveIntensity=0.9;}
+      else{m.emissive.setHex(m.userData._glO.e);m.emissiveIntensity=m.userData._glO.i;}
+    }});
+}
+function syncVmSkinFX(){
+  const sk=equippedSkin(),kind=sk&&sk.fx?sk.fx:null;
+  const want=kind?kind+'@'+G.rifle+'@'+glbState.key:null,have=vmSkinFX?vmSkinFX.id:null;
+  if(want!==have){
+    if(vmSkinFX){rifle.remove(vmSkinFX.group);fxDispose(vmSkinFX.group);vmSkinFX=null;}
+    if(kind){const grp=makeSkinFX(kind,fxDimsFor(G.rifle));rifle.add(grp);vmSkinFX={id:want,group:grp};
+      if(G.quality==='low')fxSetParticlesVisible(grp,false); // quality presets : Low disables in-game gun particles (preview keeps them)
+    }
+  }
+  if(vmSkinFX)fxSetParticlesVisible(vmSkinFX.group,G.quality!=='low'); // self-heals on quality changes
+  tintScopeGlass(kind);
+}
+/* ---- preview FX : child of the preview holder, in the same rifle space ---- */
+let pvSkinFX=null;
+function pvFxDetach(){if(pvSkinFX){if(pvSkinFX.group.parent)pvSkinFX.group.parent.remove(pvSkinFX.group);fxDispose(pvSkinFX.group);pvSkinFX=null;}} // LOBBY POLISH : UNPARENT + dispose — a disposed group left in the tree still renders as a ghost
+function syncPvSkinFX(){
+  const sk=skinDef(pvSkinId),kind=sk&&sk.fx?sk.fx:null,key=pvRifleKey();
+  const want=kind?kind+'@'+key+'@'+(pv.isGlb?'g':'p'):null,have=pvSkinFX?pvSkinFX.id:null;
+  if(want===have)return;
+  pvFxDetach();
+  if(kind&&pv.built&&pv.fit&&pv.fit.children.length){
+    const holder=pv.fit.children[0];
+    const D=fxDimsFor(key),k=(pv.size&&D.len)?pv.size.x/D.len:1;
+    const grp=makeSkinFX(kind,{cx:0,cy:0,cz:0,h:D.h*k,w:D.w*k,len:D.len*k}); // LOBBY POLISH : preview FX is built RECENTERED in holder space — pvCenterModel parks every model's bbox center on the holder origin, so this lands on any rifle (the PCR wrap clone carries a x12.7 root scale that flung a wrap-space group metres off-frame)
+    holder.add(grp);grp.position.set(0,0,0);
+    pvSkinFX={id:want,group:grp};
+  }
+}
+/* ---- kill effects + the unlock ceremony ---- */
+const kfFx=[]; // transient kill-effect meshes (flashes / shockwave rings), ticked by skinFxTick
+let kfGlowTex=null,killFxPopTm=null;
+function kfFlash(p,color,s0,life){
+  if(!kfGlowTex)kfGlowTex=makeDotTexture('rgba(255,255,255,1)','rgba(255,255,255,0)');
+  const m=new THREE.Sprite(new THREE.SpriteMaterial({map:kfGlowTex,color:color,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0.95}));
+  m.position.copy(p);m.scale.set(s0,s0,1);scene.add(m);
+  kfFx.push({m:m,kind:'flash',t:0,life:life,op0:0.95,s0:s0});
+}
+function kfRing(p,color){
+  const m=new THREE.Mesh(new THREE.RingGeometry(0.42,0.5,40),new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  m.position.copy(p);m.rotation.x=-Math.PI/2;m.frustumCulled=false;scene.add(m);
+  kfFx.push({m:m,kind:'ring',t:0,life:0.65,op0:0.85,grow:7});
+}
+function fireKillFx(id,p){ // layered ON TOP of blood/ragdoll — never replaces them ; quality scales counts, never the STARFORGE flash
+  const q=G.quality==='low'?0.45:1;
+  if(id==='inferno'){
+    spawnBurst(p,{color:0xff7a26,n:Math.round(26*q),add:1,sp0:2,sp1:7.5,up0:0.5,up1:4.5,life:0.7,grav:6,sz:[1.7,2.7]}); // ember detonation core
+    spawnBurst(p,{color:0x59483c,n:Math.round(14*q),sp0:1,sp1:3.4,up0:1,up1:3.4,life:0.9,grav:4,sz:[1.2,2]}); // ash
+    spawnBurst(p,{color:0xffb347,n:Math.round(10*q),add:1,sp0:0.4,sp1:1.2,up0:2.2,up1:4.6,life:1.25,grav:-1.6,sz:[1.1,1.7]}); // a few embers keep rising after
+    kfFlash(p,0xff9a40,1.7,0.20);
+  }else if(id==='starforge'){
+    kfFlash(p,0xfff0c0,2.7,0.26); // brighter + bigger than INFERNO's in every way
+    spawnBurst(p,{color:0xffe9a8,n:Math.round(30*q),add:1,sp0:2.5,sp1:9,up0:0.5,up1:5.5,life:0.85,grav:5,sz:[1.6,2.6]}); // nova core
+    spawnBurst(p,{color:0xb45cff,n:Math.round(24*q),add:1,sp0:1.5,sp1:7,up0:0,up1:4,life:1.0,grav:3.5,sz:[1.4,2.2]}); // violet shell
+    spawnBurst(p,{color:0xffffff,n:Math.round(22*q),add:1,sp0:0.6,sp1:2.2,up0:0.6,up1:2.4,life:1.5,grav:-0.4,sz:[1.2,1.9]}); // star sparkles
+    spawnBurst(p,{color:0xf2c233,n:Math.round(8*q)+2,add:1,sp0:0.2,sp1:0.7,up0:0.4,up1:1.2,life:1.9,grav:-0.2,sz:[1,1.5]}); // lingering twinkles
+    kfRing(p,0xf2c233); // the expanding shockwave — INFERNO gets nothing like it
+  }
+}
+function showKillFxPop(sk){ // the 100th-kill ceremony : a top banner, ~3.5 s, non-blocking — the effect itself is NOT armed by this, MW equips it on the card
+  const pop=$('killFxPop');if(!pop)return;
+  $('killFxPopName').textContent=sk.name.toUpperCase();
+  $('killFxPopName').style.color=sk.id==='starforge'?'#f2c233':'#ff9a40';
+  pop.querySelector('.kfxBadge').style.background=sk.id==='starforge'?'#b45cff':'#ff7a26';
+  pop.classList.add('show');
+  buzz(30);sTone(1320,0.12,'triangle',0.10);
+  clearTimeout(killFxPopTm);killFxPopTm=setTimeout(()=>pop.classList.remove('show'),3500);
+}
+function skinKillHook(e,hitP,camWillRun){ // called from the kill choke point — COUNTS for the worn grind skin, fires only when worn + unlocked + enabled
+  const sk=equippedSkin();if(!sk||!sk.killFx)return;
+  const all=skinKills(),n=(all[sk.id]||0)+1;all[sk.id]=n;lsSet('longshot_skinKills',JSON.stringify(all));
+  if(n===KILLFX_NEED){showKillFxPop(sk);return;} // ceremony kill : popup only — no burst, nothing armed
+  if(n>KILLFX_NEED&&killFxOn(sk.id)){
+    if(camWillRun)KC.fxSkin=sk.id; // deferred — detonates on the cam's impact beat, with the blood
+    else fireKillFx(sk.id,hitP||e.chest());
+  }
+}
+function skinFxTick(dt){ // hooked into the main frame loop
+  syncVmSkinFX();
+  const t=performance.now()/1000;
+  if(vmSkinFX)fxUpdate(vmSkinFX.group,t,dt);
+  for(let i=kfFx.length-1;i>=0;i--){const k=kfFx[i];k.t+=dt;const u=k.t/k.life;
+    if(u>=1){scene.remove(k.m);k.m.material.dispose();if(k.m.geometry)k.m.geometry.dispose();kfFx.splice(i,1);continue;}
+    if(k.kind==='ring'){const s=0.4+u*k.grow;k.m.scale.set(s,s,s);k.m.material.opacity=k.op0*(1-u);}
+    else{k.m.material.opacity=k.op0*(1-u)*(1-u);const s=k.s0*(1+u*0.7);k.m.scale.set(s,s,1);}}
+}
+/* ================= end MYTHIC block ================= */
 
 /* ---- menu wiring ---- */
 bindEl($('deployBtn'),deployMission);
