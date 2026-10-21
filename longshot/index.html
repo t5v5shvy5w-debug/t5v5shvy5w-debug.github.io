@@ -147,43 +147,55 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #dmgDir i{position:absolute;left:-11px;top:-122px;width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:22px solid rgba(255,60,40,.95);filter:drop-shadow(0 0 6px rgba(255,0,0,.85))}
 /* ================= MENU / UI (GHOSTLINE) ================= */
 #verBadge{z-index:97!important}
-#menuRoot{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;background:rgba(3,7,4,.58);backdrop-filter:blur(8px) saturate(.65);-webkit-backdrop-filter:blur(8px) saturate(.65);color:#dfe9da;text-transform:uppercase;overflow:hidden}
+/* LOBBY FIX : the version badge lives at the bottom of the lobby now — tiny + faint, just above the tab bar (the element + its boot text logic are untouched ; JS moves the node into #menuVerSlot) */
+#menuRoot #verBadge{position:static!important;font-size:9px!important;opacity:.38!important;color:#8aa086!important;letter-spacing:2px!important;text-align:center}
+#menuVerSlot{flex:none;text-align:center;padding:3px 0 1px;line-height:1.2}
+#menuRoot{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;background:rgba(3,7,4,.58);backdrop-filter:blur(8px) saturate(.65);-webkit-backdrop-filter:blur(8px) saturate(.65);color:#dfe9da;text-transform:uppercase;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:manipulation} /* LOBBY FIX : no text selection / no double-tap zoom inside the lobby (menu scope only) */
 #menuRoot:before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);z-index:1}
 #menuRoot:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 42%,transparent 52%,rgba(0,0,0,.6) 100%);z-index:1}
 #menuRoot>*{position:relative;z-index:2}
-.dustp{position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(255,205,130,.55);pointer-events:none;animation:dustdrift linear infinite}
-@keyframes dustdrift{0%{transform:translate(0,0);opacity:0}12%{opacity:.75}85%{opacity:.45}100%{transform:translate(30px,-130px);opacity:0}}
-#topBar{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 62px 4px 14px;flex:none}
+.dustp{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(255,205,130,.32);pointer-events:none;animation:dustdrift linear infinite} /* LOBBY FIX : fewer, smaller, fainter motes … */
+#menuRoot>.dustp{z-index:0} /* LOBBY FIX : … and they render BEHIND every piece of UI text / button (content sits at z-index 2) */
+@keyframes dustdrift{0%{transform:translate(0,0);opacity:0}12%{opacity:.45}85%{opacity:.25}100%{transform:translate(30px,-130px);opacity:0}}
+#topBar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 62px 8px 14px;flex:none} /* LOBBY FIX : one tidy row, both sides vertically centered (right padding still clears the fixed gear) */
 .tbLab{font-size:9px;letter-spacing:2.5px;color:#8aa086}
 #rankName{font-size:15px;letter-spacing:2px;color:#f5e6a8;font-weight:700;line-height:1.15}
 .xpbar{width:148px;height:6px;background:rgba(255,255,255,.13);border-radius:3px;overflow:hidden;margin:4px 0 3px}
 .xpbar>i{display:block;height:100%;background:#7fd67f;border-radius:3px;transition:width .4s ease}
 #xpText{font-size:9px;letter-spacing:1.5px;color:#8aa086}
-.tb-right{text-align:right;padding-top:2px}
+.tb-right{text-align:right;padding-top:0} /* LOBBY FIX : was padding-top:2px — the row is align-items:center now */
 #crVal{font-size:18px;color:#f5e6a8;letter-spacing:1px;font-weight:700}
 #midWrap{flex:1;position:relative;display:flex;flex-direction:column;min-height:0}
 #homeView{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 18px 6px;min-height:0}
-#titleBlock{position:relative;text-align:center;margin-top:0;animation:titleIn 1.4s ease both;flex:none}
+#titleBlock{position:relative;text-align:center;margin-top:12px;animation:titleIn .7s ease both;flex:none} /* LOBBY FIX : real air between the top bar (XP text) and the title ; quicker fade */
 @keyframes titleIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-#titleBlock svg.ring{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);opacity:.32;pointer-events:none}
+/* LOBBY FIX : staggered lobby fade-in (backwards fill only, so :active press states still win after the intro) */
+@keyframes lobbyIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 #gameTitle{position:relative;font-size:clamp(34px,10.5vw,46px);letter-spacing:7px;color:#f5e6a8;font-weight:800;text-shadow:0 0 18px rgba(245,230,168,.35),0 2px 0 rgba(0,0,0,.6);margin:0;line-height:1.1}
-#gameSub{position:relative;font-size:12px;letter-spacing:10px;color:#9fc79f;margin-top:2px}
-.pvSlot{position:relative;width:100%;flex:1;min-height:118px}
-.pvSlot canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;touch-action:none}
-#pvSkinName{flex:none;font-size:11px;letter-spacing:3px;color:#cfe3c8;margin-top:1px;text-align:center}
+#gameSub{position:relative;font-size:12px;letter-spacing:6px;color:#9fc79f;margin-top:2px} /* LOBBY FIX : subtitle letter-spacing 10px → 6px, no longer looks stretched */
+.pvSlot{position:relative;width:100%;flex:1;min-height:96px} /* LOBBY FIX : min-height trimmed so iPhone SE keeps every row */
+.pvSlot canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;touch-action:none;z-index:1} /* LOBBY FIX : canvas rides ABOVE the reticle ring layer */
+/* LOBBY FIX : scope reticle — smaller + fainter (~18% opacity), centered behind the RIFLE inside the preview slot, never touching text */
+.pvRing{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:200px;height:200px;opacity:.18;pointer-events:none;z-index:0}
+.pvRing svg{width:100%;height:100%;display:block}
+#pvHome{animation:lobbyIn .55s ease .12s backwards} /* LOBBY FIX : fade-in stagger — rifle second */
+#pvSkinName{flex:none;font-size:11px;letter-spacing:3px;color:#cfe3c8;margin-top:7px;text-align:center;cursor:pointer;padding:5px 12px;animation:lobbyIn .55s ease .22s backwards} /* LOBBY FIX : tappable skin label (jumps to SKINS), clear air above the mission row */
 #pvSkinName b{color:#f5e6a8}
-#mPickRow{flex:none;display:flex;align-items:center;gap:14px;margin-top:9px}
-#mPickLabel{font-size:15px;letter-spacing:3px;color:#f5e6a8;min-width:158px;text-align:center}
+.skdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px;box-shadow:0 0 6px currentColor} /* LOBBY FIX : rarity dot before the skin name */
+#mPickRow{flex:none;display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px;width:100%;animation:lobbyIn .55s ease .32s backwards} /* LOBBY FIX : picker row centered as a unit */
+#mPickLabel{font-size:15px;letter-spacing:3px;color:#f5e6a8;width:min(204px,52vw);flex:none;text-align:center} /* LOBBY FIX : fixed-width label block — the row never shifts when the text changes */
 #mPickLabel small{display:block;font-size:9px;letter-spacing:2.5px;color:#8aa086;margin-top:2px}
-.parr{width:48px;height:42px;border-radius:11px;background:#14220f;border:1px solid #3f5f45;color:#cfe3c8;font-size:15px;font-family:inherit}
+.parr{width:48px;height:48px;flex:none;border-radius:11px;background:#14220f;border:1px solid #3f5f45;color:#cfe3c8;font-size:15px;font-family:inherit} /* LOBBY FIX : full 48px tap target both axes */
 .parr:active{transform:scale(.94)}
-#deployBtn{flex:none;width:80%;max-width:400px;height:88px;margin-top:12px;border-radius:17px;border:2px solid #6fd67f;background:linear-gradient(180deg,#18300f,#0c1a08);color:#d9ffd9;font-family:inherit;font-size:23px;font-weight:800;letter-spacing:7px;box-shadow:0 0 24px rgba(111,214,127,.35),inset 0 0 18px rgba(111,214,127,.12);animation:deployPulse 2.4s ease-in-out infinite;cursor:pointer}
+.parr.off{opacity:.3} /* LOBBY FIX : first/last mission — arrow stays VISIBLE, just dimmed (was visibility:hidden) */
+#deployBtn{flex:none;width:80%;max-width:400px;height:88px;margin-top:14px;margin-bottom:10px;border-radius:17px;border:2px solid #6fd67f;background:linear-gradient(180deg,#18300f,#0c1a08);color:#d9ffd9;font-family:inherit;font-size:23px;font-weight:800;letter-spacing:7px;box-shadow:0 0 24px rgba(111,214,127,.35),inset 0 0 18px rgba(111,214,127,.12);animation:deployPulse 2.4s ease-in-out infinite,lobbyIn .55s ease .42s backwards;cursor:pointer} /* LOBBY FIX : air above the version line / tab bar ; fade-in runs alongside the glow pulse (different properties) */
 #deployBtn:active{transform:scale(.97)}
 @keyframes deployPulse{0%,100%{box-shadow:0 0 16px rgba(111,214,127,.25),inset 0 0 14px rgba(111,214,127,.1)}50%{box-shadow:0 0 32px rgba(111,214,127,.55),inset 0 0 22px rgba(111,214,127,.2)}}
 #tabBar{flex:none;display:flex;border-top:1px solid #3f5f45;background:rgba(5,9,6,.94);padding-bottom:env(safe-area-inset-bottom)}
-.tabbtn{flex:1;background:none;border:none;color:#7d927a;font-family:inherit;font-size:10px;letter-spacing:2px;padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;text-transform:uppercase}
+.tabbtn{flex:1;background:none;border:none;color:#7d927a;font-family:inherit;font-size:10px;letter-spacing:2px;padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;text-transform:uppercase;transition:transform .08s ease}
+.tabbtn:active{transform:scale(.93)} /* LOBBY FIX : every tab button gets the press-scale */
 .tabbtn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.tabbtn.on{color:#8ff09a;box-shadow:inset 0 2px 0 #6fd67f;text-shadow:0 0 10px rgba(111,214,127,.6)}
+.tabbtn.on{color:#8ff09a;box-shadow:inset 0 -3px 0 #6fd67f,inset 0 -14px 16px -10px rgba(111,214,127,.55);text-shadow:0 0 10px rgba(111,214,127,.6)} /* LOBBY FIX : active tab = green UNDERLINE glow (was a top line) */
 .tabPanel{position:absolute;inset:0;display:none;background:rgba(4,8,5,.35)}
 .tabPanel.open{display:block;animation:tabIn .2s ease both}
 @keyframes tabIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -340,12 +352,11 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
 
 <!-- ================= MENU / UI (GHOSTLINE) ================= -->
 <div id="menuRoot">
+  <!-- LOBBY FIX : dust motes cut 6 → 4 (fainter + behind UI via CSS) -->
   <span class="dustp" style="left:12%;top:64%;animation-duration:11s"></span>
   <span class="dustp" style="left:30%;top:78%;animation-duration:14s;animation-delay:2s"></span>
   <span class="dustp" style="left:55%;top:70%;animation-duration:12s;animation-delay:5s"></span>
-  <span class="dustp" style="left:74%;top:82%;animation-duration:15s;animation-delay:1s"></span>
   <span class="dustp" style="left:88%;top:60%;animation-duration:10s;animation-delay:7s"></span>
-  <span class="dustp" style="left:44%;top:88%;animation-duration:13s;animation-delay:3.5s"></span>
   <div id="topBar">
     <div>
       <div class="tbLab">RANK</div>
@@ -361,11 +372,12 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
   <div id="midWrap">
     <div id="homeView">
       <div id="titleBlock">
-        <svg class="ring" width="230" height="230" viewBox="0 0 100 100"><circle cx="50" cy="50" r="34" stroke="#6fd67f" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="2.2" fill="#6fd67f"/><path d="M50 6v20M50 74v20M6 50h20M74 50h20" stroke="#6fd67f" stroke-width="1"/></svg>
         <h1 id="gameTitle">GHOSTLINE</h1>
         <div id="gameSub">SNIPER OPS</div>
       </div>
-      <div class="pvSlot" id="pvHome"></div>
+      <div class="pvSlot" id="pvHome"><!-- LOBBY FIX : the reticle ring moved here — centered behind the RIFLE, not the title -->
+        <div class="pvRing"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="34" stroke="#6fd67f" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="2.2" fill="#6fd67f"/><path d="M50 6v20M50 74v20M6 50h20M74 50h20" stroke="#6fd67f" stroke-width="1"/></svg></div>
+      </div>
       <div id="pvSkinName"></div>
       <div id="mPickRow">
         <button class="parr" id="mPickPrev">&#9664;</button>
@@ -425,6 +437,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
       <p style="font-size:10px;color:#7d8f7a;letter-spacing:1px;text-align:center;margin-top:12px">FULL SETTINGS (KILLCAM, RETICLE, INVERT…) LIVE IN THE GEAR PANEL</p>
     </div></div>
   </div>
+  <div id="menuVerSlot"></div><!-- LOBBY FIX : the version badge (moved here by JS at boot) sits tiny + faint just above the tab bar -->
   <div id="tabBar">
     <button class="tabbtn" data-tab="loadout"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="1.4"/></svg>LOADOUT</button>
     <button class="tabbtn" data-tab="skins"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>SKINS</button>
@@ -476,8 +489,12 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='10.5'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='10.6'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'10.6',lines:[ // LOBBY FIX : lobby polish release
+  '<b>LOBBY POLISH</b> — the rifle now sits centered and sways gently — drag it to spin',
+  '<b>NEW LIGHTING</b> — the preview rifle reads as real metal, not a silhouette',
+  '<b>CLEANER LAYOUT</b> — tidier top bar, picker and tabs']},
  {v:'10.5',lines:[
   '<b>DISTINCT RIFLES</b> — every sniper now has its own 3D model',
   '<b>+500 CR</b> — launch grant in your wallet',
@@ -3890,9 +3907,10 @@ function renderTopBar(){
 function renderHome(){
   const n=G.menuMission||G.mission;
   $('mPickLabel').innerHTML='MISSION '+n+'<small>'+missionFlavor(n)+' · BEST '+(missionBest(n)?missionBest(n).toLocaleString('en-US'):'—')+'</small>';
-  $('mPickPrev').style.visibility=n>1?'visible':'hidden';
-  $('mPickNext').style.visibility=n<missionUnlockMax()?'visible':'hidden';
-  $('pvSkinName').innerHTML='EQUIPPED SKIN<br><b>'+equippedSkin().name+'</b>';
+  $('mPickPrev').classList.toggle('off',n<=1); // LOBBY FIX : arrows stay VISIBLE at the ends — dimmed, not hidden
+  $('mPickNext').classList.toggle('off',n>=missionUnlockMax());
+  const sk=equippedSkin(); // LOBBY FIX : skin label = rarity dot + name, one tidy line (tap it → SKINS tab)
+  $('pvSkinName').innerHTML='<span class="skdot" style="background:'+RARITY_C[sk.rarity]+';color:'+RARITY_C[sk.rarity]+'"></span><b>'+sk.name+'</b>';
 }
 function openTab(name){
   if(curTab===name)name=null;
@@ -4059,7 +4077,8 @@ function resetProgress(){ // progress keys only — settings + seen-version surv
    of the in-game rifle — the GLB wrap when it landed, the procedural parts
    as fallback (swapped up if the GLB arrives late). Its stock materials are
    cloned too, so previewing a skin never tints the real viewmodel. ---- */
-const pv={built:false,isGlb:false,isModel:false,shownKey:null,spin:null,stockGLB:[],stockProc:[],drag:false,lastDrag:-9,t0:0};
+const pv={built:false,isGlb:false,isModel:false,shownKey:null,spin:null,stockGLB:[],stockProc:[],drag:false,lastDrag:-9,t0:0,
+  fit:null,size:null,dragYaw:0,swayAmp:0,ped:null,frames:0}; // LOBBY FIX : fit group + measured model size + sway/drag state + pedestal + render counter (probe-visible)
 let pvRenderer=null,pvScene=null,pvCam=null,pvGrp=null,pvCanvas=null;
 function pvInit(){
   if(pvCanvas)return;
@@ -4067,29 +4086,54 @@ function pvInit(){
   pvCanvas=document.createElement('canvas');
   try{pvRenderer=new THREE.WebGLRenderer({canvas:pvCanvas,antialias:true,alpha:true});}
   catch(e){pvCanvas=null;return;}
-  pvRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  pvRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); // LOBBY FIX : pixel ratio capped at 2
   pvScene=new THREE.Scene();
   pvCam=new THREE.PerspectiveCamera(38,1.5,0.1,60);pvCam.position.set(0,0.3,3.8);pvCam.lookAt(0,0,0);
-  pvScene.add(new THREE.HemisphereLight(0xdfe8ff,0x2a2f22,1.0));
-  const key=new THREE.DirectionalLight(0xffe0b0,1.2);key.position.set(2.5,3,3.5);pvScene.add(key);
-  const rim=new THREE.DirectionalLight(0x88aaff,0.55);rim.position.set(-3,1.2,-2.5);pvScene.add(rim);
+  /* LOBBY FIX : lobby lighting rig — soft hemisphere base, ONE warm key from the
+     FRONT-LEFT, ONE cool rim from BEHIND so the barrel/scope edges pop, plus a
+     whisper of low front fill. Replaces the flat right-side key that left the
+     rifles reading as black silhouettes. */
+  pvScene.add(new THREE.HemisphereLight(0xe8f1ff,0x27301f,0.95));
+  const key=new THREE.DirectionalLight(0xffd9a8,1.35);key.position.set(-3,2.6,4.2);pvScene.add(key);
+  const rim=new THREE.DirectionalLight(0x7fb2ff,0.95);rim.position.set(2.6,1.6,-3.6);pvScene.add(rim);
+  const fill=new THREE.DirectionalLight(0xbfd4ff,0.3);fill.position.set(0,-1,3);pvScene.add(fill);
+  /* LOBBY FIX : soft glowing pedestal ellipse under the rifle (canvas radial
+     gradient on a flat plane) — the rifle sits ON light instead of floating */
+  {const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+   const g=x.createRadialGradient(64,64,4,64,64,62);g.addColorStop(0,'rgba(190,255,190,0.5)');g.addColorStop(0.55,'rgba(140,220,150,0.16)');g.addColorStop(1,'rgba(140,220,150,0)');
+   x.fillStyle=g;x.fillRect(0,0,128,128);
+   pv.ped=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false}));
+   pv.ped.rotation.x=-Math.PI/2;pvScene.add(pv.ped);}
   pvGrp=new THREE.Group();pvScene.add(pvGrp);
-  pv.spin=new THREE.Group();pvGrp.add(pv.spin);
-  pv.spin.rotation.y=0.7;
-  let lx=0; // drag to rotate ; auto-rotate resumes after 2 s idle (see pvTick)
-  pvCanvas.addEventListener('pointerdown',e=>{pv.drag=true;lx=e.clientX;try{pvCanvas.setPointerCapture(e.pointerId);}catch(err){}});
-  pvCanvas.addEventListener('pointermove',e=>{if(!pv.drag)return;pv.spin.rotation.y+=(e.clientX-lx)*0.012;lx=e.clientX;pv.lastDrag=performance.now()/1000;});
+  pv.spin=new THREE.Group();pvGrp.add(pv.spin); // LOBBY FIX : ONLY this group ever rotates …
+  pv.fit=new THREE.Group();pv.spin.add(pv.fit); // LOBBY FIX : … this one carries the auto-fit scale, and the centered model sits inside it
+  let lx=0; // LOBBY FIX : drag feeds dragYaw (pvTick composes drag + sway) ; sway resumes ~2 s after the last touch
+  pvCanvas.addEventListener('pointerdown',e=>{pv.drag=true;lx=e.clientX;pv.lastDrag=performance.now()/1000;try{pvCanvas.setPointerCapture(e.pointerId);}catch(err){}});
+  pvCanvas.addEventListener('pointermove',e=>{if(!pv.drag)return;pv.dragYaw+=(e.clientX-lx)*0.011;lx=e.clientX;pv.lastDrag=performance.now()/1000;});
   const end=()=>{pv.drag=false;pv.lastDrag=performance.now()/1000;};
   pvCanvas.addEventListener('pointerup',end);pvCanvas.addEventListener('pointercancel',end);
+  window.addEventListener('resize',()=>pvResize()); // LOBBY FIX : re-fit on resize …
+  window.addEventListener('orientationchange',()=>setTimeout(pvResize,60)); // LOBBY FIX : … and on orientation change
 }
-function pvFrameModel(){ // center the model on the spin origin and scale it into frame
-  const box=new THREE.Box3().setFromObject(pv.spin);
-  if(box.isEmpty())return;
+function pvCenterModel(root){ // LOBBY FIX : the old pvFrameModel measured the box through the (possibly scaled) stage group, so the center was wrong and the rifle ORBITED its spin axis, cropped at the edge. Now: measure the DETACHED model, shift it so its bounding-box center sits exactly on the group origin, and yaw it so the long axis lies across the screen. The model is never rotated after this — the GROUP is.
+  const box=new THREE.Box3().setFromObject(root);
+  const holder=new THREE.Group();
+  if(box.isEmpty()){pv.size=null;holder.add(root);return holder;}
   const c=box.getCenter(new THREE.Vector3()),s=box.getSize(new THREE.Vector3());
-  const inner=pv.spin.children[0];if(!inner)return;
-  inner.position.sub(c);
-  const len=Math.max(s.x,s.y,s.z)||1;
-  pvGrp.scale.setScalar(2.7/len);
+  root.position.sub(c);
+  holder.add(root);
+  if(s.z>s.x){holder.rotation.y=Math.PI/2;pv.size={x:s.z,y:s.y,z:s.x};}
+  else pv.size={x:s.x,y:s.y,z:s.z};
+  return holder;
+}
+function pvFitPreview(){ // LOBBY FIX : auto-fit — scale so the model's longest side fills ~85% of the preview width at ANY rotation (worst-case Y-extent sampled), fully visible with margins on both sides ; also sizes/places the pedestal glow
+  if(!pv.fit||!pv.size)return;
+  const aspect=pvCam.aspect||1.5,D=pvCam.position.length();
+  const visH=2*D*Math.tan(pvCam.fov*Math.PI/360),visW=visH*aspect;
+  let maxE=0;for(let a=0;a<=90;a+=5){const r=a*Math.PI/180,e=pv.size.x*Math.abs(Math.cos(r))+pv.size.z*Math.abs(Math.sin(r));if(e>maxE)maxE=e;}
+  const sc=Math.min(0.80*visW/(maxE||1),0.74*visH/(pv.size.y||1)); // LOBBY FIX : 0.80 target — perspective widens near corners a touch past the flat math, landing the widest rendered point at ~85% of the width with a real margin (probe-measured)
+  pv.fit.scale.setScalar(sc);
+  if(pv.ped){const w=pv.size.x*sc*1.04;pv.ped.scale.set(w,w*0.30,1);pv.ped.position.y=-(pv.size.y*sc)/2-0.05;}
 }
 function pvSkinVertex(mesh,i,target){ // one vertex, skinned, in the mesh's local space (three's skinning recipe, inlined so it works on r128)
   const geo=mesh.geometry,si=geo.attributes.skinIndex,sw=geo.attributes.skinWeight;
@@ -4124,47 +4168,64 @@ function pvBakeSkinnedFrom(cloneRoot,srcRoot){ // a cloned SkinnedMesh keeps poi
 }
 function pvBuildModel(key){ // v10.5 : the turntable shows the browsed/equipped rifle's OWN model, cloned from its parked wrap
   const rec=VMODELS[key];if(!rec||!rec.wrap)return;
-  while(pv.spin.children.length)pv.spin.remove(pv.spin.children[0]);
+  while(pv.fit.children.length)pv.fit.remove(pv.fit.children[0]); // LOBBY FIX : models live in the fit group now
   pv.stockGLB.length=0;pv.stockProc.length=0;
   const clone=rec.wrap.clone(true);clone.visible=true;
   if(rec.skinned)pvBakeSkinnedFrom(clone,rec.wrap);
   const cfg=RIFLE_MODELS[key];
   clone.traverse(o=>{if(o.isMesh){o.frustumCulled=false;
     const ms=Array.isArray(o.material)?o.material:[o.material];
-    for(let i=0;i<ms.length;i++){const m=ms[i];
-      if(m&&m.name&&cfg.tintPats.some(p=>m.name.toLowerCase().indexOf(p.toLowerCase())>=0)){
-        const cm=m.clone();cm.userData._skCol=(rec.origCols[m.name]!=null?rec.origCols[m.name]:cm.color.getHex());
-        if(Array.isArray(o.material))o.material[i]=cm;else o.material=cm;
-        pv.stockGLB.push(cm);}}}});
-  pv.spin.add(clone);pv.isGlb=true;pv.isModel=true;pv.built=true;pv.shownKey=key;pvFrameModel();applyPvTint();
+    for(let i=0;i<ms.length;i++){let m=ms[i];if(!m)continue;
+      m=m.clone(); // LOBBY FIX : EVERY preview material is a private clone — preview lighting/PBR tweaks can never leak into the in-game viewmodel
+      if(Array.isArray(o.material))o.material[i]=m;else o.material=m;
+      if(m.name&&cfg.tintPats.some(p=>m.name.toLowerCase().indexOf(p.toLowerCase())>=0)){
+        m.userData._skCol=(rec.origCols[m.name]!=null?rec.origCols[m.name]:m.color.getHex());
+        pv.stockGLB.push(m);
+      }else if(typeof m.metalness==='number'){ // LOBBY FIX : non-stock metal gets a slight metal read under the new lights (tint mats keep their exact skin-driven props)
+        if(m.metalness<0.32)m.metalness=0.32;
+        if(m.roughness>0.62)m.roughness=0.62;
+      }}}});
+  pv.fit.add(pvCenterModel(clone));pv.isGlb=true;pv.isModel=true;pv.built=true;pv.shownKey=key;pvFitPreview();applyPvTint(); // LOBBY FIX : centered + auto-fit
 }
 function pvBuildProc(){
-  while(pv.spin.children.length)pv.spin.remove(pv.spin.children[0]);
+  while(pv.fit.children.length)pv.fit.remove(pv.fit.children[0]); // LOBBY FIX : fit group
   pv.stockGLB.length=0;pv.stockProc.length=0;
   const holder=new THREE.Group();
   for(const ch of rifle.children.slice()){
     if(ch.userData&&ch.userData.isModelWrap)continue;
     holder.add(ch.clone(true));}
-  pv.spin.add(holder);
-  pv.spin.traverse(m=>{if(m.isMesh&&m.userData.isStock){m.material=m.material.clone();pv.stockProc.push(m.material);}});
-  pv.isGlb=false;pv.isModel=false;pv.shownKey='proc';pv.built=true;pvFrameModel();applyPvTint();
+  pv.fit.add(pvCenterModel(holder)); // LOBBY FIX : same centering as the GLB path
+  pv.fit.traverse(m=>{if(m.isMesh&&m.userData.isStock){m.material=m.material.clone();pv.stockProc.push(m.material);}});
+  pv.isGlb=false;pv.isModel=false;pv.shownKey='proc';pv.built=true;pvFitPreview();applyPvTint(); // LOBBY FIX : auto-fit
 }
-function pvTick(dt){ // called from the main frame loop ; renders only while the menu is up
+function pvTick(dt){ // called from the main frame loop ; renders only while the preview is actually on screen
   if(!pvCanvas)pvInit();
   if(!pvCanvas||!pvRenderer)return;
   const mr=$('menuRoot');
-  if(!mr||mr.style.display==='none')return;
+  if(!mr||mr.style.display==='none')return; // LOBBY FIX : in-game — preview loop fully paused
+  if(!pvCanvas.getClientRects||!pvCanvas.getClientRects().length)return; // LOBBY FIX : canvas parked in a hidden slot (MISSIONS / SETTINGS tabs) — paused. HOME / LOADOUT / SKINS keep their live turntable because the canvas is visibly mounted there.
   const key=pvRifleKey();
   if(pv.shownKey!==key){
     const rec=VMODELS[key];
     if(rec&&rec.status==='ready'&&rec.wrap)pvBuildModel(key);
-    else ensureModel(key); // browsed rifle still loading : keep the current model spinning until it lands
+    else ensureModel(key); // browsed rifle still loading : keep the current model swaying until it lands
   }
   if(!pv.built){
     if(performance.now()-pv.t0>3500)pvBuildProc();
     return;
   }
-  if(!pv.drag&&performance.now()/1000-pv.lastDrag>2)pv.spin.rotation.y+=dt*0.4; // slow idle turn
+  /* LOBBY FIX : the constant 360° spin is GONE. The rifle sways gently — Y
+     swinging ±30° (0.52 rad) on a slow sine, plus a tiny up/down float on the
+     stage group. Dragging feeds dragYaw directly (sway fades out while you
+     hold it) ; 2 s after release the drag yaw eases home by the shortest path
+     and the sway fades back in — no snapping, ever. */
+  const now=performance.now()/1000;
+  const idle=!pv.drag&&(now-pv.lastDrag>2);
+  pv.swayAmp+=((idle?1:0)-pv.swayAmp)*(1-Math.exp(-dt*2.4));
+  if(idle){const tw=Math.round(pv.dragYaw/(Math.PI*2))*Math.PI*2;pv.dragYaw+=(tw-pv.dragYaw)*Math.min(1,dt*2.2);} // LOBBY FIX : shortest-path ease home (τ≈0.45 s of real frames — smooth, never a snap)
+  pv.spin.rotation.y=pv.dragYaw+pv.swayAmp*Math.sin(now*0.5)*0.52;
+  pvGrp.position.y=Math.sin(now*0.85)*0.035;
+  pv.frames++; // LOBBY FIX : render counter — probes assert this stalls while the preview is off-screen
   pvRenderer.render(pvScene,pvCam);
 }
 function mountPreview(slot){
@@ -4178,6 +4239,7 @@ function pvResize(){
   const w=Math.max(50,r.width),h=Math.max(50,r.height);
   pvRenderer.setSize(w,h,false);
   pvCam.aspect=w/h;pvCam.updateProjectionMatrix();
+  pvFitPreview(); // LOBBY FIX : every resize re-runs the auto-fit for the new aspect
 }
 function applyPvTint(){ // preview tint : the PREVIEWED skin (pvSkinId) on the browsed/equipped rifle — temporary until equipped
   if(!pv.built)return;
@@ -4191,8 +4253,9 @@ function applyPvTint(){ // preview tint : the PREVIEWED skin (pvSkinId) on the b
 
 /* ---- menu wiring ---- */
 bindEl($('deployBtn'),deployMission);
-bindEl($('mPickPrev'),()=>{const n=G.menuMission;if(n>1){startMission(n-1);tick();}});
-bindEl($('mPickNext'),()=>{const n=G.menuMission;if(n<missionUnlockMax()){startMission(n+1);tick();}});
+bindEl($('mPickPrev'),()=>{const n=G.menuMission;if(n>1){startMission(n-1);tick();}else denyBtn($('mPickPrev'));}); // LOBBY FIX : dimmed end arrow gives deny feedback instead of hiding
+bindEl($('mPickNext'),()=>{const n=G.menuMission;if(n<missionUnlockMax()){startMission(n+1);tick();}else denyBtn($('mPickNext'));}); // LOBBY FIX : same, forward end
+bindEl($('pvSkinName'),()=>{openTab('skins');}); // LOBBY FIX : tapping the equipped-skin label jumps straight to the SKINS tab (openTab supplies the click + haptic)
 {const btns=document.querySelectorAll('#tabBar .tabbtn');
  for(const b of btns)bindEl(b,()=>openTab(b.getAttribute('data-tab')));}
 bindEl($('loPrev'),()=>cycleBrowseRifle(-1));
@@ -4247,6 +4310,7 @@ buildTruck();
 buildSabotage();
 applyGraphics(); // boot-time graphics application : manual preset, or Auto matching the stock behavior
 $('verBadge').textContent='v'+LS_VER; // VERSION BADGE : the running build, always on screen (Font Fight rule — kills 'update is not there' guesswork)
+{const _mv=$('menuVerSlot');if(_mv)_mv.appendChild($('verBadge'));} // LOBBY FIX : the badge node itself moves to the bottom of the lobby, tiny + faint just above the tab bar — same element, same text logic, self-update untouched
 startMission(menuMissionBoot()); // BOOT TO PROGRESS : the menu opens on the player's picked mission (persisted), defaulting to the furthest unlocked
 requestAnimationFrame(frame);
 </script>
