@@ -332,6 +332,8 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="setrow"><span style="color:#8aa086">Desktop: click to lock mouse &middot; right-click / F scope &middot; wheel zoom &middot; R reload</span></div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
     <div class="row"><button class="mbtn" id="setClose">DONE</button></div>
   </div>
 </div>
@@ -474,8 +476,12 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='10.4'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='10.5'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'10.5',lines:[
+  '<b>DISTINCT RIFLES</b> — every sniper now has its own 3D model',
+  '<b>+500 CR</b> — launch grant in your wallet',
+  '<b>SKINS</b> — tints now apply per rifle model']},
  {v:'10.4',lines:[
   '<b>GHOSTLINE</b> — full menu redesign: tabs for Loadout, Skins, Missions',
   '<b>SKINS</b> — 8 rifle skins, buy with credits earned in missions',
@@ -1256,14 +1262,24 @@ const flashSprite=(function(){const cv=document.createElement('canvas');cv.width
    already stands muzzle -Z / up +Y. Children of PCR (the bolt pivot, the
    magazine) still live in the raw space: their Y is the bore axis, +Z is
    world-down. */
-const glbState={active:false,cycle:false,cycPrev:0,cased:false,clicked:false,
+const glbState={key:'longshot',active:false,cycle:false,cycPrev:0,cased:false,clicked:false,
   rot:0,off:0,magOff:0,pivot:null,pivotRestY:0,mag:null,magRestZ:0,stockMats:[],fill:null};
+const _white45=new THREE.Color(0xffffff);
+function tintMatsInto(mats,perRifleDefault,rifleKey,sk){ // v10.5 : one tint path for every rifle model
+  if(sk&&sk.tint!=null){
+    const c=new THREE.Color(sk.tint);c.lerp(_white45,0.45); // SUBTLE variant tint : dark texture x lifted stock hue
+    for(const m of mats){m.color.copy(c);skinProps(m,sk);}
+  }else if(perRifleDefault){ // PCR : Default Steel = the per-rifle tint (the v10.4 look, unchanged)
+    const c=new THREE.Color(skinTintFor(rifleKey,sk));c.lerp(_white45,0.45);
+    for(const m of mats){m.color.copy(c);skinProps(m,sk);}
+  }else{ // sourced models : Default Steel restores the model's own factory colors
+    for(const m of mats){if(m.userData._skCol!=null)m.color.setHex(m.userData._skCol);skinProps(m,sk);}
+  }
+}
 function glbApplyTint(){
-  if(!glbState.active||!glbState.stockMats.length)return;
-  const sk=equippedSkin(); // GHOSTLINE SKINS : the equipped skin wins over the per-rifle tint (Default Steel = per-rifle original)
-  const c=new THREE.Color(skinTintFor(G.rifle,sk));
-  c.lerp(new THREE.Color(0xffffff),0.45); // SUBTLE variant tint : dark texture x lifted stock hue
-  for(const m of glbState.stockMats){m.color.copy(c);skinProps(m,sk);}
+  const rec=VMODELS[glbState.key];
+  if(!rec||rec.status!=='ready'||!rec.tintMats.length)return;
+  tintMatsInto(rec.tintMats,rec.perRifleDefault,G.rifle,equippedSkin()); // GHOSTLINE SKINS : the equipped skin wins over the per-rifle tint
 }
 function boltLiftCurve(p){ // handle up early, hold through the pull, down as it closes
   if(p<0.02)return 0; if(p<0.16)return sstep(0.02,0.16,p);
@@ -1290,20 +1306,140 @@ function updateGlbViewmodel(dt){
   const k=1-Math.exp(-dt*18);
   glbState.rot+=(rotT-glbState.rot)*k;glbState.off+=(offT-glbState.off)*k;
   if(!glbState.cycle&&!G.reloading&&Math.abs(glbState.rot)<0.0005&&Math.abs(glbState.off)<0.002){glbState.rot=0;glbState.off=0;} // exact rest, no drift
-  glbState.pivot.rotation.y=glbState.rot; // pivot lives in PCR space : its Y is the bore axis
-  glbState.pivot.position.y=glbState.pivotRestY+glbState.off;
+  const _rec=VMODELS[glbState.key];
+  if(_rec&&_rec.boltApply)_rec.boltApply(glbState.rot,glbState.off); // v10.5 : sourced models drive their own bolt node
+  else{glbState.pivot.rotation.y=glbState.rot; // pivot lives in PCR space : its Y is the bore axis
+  glbState.pivot.position.y=glbState.pivotRestY+glbState.off;}
   let magT=0; // MAGAZINE : dip is a pure function of reload progress — a cancelled reload just eases home and always ends seated
   if(G.reloading){const ph=clamp(1-G.reloadT/G.reloadMax,0,1);
     magT=(ph<0.25?sstep(0,0.25,ph):(ph>0.6?1-sstep(0.6,0.9,ph):1))*0.67;} // 0.67 local units ≈ 0.085 m dip (PCR +Z is world-down)
   const km=1-Math.exp(-dt*14);
   glbState.magOff+=(magT-glbState.magOff)*km;
   if(!G.reloading&&Math.abs(glbState.magOff)<0.002)glbState.magOff=0;
-  glbState.mag.position.z=glbState.magRestZ+glbState.magOff;
+  if(_rec&&_rec.magApply)_rec.magApply(glbState.magOff); // v10.5 : sourced models dip their own magazine node
+  else if(glbState.mag)glbState.mag.position.z=glbState.magRestZ+glbState.magOff;
 }
 /* soft camera fill so the near-black GLB finish reads — 3.2 m falloff, so only the viewmodel picks it up */
 glbState.fill=new THREE.PointLight(0xcfe0ff,0,3.2,1);
 glbState.fill.position.set(0.35,-0.08,0.15);
 camera.add(glbState.fill);
+
+/* ================= v10.5 : DISTINCT RIFLES — one 3D model per rifle =========
+   LONGSHOT keeps the PCR (above). VARMINT and THUNDER ship their own GLBs,
+   base64-in-JS like the PCR's data file but loaded LAZILY the first time the
+   rifle is equipped / browsed / previewed, so first paint never pays for
+   rifles the player doesn't own yet. Any failure (missing file, bad parse,
+   unexpected nodes) falls back to the PCR viewmodel — never a broken gun.
+   Sourcing (license verified on the model pages, Oct 2026) :
+     VARMINT = "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza/m/ntijptIGIw
+       classic wood-stock bolt-action ; separate Bolt mesh, floating display
+       Clip + loose Bullets (hidden — they hover beside the gun as authored).
+     THUNDER = "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza/m/hcB4it4UpA
+       Barrett-style anti-materiel rifle ; SKINNED, with real Bolt and
+       Magazine bones (weighted), so its bolt cycles and its mag dips. */
+const RIFLE_MODELS={
+  longshot:{legacy:true,tintPats:['Stock_Sopmod','Buffer_Tube']},
+  varmint:{dataFile:'models/kar98-data.js',b64:'KAR98_B64',rotY:Math.PI/2,
+    tintPats:['Primary'],boltName:'Bolt',magName:null,hide:['Clip','Bullet1','Bullet2','Bullet3','Bullet4','Bullet5']},
+  thunder:{dataFile:'models/matwest-data.js',b64:'MATWEST_B64',rotY:0,
+    tintPats:['M_PCL_Flat_Grey_Darker','M_PCL_Flat_Grey_Dark'],boltName:'Bolt',magName:'Magazine',hide:[]},
+};
+function _vmRec(){return{status:'idle',wrap:null,pivot:null,mag:null,tintMats:[],origCols:{},
+  muzzleV:new THREE.Vector3(0.27,-0.245,-2.124),perRifleDefault:false,boltApply:null,magApply:null,pivotRestY:0,magRestZ:0,_p:null};}
+const VMODELS={longshot:_vmRec(),varmint:_vmRec(),thunder:_vmRec()};
+VMODELS.longshot.status='pending'; // the PCR load below is already in flight
+VMODELS.longshot.perRifleDefault=true;
+const VM_TARGET_C=new THREE.Vector3(0.272,-0.294,-1.024); // the PCR's measured bbox center in viewmodel space — every model is framed onto it
+const VM_OFF_M=0.09/0.71; // PCR bolt units -> meters (its 0.71 local travel ≈ 0.09 m)
+function vmPivot(node,kind){ // wrap a bolt/magazine node in a pivot ON its own center, world transform preserved (the PCR attach pattern, generalized)
+  const parent=node.parent;if(!parent)return null;
+  const pivot=new THREE.Group();parent.add(pivot);
+  rifle.updateMatrixWorld(true);
+  const wp=new THREE.Vector3();node.getWorldPosition(wp);
+  pivot.position.copy(parent.worldToLocal(wp.clone()));
+  pivot.attach(node);
+  const rest=pivot.position.clone();
+  rifle.updateMatrixWorld(true);
+  const rel=new THREE.Matrix4().multiplyMatrices(new THREE.Matrix4().getInverse(rifle.matrixWorld),parent.matrixWorld);
+  const q=new THREE.Quaternion(),sc=new THREE.Vector3();rel.decompose(new THREE.Vector3(),q,sc);
+  const backAxis=new THREE.Vector3(0,0,1).transformDirection(rel); // bore-backward in parent space : lifting around it raises a +X bolt handle, pulling along it draws the bolt back
+  const downAxis=new THREE.Vector3(0,-1,0).transformDirection(rel);
+  const invS=1/(Math.abs(sc.x)>1e-6?sc.x:1);
+  if(kind==='mag')return{pivot:pivot,apply:function(off){pivot.position.copy(rest).addScaledVector(downAxis,off*VM_OFF_M*invS);}};
+  return{pivot:pivot,apply:function(rot,off){pivot.quaternion.setFromAxisAngle(backAxis,rot);pivot.position.copy(rest).addScaledVector(backAxis,off*VM_OFF_M*invS);}};
+}
+function setupModel(key,scene){ // normalize a freshly parsed GLB into a parked viewmodel wrap
+  const cfg=RIFLE_MODELS[key],rec=VMODELS[key];
+  try{
+    const wrap=new THREE.Group();wrap.userData.isModelWrap=true;
+    const inner=new THREE.Group();inner.rotation.y=cfg.rotY||0;inner.add(scene);wrap.add(inner);
+    scene.traverse(o=>{if(o.isMesh){o.frustumCulled=false;if(o.isSkinnedMesh)rec.skinned=true;}});
+    for(const hn of (cfg.hide||[])){const n=scene.getObjectByName(hn);if(n&&n.parent)n.parent.remove(n);} // authored display parts that would float in first person : removed, not hidden, so preview framing (bbox) stays tight
+    const holder=new THREE.Group();holder.add(wrap);holder.updateMatrixWorld(true); // detached at identity : world == wrap space while measuring
+    let box=new THREE.Box3().setFromObject(inner),size=box.getSize(new THREE.Vector3());
+    inner.scale.setScalar(2.2/(Math.max(size.x,size.y,size.z)||1)); // same 2.2 m viewmodel length as the PCR
+    holder.updateMatrixWorld(true);
+    box=new THREE.Box3().setFromObject(inner);
+    const c=box.getCenter(new THREE.Vector3());
+    inner.position.x+=VM_TARGET_C.x-c.x;inner.position.y+=VM_TARGET_C.y-c.y;inner.position.z+=VM_TARGET_C.z-c.z;
+    holder.updateMatrixWorld(true);
+    let mz=Infinity;const vv=new THREE.Vector3(); // muzzle : centroid of the most-forward vertices, wrap space
+    scene.traverse(o=>{if(o.isMesh){const p=o.geometry.attributes.position;for(let i=0;i<p.count;i++){vv.fromBufferAttribute(p,i);o.localToWorld(vv);if(vv.z<mz)mz=vv.z;}}});
+    let mx=0,my=0,cnt=0;
+    scene.traverse(o=>{if(o.isMesh){const p=o.geometry.attributes.position;for(let i=0;i<p.count;i++){vv.fromBufferAttribute(p,i);o.localToWorld(vv);if(vv.z<mz+0.03){mx+=vv.x;my+=vv.y;cnt++;}}}});
+    if(cnt)rec.muzzleV.set(mx/cnt,my/cnt,mz);
+    const byName={}; // tint materials : cloned once, factory colors snapshotted for Default Steel
+    scene.traverse(o=>{if(o.isMesh){const ms=Array.isArray(o.material)?o.material:[o.material];
+      for(let i=0;i<ms.length;i++){const m=ms[i];
+        if(m&&m.name&&cfg.tintPats.some(p=>m.name.toLowerCase().indexOf(p.toLowerCase())>=0)){
+          if(!byName[m.name]){byName[m.name]=m.clone();byName[m.name].userData._skCol=byName[m.name].color.getHex();
+            rec.origCols[m.name]=byName[m.name].color.getHex();rec.tintMats.push(byName[m.name]);}
+          if(Array.isArray(o.material))o.material[i]=byName[m.name];else o.material=byName[m.name];}}}});
+    rifle.add(wrap);wrap.visible=false; // parked : setViewModel toggles visibility
+    if(cfg.boltName){const bn=scene.getObjectByName(cfg.boltName);if(bn){const pv=vmPivot(bn,'bolt');if(pv){rec.pivot=pv.pivot;rec.boltApply=pv.apply;}}}
+    if(!rec.pivot){const anch=new THREE.Group();anch.position.set(rec.muzzleV.x,rec.muzzleV.y+0.12,rec.muzzleV.z+1.05);wrap.add(anch);rec.pivot=anch;} // boltless model : casings still leave from the receiver
+    if(cfg.magName){const mn=scene.getObjectByName(cfg.magName);if(mn){const pv=vmPivot(mn,'mag');if(pv)rec.magApply=pv.apply;}}
+    rec.wrap=wrap;rec.status='ready';
+  }catch(err){rec.status='failed';console.warn('[longshot] model setup failed for '+key+' — PCR fallback',err);}
+}
+function setViewModel(key){ // point glbState at the equipped rifle's model (PCR stands in until it lands)
+  let rec=VMODELS[key];
+  if(!rec||rec.status!=='ready'||!rec.wrap){
+    if(key==='longshot')return; // nothing GLB ready yet — the procedural rifle stands
+    key='longshot';rec=VMODELS.longshot;
+    if(!rec||rec.status!=='ready'||!rec.wrap)return;
+  }
+  for(const k in VMODELS){const r=VMODELS[k];if(r.wrap)r.wrap.visible=(k===key);}
+  glbState.key=key;glbState.wrap=rec.wrap;
+  glbState.pivot=rec.pivot;glbState.pivotRestY=rec.pivotRestY||0;
+  glbState.mag=rec.mag||null;glbState.magRestZ=rec.magRestZ||0;
+  glbState.stockMats=rec.tintMats;glbState.active=true;glbState.fill.intensity=0.9;
+  rifle.userData.muzzle.copy(rec.muzzleV);
+  flashSprite.position.copy(rec.muzzleV); // the flash rides THIS rifle's muzzle
+  glbState.cycle=false;glbState.rot=0;glbState.off=0;glbState.magOff=0;
+  if(rec.boltApply)rec.boltApply(0,0);
+  if(rec.magApply)rec.magApply(0);
+  glbApplyTint();
+}
+function ensureModel(key){ // lazy-load a rifle's data file + GLB on first need ; promise-cached, failure = PCR fallback
+  const cfg=RIFLE_MODELS[key];if(!cfg||cfg.legacy)return Promise.resolve(VMODELS[key].status==='ready');
+  const rec=VMODELS[key];
+  if(rec.status==='ready')return Promise.resolve(true);
+  if(rec.status==='failed')return Promise.resolve(false);
+  if(rec._p)return rec._p;
+  rec.status='loading';
+  rec._p=new Promise(res=>{
+    const fail=()=>{if(rec.status!=='ready')rec.status='failed';console.warn('[longshot] model load failed for '+key+' — PCR fallback');res(false);};
+    const parse=()=>{
+      if(!window[cfg.b64])return fail();
+      try{const bin=atob(window[cfg.b64]);const buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
+        new THREE.GLTFLoader().parse(buf.buffer,'',g=>{setupModel(key,g.scene);if(rec.status==='ready'){if(G.rifle===key)setViewModel(key);res(true);}else res(false);},fail);
+      }catch(e){fail();}};
+    if(window[cfg.b64])parse();
+    else{const s=document.createElement('script');s.src=cfg.dataFile;s.onload=parse;s.onerror=fail;document.head.appendChild(s);}
+  });
+  return rec._p;
+}
 (function loadGlbRifle(){
   if(typeof THREE.GLTFLoader!=='function'){console.warn('[longshot] GLTFLoader missing — procedural rifle stays');return;}
   const S_TOT=2.2/17.326; // world scale : a ~2.2 m viewmodel, framed like the procedural rifle
@@ -1311,6 +1447,7 @@ camera.add(glbState.fill);
     try{
       const wrap=new THREE.Group();
       glbState.wrap=wrap; // GHOSTLINE preview : the menu's 3D preview clones this group
+      wrap.userData.isModelWrap=true; // v10.5 : the procedural preview fallback skips every model wrap
       wrap.scale.setScalar(S_TOT/0.01); // PCR root already carries 0.01
       wrap.position.set(0.27,-0.245-2.061*S_TOT,-0.72-2.647*S_TOT); // bore line + receiver land where the old rifle's sit
       const orient=new THREE.Group(); // NO rotation here : the PCR root itself carries the exporter's Rx(90) axis conversion, so the loaded scene already stands muzzle -Z / up +Y — adding another quarter-turn double-rotates it
@@ -1342,9 +1479,13 @@ camera.add(glbState.fill);
       glbState.fill.intensity=0.9;
       rifle.userData.muzzle.set(0.27,-0.245,-2.124); // flash sprite rides the real muzzle now
       glbApplyTint();
+      const lrec=VMODELS.longshot; // v10.5 : register as rifle #1's model record, then show the equipped rifle
+      lrec.wrap=wrap;lrec.pivot=pivot;lrec.pivotRestY=pivot.position.y;lrec.mag=magN;lrec.magRestZ=magN.position.z;
+      lrec.tintMats=glbState.stockMats;lrec.status='ready';
+      setViewModel(G.rifle);
     }catch(err){console.warn('[longshot] GLB rifle setup failed — procedural rifle stays',err);}
   };
-  const glbErr=function(err){console.warn('[longshot] GLB rifle failed to load — procedural rifle stays',err);};
+  const glbErr=function(err){VMODELS.longshot.status='failed';console.warn('[longshot] GLB rifle failed to load — procedural rifle stays',err);};
   if(window.SNIPER_B64){try{const bin=atob(window.SNIPER_B64);const buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);new THREE.GLTFLoader().parse(buf.buffer,'',glbOk,glbErr);}catch(err){glbErr(err);}}
   else new THREE.GLTFLoader().load('models/sniper.glb',glbOk,undefined,glbErr);
 })();
@@ -3262,6 +3403,7 @@ function cycleRifle(d){
    viewmodel stock accent color. Runs at mission start and when the card pick locks in. */
 function applyRifleZoom(){
   const r=RIFLES[G.rifle];
+  setViewModel(G.rifle);ensureModel(G.rifle); // v10.5 : the viewmodel IS the equipped rifle's own model (loads lazily, PCR stands in)
   G.maxZoom=r.zmax;
   G.zoom=clamp(Math.max(G.zoom||8,r.zmin),r.zmin,r.zmax);
   const zs=$('zoomSlider');zs.min=r.zmin;zs.max=r.zmax;zs.value=G.zoom;
@@ -3830,7 +3972,7 @@ function renderLoadout(){
   else{b.textContent='EQUIP';b.className='ubtn';}
   applyPvTint();
 }
-function cycleBrowseRifle(d){let i=RIFLE_ORDER.indexOf(selRifle);if(i<0)i=0;selRifle=RIFLE_ORDER[(i+d+RIFLE_ORDER.length)%RIFLE_ORDER.length];renderLoadout();tick();}
+function cycleBrowseRifle(d){let i=RIFLE_ORDER.indexOf(selRifle);if(i<0)i=0;selRifle=RIFLE_ORDER[(i+d+RIFLE_ORDER.length)%RIFLE_ORDER.length];ensureModel(selRifle);renderLoadout();tick();}
 function loEquipPress(){
   if(!rifleUnlocked(selRifle)){denyBtn($('loEquip'));return;}
   G.rifle=selRifle;lsSet('longshot_rifle',selRifle);applyRifleZoom(); // the card picker's exact lock-in path
@@ -3908,7 +4050,7 @@ let confirmFn=null;
 function openConfirm(head,text,fn){$('cfHead').textContent=head;$('cfText').textContent=text;confirmFn=fn;$('confirmRoot').style.display='flex';}
 function closeConfirm(){$('confirmRoot').style.display='none';confirmFn=null;}
 function resetProgress(){ // progress keys only — settings + seen-version survive, then a clean reload
-  const keys=['longshot_best','longshot_mbest','longshot_mtime','longshot_rifles','longshot_rifle','longshot_credits','longshot_xp','longshot_skinsOwned','longshot_skin','longshot_ghostMissions','longshot_menuMission'];
+  const keys=['longshot_best','longshot_mbest','longshot_mtime','longshot_rifles','longshot_rifle','longshot_credits','longshot_xp','longshot_skinsOwned','longshot_skin','longshot_ghostMissions','longshot_menuMission','longshot_grant105'];
   for(const k of keys){try{localStorage.removeItem(k);}catch(e){}}
   location.reload();
 }
@@ -3917,7 +4059,7 @@ function resetProgress(){ // progress keys only — settings + seen-version surv
    of the in-game rifle — the GLB wrap when it landed, the procedural parts
    as fallback (swapped up if the GLB arrives late). Its stock materials are
    cloned too, so previewing a skin never tints the real viewmodel. ---- */
-const pv={built:false,isGlb:false,spin:null,stockGLB:[],stockProc:[],drag:false,lastDrag:-9,t0:0};
+const pv={built:false,isGlb:false,isModel:false,shownKey:null,spin:null,stockGLB:[],stockProc:[],drag:false,lastDrag:-9,t0:0};
 let pvRenderer=null,pvScene=null,pvCam=null,pvGrp=null,pvCanvas=null;
 function pvInit(){
   if(pvCanvas)return;
@@ -3949,34 +4091,78 @@ function pvFrameModel(){ // center the model on the spin origin and scale it int
   const len=Math.max(s.x,s.y,s.z)||1;
   pvGrp.scale.setScalar(2.7/len);
 }
-function pvBuildGlb(){
-  const clone=glbState.wrap.clone(true);
-  for(const nm of['Stock_Sopmod','Buffer_Tube']){const o=clone.getObjectByName(nm);
-    if(o)o.traverse(m=>{if(m.isMesh){m.material=m.material.clone();pv.stockGLB.push(m.material);}});}
-  pv.spin.add(clone);pv.isGlb=true;pv.built=true;pvFrameModel();applyPvTint();
+function pvSkinVertex(mesh,i,target){ // one vertex, skinned, in the mesh's local space (three's skinning recipe, inlined so it works on r128)
+  const geo=mesh.geometry,si=geo.attributes.skinIndex,sw=geo.attributes.skinWeight;
+  target.fromBufferAttribute(geo.attributes.position,i).applyMatrix4(mesh.bindMatrix);
+  const acc=new THREE.Vector3(),tmp=new THREE.Vector3(),bm=new THREE.Matrix4(),G=['getX','getY','getZ','getW'];
+  for(let k=0;k<4;k++){const w=sw[G[k]](i);if(w>0){bm.fromArray(mesh.skeleton.boneMatrices,si[G[k]](i)*16);tmp.copy(target).applyMatrix4(bm);acc.addScaledVector(tmp,w);}}
+  return acc.applyMatrix4(mesh.bindMatrixInverse);
+}
+function pvBakeSkinnedFrom(cloneRoot,srcRoot){ // a cloned SkinnedMesh keeps pointing at the SOURCE skeleton (parked at the camera) — bake bind pose into plain meshes so the preview stands on its own
+  const srcs=[],clos=[];
+  srcRoot.traverse(o=>{if(o.isSkinnedMesh)srcs.push(o);});
+  cloneRoot.traverse(o=>{if(o.isSkinnedMesh)clos.push(o);});
+  srcRoot.updateWorldMatrix(true,true);
+  for(let s=0;s<srcs.length&&s<clos.length;s++){
+    const src=srcs[s],clo=clos[s];
+    if(src.skeleton)src.skeleton.update();
+    const geo=src.geometry,pos=geo.attributes.position,nor=geo.attributes.normal;
+    const bp=new Float32Array(pos.count*3),v=new THREE.Vector3();
+    for(let i=0;i<pos.count;i++){pvSkinVertex(src,i,v);bp[i*3]=v.x;bp[i*3+1]=v.y;bp[i*3+2]=v.z;}
+    const bg=new THREE.BufferGeometry();
+    bg.setAttribute('position',new THREE.BufferAttribute(bp,3));
+    if(nor){const bn=new Float32Array(pos.count*3),nv=new THREE.Vector3(),sv=new THREE.Vector3();
+      for(let i=0;i<pos.count;i++){pvSkinVertex(src,i,sv);nv.fromBufferAttribute(nor,i).add(sv);pvSkinVertex(src,i,nv);nv.sub(sv).normalize();bn[i*3]=nv.x;bn[i*3+1]=nv.y;bn[i*3+2]=nv.z;}
+      bg.setAttribute('normal',new THREE.BufferAttribute(bn,3));}
+    if(geo.attributes.uv)bg.setAttribute('uv',geo.attributes.uv);
+    if(geo.index)bg.setIndex(geo.index);
+    const mesh=new THREE.Mesh(bg,clo.material);
+    mesh.position.copy(clo.position);mesh.quaternion.copy(clo.quaternion);mesh.scale.copy(clo.scale);
+    mesh.name=clo.name;mesh.frustumCulled=false;
+    const parent=clo.parent;if(parent){parent.remove(clo);parent.add(mesh);}
+  }
+}
+function pvBuildModel(key){ // v10.5 : the turntable shows the browsed/equipped rifle's OWN model, cloned from its parked wrap
+  const rec=VMODELS[key];if(!rec||!rec.wrap)return;
+  while(pv.spin.children.length)pv.spin.remove(pv.spin.children[0]);
+  pv.stockGLB.length=0;pv.stockProc.length=0;
+  const clone=rec.wrap.clone(true);clone.visible=true;
+  if(rec.skinned)pvBakeSkinnedFrom(clone,rec.wrap);
+  const cfg=RIFLE_MODELS[key];
+  clone.traverse(o=>{if(o.isMesh){o.frustumCulled=false;
+    const ms=Array.isArray(o.material)?o.material:[o.material];
+    for(let i=0;i<ms.length;i++){const m=ms[i];
+      if(m&&m.name&&cfg.tintPats.some(p=>m.name.toLowerCase().indexOf(p.toLowerCase())>=0)){
+        const cm=m.clone();cm.userData._skCol=(rec.origCols[m.name]!=null?rec.origCols[m.name]:cm.color.getHex());
+        if(Array.isArray(o.material))o.material[i]=cm;else o.material=cm;
+        pv.stockGLB.push(cm);}}}});
+  pv.spin.add(clone);pv.isGlb=true;pv.isModel=true;pv.built=true;pv.shownKey=key;pvFrameModel();applyPvTint();
 }
 function pvBuildProc(){
+  while(pv.spin.children.length)pv.spin.remove(pv.spin.children[0]);
+  pv.stockGLB.length=0;pv.stockProc.length=0;
   const holder=new THREE.Group();
   for(const ch of rifle.children.slice()){
-    if(glbState.wrap&&ch===glbState.wrap)continue;
+    if(ch.userData&&ch.userData.isModelWrap)continue;
     holder.add(ch.clone(true));}
   pv.spin.add(holder);
   pv.spin.traverse(m=>{if(m.isMesh&&m.userData.isStock){m.material=m.material.clone();pv.stockProc.push(m.material);}});
-  pv.isGlb=false;pv.built=true;pvFrameModel();applyPvTint();
+  pv.isGlb=false;pv.isModel=false;pv.shownKey='proc';pv.built=true;pvFrameModel();applyPvTint();
 }
 function pvTick(dt){ // called from the main frame loop ; renders only while the menu is up
   if(!pvCanvas)pvInit();
   if(!pvCanvas||!pvRenderer)return;
   const mr=$('menuRoot');
   if(!mr||mr.style.display==='none')return;
-  if(!pv.built){
-    if(glbState.active&&glbState.wrap)pvBuildGlb();
-    else if(performance.now()-pv.t0>3500)pvBuildProc();
-    return;
+  const key=pvRifleKey();
+  if(pv.shownKey!==key){
+    const rec=VMODELS[key];
+    if(rec&&rec.status==='ready'&&rec.wrap)pvBuildModel(key);
+    else ensureModel(key); // browsed rifle still loading : keep the current model spinning until it lands
   }
-  if(!pv.isGlb&&glbState.active&&glbState.wrap){ // the real GLB landed after the fallback was built — swap up to it
-    while(pv.spin.children.length)pv.spin.remove(pv.spin.children[0]);
-    pv.stockProc.length=0;pvBuildGlb();
+  if(!pv.built){
+    if(performance.now()-pv.t0>3500)pvBuildProc();
+    return;
   }
   if(!pv.drag&&performance.now()/1000-pv.lastDrag>2)pv.spin.rotation.y+=dt*0.4; // slow idle turn
   pvRenderer.render(pvScene,pvCam);
@@ -3997,8 +4183,8 @@ function applyPvTint(){ // preview tint : the PREVIEWED skin (pvSkinId) on the b
   if(!pv.built)return;
   const sk=skinDef(pvSkinId),hex=skinTintFor(pvRifleKey(),sk);
   if(pv.stockGLB.length){
-    const c=new THREE.Color(hex);c.lerp(new THREE.Color(0xffffff),0.45); // same subtle lift as the viewmodel tint
-    for(const m of pv.stockGLB){m.color.copy(c);skinProps(m,sk);}
+    const rec=VMODELS[pv.shownKey];
+    tintMatsInto(pv.stockGLB,!!(rec&&rec.perRifleDefault),pvRifleKey(),sk); // v10.5 : same per-model tint rules as the viewmodel
   }
   for(const m of pv.stockProc)m.color.setHex(hex);
 }
@@ -4049,6 +4235,13 @@ G.haptics=lsGet('longshot_haptics','1')==='1';
 if(lsGet('longshot_left','0')==='1')document.body.classList.add('lefthand');
 if(lsGet('longshot_briefSeen','')==='1')$('briefTab').classList.add('seen');
 pvSkinId=equippedSkin().id;
+
+/* ---- v10.5 : warm the equipped rifle's model + one-time launch grant ---- */
+ensureModel(G.rifle);
+if(lsGet('longshot_grant105','')!=='1'){ // GHOSTLINE LAUNCH GRANT : +500 CR exactly once (a progress reset clears the flag, so a reset re-grants)
+  setCredits(credits()+500);lsSet('longshot_grant105','1');
+  setTimeout(()=>{toast('GHOSTLINE LAUNCH GRANT +500 CR');$('toast').style.zIndex='95';},2800);
+}
 
 buildTruck();
 buildSabotage();
