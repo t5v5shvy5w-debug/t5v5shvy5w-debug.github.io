@@ -516,8 +516,12 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='10.7'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='10.8'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'10.8',lines:[ // MYTHIC FX : the effects now live ON the gun — no more bubble wrap
+  '<b>MYTHIC FX REBUILT</b> — the bubble is gone: VOIDCURRENT, INFERNO CORE and STARFORGE effects now flow across the gun itself — electric arcs, molten cracks, living nebula on the metal',
+  '<b>FORM-FITTING ACCENTS</b> — barrel-hugging holo rings, a gold halo and tight-orbit star orbs',
+  '<b>SAME GRIND</b> — kill effects, scopes, tracers, prices and counters unchanged']},
  {v:'10.7',lines:[ // LOBBY POLISH : menu glow-up + MYTHIC skins
   '<b>LOBBY POLISH</b> — the preview rifle now fits every screen, lit like real metal',
   '<b>MYTHIC SKINS</b> — VOIDCURRENT 6,000 CR · INFERNO CORE 15,000 CR · STARFORGE 30,000 CR — animated effects, custom scopes, tracers',
@@ -1328,6 +1332,7 @@ function glbApplyTint(){
   const rec=VMODELS[glbState.key];
   if(!rec||rec.status!=='ready'||!rec.tintMats.length)return;
   tintMatsInto(rec.tintMats,rec.perRifleDefault,G.rifle,equippedSkin()); // GHOSTLINE SKINS : the equipped skin wins over the per-rifle tint
+  fxApplyMats(rec.wrap,fxCollectMats(rec.wrap),new Set(rec.tintMats),(equippedSkin()||{}).fx||null,'vm'); // MYTHIC FX : the flow rides the ACTIVE model's own materials (setViewModel funnels through here too)
 }
 function boltLiftCurve(p){ // handle up early, hold through the pull, down as it closes
   if(p<0.02)return 0; if(p<0.16)return sstep(0.02,0.16,p);
@@ -1399,6 +1404,57 @@ VMODELS.longshot.status='pending'; // the PCR load below is already in flight
 VMODELS.longshot.perRifleDefault=true;
 const VM_TARGET_C=new THREE.Vector3(0.272,-0.294,-1.024); // the PCR's measured bbox center in viewmodel space — every model is framed onto it
 const VM_OFF_M=0.09/0.71; // PCR bolt units -> meters (its 0.71 local travel ≈ 0.09 m)
+/* MYTHIC FX : barrel cross-section profile, measured from the model's own
+   vertices in wrap space. The transform is composed from LOCAL matrices
+   only (mesh -> ... -> wrap) : a world-matrix round trip at load time reads
+   whatever snapshot the scene graph happens to hold mid-parse and produced
+   squashed / empty profiles. The rebuilt mythic accents — rings, halo,
+   orbs — size themselves from THIS, never from a guessed sleeve radius :
+   a ring is the barrel's real radius + ~15%, by construction. */
+function measureBarrel(rec,wrapArg){
+  const wrap=wrapArg||rec.wrap,D=rec.fxBox;if(!wrap||!D)return;
+  try{
+    const pts=[],v=new THREE.Vector3(),chain=[];
+    wrap.traverse(o=>{
+      if(!o.isMesh||!o.geometry||!o.geometry.attributes||!o.geometry.attributes.position)return;
+      chain.length=0;let n=o;while(n){chain.push(n);if(n===wrap)break;n=n.parent;} // up to AND INCLUDING wrap : the PCR wrap carries its own x12.7 root scale, the sourced wraps are identity with the scale on an inner node
+      if(!chain.length||chain[chain.length-1]!==wrap)return;
+      const m=new THREE.Matrix4();
+      for(let i=chain.length-1;i>=0;i--){chain[i].updateMatrix();m.multiply(chain[i].matrix);}
+      const p=o.geometry.attributes.position;
+      for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i).applyMatrix4(m);pts.push(v.x,v.y,v.z);}
+    });
+    if(pts.length<30)return;
+    // the barrel line : centroid of the forward third (barrel + handguard live
+    // there ; the scope and dropped stock that pull the bbox center off-axis
+    // sit mid-body and are excluded)
+    const zF=D.cz-D.len*0.28;let ax=0,ay=0,an=0;
+    for(let i=0;i<pts.length;i+=3){if(pts[i+2]<=zF){ax+=pts[i];ay+=pts[i+1];an++;}}
+    if(!an)return;
+    ax/=an;ay/=an;rec.barrelAxis={x:ax,y:ay};
+    const bins={};
+    for(let i=0;i<pts.length;i+=3){
+      const b=Math.round(pts[i+2]/0.05),r=Math.hypot(pts[i]-ax,pts[i+1]-ay);
+      (bins[b]||(bins[b]=[])).push(r);
+    }
+    const prof=[];
+    for(const b in bins){const a=bins[b].sort((x,y)=>x-y);prof.push({z:+b*0.05,r:a[Math.min(a.length-1,Math.floor(a.length*0.90))]});}
+    prof.sort((a,b)=>a.z-b.z);
+    if(prof.length)rec.barrel=prof;
+    { // MYTHIC FX R2 : decimated surface anchors for the particle sheath — real vertices of THIS gun in rifle space. A particle pinned within a few cm of a real vertex is inside the hull gate by construction (max of a linear functional over a convex set is attained at its vertices) ; every bbox-filling or axis-ring distribution tried before it leaked at one-sided cross-sections.
+      const nv=pts.length/3,step=Math.max(1,Math.floor(nv/700)),fv=[];
+      for(let i=0;i<nv;i+=step)fv.push(pts[i*3],pts[i*3+1],pts[i*3+2]);
+      if(fv.length>30)rec.fxVerts=fv;
+    }
+  }catch(e){/* profile is an accent nicety — barrelR falls back to a sane constant */}
+}
+function barrelR(rec,z){ // interpolated barrel radius at wrap-space z
+  const P=rec&&rec.barrel;if(!P||!P.length)return 0.055;
+  if(z<=P[0].z)return P[0].r;
+  if(z>=P[P.length-1].z)return P[P.length-1].r;
+  for(let i=1;i<P.length;i++){if(z<=P[i].z){const a=P[i-1],b=P[i],f=(z-a.z)/((b.z-a.z)||1);return a.r+(b.r-a.r)*f;}}
+  return 0.055;
+}
 function vmPivot(node,kind){ // wrap a bolt/magazine node in a pivot ON its own center, world transform preserved (the PCR attach pattern, generalized)
   const parent=node.parent;if(!parent)return null;
   const pivot=new THREE.Group();parent.add(pivot);
@@ -1449,6 +1505,7 @@ function setupModel(key,scene){ // normalize a freshly parsed GLB into a parked 
     if(!rec.pivot){const anch=new THREE.Group();anch.position.set(rec.muzzleV.x,rec.muzzleV.y+0.12,rec.muzzleV.z+1.05);wrap.add(anch);rec.pivot=anch;} // boltless model : casings still leave from the receiver
     if(cfg.magName){const mn=scene.getObjectByName(cfg.magName);if(mn){const pv=vmPivot(mn,'mag');if(pv)rec.magApply=pv.apply;}}
     rec.fxBox={cx:VM_TARGET_C.x,cy:VM_TARGET_C.y,cz:VM_TARGET_C.z,h:sizeC.y,w:sizeC.x,len:sizeC.z}; // LOBBY POLISH : wrap-space dims — the center is VM_TARGET_C by construction (a live setFromObject here would read scene-world coords through the camera-mounted rifle group and fling the FX metres away)
+    measureBarrel(rec,wrap); // MYTHIC FX : barrel profile for the form-fitting accents (local wrap — rec.wrap is assigned below)
     rec.wrap=wrap;rec.status='ready';
   }catch(err){rec.status='failed';console.warn('[longshot] model setup failed for '+key+' — PCR fallback',err);}
 }
@@ -1521,8 +1578,8 @@ function ensureModel(key){ // lazy-load a rifle's data file + GLB on first need 
         glassN.material.roughness=0.12;}
       const stockN=gltf.scene.getObjectByName('Stock_Sopmod'),bufN=gltf.scene.getObjectByName('Buffer_Tube');
       const seen={}; // clone the stock-subtree materials once so the per-rifle tint never touches the shared set
-      const grab=o=>{if(o){o.traverse(n=>{if(n.isMesh&&!seen[n.material.uuid]){seen[n.material.uuid]=1;
-        n.material=n.material.clone();glbState.stockMats.push(n.material);}});}};
+      const grab=o=>{if(o){o.traverse(n=>{if(n.isMesh&&n.material&&n.material.isMaterial&&!n.material.userData._skGrab&&!seen[n.material.uuid]){seen[n.material.uuid]=1;
+        n.material=n.material.clone();n.material.userData._skGrab=1;glbState.stockMats.push(n.material);}});}}; // MYTHIC FX R2 : Buffer_Tube nests INSIDE the Stock subtree, so the second grab used to re-clone the first grab's clone (new uuid, unmarked) — orphaning a phantom material in tintMats that no mesh uses and the flow pass never reaches. Mark stock clones and skip them on re-grab : tintMats is now exactly the live tint set.
       grab(stockN);grab(bufN);
       for(const ch of rifle.children)if(ch!==wrap)ch.visible=false; // procedural rifle retires
       glbState.active=true;
@@ -1532,7 +1589,17 @@ function ensureModel(key){ // lazy-load a rifle's data file + GLB on first need 
       const lrec=VMODELS.longshot; // v10.5 : register as rifle #1's model record, then show the equipped rifle
       lrec.wrap=wrap;lrec.pivot=pivot;lrec.pivotRestY=pivot.position.y;lrec.mag=magN;lrec.magRestZ=magN.position.z;
       lrec.tintMats=glbState.stockMats;lrec.status='ready';
-      lrec.fxBox={cx:0.272,cy:-0.294,cz:-1.024,h:0.40,w:0.15,len:2.2}; // LOBBY POLISH : PCR rifle-space dims from the build's own measured constants (bbox center VM_TARGET_C, 2.2 span, muzzle -2.124) — MYTHIC FX sleeves
+      lrec.fxBox={cx:0.272,cy:-0.294,cz:-1.024,h:0.40,w:0.15,len:2.2}; // LOBBY POLISH : PCR rifle-space dims — fallback hand constants, replaced by the measured box just below
+      { /* MYTHIC FX R2 : MEASURE the PCR's real rifle-space box. The sourced models get a measured fxBox at setup ; the PCR's hand constants sit proud of the real geometry (~0.07-0.11 top and bottom), which kept leaking the FX particle band past the bbox+0.12 gate. Geometry boxes only, transforms taken relative to the rifle group, so the camera pose at load time can't pollute the measurement. */
+        try{
+          wrap.updateWorldMatrix(true,true);
+          const inv=new THREE.Matrix4().getInverse(rifle.matrixWorld),m4=new THREE.Matrix4(),bb=new THREE.Box3(),acc=new THREE.Box3();
+          wrap.traverse(o=>{if(o.isMesh&&o.geometry){if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();bb.copy(o.geometry.boundingBox);m4.multiplyMatrices(inv,o.matrixWorld);bb.applyMatrix4(m4);acc.union(bb);}});
+          if(!acc.isEmpty()){const sz=acc.getSize(new THREE.Vector3()),ct=acc.getCenter(new THREE.Vector3());
+            lrec.fxBox={cx:ct.x,cy:ct.y,cz:ct.z,h:sz.y,w:sz.x,len:sz.z};}
+        }catch(e){}
+      }
+      measureBarrel(lrec,wrap); // MYTHIC FX : barrel profile for the form-fitting accents
       setViewModel(G.rifle);
     }catch(err){console.warn('[longshot] GLB rifle setup failed — procedural rifle stays',err);}
   };
@@ -3922,7 +3989,8 @@ function skinProps(m,sk){ // drive a stock material's PBR props from the skin, o
 }
 function applyRifleLook(){ // in-game viewmodel : the equipped skin beats the per-rifle tint ; Default Steel restores it
   const sk=equippedSkin();
-  if(rifle.userData.stockMat)rifle.userData.stockMat.color.setHex(skinTintFor(G.rifle,sk));
+  if(rifle.userData.stockMat){rifle.userData.stockMat.color.setHex(skinTintFor(G.rifle,sk));
+    fxApplyMats(null,new Set([rifle.userData.stockMat]),new Set([rifle.userData.stockMat]),(sk||{}).fx||null,'vm');} // MYTHIC FX : the procedural fallback rifle carries the flow on its stock material
   glbApplyTint();
   /* LOBBY POLISH : MYTHIC combat dressing (visual only — ballistics + scoring untouched) :
      scope theme, hitmarker class, muzzle flash + bullet + tracer colors, the
@@ -4178,6 +4246,7 @@ function resetProgress(){ // progress keys only — settings + seen-version surv
    of the in-game rifle — the GLB wrap when it landed, the procedural parts
    as fallback (swapped up if the GLB arrives late). Its stock materials are
    cloned too, so previewing a skin never tints the real viewmodel. ---- */
+const PV_HERO_YAW=-0.45; // MYTHIC FX : preview rest pose — a slight 3/4 hero angle the sway oscillates around (pvTick)
 const pv={built:false,isGlb:false,isModel:false,shownKey:null,spin:null,stockGLB:[],stockProc:[],drag:false,lastDrag:-9,t0:0,
   fit:null,size:null,dragYaw:0,swayAmp:0,ped:null,frames:0}; // LOBBY FIX : fit group + measured model size + sway/drag state + pedestal + render counter (probe-visible)
 let pvRenderer=null,pvScene=null,pvCam=null,pvGrp=null,pvCanvas=null;
@@ -4338,8 +4407,14 @@ function pvBakeSkinnedFrom(cloneRoot,srcRoot){ // a cloned SkinnedMesh keeps poi
     for(let i=0;i<pos.count;i++){pvSkinVertex(src,i,v);bp[i*3]=v.x;bp[i*3+1]=v.y;bp[i*3+2]=v.z;}
     const bg=new THREE.BufferGeometry();
     bg.setAttribute('position',new THREE.BufferAttribute(bp,3));
-    if(nor){const bn=new Float32Array(pos.count*3),nv=new THREE.Vector3(),sv=new THREE.Vector3();
-      for(let i=0;i<pos.count;i++){pvSkinVertex(src,i,sv);nv.fromBufferAttribute(nor,i).add(sv);pvSkinVertex(src,i,nv);nv.sub(sv).normalize();bn[i*3]=nv.x;bn[i*3+1]=nv.y;bn[i*3+2]=nv.z;}
+    if(nor){const bn=new Float32Array(pos.count*3),nv=new THREE.Vector3(),mm=new THREE.Matrix4(),bm2=new THREE.Matrix4(),am=new THREE.Matrix4(),nm=new THREE.Matrix3(),G2=['getX','getY','getZ','getW'];
+      const siA=geo.attributes.skinIndex,swA=geo.attributes.skinWeight;
+      for(let i=0;i<pos.count;i++){ // MYTHIC FX (bake fix) : pvSkinVertex() resets its target from the position attribute, so the old skin-the-tip trick always produced ZERO normals (zero -> NaN in the standard shader -> the THUNDER preview rendered pitch black under ANY skin, sleeves hid it in v10.7). Blend the bone matrices and run the source normal through the normal matrix instead.
+        mm.set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        if(siA&&swA&&src.skeleton)for(let k=0;k<4;k++){const w=swA[G2[k]](i);if(w>0){bm2.fromArray(src.skeleton.boneMatrices,siA[G2[k]](i)*16);for(let e=0;e<16;e++)mm.elements[e]+=w*bm2.elements[e];}}
+        am.multiplyMatrices(src.bindMatrixInverse,mm).multiply(src.bindMatrix);nm.getNormalMatrix(am);
+        nv.fromBufferAttribute(nor,i).applyMatrix3(nm);if(nv.lengthSq()<1e-8)nv.set(0,1,0);nv.normalize();
+        bn[i*3]=nv.x;bn[i*3+1]=nv.y;bn[i*3+2]=nv.z;}
       bg.setAttribute('normal',new THREE.BufferAttribute(bn,3));}
     if(geo.attributes.uv)bg.setAttribute('uv',geo.attributes.uv);
     if(geo.index)bg.setIndex(geo.index);
@@ -4351,7 +4426,7 @@ function pvBakeSkinnedFrom(cloneRoot,srcRoot){ // a cloned SkinnedMesh keeps poi
 }
 function pvBuildModel(key){ // v10.5 : the turntable shows the browsed/equipped rifle's OWN model, cloned from its parked wrap
   const rec=VMODELS[key];if(!rec||!rec.wrap)return;
-  pvFxDetach(); // LOBBY POLISH : the old holder (FX group inside) is about to be cleared — dispose the package first
+  pvFxDetach();FX_LIVE.pv.length=0; // MYTHIC FX : the clone's materials are about to be replaced wholesale — their flow registry entries die with them
   while(pv.fit.children.length)pv.fit.remove(pv.fit.children[0]); // LOBBY FIX : models live in the fit group now
   pv.stockGLB.length=0;pv.stockProc.length=0;
   const clone=rec.wrap.clone(true);clone.visible=true;
@@ -4361,6 +4436,7 @@ function pvBuildModel(key){ // v10.5 : the turntable shows the browsed/equipped 
     const ms=Array.isArray(o.material)?o.material:[o.material];
     for(let i=0;i<ms.length;i++){let m=ms[i];if(!m)continue;
       m=m.clone(); // LOBBY FIX : EVERY preview material is a private clone — preview lighting/PBR tweaks can never leak into the in-game viewmodel
+      if(m.color)m.color=new THREE.Color(m.color.getHex()); // MYTHIC FX (clone repair) : cloned GLB colors are defective objects in this build — reads (getHex) are true but lerp() writes silently no-op, which froze every preview tint dye at factory white (the mythic base never landed and the signature emissive washed pastel over white). Re-seat a genuine Color with the same value so tintMatsInto's lerp works as designed.
       if(Array.isArray(o.material))o.material[i]=m;else o.material=m;
       if(m.name&&cfg.tintPats.some(p=>m.name.toLowerCase().indexOf(p.toLowerCase())>=0)){
         m.userData._skCol=(rec.origCols[m.name]!=null?rec.origCols[m.name]:m.color.getHex());
@@ -4373,7 +4449,7 @@ function pvBuildModel(key){ // v10.5 : the turntable shows the browsed/equipped 
   pvRenderer.toneMappingExposure=PV_EXPO[key]||1.12; // LOBBY POLISH : per-model preview exposure
 }
 function pvBuildProc(){
-  pvFxDetach(); // LOBBY POLISH : dispose the old FX package before the holder is cleared
+  pvFxDetach();FX_LIVE.pv.length=0; // MYTHIC FX : same registry reset as pvBuildModel
   while(pv.fit.children.length)pv.fit.remove(pv.fit.children[0]); // LOBBY FIX : fit group
   pv.stockGLB.length=0;pv.stockProc.length=0;
   const holder=new THREE.Group();
@@ -4412,7 +4488,7 @@ function pvTick(dt){ // called from the main frame loop ; renders only while the
   const idle=!pv.drag&&(now-pv.lastDrag>2);
   pv.swayAmp+=((idle?1:0)-pv.swayAmp)*(1-Math.exp(-dt*2.4));
   if(idle){const tw=Math.round(pv.dragYaw/(Math.PI*2))*Math.PI*2;pv.dragYaw+=(tw-pv.dragYaw)*Math.min(1,dt*2.2);} // LOBBY FIX : shortest-path ease home (τ≈0.45 s of real frames — smooth, never a snap)
-  pv.spin.rotation.y=pv.dragYaw+pv.swayAmp*Math.sin(now*0.5)*0.52;
+  pv.spin.rotation.y=PV_HERO_YAW+pv.dragYaw+pv.swayAmp*Math.sin(now*0.5)*0.52; // MYTHIC FX : the sway oscillates around a slight 3/4 HERO angle (-0.45 rad ≈ -26°) so the gun reads dimensional at rest instead of flat side-on / end-on ; drag is relative to the hero pose and ease-home returns to it
   pvGrp.position.y=Math.sin(now*0.85)*0.035;
   pv.frames++; // LOBBY FIX : render counter — probes assert this stalls while the preview is off-screen
   if(pvSkinFX)fxUpdate(pvSkinFX.group,now,dt); // LOBBY POLISH : the preview's MYTHIC package animates on the preview clock
@@ -4440,13 +4516,14 @@ function applyPvTint(){ // preview tint : the PREVIEWED skin (pvSkinId) on the b
     tintMatsInto(pv.stockGLB,!!(rec&&rec.perRifleDefault),pvRifleKey(),sk); // v10.5 : same per-model tint rules as the viewmodel
   }
   for(const m of pv.stockProc)m.color.setHex(hex);
+  const pvRoot=pv.fit&&pv.fit.children&&pv.fit.children[0]; // MYTHIC FX : the PREVIEWED skin's flow on the preview clone's own materials — AFTER the tint, same as the viewmodel, so the flow's emissive wins
+  if(pvRoot)fxApplyMats(pvRoot,fxCollectMats(pvRoot),new Set(pv.stockGLB.concat(pv.stockProc)),sk.fx||null,'pv');
   syncPvSkinFX(); // LOBBY POLISH : the preview's MYTHIC effect package follows the previewed skin + browsed rifle
 }
 
 /* ================= LOBBY POLISH — MYTHIC SKINS (Phase 5) =================
    Three skins above legendary. They are NOT tints : each is an animated
-   effect package (procedural canvas textures + additive geometry + bounded
-   particle Points) built in RIFLE SPACE — every rifle shares the same
+   effect package built in RIFLE SPACE — every rifle shares the same
    rifle-space dims (2.2 span, center VM_TARGET_C family), so one package
    fits all three, in the menu preview AND the in-game viewmodel.
    STRICT HIERARCHY (MW) : STARFORGE >> INFERNO CORE >> VOIDCURRENT.
@@ -4456,6 +4533,19 @@ function applyPvTint(){ // preview tint : the PREVIEWED skin (pvSkinId) on the b
      STARFORGE   : TWO counter-scrolling nebula sleeves + halo ring + 3
                    orbiting orbs + ~60 twinkles, PLUS the best scope, the
                    prettiest tracers and a bigger kill effect (nova + ring).
+
+   MYTHIC FX REBUILD (v10.8) : the v10.7 translucent SLEEVES read as
+   packaging on a real screen (bubble / tube / slab — MW's screenshots).
+   They are DELETED. The effects now live ON the gun : a procedural
+   emissiveMap flows across the gun's OWN materials (fxApplyMats), and the
+   only geometry left hugs the metal — torus rings sized from the measured
+   barrel profile (measureBarrel), tight-orbit orbs, surface particles.
+   Emissive-flow transform note (probe-verified on this three build) : a
+   material WITH a map shares the map's uv transform and its emissiveMap
+   offset is ignored — so the flow scrolls only on map-less materials and
+   rides static + pulsing on mapped ones. The diffuse maps are NEVER parked :
+   parking blew the PCR's white base-color multipliers out to a paper-white
+   gun (caught by the v10.8 screenshot gate).
    Kill effects (Amendment 3 — EXCLUSIVE to their skin) : 100 kills WHILE
    WEARING the skin unlocks its effect (top popup ceremony, no auto-fire) ;
    MW then enables it on that skin's SKINS card (longshot_killFxOn) ; it
@@ -4470,42 +4560,49 @@ function setKillFxOn(id,on){let o={};try{o=JSON.parse(lsGet('longshot_killFxOn',
 const STAR_SPECKS=(()=>{let s=1337;const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};const a=[];for(let i=0;i<26;i++)a.push([rnd(),rnd(),rnd()]);return a;})();
 /* ---- procedural textures (zero external assets) ---- */
 function fxCanvasTex(w,h,draw){const cv=document.createElement('canvas');cv.width=w;cv.height=h;draw(cv.getContext('2d'),w,h);const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;}
-function makeArcTexture(){ // VOIDCURRENT : jagged electric arcs on transparency
+function makeArcTexture(){ // MYTHIC FX (v10.8) : VOIDCURRENT emissive — jagged electric arcs on OPAQUE BLACK (emissiveMap : black = dark metal, only the arcs glow)
   return fxCanvasTex(256,256,(x,w,h)=>{
-    x.clearRect(0,0,w,h);
+    x.fillStyle='#000000';x.fillRect(0,0,w,h);
     for(let i=0;i<26;i++){
       let px=-10,py=rand(0,h);x.beginPath();x.moveTo(px,py);
       while(px<w+10){px+=rand(8,26);py+=rand(-16,16);x.lineTo(px,py);}
-      x.strokeStyle='rgba(70,110,255,0.22)';x.lineWidth=5;x.shadowColor='#2a4bff';x.shadowBlur=8;x.stroke();
-      x.strokeStyle='rgba(195,225,255,0.95)';x.lineWidth=1.4;x.stroke();
+      x.strokeStyle='rgba(30,60,220,0.32)';x.lineWidth=3.5;x.shadowColor='#2a4bff';x.shadowBlur=8;x.stroke();
+      x.strokeStyle='rgba(80,140,255,0.9)';x.lineWidth=2.2;x.stroke();
+      x.strokeStyle='rgba(215,238,255,0.98)';x.lineWidth=1.1;x.stroke();
     }
-    for(let i=0;i<44;i++){x.fillStyle='rgba(150,190,255,'+rand(0.12,0.4).toFixed(2)+')';x.fillRect(rand(0,w),rand(0,h),rand(1,3),rand(1,3));}
+    for(let i=0;i<44;i++){x.fillStyle='rgba(120,175,255,'+rand(0.2,0.55).toFixed(2)+')';x.fillRect(rand(0,w),rand(0,h),rand(1,3),rand(1,3));}
   });
 }
-function makeCrackTexture(){ // INFERNO : a glowing fissure network
+function makeCrackTexture(){ // MYTHIC FX (v10.8) : INFERNO emissive — molten fissures on OPAQUE BLACK : bright core #ffcf8a -> mid #ff5a14 -> deep red edge #cc2200 ; the metal between cracks stays dark
   return fxCanvasTex(256,256,(x,w,h)=>{
-    x.clearRect(0,0,w,h);
+    x.fillStyle='#000000';x.fillRect(0,0,w,h);
     function crack(cx,cy,ang,len,wid){
       let px=cx,py=cy,a=ang;x.beginPath();x.moveTo(px,py);
       const steps=Math.max(2,Math.floor(len/9));
       for(let s=0;s<steps;s++){a+=rand(-0.5,0.5);px+=Math.cos(a)*9;py+=Math.sin(a)*9;x.lineTo(px,py);
         if(Math.random()<0.3&&wid>0.8)crack(px,py,a+rand(-1.1,1.1),len*0.45,wid*0.6);}
-      x.strokeStyle='rgba(255,90,20,0.35)';x.lineWidth=wid*2.6;x.shadowColor='#ff5a14';x.shadowBlur=10;x.stroke();
-      x.strokeStyle='rgba(255,200,115,0.95)';x.lineWidth=wid;x.stroke();
+      x.strokeStyle='rgba(204,34,0,0.85)';x.lineWidth=wid*3.0;x.shadowColor='#ff4400';x.shadowBlur=10;x.stroke();
+      x.strokeStyle='rgba(255,90,20,0.95)';x.lineWidth=wid*1.6;x.stroke();
+      x.strokeStyle='rgba(255,207,138,0.98)';x.lineWidth=wid*0.8;x.stroke();
     }
-    for(let i=0;i<9;i++)crack(rand(0,w),rand(0,h),rand(0,Math.PI*2),rand(60,150),rand(1.1,2.2));
-    const g=x.createRadialGradient(w/2,h/2,8,w/2,h/2,150);g.addColorStop(0,'rgba(255,110,30,0.20)');g.addColorStop(1,'rgba(255,110,30,0)');
-    x.fillStyle=g;x.fillRect(0,0,w,h);
+    for(let i=0;i<10;i++)crack(rand(0,w),rand(0,h),rand(0,Math.PI*2),rand(60,150),rand(1.1,2.2));
+    for(let i=0;i<7;i++){ // molten pools where the fissures meet — the brightest points on the gun
+      const gx=rand(20,w-20),gy=rand(20,h-20),gr=rand(7,15);
+      const g=x.createRadialGradient(gx,gy,1,gx,gy,gr);
+      g.addColorStop(0,'rgba(255,240,200,0.95)');g.addColorStop(0.45,'rgba(255,119,34,0.75)');g.addColorStop(1,'rgba(204,34,0,0)');
+      x.fillStyle=g;x.beginPath();x.arc(gx,gy,gr,0,7);x.fill();
+    }
   });
 }
-function makeNebulaTexture(){ // STARFORGE : nebula clouds + star dust
+function makeNebulaTexture(){ // MYTHIC FX (v10.8) : STARFORGE emissive — violet + gold nebula AND star specks composited in one map (two visual layers), on near-black deep violet
   return fxCanvasTex(256,256,(x,w,h)=>{
-    x.clearRect(0,0,w,h);
-    const cols=['rgba(122,60,255,','rgba(255,90,200,','rgba(242,194,51,','rgba(70,120,255,'];
-    for(let i=0;i<26;i++){const cx=rand(0,w),cy=rand(0,h),r=rand(18,64),c=cols[i%cols.length];
-      const g=x.createRadialGradient(cx,cy,1,cx,cy,r);g.addColorStop(0,c+'0.30)');g.addColorStop(1,c+'0)');
+    x.fillStyle='#05030d';x.fillRect(0,0,w,h);
+    const cols=['rgba(122,60,255,','rgba(190,70,255,','rgba(242,194,51,','rgba(70,120,255,'];
+    for(let i=0;i<30;i++){const cx=rand(0,w),cy=rand(0,h),r=rand(16,60),c=cols[i%cols.length];
+      const g=x.createRadialGradient(cx,cy,1,cx,cy,r);g.addColorStop(0,c+'0.55)');g.addColorStop(1,c+'0)');
       x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,7);x.fill();}
-    for(let i=0;i<90;i++){x.fillStyle='rgba(255,255,255,'+rand(0.25,0.95).toFixed(2)+')';const s=rand(0.6,1.9);x.fillRect(rand(0,w),rand(0,h),s,s);}
+    for(let i=0;i<110;i++){x.fillStyle='rgba(255,255,255,'+rand(0.35,0.98).toFixed(2)+')';const s=rand(0.6,2.0);x.fillRect(rand(0,w),rand(0,h),s,s);}
+    for(let i=0;i<22;i++){x.fillStyle='rgba(242,217,138,'+rand(0.4,0.9).toFixed(2)+')';const s=rand(0.8,1.8);x.fillRect(rand(0,w),rand(0,h),s,s);}
   });
 }
 function makeDotTexture(inner,outer){ // soft round sprite
@@ -4521,83 +4618,233 @@ function makeStarTexture(){ // 4-point sparkle sprite
   x.moveTo(32,3);x.lineTo(32,61);x.moveTo(3,32);x.lineTo(61,32);x.stroke();
   return new THREE.CanvasTexture(cv);
 }
-/* ---- the packages ---- */
-function fxDimsFor(key){const rec=VMODELS[key];if(rec&&rec.fxBox)return rec.fxBox;return {cx:0.272,cy:-0.27,cz:-1.02,h:0.42,w:0.16,len:2.2};}
-function fxPoints(parent,o){ // one bounded ambient particle layer hugging the gun
-  const geo=new THREE.BufferGeometry();
-  const pos=new Float32Array(o.n*3),seeds=[];
-  for(let i=0;i<o.n;i++)seeds.push({ang:rand(0,TAU),rad:rand(o.area.R*0.35,o.area.R),y:rand(o.area.cy-o.area.h/2,o.area.cy+o.area.h/2),z:rand(o.area.cz-o.area.len/2,o.area.cz+o.area.len/2),spd:rand(0.3,1)});
-  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-  const mat=new THREE.PointsMaterial({size:o.size,map:o.tex,transparent:true,opacity:0.9,depthWrite:false,blending:THREE.AdditiveBlending,color:o.color,sizeAttenuation:true});
-  const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;parent.add(pts);
-  return {pts:pts,geo:geo,mat:mat,n:o.n,seeds:seeds,cx:o.area.cx,cz:o.area.cz,
-    yMin:o.area.cy-o.area.h/2-0.04,yMax:o.area.cy+o.area.h/2+0.22,drift:o.drift,tw:(o.twinkle==null?null:o.twinkle),baseOp:0.9};
+/* ---- MYTHIC FX (v10.8) : emissive flow ON the gun's own materials ----
+   One shared flow texture per kind (its offset animation drives the viewmodel
+   and the preview together). fxApplyMats is the ONLY writer of the mythic
+   material state. The gun's diffuse maps are NEVER touched : on materials
+   that carry a map, three r128 sources the shared uv transform from the map,
+   so the flow rides STATIC there (intensity pulse still breathes it) while
+   map-less materials get the full scroll — parking the map instead blew the
+   PCR's white base-color multipliers out to a paper-white gun. Tint-set
+   materials keep their emissive owned by skinProps on clear ; every other
+   material gets its pre-mythic emissive snapshotted and restored. Scope-glass
+   materials are skipped (the scope theme tints them separately). */
+const FX_FLOW={
+  void:   {make:makeArcTexture,   rep:[2,1],scroll:{x:0.16,y:0.045},int:1.15,pulse:null},
+  inferno:{make:makeCrackTexture, rep:[2,1],scroll:{x:0,y:0},      int:1.60,pulse:{spd:2.1,lo:0.60,hi:1.14}},
+  star:   {make:makeNebulaTexture,rep:[2,1],scroll:{x:0.020,y:0.013},int:1.30,pulse:{spd:1.6,lo:0.90,hi:1.08}},
+};
+function fxFlowTexture(kind){
+  const F=FX_FLOW[kind];if(!F)return null;
+  if(!F.tex){F.tex=F.make();F.tex.repeat.set(F.rep[0],F.rep[1]);}
+  return F.tex;
 }
-function makeSkinFX(kind,D){
+const FX_LIVE={vm:[],pv:[]}; // materials currently carrying a flow : {m, base, kind} per surface
+const FX_SIG={void:0x1c46ff,inferno:0xff4400,star:0x7430ff};
+const FX_SIGDEEP={void:0x131a3a,inferno:0x1c0f0a,star:0x17102b}; // MYTHIC FX : the mythics' own base tints — tint mode repaints the base itself (lifted 0.10 like tintMatsInto) so the look never depends on the tint pass having landed // MYTHIC FX : signature emissive for degenerate-UV materials (flat-color models whose UVs are points/slivers — the flow texture would sample one dark texel, so the metal itself glows the signature hue and breathes instead)
+function fxUvRanges(root){ // per-material uv extents over a surface root — degenerate detection for the tint fallback
+  const map=new Map();if(!root)return map;
+  root.traverse(o=>{
+    if(!o.isMesh||!o.geometry||!o.geometry.attributes||!o.geometry.attributes.uv)return;
+    const uv=o.geometry.attributes.uv,ms=Array.isArray(o.material)?o.material:[o.material];
+    for(const m of ms){if(!m)continue;
+      let r=map.get(m);if(!r){r={u0:9,u1:-9,v0:9,v1:-9};map.set(m,r);}
+      for(let i=0;i<uv.count;i++){const u=uv.getX(i),v=uv.getY(i);
+        if(u<r.u0)r.u0=u;if(u>r.u1)r.u1=u;if(v<r.v0)r.v0=v;if(v>r.v1)r.v1=v;}
+    }});
+  return map;
+}
+function fxCollectMats(root){
+  const set=new Set();if(!root)return set;
+  root.traverse(o=>{if(o.isMesh){const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms)if(m)set.add(m);}});
+  return set;
+}
+function fxApplyMats(root,list,tintSet,kind,surf){
+  const inList=new Set(list); // entries for THESE materials are replaced ; other surfaces' entries are untouched (the VM applies from two call sites)
+  for(let i=FX_LIVE[surf].length-1;i>=0;i--)if(inList.has(FX_LIVE[surf][i].m))FX_LIVE[surf].splice(i,1);
+  const ranges=kind?fxUvRanges(root):null;
+  let starGold=null; // MYTHIC FX R2 : STARFORGE tint mode — gold must land on a MAJOR VISIBLE surface or it never reads. Factory-warm-first put it on THUNDER's brass AMMO section (a full-weight material that is nevertheless inside the mag — the rifle still read as a flat lilac dip, zero warm pixels in the shot). Rule : among the non-pale surfaces, the heaviest stays violet (the hero body) and the SECOND-heaviest goes gold — the nebula's violet+gold structure on the gun's two biggest exterior sections. Factory-warm parts still take gold in the per-material branch below (brass should glow gold — it just can't be the only gold).
+  if(kind==='star'&&root){
+    const wts=new Map();
+    root.traverse(o=>{if(!o.isMesh||!o.geometry||!o.geometry.attributes||!o.geometry.attributes.position)return;
+      const ms=Array.isArray(o.material)?o.material:[o.material];
+      for(const m of ms)if(m&&inList.has(m))wts.set(m,(wts.get(m)||0)+o.geometry.attributes.position.count);});
+    const fac=m=>(m.userData._skCol!=null)?m.userData._skCol:((m.userData._fxEm0&&m.userData._fxEm0.c!=null)?m.userData._fxEm0.c:(m.color?m.color.getHex():null));
+    const ranked=Array.from(list).filter(m=>m&&m.emissive&&typeof m.metalness==='number'&&wts.has(m)&&(function(){const fc=fac(m);if(fc==null)return false;const cc=new THREE.Color(fc);return (0.2126*cc.r+0.7152*cc.g+0.0722*cc.b)<=0.72;})()).sort((a,b)=>wts.get(b)-wts.get(a)); // list arrives as an Array at some call sites, a Set at others
+    if(ranked.length>1)starGold=ranked[1];
+  }
+  list.forEach(m=>{
+    if(!m||!m.emissive||typeof m.metalness!=='number')return; // standard materials only
+    if(/glass/i.test(m.name||''))return; // scope glass belongs to tintScopeGlass
+    const was=!!m.userData._fxOn, isTint=tintSet.has(m);
+    let vf=1,ph=0,shim=0; // MYTHIC FX R2 : per-material variation factor / shimmer (STARFORGE tint mode only)
+    if(kind){
+      if(!was&&!isTint)m.userData._fxEm0={e:m.emissive.getHex(),i:(m.emissiveIntensity!=null?m.emissiveIntensity:1),c:(m.color?m.color.getHex():null)};
+      const r=ranges?ranges.get(m):null;
+      const degen=!r||(r.u1-r.u0)<0.05||(r.v1-r.v0)<0.05; // MYTHIC FX : point/sliver UVs (THUNDER's flat-color mats) — texture flow would sample a single texel
+      const mode=(root&&degen)?'tint':'map';
+      if(mode==='tint'){
+        m.emissiveMap=null;
+        let sig=FX_SIG[kind]; // signature hue straight on the metal ; fxFlowTick breathes it
+        if(kind==='star'){ // MYTHIC FX R2 : one flat signature hue read as a lilac DIP on THUNDER (MW's shot) — the nebula needs its second tone ON the metal : warm / bright factory mats glow gold like the nebula map's gold layer, the rest stay violet ; a per-material intensity spread + a slow shimmer phase give the flat metal depth a texture can't
+          let h=0;const nm=m.name||'';for(let ci=0;ci<nm.length;ci++)h=(h*31+nm.charCodeAt(ci))>>>0;
+          vf=0.85+((h>>3)%5)*0.09;ph=(h%628)/100;shim=0.16;
+          const fc=(m.userData._skCol!=null)?m.userData._skCol:((!isTint&&m.userData._fxEm0)?m.userData._fxEm0.c:null);
+          if(fc!=null){const cc=new THREE.Color(fc),lum=0.2126*cc.r+0.7152*cc.g+0.0722*cc.b;
+            if(lum>0.72)sig=0xf2e3ac;else if(lum>0.26&&(cc.r-cc.b)>0.10)sig=0xe8a91c;}
+          if(m===starGold){sig=0xe8a91c;vf*=1.75;} // the designated major surface goes gold, clearly the hottest emissive on the gun — gold reads by brightness contrast even where the render washes hue
+        }
+        m.emissive.setHex(sig);
+        var base=FX_FLOW[kind].int*(isTint?0.62:0.45)*vf;
+        if(isTint&&m.color)m.color.setHex(FX_SIGDEEP[kind]); // the skin's deep base, painted by the fx pass itself (tintMatsInto re-owns it on the next apply either way)
+        if(!was&&!isTint&&m.color)m.color.multiplyScalar(0.42); // MYTHIC FX : flat-color parts keep a LIGHT factory albedo that washes the signature pastel (THUNDER inferno read tan) — pull the diffuse down once so the emissive owns the look ; restored from _fxEm0 on clear
+      }else{
+        m.emissiveMap=fxFlowTexture(kind); // the diffuse map is NEVER parked (see header) : mapped materials ride the map's transform, map-less ones scroll
+        m.emissive.setHex(0xffffff); // the texture carries the hue ; white keeps it true
+        base=FX_FLOW[kind].int*(isTint?1:0.55); // the skin's canvas at full strength, the rest of the gun a half-step behind
+        if(!m.map&&m.color){ // MYTHIC FX R2 : map-less flat mats (Kar98 wood/steel) ride ~2.5x brighter than the PCR's dark atlas under the same rig, so the flow's contrast drowned and the rifle read bleached (MW's varmint/INFERNO shot ; pixel-attributed : diffuse-only mean 0.27 vs LONGSHOT's 0.10). Pull the flat diffuse down so the emissive owns the look. Deterministic : the tint pass re-owns the source color on every apply, so we record the source hex and re-derive the darkened value from it — re-applies can't stack the multiply, and skin switches re-derive from the new tint.
+          const cur=m.color.getHex();let src=m.userData._fxDkSrc,dk=m.userData._fxDkVal;
+          if(src==null||(cur!==src&&cur!==dk)){src=cur;const cc=new THREE.Color(cur);cc.multiplyScalar(0.45);dk=cc.getHex();m.userData._fxDkSrc=src;m.userData._fxDkVal=dk;}
+          if(cur!==dk)m.color.setHex(dk);
+        }
+      }
+      m.emissiveIntensity=base;
+      m.userData._fxOn=true;
+      if(!was||m.userData._fxMode!==mode)m.needsUpdate=true; // emissiveMap appearing/disappearing toggles a shader define
+      m.userData._fxMode=mode;
+      FX_LIVE[surf].push({m:m,base:base,kind:kind,shim:shim,ph:ph});
+    }else if(was){
+      m.emissiveMap=null;
+      m.userData._fxOn=false;m.userData._fxMode=null;
+      delete m.userData._fxDkSrc;delete m.userData._fxDkVal; // MYTHIC FX R2 : the map-less darken bookkeeping dies with the flow (color itself is restored below / by the tint pass)
+      m.needsUpdate=true;
+      if(!isTint&&m.userData._fxEm0){m.emissive.setHex(m.userData._fxEm0.e);m.emissiveIntensity=m.userData._fxEm0.i;if(m.userData._fxEm0.c!=null&&m.color)m.color.setHex(m.userData._fxEm0.c);delete m.userData._fxEm0;}
+    }
+  });
+}
+function fxFlowTick(t){ // MYTHIC FX : scroll the shared flow maps + breathe the live intensities (called from skinFxTick)
+  for(const kind in FX_FLOW){
+    const F=FX_FLOW[kind];if(!F.tex)continue;
+    if(F.scroll&&(F.scroll.x||F.scroll.y)){F.tex.offset.x=(t*F.scroll.x)%1;F.tex.offset.y=(t*F.scroll.y)%1;}
+  }
+  for(const surf of ['vm','pv']){
+    const L=FX_LIVE[surf];
+    for(let i=0;i<L.length;i++){
+      const e=L[i],F=FX_FLOW[e.kind];let f=1;
+      if(F&&F.pulse)f=F.pulse.lo+(F.pulse.hi-F.pulse.lo)*(0.5+0.5*Math.sin(t*F.pulse.spd));
+      else if(e.kind==='void')f=0.94+0.06*Math.sin(t*7.3)+0.03*Math.sin(t*13.1); // electric flicker, small and fast
+      if(e.shim)f*=1+e.shim*Math.sin(t*1.9+(e.ph||0)); // MYTHIC FX R2 : STARFORGE tint-mode shimmer — each flat material breathes on its own phase, so the metal shimmers like a nebula instead of dipping in one flat hue
+      e.m.emissiveIntensity=e.base*f;
+    }
+  }
+}
+/* ---- the packages ---- */
+function fxDimsFor(key){const rec=VMODELS[key];const base=(rec&&rec.fxBox)?rec.fxBox:{cx:0.272,cy:-0.27,cz:-1.02,h:0.42,w:0.16,len:2.2};
+  if(rec&&!rec.barrel&&rec.wrap)measureBarrel(rec); // MYTHIC FX : self-heal — a profile missed at load is re-measured on first FX build
+  const D={cx:base.cx,cy:base.cy,cz:base.cz,h:base.h,w:base.w,len:base.len}; // MYTHIC FX : fresh copy — the accents list rides along, rec.fxBox stays pristine
+  const za=D.cz-D.len*0.16, zb=D.cz-D.len*0.34, zo=D.cz+D.len*0.10;
+  D.rings=[{z:za,r:barrelR(rec,za)},{z:zb,r:barrelR(rec,zb)}];
+  D.orbR=barrelR(rec,zo);D.orbZ=zo;
+  const BA=rec&&rec.barrelAxis;D.ax=BA?BA.x:base.cx;D.ay=BA?BA.y:base.cy; // MYTHIC FX : rings + orbs center on the measured BARREL LINE, not the bbox center
+  D.rAt=function(z){return barrelR(rec,z);}; // MYTHIC FX R2 : the gun's measured radial silhouette at z — fallback sheath sizing when no surface anchors exist
+  D.verts=(rec&&rec.fxVerts)?rec.fxVerts:null; // MYTHIC FX R2 : surface anchors (rifle space) — the particle sheath pins itself to these
+  return D;}
+function fxPoints(parent,o){ // one bounded ambient particle layer hugging the gun — R2 : built as FIVE z-band Points sharing one material. A single gun-length Points geometry gets ONE world AABB, whose empty corners inflate under sway rotation and clipped the bbox gate even with every particle on the metal ; five short band boxes track the gun's real silhouette far tighter.
+  const mat=new THREE.PointsMaterial({size:o.size,map:o.tex,transparent:true,opacity:0.9,depthWrite:false,blending:THREE.AdditiveBlending,color:o.color,sizeAttenuation:true});
+  const V=(o.area.verts&&o.area.verts.length>30)?o.area.verts:null;
+  const zLo=o.area.cz-o.area.len/2,band=(o.area.len||1)/5;
+  const bandOf=z=>Math.min(4,Math.max(0,Math.floor((z-zLo)/band)));
+  const buckets=[[],[],[],[],[]],bandVis=[[],[],[],[],[]];
+  if(V)for(let vi=0;vi<V.length/3;vi++)bandVis[bandOf(V[vi*3+2])].push(vi);
+  const useBands=bandVis.every(b=>b.length>0);
+  for(let i=0;i<o.n;i++){
+    if(V){ // MYTHIC FX R2 : surface-anchor seed — a real vertex of this gun + a small random offset direction ; the particle lives ON the metal
+      const th=rand(0,TAU),ph2=Math.acos(rand(-1,1)),sp=Math.sin(ph2);
+      const bd=useBands?Math.floor(rand(0,5)):0,pool=useBands?bandVis[bd]:bandVis[0].concat(bandVis[1],bandVis[2],bandVis[3],bandVis[4]);
+      buckets[useBands?bd:0].push({vi:pool[Math.floor(rand(0,pool.length))],ux:sp*Math.cos(th),uy:sp*Math.sin(th),uz:Math.cos(ph2),pad:rand(0.002,0.012),ph:rand(0,TAU),rise:0,spd:rand(0.3,1)});
+    }else{ // fallback sheath seed (no profile captured) : angle around the barrel axis at a z along the gun, radius = profile + pad
+      const sd={th:rand(0,TAU),z:rand(zLo,zLo+band*5),pad:rand(0.006,0.045),rise:0,spd:rand(0.3,1)};
+      buckets[bandOf(sd.z)].push(sd);
+    }
+  }
+  const parts=[];
+  for(let b=0;b<5;b++){
+    const seeds=buckets[b];if(!seeds.length)continue;
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(seeds.length*3),3));
+    const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;parent.add(pts);
+    parts.push({geo:geo,seeds:seeds,vis:useBands?bandVis[b]:bandVis[0].concat(bandVis[1],bandVis[2],bandVis[3],bandVis[4])});
+  }
+  return {parts:parts,mat:mat,verts:V,ax:(o.area.ax!=null?o.area.ax:o.area.cx),ay:(o.area.ay!=null?o.area.ay:o.area.cy),rAt:(o.area.rAt||null),rFlat:(o.area.h||0.4)*0.30,drift:o.drift,tw:(o.twinkle==null?null:o.twinkle),baseOp:0.9};
+}
+function makeSkinFX(kind,D){ // MYTHIC FX (v10.8) : accents + particles ONLY — the flow lives on the gun's materials (fxApplyMats) ; NOTHING here encloses the gun
   const g=new THREE.Group();g.userData.isSkinFX=true;
-  const cx=D.cx,cy=D.cy,cz=D.cz,len=D.len||2.2,R=Math.max(D.w||0.14,D.h||0.4)*0.50+0.010; // LOBBY POLISH : sleeve hugs the gun (radius just past the receiver half-height) — a fat tube read as a fluorescent slab swallowing the rifle
-  const up={points:[],spin:[],orbs:[],flowTex:null,flowSpd:0,pulse:null,pulseSpr:null};
+  const cx=D.cx,cy=D.cy,cz=D.cz,len=D.len||2.2;
+  const ax=(D.ax!=null?D.ax:cx),ay=(D.ay!=null?D.ay:cy); // MYTHIC FX : accents center on the measured barrel line
+  const up={points:[],spin:[],orbs:[],pulseSpr:null};
   g.userData.fx=up;
-  const area={cx:cx,cy:cy,cz:cz,h:(D.h||0.4)+0.10,R:R,len:len};
+  const area={cx:cx,cy:cy,cz:cz,h:(D.h||0.4),w:(D.w||0.16),ax:ax,ay:ay,rAt:(D.rAt||null),verts:(D.verts||null),len:len}; // particles sheath the gun's own surface (R2 : real-vertex anchors from the measured profile pass, silhouette sheath as fallback)
+  up.clamp={x0:cx-(D.w||0.16)/2,x1:cx+(D.w||0.16)/2,y0:cy-(D.h||0.4)/2,y1:cy+(D.h||0.4)/2}; // MYTHIC FX R2 : orb centers stay inside the measured gun box EXACTLY in LOCAL space — only the orbs' own radius (<=0.02) can cross the face, so no sway phase can swing one past the bbox gate
+  function ringAccent(ring,hex,op,tube,tilt,spd){ // a torus sized from the MEASURED barrel profile at its z, on a tilted pivot so its spin reads as precession ; a bright bead rides the rim so the rotation is unmistakable
+    const R=ring.r*1.15+0.012;
+    const pivot=new THREE.Group();pivot.position.set(ax,ay,ring.z);pivot.rotation.x=tilt;g.add(pivot);
+    const mat=new THREE.MeshBasicMaterial({color:hex,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+    const tor=new THREE.Mesh(new THREE.TorusGeometry(R,tube,8,42),mat);tor.frustumCulled=false;pivot.add(tor);
+    const bead=new THREE.Mesh(new THREE.SphereGeometry(tube*2.1,10,8),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:Math.min(1,op+0.08),blending:THREE.AdditiveBlending,depthWrite:false}));
+    bead.position.set(R,0,0);bead.frustumCulled=false;pivot.add(bead);
+    up.spin.push({m:pivot,axis:'z',spd:spd});
+    return pivot;
+  }
   if(kind==='void'){
-    up.flowTex=makeArcTexture();up.flowSpd=0.5;
-    const mat=new THREE.MeshBasicMaterial({map:up.flowTex,transparent:true,opacity:0.62,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
-    const geo=new THREE.CylinderGeometry(R,R*0.92,len*0.86,20,1,true);geo.rotateX(Math.PI/2);
-    const m=new THREE.Mesh(geo,mat);m.position.set(cx,cy,cz-len*0.04);m.frustumCulled=false;g.add(m);
-    const rMat=new THREE.MeshBasicMaterial({color:0x5f8dff,transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(R+0.055,0.008,8,40),rMat);ring.position.set(cx,cy,cz-len*0.36);ring.frustumCulled=false;g.add(ring);
-    up.spin.push({m:ring,axis:'z',spd:0.9});
-    const ring2=new THREE.Mesh(new THREE.TorusGeometry(R+0.032,0.004,8,40),rMat.clone());ring2.position.set(cx,cy,cz-len*0.36);ring2.rotation.x=0.55;ring2.frustumCulled=false;g.add(ring2);
-    up.spin.push({m:ring2,axis:'z',spd:-0.6});
+    const rings=D.rings||[];
+    if(rings[0])ringAccent(rings[0],0x6f9dff,0.95,0.0075,0.50,0.9); // two counter-rotating holo rings, both ON the barrel
+    if(rings[1])ringAccent(rings[1],0x6f9dff,0.85,0.0055,-0.35,-0.65);
     up.points.push(fxPoints(g,{n:25,tex:makeDotTexture('rgba(195,225,255,1)','rgba(60,110,255,0)'),color:0x9fc4ff,size:0.035,area:area,drift:{y:0.05,swirl:0.25}}));
   }else if(kind==='inferno'){
-    up.flowTex=makeCrackTexture(); // cracks do not scroll — they BREATHE
-    const mat=new THREE.MeshBasicMaterial({map:up.flowTex,transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
-    const geo=new THREE.CylinderGeometry(R*1.02,R*1.06,len*0.94,20,1,true);geo.rotateX(Math.PI/2);
-    const m=new THREE.Mesh(geo,mat);m.position.set(cx,cy,cz);m.frustumCulled=false;g.add(m);
-    up.pulse={mat:mat,base:0.8,spd:2.1};
     const sm=new THREE.Sprite(new THREE.SpriteMaterial({map:makeDotTexture('rgba(255,170,80,0.85)','rgba(255,90,20,0)'),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0.5}));
-    sm.scale.set(0.55,0.4,1);sm.position.set(cx,cy,cz+len*0.18);g.add(sm);
+    sm.scale.set(0.34,0.245,1);sm.position.set(cx,cy,cz+len*0.16);g.add(sm); // heat glow AT the receiver — a sprite, not a volume (R2 : 0.45 -> 0.34 — as a camera-facing quad its world AABB is view-dependent and the big quad clipped the bbox gate in some drift phases)
     up.pulseSpr={m:sm,base:0.5,spd:2.1};
     up.points.push(fxPoints(g,{n:40,tex:makeDotTexture('rgba(255,214,150,1)','rgba(255,90,20,0)'),color:0xffb060,size:0.03,area:area,drift:{y:0.22,swirl:0.1}}));
   }else if(kind==='star'){
-    const mat1=new THREE.MeshBasicMaterial({map:makeNebulaTexture(),transparent:true,opacity:0.66,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
-    const geo1=new THREE.CylinderGeometry(R,R*0.94,len*0.9,20,1,true);geo1.rotateX(Math.PI/2);
-    const m1=new THREE.Mesh(geo1,mat1);m1.position.set(cx,cy,cz-len*0.03);m1.frustumCulled=false;g.add(m1);
-    up.spin.push({m:m1,axis:'z',spd:0.05}); // the whole nebula sleeve creeps around the barrel axis …
-    const mat2=new THREE.MeshBasicMaterial({map:makeNebulaTexture(),transparent:true,opacity:0.45,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
-    const geo2=new THREE.CylinderGeometry(R+0.035,R+0.035,len*0.8,20,1,true);geo2.rotateX(Math.PI/2);
-    const m2=new THREE.Mesh(geo2,mat2);m2.position.set(cx,cy,cz-len*0.03);m2.frustumCulled=false;g.add(m2);
-    up.spin.push({m:m2,axis:'z',spd:-0.08}); // … while the outer layer counter-swirls — the depth tell of the top tier
-    const hMat=new THREE.MeshBasicMaterial({color:0xf2c233,transparent:true,opacity:0.75,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
-    const halo=new THREE.Mesh(new THREE.TorusGeometry(R+0.11,0.006,8,48),hMat);halo.position.set(cx,cy,cz-len*0.30);halo.rotation.x=0.9;halo.frustumCulled=false;g.add(halo);
-    up.spin.push({m:halo,axis:'z',spd:0.5});
+    const rings=D.rings||[];
+    if(rings[0])ringAccent(rings[0],0xf2c233,0.9,0.0065,0.42,0.55); // ONE gold halo, barrel-measured — not a giant floating ellipse
     up.points.push(fxPoints(g,{n:34,tex:makeStarTexture(),color:0xffffff,size:0.045,area:area,drift:{y:0.02,swirl:0.15},twinkle:0}));
-    const area2={cx:cx,cy:cy,cz:cz,h:(D.h||0.4)+0.10,R:R*0.9,len:len*0.95};
-    up.points.push(fxPoints(g,{n:26,tex:makeStarTexture(),color:0xf2d98a,size:0.035,area:area2,drift:{y:0.03,swirl:-0.2},twinkle:2.1}));
+    up.points.push(fxPoints(g,{n:26,tex:makeStarTexture(),color:0xf2d98a,size:0.035,area:area,drift:{y:0.03,swirl:-0.2},twinkle:2.1}));
+    const zo=(D.orbZ!=null?D.orbZ:cz+len*0.10),orad=(D.orbR||0.06)+0.030,orx=(D.w||0.14)/2+0.028; // orbs orbit the barrel axis CLOSE to the receiver (R2 : the orbit is an ELLIPSE matched to the receiver cross-section — a round orbit sized by the scope-dominated profile radius swung the orbs +0.070 past the gun's thin sides in local x)
     for(let i=0;i<3;i++){
-      const om=new THREE.Sprite(new THREE.SpriteMaterial({map:makeDotTexture('rgba(255,242,205,1)','rgba(160,90,255,0)'),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
-      const s=[0.14,0.10,0.08][i];om.scale.set(s,s,1);g.add(om);
-      up.orbs.push({m:om,ph:i*2.1,rad:R+[0.10,0.15,0.07][i],spd:[0.7,0.5,0.9][i],cx:cx,cy:cy,zc:cz+len*0.16,tilt:[0.4,1.1,2.2][i]});
+      const om=new THREE.Mesh(new THREE.SphereGeometry([0.020,0.016,0.012][i],10,8),
+        new THREE.MeshBasicMaterial({color:[0xfff2cd,0xcfa8ff,0xf2c233][i],transparent:true,opacity:0.95,blending:THREE.AdditiveBlending,depthWrite:false}));
+      om.frustumCulled=false;g.add(om);
+      up.orbs.push({m:om,ph:i*2.1,rx:orx+[0,0.010,0.018][i],ry:orad+[0,0.014,0.024][i],spd:[0.7,0.5,0.9][i],cx:ax,cy:ay,zc:zo+[-0.06,0.01,0.07][i]});
     }
   }
   return g;
 }
-function fxUpdate(group,t,dt){
+function fxUpdate(group,t,dt){ // accents + particles only — the emissive flow is ticked separately (fxFlowTick)
   const up=group.userData.fx;if(!up)return;
-  if(up.flowTex&&up.flowSpd)up.flowTex.offset.y=(t*up.flowSpd)%1; // the current crawls along the gun
-  if(up.pulse){const b=0.72+0.28*Math.sin(t*up.pulse.spd);up.pulse.mat.opacity=up.pulse.base*b;}
-  if(up.pulseSpr){const b=0.72+0.28*Math.sin(t*up.pulseSpr.spd);up.pulseSpr.m.material.opacity=up.pulseSpr.base*b;const s=0.55*(0.94+0.09*b);up.pulseSpr.m.scale.set(s,s*0.72,1);}
+  if(up.pulseSpr){const b=0.72+0.28*Math.sin(t*up.pulseSpr.spd);up.pulseSpr.m.material.opacity=up.pulseSpr.base*b;const s=0.34*(0.94+0.09*b);up.pulseSpr.m.scale.set(s,s*0.72,1);}
   for(const s of up.spin)s.m.rotation[s.axis]+=s.spd*dt;
-  for(const o of up.orbs){const a=t*o.spd+o.ph;
-    o.m.position.set(o.cx+Math.cos(a)*o.rad,o.cy+Math.sin(a)*o.rad*Math.cos(o.tilt),o.zc+Math.sin(a)*o.rad*Math.sin(o.tilt));}
+  for(const o of up.orbs){const a=t*o.spd+o.ph; // planar orbit around the barrel axis, tight to the gun
+    let ox=o.cx+Math.cos(a)*o.rx,oy=o.cy+Math.sin(a)*o.ry; // elliptical orbit matched to the receiver cross-section
+    if(up.clamp){ox=clamp(ox,up.clamp.x0,up.clamp.x1);oy=clamp(oy,up.clamp.y0,up.clamp.y1);} // MYTHIC FX R2 : the orbit is clipped to the measured gun box — an edge-on sway phase used to swing an orb +0.107 past the bbox gate
+    o.m.position.set(ox,oy,o.zc+Math.sin(a*0.7)*0.02);}
   for(const L of up.points){
-    const pos=L.geo.attributes.position;
-    for(let i=0;i<L.n;i++){const sd=L.seeds[i];
-      sd.ang+=L.drift.swirl*dt*(0.6+sd.spd);sd.y+=L.drift.y*dt*(0.5+sd.spd);
-      if(sd.y>L.yMax){sd.y=L.yMin;sd.ang=rand(0,TAU);}
-      pos.setXYZ(i,L.cx+Math.cos(sd.ang)*sd.rad,sd.y,sd.z+Math.sin(sd.ang)*sd.rad*0.35);}
-    pos.needsUpdate=true;
+    for(const part of L.parts){
+      const pos=part.geo.attributes.position;
+      for(let i=0;i<part.seeds.length;i++){const sd=part.seeds[i];
+        sd.rise+=L.drift.y*dt*(0.5+sd.spd);
+        if(L.verts){ // MYTHIC FX R2 : surface anchors — jitter a breath around a real vertex ; embers lift <=0.025 then recycle onto a fresh vertex IN THE SAME z-BAND (recycling across bands would stretch the band's geometry box and re-inflate the gate). Total reach from the metal <= ~0.04.
+          if(sd.rise>0.025){sd.rise=0;sd.vi=part.vis[Math.floor(rand(0,part.vis.length))];}
+          const j=sd.pad+0.004*Math.sin(t*(0.7+sd.spd)+sd.ph),b=sd.vi*3;
+          pos.setXYZ(i,L.verts[b]+sd.ux*j,L.verts[b+1]+sd.uy*j+sd.rise,L.verts[b+2]+sd.uz*j);
+        }else{ // fallback sheath around the barrel axis (no anchors captured)
+          sd.th+=L.drift.swirl*dt*(0.6+sd.spd);
+          if(sd.rise>0.05){sd.rise=0;sd.th=rand(0,TAU);}
+          const rr=(L.rAt?L.rAt(sd.z):L.rFlat)+sd.pad;
+          pos.setXYZ(i,L.ax+Math.cos(sd.th)*rr,L.ay+Math.sin(sd.th)*rr+sd.rise,sd.z);
+        }}
+      pos.needsUpdate=true;
+    }
     if(L.tw!=null)L.mat.opacity=L.baseOp*(0.68+0.32*Math.sin(t*2.6+L.tw)); // counter-phased twinkle layers
   }
 }
@@ -4649,7 +4896,11 @@ function syncPvSkinFX(){
   if(kind&&pv.built&&pv.fit&&pv.fit.children.length){
     const holder=pv.fit.children[0];
     const D=fxDimsFor(key),k=(pv.size&&D.len)?pv.size.x/D.len:1;
-    const grp=makeSkinFX(kind,{cx:0,cy:0,cz:0,h:D.h*k,w:D.w*k,len:D.len*k}); // LOBBY POLISH : preview FX is built RECENTERED in holder space — pvCenterModel parks every model's bbox center on the holder origin, so this lands on any rifle (the PCR wrap clone carries a x12.7 root scale that flung a wrap-space group metres off-frame)
+    const rAtPv=D.rAt?function(z){return D.rAt(z/k+D.cz)*k;}:null; // MYTHIC FX R2 : the silhouette profile, recentered + rescaled like every other dim
+    const vertsPv=D.verts?(function(){const a=new Array(D.verts.length);for(let i=0;i<D.verts.length;i+=3){a[i]=(D.verts[i]-D.cx)*k;a[i+1]=(D.verts[i+1]-D.cy)*k;a[i+2]=(D.verts[i+2]-D.cz)*k;}return a;})():null; // MYTHIC FX R2 : surface anchors, same recenter + rescale
+    const grp=makeSkinFX(kind,{cx:0,cy:0,cz:0,h:D.h*k,w:D.w*k,len:D.len*k,rAt:rAtPv,verts:vertsPv, // MYTHIC FX : accents recentered + rescaled with the same k as every other dim
+      ax:(D.ax-D.cx)*k,ay:(D.ay-D.cy)*k,
+      rings:(D.rings||[]).map(r=>({z:(r.z-D.cz)*k,r:r.r*k})),orbR:(D.orbR||0.06)*k,orbZ:(D.orbZ!=null?(D.orbZ-D.cz)*k:0)}); // LOBBY POLISH : preview FX is built RECENTERED in holder space — pvCenterModel parks every model's bbox center on the holder origin, so this lands on any rifle (the PCR wrap clone carries a x12.7 root scale that flung a wrap-space group metres off-frame)
     holder.add(grp);grp.position.set(0,0,0);
     pvSkinFX={id:want,group:grp};
   }
@@ -4705,6 +4956,7 @@ function skinKillHook(e,hitP,camWillRun){ // called from the kill choke point �
 function skinFxTick(dt){ // hooked into the main frame loop
   syncVmSkinFX();
   const t=performance.now()/1000;
+  fxFlowTick(t); // MYTHIC FX : scroll + breathe the emissive flow on the guns' materials
   if(vmSkinFX)fxUpdate(vmSkinFX.group,t,dt);
   for(let i=kfFx.length-1;i>=0;i--){const k=kfFx[i];k.t+=dt;const u=k.t/k.life;
     if(u>=1){scene.remove(k.m);k.m.material.dispose();if(k.m.geometry)k.m.geometry.dispose();kfFx.splice(i,1);continue;}
