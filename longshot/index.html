@@ -527,8 +527,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='11.1.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='11.1.2'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'11.1.2',lines:[ // SYNC 11.1.2 : sign-in gesture + watchdog — sign-in loads early, the popup opens inside the tap, and a popup that never answers falls back on its own
+  '<b>SIGN-IN RELIABILITY</b> — Google sign-in now loads early and the popup opens the moment you tap SIGN IN; if a popup ever gets stuck, the game falls back automatically']},
  {v:'11.1.1',lines:[ // SYNC 11.1.1 : sign-in reliability — popup-first so the Google round trip completes on iOS Safari
   '<b>SIGN-IN FIX</b> — Google sign-in now opens as a popup on every device, so linking your account completes instead of bouncing back unfinished']},
  {v:'11.1',lines:[ // SYNC 11.1 : Google sign-in + cloud save
@@ -5517,9 +5519,11 @@ requestAnimationFrame(frame);
 /* ==================== SYNC 11.1 — Google sign-in + cloud save (Firebase) ====================
    Auth (Google) + Firestore behind a tiny adapter (FBAPI) so the whole layer
    stubs cleanly in sims and fails soft in the field. The pinned compat SDK
-   loads LAZILY from the official gstatic CDN — on Settings open, or at boot
-   only when this device has signed in before / a redirect sign-in is in
-   flight — and NEVER blocks boot or gameplay. If it cannot load (offline,
+   loads from the official gstatic CDN — EAGERLY at menu idle on every boot
+   (SYNC 11.1.2 : preloaded so a sign-in tap finds it ready and the popup
+   keeps its user gesture; v11.1's signed-in-only lazy boot load is retired),
+   on Settings open, or at boot when a redirect sign-in is returning — and
+   NEVER blocks boot or gameplay. If it cannot load (offline,
    file:// Files-app preview, CDN blocked) the game behaves exactly as
    v11.0 and the Settings row shows a quiet "Sign-in unavailable (offline)".
    Compat (namespaced) builds are used because this page has no bundler or
@@ -5562,10 +5566,14 @@ const FBAPI={ // SYNC 11.1 : adapter — every Firebase call the sync layer make
     return Promise.resolve(pp).then(function(r){return r;},function(e){
       const c=e&&e.code;
       if(c==='auth/popup-blocked'||c==='auth/operation-not-supported-in-this-environment'||c==='auth/web-storage-unsupported'){
-        try{return FBAPI.auth.signInWithRedirect(prov);}catch(e2){return Promise.reject(e2);} // fallback ONCE : the caller's pending flag already covers the return trip
+        return FBAPI.signInRedirect(); // SYNC 11.1.2 : fallback ONCE, via the shared redirect entry — the caller's pending flag already covers the return trip (was an inline signInWithRedirect call)
       }
       throw e; // popup-closed-by-user / cancelled-popup-request / anything else : classified by SYNC.signIn (a closed popup is a shrug, not a failure)
     });
+  },
+  signInRedirect:function(){ // SYNC 11.1.2 : the redirect as a standalone adapter call — FBAPI.signIn's popup-refused fallback and SYNC.signIn's dead-popup watchdog both land here. In the field this navigates the page away; the caller's lssync_pending flag covers the return trip.
+    let prov;try{prov=new firebase.auth.GoogleAuthProvider();}catch(e){return Promise.reject(e);}
+    try{return FBAPI.auth.signInWithRedirect(prov);}catch(e){return Promise.reject(e);}
   },
   signOut:function(){try{return FBAPI.auth.signOut();}catch(e){return Promise.reject(e);}},
   get:function(uid){
@@ -5586,7 +5594,7 @@ const SYNC={
     'longshot_skinsOwned','longshot_skin','longshot_mbest','longshot_mtime','longshot_ghostMissions',
     'longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn','longshot_seenver'],
   NUMK:{longshot_credits:1,longshot_xp:1,longshot_best:1,longshot_rifles:1,longshot_menuMission:1}, // numeric ladders : best-of = max (rifles unlock by ladder, so max IS the union)
-  state:'idle',user:null,dirty:false,_sdkOk:false,_kicked:false,_applying:false,_pushing:false,_pushT:0,_pushTimer:0,_status:'',
+  state:'idle',user:null,dirty:false,_sdkOk:false,_kicked:false,_applying:false,_pushing:false,_pushT:0,_pushTimer:0,_status:'',_wdMs:9000, // SYNC 11.1.2 : popup watchdog window (ms) — a signInWithPopup promise still unsettled this long, with no auth event landed, is the webview dead-popup: rescue it with the redirect fallback
   store:{get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},
          set:function(k,v){try{localStorage.setItem(k,v);}catch(e){}},
          del:function(k){try{localStorage.removeItem(k);}catch(e){}}},
@@ -5709,7 +5717,17 @@ const SYNC={
       const go=function(){
         SYNC._status='Opening Google sign-in…';SYNC.render();
         let p;try{p=FBAPI.signIn();}catch(e){p=Promise.reject(e);}
-        Promise.resolve(p).then(function(){},function(e){SYNC.store.del('lssync_pending');const c=e&&e.code;
+        let done=false; // SYNC 11.1.2 : settled-once guard — the first outcome (popup settle or watchdog rescue) owns this attempt; anything later is ignored
+        const wd=setTimeout(function(){ // SYNC 11.1.2 : popup watchdog — in in-app webviews window.open can no-op and the compat popup promise NEVER settles: no rejection, no fallback, a dead button (MW's iPhone field report). If the promise is still unsettled and no auth event has landed when the window closes, fire the redirect fallback ONCE; the lssync_pending flag set above already covers the return trip.
+          if(done||SYNC.user)return;
+          done=true;
+          let rp;try{rp=FBAPI.signInRedirect();}catch(e){rp=Promise.reject(e);}
+          Promise.resolve(rp).then(function(){},function(e){SYNC.store.del('lssync_pending');const c=e&&e.code;SYNC._status='Sign-in failed'+(c?' ('+c+')':'')+' — try again';SYNC.render();}); // SYNC 11.1.2 : the rescue redirect itself failed — name its code, same as a terminal popup failure
+        },SYNC._wdMs);
+        Promise.resolve(p).then(function(){done=true;clearTimeout(wd);},function(e){ // SYNC 11.1.2 : any settle cancels the watchdog; classification below is v11.1.1's, unchanged
+          if(done)return; // SYNC 11.1.2 : the watchdog already rescued this attempt — a late popup rejection must not overwrite the rescue, clear the pending flag, or re-trigger anything
+          done=true;clearTimeout(wd);
+          SYNC.store.del('lssync_pending');const c=e&&e.code;
           if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'){SYNC._status='';} // SYNC 11.1.1 : he just closed the popup — quiet reset to the signed-out row, NO error text
           else SYNC._status='Sign-in failed'+(c?' ('+c+')':'')+' — try again'; // SYNC 11.1.1 : terminal failures name their code so the row itself is the field diagnostic
           SYNC.render();});
@@ -5752,7 +5770,12 @@ const SYNC={
     try{document.addEventListener('visibilitychange',function(){try{if(document.hidden)SYNC.push();}catch(e){}});}catch(e){}
     try{window.addEventListener('online',function(){try{if(SYNC.dirty)SYNC.pushNow();}catch(e){}});}catch(e){}
     SYNC.render();
-    try{if(SYNC.store.get('lssync_was')||SYNC.store.get('lssync_pending')==='1')setTimeout(function(){SYNC.kick();},1600);}catch(e){} // returning / redirect-returning device : restore the session in the background; a never-signed-in boot stays exactly v11.0
+    try{if(SYNC.store.get('lssync_was')||SYNC.store.get('lssync_pending')==='1')setTimeout(function(){SYNC.kick();},1600);}catch(e){} // returning / redirect-returning device : restore the session in the background, ahead of the general idle preload below
+    try{ // SYNC 11.1.2 : EAGER IDLE PRELOAD — every boot warms the SDK once the menu is idle, so when a tap lands on SIGN IN the SDK is already ready and go() runs synchronously inside the tap handler (iOS Safari kills popups fired after an async hop: the v11.1.1 gesture-loss field bug, where the 250 ms poll fired the popup and it died as popup-blocked into the ITP-eaten redirect). Scheduled with the world pack's menu-idle discipline: after the menu is interactive, never blocking boot or first paint; kick() is idempotent, so the Settings-open and returning-device kicks stay harmless no-ops once this lands. DELIBERATE trade-off: a never-signed-in boot now also streams the ~512 KB SDK at idle — v11.1's zero-extra-bytes property is retired (the 2.4 MB world pack already set the idle-streaming precedent).
+      const _ik=function(){SYNC.kick();};
+      if(window.requestIdleCallback)requestIdleCallback(_ik,{timeout:3000});
+      setTimeout(_ik,2400); // backstop : older Safari has no requestIdleCallback, and idle may never report over a busy menu — the warm-up must land regardless
+    }catch(e){}
   }
 };
 try{SYNC.init();}catch(e){}
