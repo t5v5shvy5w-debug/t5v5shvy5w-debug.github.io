@@ -182,6 +182,18 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 .xpbar>i{display:block;height:100%;background:#7fd67f;border-radius:3px;transition:width .4s ease}
 #xpText{font-size:9px;letter-spacing:1.5px;color:#8aa086}
 .tb-right{text-align:right;padding-top:0} /* LOBBY FIX : was padding-top:2px — the row is align-items:center now */
+/* SYNC 11.2 : identity chip (top bar) + sign-in diagnostics (lobby red box, settings details) */
+#syncChip{display:none;align-items:center;gap:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:3px 10px 3px 3px;max-width:36vw;flex:none;cursor:pointer}
+#syncChip.on{display:flex}
+#syncChipImg{width:22px;height:22px;border-radius:50%;object-fit:cover;background:#33502f;flex:none}
+#syncChipName{font-size:11px;letter-spacing:1px;color:#dfe9da;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+@media (max-width:380px){#syncChipName{display:none}#syncChip{padding:3px}}
+#syncBox{margin:8px 14px 0;padding:10px 12px;background:rgba(80,14,10,.88);border:1px solid #ff6a5e;border-radius:10px;color:#ffe3de;text-transform:none}
+#syncBoxMsg{font-size:12px;line-height:1.55}
+#syncBoxLog{font:10px/1.6 monospace;color:#ffb4a8;white-space:pre-wrap;word-break:break-word;margin-top:6px;max-height:110px;overflow:auto}
+#syncBoxX{margin-top:8px;font-size:10px;padding:5px 10px}
+#syncDet{margin:2px 0 8px;padding:8px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:8px}
+#syncDetBody{font-size:11px;line-height:1.65;color:#cfe3c8;white-space:pre-wrap;word-break:break-word;text-transform:none;margin-top:2px}
 #crVal{font-size:18px;color:#f5e6a8;letter-spacing:1px;font-weight:700}
 #midWrap{flex:1;position:relative;display:flex;flex-direction:column;min-height:0}
 #homeView{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 18px 6px;min-height:0}
@@ -358,6 +370,8 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <h1>SETTINGS</h1>
     <div class="setrow" id="syncRow"><span>Google account</span><span><button class="mbtn" id="syncBtn">SIGN IN WITH GOOGLE</button><button class="mbtn" id="syncOut" style="display:none">SIGN OUT</button></span></div>
     <div class="setrow" id="syncRow2" style="display:none"><span id="syncWho" style="color:#8aa086">Cloud save</span><span id="syncStatus" style="color:#8aa086"></span></div>
+    <div class="setrow" id="syncRow3"><span style="color:#8aa086">Redirect not working?</span><span><button class="mbtn" id="syncPopBtn" style="font-size:11px;padding:6px 10px">Popup sign-in instead</button></span></div>
+    <div id="syncDet" style="display:none"><div style="font-size:10px;letter-spacing:1.5px;color:#8aa086">LAST SIGN-IN ATTEMPT</div><div id="syncDetBody"></div></div>
     <div class="setrow"><span>Invert Y aim</span><input type="checkbox" id="invY"></div>
     <div class="setrow"><span>Invert X aim</span><input type="checkbox" id="invX"></div>
     <div class="setrow"><span>Aim sensitivity</span><input type="range" id="sens" min="0.5" max="2" step="0.1" value="1"></div>
@@ -401,11 +415,13 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
       <div class="xpbar"><i id="xpFill" style="width:0%"></i></div>
       <div id="xpText">0 XP</div>
     </div>
+    <div id="syncChip"><img id="syncChipImg" alt="" referrerpolicy="no-referrer"><span id="syncChipName"></span></div>
     <div class="tb-right">
       <div class="tbLab">CREDITS</div>
       <div id="crVal">0</div>
     </div>
   </div>
+  <div id="syncBox" style="display:none"><div id="syncBoxMsg"></div><div id="syncBoxLog"></div><button class="mbtn" id="syncBoxX">DISMISS</button></div>
   <div id="midWrap">
     <div id="homeView">
       <div id="titleBlock">
@@ -527,8 +543,11 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='11.1.2'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='11.2'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'11.2',lines:[ // SYNC 11.2 : sign-in diagnostics + identity chip
+  '<b>SIGN-IN DIAGNOSTICS</b> — if Google sign-in fails, the game now shows exactly what happened on screen, and Settings gains a second popup sign-in option',
+  '<b>SIGNED IN, VISIBLE</b> — your Google name and photo ride in the lobby top bar while you are signed in']},
  {v:'11.1.2',lines:[ // SYNC 11.1.2 : sign-in gesture + watchdog — sign-in loads early, the popup opens inside the tap, and a popup that never answers falls back on its own
   '<b>SIGN-IN RELIABILITY</b> — Google sign-in now loads early and the popup opens the moment you tap SIGN IN; if a popup ever gets stuck, the game falls back automatically']},
  {v:'11.1.1',lines:[ // SYNC 11.1.1 : sign-in reliability — popup-first so the Google round trip completes on iOS Safari
@@ -5530,11 +5549,19 @@ requestAnimationFrame(frame);
    import map: classic script tags load anywhere the game's own sidecar
    scripts do, and a failed tag is a soft onerror, never a module error.
    Placement per MW: the sign-in row is the FIRST item of the gear Settings
-   panel — never a lobby button; the lobby stays uncluttered. */
+   panel — never a lobby button; the lobby stays uncluttered.
+   SYNC 11.2 (MW's written spec after three silent field failures) : the
+   REDIRECT is the primary sign-in path again (direct tap; the popup is an
+   explicit second button — the 11.1.2 auto-redirect watchdog is retired),
+   EVERY auth event lands in a persisted on-screen log (lssync_log, never
+   synced), a dismissible red box on the lobby shows the latest failure in
+   plain words with its real error code, startup env checks (file:// /
+   in-app browser / config / origin) run + log at boot, and a signed-in
+   identity chip (photo + first name) rides the lobby top bar. */
 const FB_CFG={apiKey:"AIzaSyB2JyZ9G94SchgWnWrbXPfYF6J_1G7uiZc",authDomain:"long-shot-sync.firebaseapp.com",projectId:"long-shot-sync",storageBucket:"long-shot-sync.firebasestorage.app",messagingSenderId:"528453347717",appId:"1:528453347717:web:2f58e61b4f7793d3eb7cec"}; // SYNC 11.1 : public web identifiers (not secrets) — project long-shot-sync under MW's Google account
-const FB_CDN='https://www.gstatic.com/firebasejs/10.12.2/';
+const FB_CDN='https://www.gstatic.com/firebasejs/12.7.0/';
 const FBAPI={ // SYNC 11.1 : adapter — every Firebase call the sync layer makes goes through here; sims swap these methods for an in-memory fake
-  ok:false,auth:null,db:null,_redirErr:'', // SYNC 11.1.1 : error code from a failed redirect return, stashed for handleAuth's status text
+  ok:false,auth:null,db:null,_redirErr:'',_redirMsg:'',_authFired:false, // SYNC 11.2 : redirect error code AND message (FBAPI._redirMsg) + first-auth-fire latch (was code-only, SYNC 11.1.1)
   load:function(){return new Promise(function(res){
     try{
       if(window.firebase&&firebase.app&&firebase.auth&&firebase.firestore){res(true);return;}
@@ -5555,23 +5582,16 @@ const FBAPI={ // SYNC 11.1 : adapter — every Firebase call the sync layer make
       if(!firebase.apps.length)firebase.initializeApp(FB_CFG);
       FBAPI.auth=firebase.auth();FBAPI.db=firebase.firestore();
       try{const pp=FBAPI.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);if(pp&&pp.catch)pp.catch(function(){});}catch(e){}
-      try{const rp=FBAPI.auth.getRedirectResult();if(rp&&rp.catch)rp.catch(function(e){FBAPI._redirErr=(e&&e.code)||'';});}catch(e){} // SYNC 11.1.1 : keep the failure code — if the return lands user-less, the Settings row names the code instead of shrugging (was a no-op catch)
+      try{const rp=FBAPI.auth.getRedirectResult();if(rp&&rp.then)rp.then(function(r){try{SYNC.log('redirect-result',r&&r.user?('user uid='+r.user.uid):'null (no user, no error)');}catch(e){}},function(e){FBAPI._redirErr=(e&&e.code)||'';FBAPI._redirMsg=(e&&e.message)||'';try{SYNC.log('redirect-result','error '+(FBAPI._redirErr||'?')+' :: '+(FBAPI._redirMsg||''));}catch(e2){}});}catch(e){} // SYNC 11.2 : log the redirect outcome verbatim (user / null / error code+message) and stash code+message — the evidence the silent builds never captured
       FBAPI.ok=true;return true;
     }catch(e){FBAPI.ok=false;return false;}
   },
-  wireAuth:function(){try{FBAPI.auth.onAuthStateChanged(function(u){SYNC.handleAuth(u);},function(){SYNC.handleAuth(null);});}catch(e){}},
-  signIn:function(){ // SYNC 11.1.1 : popup FIRST on every platform — iOS Safari ITP partitions the cross-domain auth-handler storage the redirect handoff depends on, so the redirect returns user-less in the field despite a completed consent (v11.1 field report). Redirect survives only as the one-time fallback for environments that refuse popups outright.
+  wireAuth:function(){try{FBAPI.auth.onAuthStateChanged(function(u){if(!FBAPI._authFired){FBAPI._authFired=true;try{SYNC.log('auth-state','first fire: '+(u?('user uid='+u.uid):'null'));}catch(e){}}SYNC.handleAuth(u);},function(err){if(!FBAPI._authFired){FBAPI._authFired=true;try{SYNC.log('auth-state','first fire: error callback');}catch(e){}}SYNC.handleAuth(null);});}catch(e){}}, // SYNC 11.2 : first-fire logging — whether the auth callback fires AT ALL is itself field evidence
+  signInPopup:function(){ // SYNC 11.2 : the popup as an EXPLICIT user-chosen path (Settings "Popup sign-in instead") — popup only, NO auto-redirect fallback inside the adapter: MW picks the method, the layer respects the pick and reports the outcome verbatim. (Replaces v11.1.1's popup-with-redirect-fallback FBAPI.signIn.)
     let prov;try{prov=new firebase.auth.GoogleAuthProvider();}catch(e){return Promise.reject(e);}
-    let pp;try{pp=FBAPI.auth.signInWithPopup(prov);}catch(e){pp=Promise.reject(e);}
-    return Promise.resolve(pp).then(function(r){return r;},function(e){
-      const c=e&&e.code;
-      if(c==='auth/popup-blocked'||c==='auth/operation-not-supported-in-this-environment'||c==='auth/web-storage-unsupported'){
-        return FBAPI.signInRedirect(); // SYNC 11.1.2 : fallback ONCE, via the shared redirect entry — the caller's pending flag already covers the return trip (was an inline signInWithRedirect call)
-      }
-      throw e; // popup-closed-by-user / cancelled-popup-request / anything else : classified by SYNC.signIn (a closed popup is a shrug, not a failure)
-    });
+    try{return FBAPI.auth.signInWithPopup(prov);}catch(e){return Promise.reject(e);}
   },
-  signInRedirect:function(){ // SYNC 11.1.2 : the redirect as a standalone adapter call — FBAPI.signIn's popup-refused fallback and SYNC.signIn's dead-popup watchdog both land here. In the field this navigates the page away; the caller's lssync_pending flag covers the return trip.
+  signInRedirect:function(){ // SYNC 11.2 : the redirect as a standalone adapter call — SYNC.signIn (the primary path) lands here. In the field this navigates the page away; the caller's lssync_pending flag covers the return trip.
     let prov;try{prov=new firebase.auth.GoogleAuthProvider();}catch(e){return Promise.reject(e);}
     try{return FBAPI.auth.signInWithRedirect(prov);}catch(e){return Promise.reject(e);}
   },
@@ -5594,10 +5614,71 @@ const SYNC={
     'longshot_skinsOwned','longshot_skin','longshot_mbest','longshot_mtime','longshot_ghostMissions',
     'longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn','longshot_seenver'],
   NUMK:{longshot_credits:1,longshot_xp:1,longshot_best:1,longshot_rifles:1,longshot_menuMission:1}, // numeric ladders : best-of = max (rifles unlock by ladder, so max IS the union)
-  state:'idle',user:null,dirty:false,_sdkOk:false,_kicked:false,_applying:false,_pushing:false,_pushT:0,_pushTimer:0,_status:'',_wdMs:9000, // SYNC 11.1.2 : popup watchdog window (ms) — a signInWithPopup promise still unsettled this long, with no auth event landed, is the webview dead-popup: rescue it with the redirect fallback
+  state:'idle',user:null,dirty:false,_sdkOk:false,_kicked:false,_applying:false,_pushing:false,_pushT:0,_pushTimer:0,_status:'',_popWdMs:20000,_env:null,_attempt:0, // SYNC 11.2 : _popWdMs = popup no-settle LOG window in ms (a hang is logged, never auto-navigated — the 11.1.2 auto-redirect watchdog is retired); _env caches the boot env checks; _attempt mirrors lssync_attempt
   store:{get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},
          set:function(k,v){try{localStorage.setItem(k,v);}catch(e){}},
          del:function(k){try{localStorage.removeItem(k);}catch(e){}}},
+  /* SYNC 11.2 : persisted auth log — a capped ring (12) in localStorage under
+     lssync_log, deliberately OUTSIDE the synced key set (snapshot() reads only
+     PKEYS, so the log can never ride in a cloud payload). Cheap + wrapped: a
+     log write can never throw into game code. */
+  log:function(tag,detail){
+    try{
+      let a=[];try{a=JSON.parse(SYNC.store.get('lssync_log')||'[]');if(!Array.isArray(a))a=[];}catch(e){a=[];}
+      a.push({t:Date.now(),m:String(tag)+(detail?(' :: '+String(detail)):'')});
+      while(a.length>12)a.shift();
+      SYNC.store.set('lssync_log',JSON.stringify(a));
+    }catch(e){}
+  },
+  readLog:function(){try{const a=JSON.parse(SYNC.store.get('lssync_log')||'[]');return Array.isArray(a)?a:[];}catch(e){return[];}},
+  fmtLog:function(n){ // last n entries as plain-text lines (always rendered via textContent — error text is never HTML)
+    try{return SYNC.readLog().slice(-(n||5)).map(function(e){const d=new Date(e.t);const p=function(x){return (x<10?'0':'')+x;};return p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())+' '+e.m;}).join('\n');}catch(e){return '';}
+  },
+  _fail:function(head,msg){ // SYNC 11.2 : record a failed attempt — the lobby box keys off lssync_failAt vs the dismissed box signature
+    try{
+      SYNC._status=head;
+      const att=SYNC._attempt||+(SYNC.store.get('lssync_attempt')||0)||0;
+      SYNC.store.set('lssync_failAt',String(att));
+      SYNC.store.set('lssync_failMsg',head+(msg?(' :: '+msg):''));
+      SYNC.log('signin-failed',head+(msg?(' :: '+msg):''));
+    }catch(e){}
+  },
+  envCheck:function(){ // SYNC 11.2 : startup env checks — run once at init, logged; blocking items surface in the lobby box, all of them in the Settings details
+    const E={file:false,inapp:'',configOk:true,origin:'',originOk:false};
+    try{
+      E.origin=(location.protocol==='file:')?'file://':(location.origin||(location.protocol+'//'+location.host)); // file:// has an opaque origin ('null' in Chrome) — name it plainly
+      if(location.protocol==='file:')E.file=true;
+      const ua=navigator.userAgent||'';
+      const isIOS=/iPhone|iPad|iPod/.test(ua);
+      const marked=/(FBAN|FBAV|Instagram|Line\/|musical_ly|TikTok|Snapchat|; wv\)|GSA\/)/.test(ua);
+      if(marked)E.inapp='in-app browser (user-agent marker)';
+      else if(isIOS&&!/Safari\//.test(ua))E.inapp='iOS browser without the Safari token (likely an in-app browser)';
+      const k=(typeof FB_CFG!=='undefined'&&FB_CFG.apiKey)||'';
+      if(!/^AIza[0-9A-Za-z_\-]{20,}$/.test(k))E.configOk=false;
+      if(typeof FB_CFG==='undefined'||FB_CFG.projectId!=='long-shot-sync')E.configOk=false;
+      if(typeof FB_CFG==='undefined'||!/\.firebaseapp\.com$/.test(FB_CFG.authDomain||''))E.configOk=false;
+      E.originOk=(E.origin==='https://t5v5shvy5w-debug.github.io');
+    }catch(e){}
+    SYNC._env=E;
+    try{
+      SYNC.log('env','origin='+E.origin+' file='+(E.file?'YES':'no')+' inapp='+(E.inapp||'no')+' config='+(E.configOk?'ok':'BAD')+' origin-authorized='+(E.originOk?'YES':'no'));
+      if(E.file)SYNC.log('env-block','file:// — sign-in cannot work from a file');
+      if(!E.configOk)SYNC.log('env-block','Firebase config missing or placeholder');
+      if(E.inapp)SYNC.log('env-warn','may be an in-app browser — sign-in works best in the real Safari app ('+E.inapp+')');
+      if(!E.originOk&&!E.file)SYNC.log('env-warn','origin '+E.origin+' is not the authorized domain — add it via Firebase → Authentication → Settings → Authorized domains');
+    }catch(e){}
+    return E;
+  },
+  _boxSig:function(){ // SYNC 11.2 : signature of the box-worthy state — a stored signature equal to this means MW has already dismissed exactly this box
+    try{
+      const failAt=+(SYNC.store.get('lssync_failAt')||0);
+      if(failAt>0)return 'f'+failAt;
+      const E=SYNC._env||{};
+      if(E.file)return 'env-file';
+      if(E.configOk===false)return 'env-cfg';
+      return '';
+    }catch(e){return '';}
+  },
   snapshot:function(){const o={};for(const k of SYNC.PKEYS){const v=SYNC.store.get(k);if(v!=null)o[k]=v;}return o;},
   _mergeMap:function(sa,sb,fn){let A={},B={};try{A=JSON.parse(sa||'{}')||{};}catch(e){}try{B=JSON.parse(sb||'{}')||{};}catch(e){}
     if(typeof A!=='object'||Array.isArray(A))A={};if(typeof B!=='object'||Array.isArray(B))B={};
@@ -5668,13 +5749,14 @@ const SYNC={
       Promise.resolve(gp).then(function(remote){
         const merged=remote?SYNC.merge(SYNC.snapshot(),remote.keys):SYNC.snapshot();
         SYNC.applySnap(merged);SYNC.store.set('lssync_linked',uid);
+        try{SYNC.log('link','first link — best-of merge applied');}catch(e){} // SYNC 11.2
         SYNC.pushNow();
       },function(){SYNC._status='Offline — will retry';SYNC.dirty=true;SYNC.render();});
       return;
     }
     Promise.resolve(gp).then(function(remote){ // LINKED : last-write-wins on updatedAt
       const known=+(SYNC.store.get('lssync_ts')||0);
-      if(remote&&remote.updatedAt>known){SYNC.applySnap(remote.keys);SYNC.store.set('lssync_ts',String(remote.updatedAt));SYNC._status='Synced';SYNC.render();}
+      if(remote&&remote.updatedAt>known){SYNC.applySnap(remote.keys);SYNC.store.set('lssync_ts',String(remote.updatedAt));SYNC._status='Synced';try{SYNC.log('link','newer cloud save applied (last-write-wins)');}catch(e){}SYNC.render();} // SYNC 11.2 : link outcome logged
       else SYNC.pushNow();
     },function(){SYNC._status='Offline — will retry';SYNC.dirty=true;SYNC.render();});
   },
@@ -5682,11 +5764,18 @@ const SYNC={
     try{
       const wasPending=SYNC.store.get('lssync_pending')==='1';
       if(wasPending)SYNC.store.del('lssync_pending');
-      if(!u){SYNC.user=null;if(SYNC._sdkOk)SYNC.state='out';
-        if(wasPending){const rc=FBAPI._redirErr||'';FBAPI._redirErr='';SYNC._status='Sign-in didn’t complete'+(rc?' ('+rc+')':'')+' — try again';} // SYNC 11.1.1 : surface the redirect-return error code when there is one (ITP's silent user-less return has none — it stays the plain string)
+      if(!u){const hadUser=!!SYNC.user;SYNC.user=null;if(SYNC._sdkOk)SYNC.state='out';
+        if(wasPending){ // SYNC 11.2 : a redirect return landing user-less is a RECORDED failure — code+message when Firebase produced one; the plain iOS-storage sentence when it silently didn't (the v11.1 field signature). The lobby box + log carry it from here.
+          const rc=FBAPI._redirErr||'',rm=FBAPI._redirMsg||'';FBAPI._redirErr='';FBAPI._redirMsg='';
+          if(rc)SYNC._fail('Sign-in didn’t complete ('+rc+')',rm);
+          else SYNC._fail('Sign-in didn’t complete — Google sent you back, but the sign-in didn’t survive the return trip (known iOS Safari storage block). Try the popup button in Settings.','');
+        }
+        else if(hadUser)SYNC.log('signed-out','auth state cleared');
         SYNC.render();return;}
-      SYNC.user={uid:u.uid,displayName:u.displayName||'',email:u.email||''};
-      SYNC.state='in';SYNC.store.set('lssync_was',u.uid);SYNC._status='';SYNC.render();
+      SYNC.user={uid:u.uid,displayName:u.displayName||'',email:u.email||'',photoURL:u.photoURL||''}; // SYNC 11.2 : photoURL feeds the top-bar identity chip
+      SYNC.state='in';SYNC.store.set('lssync_was',u.uid);SYNC._status='';
+      SYNC.log('signed-in','uid='+u.uid); // SYNC 11.2
+      SYNC.render();
       SYNC.linkFlow();
     }catch(e){}
   },
@@ -5700,73 +5789,138 @@ const SYNC={
   noteWrite:function(k){try{if(SYNC._applying||!SYNC.user)return;if(SYNC.PKEYS.indexOf(k)>=0)SYNC.push();}catch(e){}},
   kick:function(){ // load + init the SDK once, on demand. Failure = the quiet unavailable state, never an error.
     if(SYNC._kicked)return;SYNC._kicked=true;
+    try{SYNC.log('sdk','load start');}catch(e){} // SYNC 11.2
     if(SYNC.state==='idle')SYNC.state='loading';
     SYNC.render();
     let lp;try{lp=FBAPI.load();}catch(e){lp=Promise.resolve(false);}
     Promise.resolve(lp).then(function(ok){
       let initOk=false;if(ok){try{initOk=FBAPI.init();}catch(e){initOk=false;}}
-      if(!initOk){SYNC._sdkOk=false;if(SYNC.state!=='in')SYNC.state='unavail';SYNC.render();return;}
-      SYNC._sdkOk=true;if(SYNC.state==='loading'||SYNC.state==='idle')SYNC.state='out';SYNC.render();
+      if(!initOk){SYNC._sdkOk=false;try{SYNC.log('sdk','load/init FAILED — sign-in unavailable');}catch(e){}if(SYNC.state!=='in')SYNC.state='unavail';SYNC.render();return;} // SYNC 11.2 : sdk failure logged
+      SYNC._sdkOk=true;try{SYNC.log('sdk','ready');}catch(e){}if(SYNC.state==='loading'||SYNC.state==='idle')SYNC.state='out';SYNC.render(); // SYNC 11.2 : sdk ready logged
       try{FBAPI.wireAuth();}catch(e){}
-    },function(){SYNC._sdkOk=false;if(SYNC.state!=='in')SYNC.state='unavail';SYNC.render();});
+    },function(){SYNC._sdkOk=false;try{SYNC.log('sdk','load FAILED — sign-in unavailable');}catch(e){}if(SYNC.state!=='in')SYNC.state='unavail';SYNC.render();}); // SYNC 11.2 : sdk failure logged
   },
-  signIn:function(){
+  signIn:function(){ // SYNC 11.2 : REDIRECT is the primary path (MW's written spec) — started only from the SIGN IN button's direct tap; the SDK is idle-preloaded so the call fires immediately; the return is handled on reload by getRedirectResult + handleAuth, now fully logged. (Replaces the 11.1.1/11.1.2 popup-primary + watchdog flow.)
     try{
-      SYNC.store.set('lssync_pending','1'); // survives the redirect round trip (sessionStorage would too, but this also covers webview storage quirks via localStorage)
+      SYNC._attempt=(+(SYNC.store.get('lssync_attempt')||0))+1;SYNC.store.set('lssync_attempt',String(SYNC._attempt));
+      SYNC.log('signin-start','redirect (attempt '+SYNC._attempt+')');
+      SYNC.store.set('lssync_pending','1'); // survives the redirect round trip
       SYNC.kick();
       const go=function(){
         SYNC._status='Opening Google sign-in…';SYNC.render();
-        let p;try{p=FBAPI.signIn();}catch(e){p=Promise.reject(e);}
-        let done=false; // SYNC 11.1.2 : settled-once guard — the first outcome (popup settle or watchdog rescue) owns this attempt; anything later is ignored
-        const wd=setTimeout(function(){ // SYNC 11.1.2 : popup watchdog — in in-app webviews window.open can no-op and the compat popup promise NEVER settles: no rejection, no fallback, a dead button (MW's iPhone field report). If the promise is still unsettled and no auth event has landed when the window closes, fire the redirect fallback ONCE; the lssync_pending flag set above already covers the return trip.
-          if(done||SYNC.user)return;
-          done=true;
-          let rp;try{rp=FBAPI.signInRedirect();}catch(e){rp=Promise.reject(e);}
-          Promise.resolve(rp).then(function(){},function(e){SYNC.store.del('lssync_pending');const c=e&&e.code;SYNC._status='Sign-in failed'+(c?' ('+c+')':'')+' — try again';SYNC.render();}); // SYNC 11.1.2 : the rescue redirect itself failed — name its code, same as a terminal popup failure
-        },SYNC._wdMs);
-        Promise.resolve(p).then(function(){done=true;clearTimeout(wd);},function(e){ // SYNC 11.1.2 : any settle cancels the watchdog; classification below is v11.1.1's, unchanged
-          if(done)return; // SYNC 11.1.2 : the watchdog already rescued this attempt — a late popup rejection must not overwrite the rescue, clear the pending flag, or re-trigger anything
-          done=true;clearTimeout(wd);
+        let p;try{p=FBAPI.signInRedirect();}catch(e){p=Promise.reject(e);}
+        Promise.resolve(p).then(function(){try{SYNC.log('redirect','navigating to Google');}catch(e){}},function(e){
           SYNC.store.del('lssync_pending');const c=e&&e.code;
-          if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'){SYNC._status='';} // SYNC 11.1.1 : he just closed the popup — quiet reset to the signed-out row, NO error text
-          else SYNC._status='Sign-in failed'+(c?' ('+c+')':'')+' — try again'; // SYNC 11.1.1 : terminal failures name their code so the row itself is the field diagnostic
-          SYNC.render();});
+          SYNC._fail('Sign-in failed'+(c?' ('+c+')':''),(e&&e.message)||'');SYNC.render();});
       };
       if(SYNC._sdkOk)go();
       else{let n=0;const iv=setInterval(function(){n++;
         if(SYNC._sdkOk){clearInterval(iv);go();}
-        else if(SYNC.state==='unavail'||n>48){clearInterval(iv);SYNC.store.del('lssync_pending');SYNC._status='Sign-in unavailable (offline)';SYNC.render();}},250);}
+        else if(SYNC.state==='unavail'||n>48){clearInterval(iv);SYNC.store.del('lssync_pending');SYNC._fail('Sign-in unavailable (offline)','the sign-in SDK did not load');SYNC.render();}},250);}
+    }catch(e){}
+  },
+  signInPopup:function(){ // SYNC 11.2 : the EXPLICIT second path (Settings "Popup sign-in instead") — fired synchronously from its own tap so the popup keeps the user gesture. v11.1.1 classification kept (closed = silent shrug; blocked/unsupported/other surface their exact code), NO auto-redirect fallback and NO navigation watchdog: a promise still unsettled at _popWdMs is LOGGED (popup-no-settle) so a webview hang is visible in the details, and nothing else is done.
+    try{
+      SYNC._attempt=(+(SYNC.store.get('lssync_attempt')||0))+1;SYNC.store.set('lssync_attempt',String(SYNC._attempt));
+      SYNC.log('signin-start','popup (attempt '+SYNC._attempt+')');
+      SYNC.kick();
+      const go=function(){
+        SYNC._status='Opening Google sign-in…';SYNC.render();
+        let p;try{p=FBAPI.signInPopup();}catch(e){p=Promise.reject(e);}
+        let settled=false;
+        const wd=setTimeout(function(){if(!settled&&!SYNC.user){SYNC.log('popup-no-settle','no answer after '+Math.round((SYNC._popWdMs||20000)/1000)+'s — the popup was likely swallowed (in-app browser?)');SYNC.renderDetails();}},SYNC._popWdMs||20000);
+        Promise.resolve(p).then(function(){settled=true;clearTimeout(wd);},function(e){
+          settled=true;clearTimeout(wd);
+          const c=e&&e.code;
+          if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'){SYNC._status='';SYNC.log('popup-closed',c);} // he just closed it — a shrug, not a failure, no box
+          else SYNC._fail('Sign-in failed'+(c?' ('+c+')':''),(e&&e.message)||'');
+          SYNC.render();});
+      };
+      if(SYNC._sdkOk)go();
+      else{let n=0;const iv=setInterval(function(){n++;
+        if(SYNC._sdkOk){clearInterval(iv);SYNC.log('signin-wait','SDK was not ready at tap — popup fired late, iOS may block it');go();}
+        else if(SYNC.state==='unavail'||n>48){clearInterval(iv);SYNC._fail('Sign-in unavailable (offline)','the sign-in SDK did not load');SYNC.render();}},250);}
     }catch(e){}
   },
   signOut:function(){
     try{
+      SYNC.log('sign-out','user tapped SIGN OUT'); // SYNC 11.2
       SYNC.store.del('lssync_was');SYNC.user=null;SYNC.dirty=false;SYNC._status='';
       let p;try{p=FBAPI.signOut();}catch(e){p=Promise.reject(e);}
       Promise.resolve(p).then(function(){SYNC.handleAuth(null);},function(){SYNC.handleAuth(null);});
       SYNC.render(); // from here on push()/pushNow() no-op (no user) — sign-out stops all further pushes
     }catch(e){}
   },
-  render:function(){ // Settings row : signed-out = button; signed-in = who + status + sign out; unavailable = quiet text
+  render:function(){ // SYNC 11.2 : rows + popup row + details + identity chip + lobby box all repaint from this one funnel (was the settings rows only)
     try{
-      const btn=$('syncBtn'),out=$('syncOut'),row2=$('syncRow2'),who=$('syncWho'),st=$('syncStatus');
+      const btn=$('syncBtn'),out=$('syncOut'),row2=$('syncRow2'),who=$('syncWho'),st=$('syncStatus'),row3=$('syncRow3');
       if(!btn||!row2)return;
       if(SYNC.state==='unavail'){
-        btn.style.display='none';if(out)out.style.display='none';row2.style.display='flex';
-        if(who)who.textContent='Cloud save';if(st)st.textContent='Sign-in unavailable (offline)';return;}
-      if(SYNC.user){
-        btn.style.display='none';if(out)out.style.display='';
+        btn.style.display='none';if(out)out.style.display='none';if(row3)row3.style.display='none';row2.style.display='flex';
+        if(who)who.textContent='Cloud save';if(st)st.textContent='Sign-in unavailable (offline)';}
+      else if(SYNC.user){
+        btn.style.display='none';if(out)out.style.display='';if(row3)row3.style.display='none';
         row2.style.display='flex';
         if(who)who.textContent='Signed in as '+(SYNC.user.displayName||SYNC.user.email||'Google user');
-        if(st)st.textContent=SYNC._status||'Synced';return;}
-      btn.style.display='';btn.textContent='SIGN IN WITH GOOGLE';if(out)out.style.display='none';
-      row2.style.display=SYNC._status?'flex':'none';
-      if(who)who.textContent='Cloud save';if(st)st.textContent=SYNC._status||'';
+        if(st)st.textContent=SYNC._status||'Synced';}
+      else{
+        btn.style.display='';btn.textContent='SIGN IN WITH GOOGLE';if(out)out.style.display='none';if(row3)row3.style.display='';
+        row2.style.display=SYNC._status?'flex':'none';
+        if(who)who.textContent='Cloud save';if(st)st.textContent=SYNC._status||'';}
+      SYNC.renderChip();SYNC.renderDetails();SYNC.renderBox();
+    }catch(e){}
+  },
+  renderChip:function(){ // SYNC 11.2 : lobby top-bar identity chip — Google photo + first name while signed in; hidden entirely when signed out
+    try{
+      const chip=$('syncChip');if(!chip)return;
+      if(!SYNC.user){chip.classList.remove('on');return;}
+      chip.classList.add('on');
+      const nm=$('syncChipName');if(nm)nm.textContent=(SYNC.user.displayName||'').split(' ')[0]||SYNC.user.email||'Player';
+      const im=$('syncChipImg');
+      if(im){
+        if(SYNC.user.photoURL){if(im.getAttribute('src')!==SYNC.user.photoURL)im.src=SYNC.user.photoURL;im.style.display='';im.onerror=function(){try{im.style.display='none';}catch(e){}};}
+        else im.style.display='none';
+      }
+    }catch(e){}
+  },
+  renderDetails:function(){ // SYNC 11.2 : Settings "LAST SIGN-IN ATTEMPT" block — env verdicts + the persisted log; always available, plain text only
+    try{
+      const det=$('syncDet'),body=$('syncDetBody');if(!det||!body)return;
+      det.style.display='block';
+      const E=SYNC._env||{};const lines=[];
+      lines.push('Origin: '+(E.origin||'')+(E.originOk?' (the authorized domain)':' (NOT the authorized domain)'));
+      if(E.file)lines.push('BLOCKED: running from file:// — sign-in cannot work here. Open the game from its web link in Safari.');
+      if(E.configOk===false)lines.push('BLOCKED: Firebase config missing or placeholder.');
+      if(E.inapp)lines.push('Warning: '+(E.inapp)+' — sign-in works best in the real Safari app.');
+      const lg=SYNC.fmtLog(6);if(lg)lines.push(lg);
+      body.textContent=lines.join('\n');
+    }catch(e){}
+  },
+  renderBox:function(){ // SYNC 11.2 : the lobby red box — shows for the latest UNSEEN failure or a blocking env; dismissal stores the state signature so it stays down until a NEW failure (or a different block) lands
+    try{
+      const box=$('syncBox');if(!box)return;
+      const sig=SYNC._boxSig();
+      if(!sig||SYNC.store.get('lssync_boxSeen')===sig){box.style.display='none';return;}
+      const E=SYNC._env||{};const msg=$('syncBoxMsg'),lg=$('syncBoxLog');if(!msg)return;
+      let head='';
+      if(sig.charAt(0)==='f')head=SYNC.store.get('lssync_failMsg')||'Sign-in failed';
+      else if(sig==='env-file')head='Sign-in can’t work from a file — open the game from its web link in Safari: https://t5v5shvy5w-debug.github.io/longshot/';
+      else head='Firebase config missing or placeholder — sign-in is disabled.';
+      msg.textContent=head;
+      if(lg){const t=SYNC.fmtLog(5);lg.textContent=(t?(t+'\n'):'')+'Origin: '+(E.origin||'');}
+      box.style.display='block';
     }catch(e){}
   },
   init:function(){
+    try{SYNC.envCheck();}catch(e){} // SYNC 11.2 : env checks first — logged before anything else can speak
+    try{if(SYNC.store.get('lssync_pending')==='1')SYNC.log('return','redirect return detected (pending flag was set)');}catch(e){} // SYNC 11.2
+    try{SYNC._attempt=+(SYNC.store.get('lssync_attempt')||0)||0;}catch(e){} // SYNC 11.2
     try{const orig=lsSet;lsSet=function(k,v){orig(k,v);SYNC.noteWrite(k);};}catch(e){} // one funnel : ANY progress write schedules a push (results, purchases, equips, bests, grants)
     try{if($('syncBtn'))bindBtn('syncBtn',function(){SYNC.signIn();});}catch(e){}
     try{if($('syncOut'))bindBtn('syncOut',function(){SYNC.signOut();});}catch(e){}
+    try{if($('syncPopBtn'))bindBtn('syncPopBtn',function(){SYNC.signInPopup();});}catch(e){} // SYNC 11.2 : explicit popup path
+    try{if($('syncBoxX'))bindBtn('syncBoxX',function(){try{SYNC.store.set('lssync_boxSeen',SYNC._boxSig());}catch(e){}const b=$('syncBox');if(b)b.style.display='none';});}catch(e){} // SYNC 11.2 : dismiss stores the signature
+    try{if($('syncChip'))bindBtn('syncChip',function(){try{openSettings();}catch(e){}});}catch(e){} // SYNC 11.2 : chip tap opens Settings (where SIGN OUT lives)
     try{document.addEventListener('visibilitychange',function(){try{if(document.hidden)SYNC.push();}catch(e){}});}catch(e){}
     try{window.addEventListener('online',function(){try{if(SYNC.dirty)SYNC.pushNow();}catch(e){}});}catch(e){}
     SYNC.render();
