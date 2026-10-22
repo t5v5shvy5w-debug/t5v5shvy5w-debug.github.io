@@ -326,6 +326,124 @@ body.lefthand #btnFire{right:auto;left:16px}
 body.lefthand #btnScope{right:auto;left:28px}
 body.lefthand #btnReload{right:auto;left:116px}
 body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
+/* 11.5 : BLUE THEME — menu/dialog chrome only. MW's deep blue (225-245 deg
+   band; azure/cyan reads purple to him). Every selector below is menu-
+   scoped by usage (lobby, tab panels, dialogs, settings, briefing,
+   results): the in-mission HUD, world rendering and mythic FX keep their
+   own colors — shared literals like #8aa086 survive inside HUD rules,
+   which this block never selects. Red stays red (danger, sync box);
+   gold stays only on money (credits value, earnings). */
+#menuRoot{background:rgba(3,5,12,.58);color:#e8eeff}
+#menuRoot #verBadge{color:#8fa3d9!important}
+.dustp{background:rgba(165,195,255,.30)}
+.tbLab{color:#8fa3d9}
+#rankName{color:#e8eeff}
+.xpbar>i{background:#2e5bff}
+#xpText{color:#8fa3d9}
+#syncChipImg{background:#12245e}
+#syncChipName{color:#e8eeff}
+#gameTitle{color:#e8eeff;text-shadow:0 0 18px rgba(46,91,255,.5),0 2px 0 rgba(0,0,0,.6)}
+#gameSub{color:#7aa0ff}
+.pvSlot{background:radial-gradient(ellipse 72% 64% at 50% 46%,rgba(70,110,220,.14),rgba(35,60,140,.06) 55%,rgba(0,0,0,0) 76%)}
+#pvSkinName{color:#e8eeff}
+#pvSkinName b{color:#7aa0ff}
+#mPickLabel{color:#e8eeff}
+#mPickLabel small{color:#8fa3d9}
+.parr{background:#0a1330;border-color:#2a4bd8;color:#c9d6ff}
+#deployBtn{border-color:#2e5bff;background:linear-gradient(180deg,#16307a,#081233);color:#eaf1ff;box-shadow:0 0 24px rgba(46,91,255,.35),inset 0 0 18px rgba(46,91,255,.14)}
+#roamBtn{border-color:#54679f;background:linear-gradient(180deg,#131f42,#0a1128);color:#b9c8f2}
+#roamTag{border-color:#2e5bff;background:rgba(4,8,20,.72);color:#bcd2ff}
+@keyframes deployPulse{0%,100%{box-shadow:0 0 16px rgba(46,91,255,.25),inset 0 0 14px rgba(46,91,255,.1)}50%{box-shadow:0 0 32px rgba(46,91,255,.55),inset 0 0 22px rgba(46,91,255,.2)}}
+#tabBar{border-top-color:#2a4bd8;background:rgba(4,7,16,.94)}
+.tabbtn{color:#7488bd}
+.tabbtn.on{color:#a9c2ff;box-shadow:inset 0 -3px 0 #2e5bff,inset 0 -14px 16px -10px rgba(46,91,255,.55);text-shadow:0 0 10px rgba(46,91,255,.6)}
+.tabPanel{background:rgba(3,6,14,.35)}
+.upanel{background:#070d1f;border-color:#2a4bd8}
+.uhead{color:#e8eeff}
+.stat .sl{color:#8fa3d9}
+.stat .sl b{color:#e8eeff}
+.sbar>i{background:#2e5bff}
+#tabLoadout .upanel{background:linear-gradient(#070d1f,#070d1f) padding-box,linear-gradient(160deg,#2a4bd8,#101f52) border-box}
+#tabLoadout .sbar>i{background:linear-gradient(180deg,#7aa0ff,#2e5bff)}
+.ubtn{background:#101d42;border-color:#2a4bd8;color:#e8eeff}
+.ubtn.eq{border-color:#2e5bff;color:#a9c2ff;background:#0c1c4e}
+.chip{border-color:#2a4bd8;background:#070d1f;color:#8fa3d9}
+.chip.on{background:#14295e;color:#d7e4ff;border-color:#2e5bff}
+.skcard{background:#070d1f;border-top-color:#24377a;border-right-color:#24377a;border-bottom-color:#24377a;color:#e8eeff}
+.skname{color:#e8eeff}
+.skstate{color:#8fa3d9}
+.skstate.eq{color:#7aa0ff}
+.skstate.own{color:#c9d6ff}
+.mcard{background:#070d1f;border-color:#24377a;color:#e8eeff}
+.mcard.cur{border-color:#2e5bff}
+.mc-num{color:#e8eeff}
+.mc-name{color:#e8eeff}
+.mc-obj{color:#8fa3d9}
+.mc-best{color:#c9d6ff}
+.starOn{color:#7aa0ff}
+.starOff{color:#2c3a63}
+#briefTab{background:#070d1f;border-color:#2a4bd8;color:#c9d6ff}
+#briefPanel{background:#070d1f;border-left-color:#2a4bd8;color:#e8eeff}
+#briefPanel h2{color:#e8eeff}
+.brfX{border-color:#2a4bd8;color:#e8eeff}
+.panel{background:linear-gradient(#080d20,#080d20) padding-box,linear-gradient(165deg,#2a4bd8,#101f52) border-box;border:1px solid transparent;color:#e8eeff}
+.panel p{color:#a9bcec}
+.panel .tap{border-color:#2e5bff;background:rgba(16,32,84,.6);color:#cfe0ff}
+.riflebox{border-color:#24377a;background:rgba(8,14,34,.5)}
+.rhead b{color:#e8eeff}
+.rstats{color:#c9d6ff}
+.rlocks{color:#7488bd}
+.mbtn{background:#101d42;border-color:#2a4bd8;color:#e8eeff}
+.sethead{color:#7aa0ff;border-bottom-color:#24377a}
+.mbest{color:#7aa0ff}
+.tip{color:#8fa3d9}
+.drow{border-top-color:rgba(120,150,230,.14)}
+.drow span{color:#8fa3d9}
+.drow b{color:#e8eeff}
+.dnote{color:#8fa3d9}
+.ghost{border-color:rgba(122,160,255,.5);background:rgba(10,20,54,.32)}
+.ghost span{color:#7aa0ff}
+.award{color:#ffe9a8!important}
+#wnSplash{background:rgba(2,4,10,.55)}
+#wnLines p{color:#c9d6ff}
+#wnLines p b{color:#e8eeff}
+#pauseRoot{background:rgba(2,4,10,.62)}
+#resultsRoot{background:rgba(2,4,10,.62)}
+#setBtn{border-color:rgba(122,160,255,.4);color:#dbe7ff}
+/* 11.5 : settings surfaces — same scoped selectors as the 11.4 polish,
+   recolored. Selects pick up border/color here (base rule is global). */
+#setPanel{background:linear-gradient(#080d20,#080d20) padding-box,linear-gradient(165deg,#2a4bd8,#101f52) border-box;box-shadow:0 12px 60px rgba(0,0,0,.65),inset 0 0 42px rgba(46,91,255,.05)}
+#setPanel h1{color:#eef3ff;text-shadow:0 0 14px rgba(46,91,255,.4)}
+#setPanel .setrow,#tabSettings .setrow{border-bottom-color:rgba(120,150,230,.10)}
+#setPanel .setrow>span:first-child,#tabSettings .setrow>span:first-child{color:#d7e2fa}
+#setPanel .setrow input[type=checkbox],#tabSettings .setrow input[type=checkbox]{background:#101a38;border-color:#33477f}
+#setPanel .setrow input[type=checkbox]::after,#tabSettings .setrow input[type=checkbox]::after{background:#5f74a8}
+#setPanel .setrow input[type=checkbox]:checked,#tabSettings .setrow input[type=checkbox]:checked{background:#1c3fae;border-color:#2e5bff}
+#setPanel .setrow input[type=checkbox]:checked::after,#tabSettings .setrow input[type=checkbox]:checked::after{background:#dceaff;box-shadow:0 0 9px rgba(46,91,255,.8)}
+#setPanel .setrow input[type=range],#tabSettings .setrow input[type=range]{background:linear-gradient(90deg,#2e5bff var(--p,50%),#16224d var(--p,50%))}
+#setPanel .setrow input[type=range]::-webkit-slider-thumb,#tabSettings .setrow input[type=range]::-webkit-slider-thumb{background:#0a1128;border-color:#7aa0ff;box-shadow:0 0 7px rgba(46,91,255,.55)}
+#setPanel .setrow input[type=range]::-moz-range-track,#tabSettings .setrow input[type=range]::-moz-range-track{background:#16224d}
+#setPanel .setrow input[type=range]::-moz-range-progress,#tabSettings .setrow input[type=range]::-moz-range-progress{background:#2e5bff}
+#setPanel .setrow input[type=range]::-moz-range-thumb,#tabSettings .setrow input[type=range]::-moz-range-thumb{background:#0a1128;border-color:#7aa0ff;box-shadow:0 0 7px rgba(46,91,255,.55)}
+#setPanel .setrow select,#tabSettings .setrow select{background:#0d1730;border-color:#2a4bd8;color:#e8eeff}
+.roval{color:#a9c6ff}
+.setver{color:#8fa3d9}
+#setPanel::-webkit-scrollbar,.tabPanel::-webkit-scrollbar{width:8px}
+#setPanel::-webkit-scrollbar-thumb,.tabPanel::-webkit-scrollbar-thumb{background:#24377a;border-radius:4px}
+#setPanel::-webkit-scrollbar-track,.tabPanel::-webkit-scrollbar-track{background:rgba(10,17,40,.4)}
+#menuRoot :focus-visible,#setPanel :focus-visible{outline:2px solid rgba(122,160,255,.75);outline-offset:1px}
+/* 11.5 : sign-in log disclosure — the details body hides behind the
+   SIGN-IN LOG toggle row until .detopen; content itself untouched. */
+#syncDet{background:rgba(46,91,255,.05);border-color:rgba(122,160,255,.18)}
+#syncDetTgl{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;margin:0;padding:2px 0;font-family:inherit;font-size:10px;letter-spacing:2.5px;color:#8fa3d9;cursor:pointer;text-transform:uppercase}
+#syncDetTgl::after{content:"\25B8";font-size:12px;color:#7aa0ff;transition:transform .15s ease}
+#syncDet.detopen #syncDetTgl::after{transform:rotate(90deg)}
+#syncDet #syncDetBody{display:none}
+#syncDet.detopen #syncDetBody{display:block}
+#syncDetBody{color:#a9bcec;font-size:10.5px;line-height:1.6;text-align:left}
+/* 11.5 : slider fill lives on the runnable-track (input stays transparent) */
+#setPanel .setrow input[type=range],#tabSettings .setrow input[type=range]{background:transparent}
+#setPanel .setrow input[type=range]::-webkit-slider-runnable-track,#tabSettings .setrow input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(90deg,#2e5bff var(--p,50%),#16224d var(--p,50%))}
 </style>
 </head>
 <body>
@@ -395,9 +513,9 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <h1>SETTINGS</h1>
     <div class="sethead acc"><!-- 11.4 -->ACCOUNT</div>
     <div class="setrow" id="syncRow"><span>Google account</span><span><button class="mbtn" id="syncBtn">SIGN IN WITH GOOGLE</button><button class="mbtn" id="syncOut" style="display:none">SIGN OUT</button></span></div>
-    <div class="setrow" id="syncRow2" style="display:none"><span id="syncWho" style="color:#8aa086">Cloud save</span><span id="syncStatus" style="color:#8aa086"></span></div>
-    <div class="setrow" id="syncRow3"><span style="color:#8aa086">Redirect not working?</span><span><button class="mbtn" id="syncPopBtn" style="font-size:11px;padding:6px 10px">Popup sign-in instead</button></span></div>
-    <div id="syncDet" style="display:none"><div style="font-size:10px;letter-spacing:1.5px;color:#8aa086">LAST SIGN-IN ATTEMPT</div><div id="syncDetBody"></div></div>
+    <div class="setrow" id="syncRow2" style="display:none"><span id="syncWho" style="color:#8fa3d9">Cloud save</span><span id="syncStatus" style="color:#8fa3d9"></span></div>
+    <div class="setrow" id="syncRow3"><span style="color:#8fa3d9">Redirect not working?</span><span><button class="mbtn" id="syncPopBtn" style="font-size:11px;padding:6px 10px">Popup sign-in instead</button></span></div>
+    <div id="syncDet" style="display:none"><button id="syncDetTgl" type="button">SIGN-IN LOG</button><div id="syncDetBody"></div></div>
     <div class="sethead"><!-- 11.4 -->AIM</div>
     <div class="setrow"><span>Invert Y aim</span><input type="checkbox" id="invY"></div>
     <div class="setrow"><span>Invert X aim</span><input type="checkbox" id="invX"></div>
@@ -419,16 +537,16 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="setrow"><span>Grass</span><input type="checkbox" id="setGrass" checked></div>
     <div class="setrow"><span>Particles</span><select id="setPart"><option value="low">LOW</option><option value="medium">MEDIUM</option><option value="high">HIGH</option></select></div>
     <div class="setrow"><span>Show FPS</span><input type="checkbox" id="setFps"></div>
-    <div class="setrow"><span style="color:#8aa086">Desktop: click to lock mouse &middot; right-click / F scope &middot; wheel zoom &middot; R reload</span></div>
+    <div class="setrow"><span style="color:#8fa3d9">Desktop: click to lock mouse &middot; right-click / F scope &middot; wheel zoom &middot; R reload</span></div>
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v11.4</p><!-- 11.4 : static build line — bump with LS_VER -->
-    <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
-    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
-    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
-    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">World: "SWAT" soldier, "Pine", "Twisted Tree", "Rock Medium", "Plant Big", "Exploding Barrel" by Quaternius (CC0 1.0) — poly.pizza</p>
-    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">World: "Sandbags" by J-Toastie (CC BY) — poly.pizza</p>
+    <p class="setver">GHOSTLINE — v11.5</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">World: "SWAT" soldier, "Pine", "Twisted Tree", "Rock Medium", "Plant Big", "Exploding Barrel" by Quaternius (CC0 1.0) — poly.pizza</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">World: "Sandbags" by J-Toastie (CC BY) — poly.pizza</p>
     <div class="row"><button class="mbtn" id="setClose">DONE</button></div>
   </div>
 </div>
@@ -461,7 +579,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
         <div id="gameSub">SNIPER OPS</div>
       </div>
       <div class="pvSlot" id="pvHome"><!-- LOBBY FIX : the reticle ring moved here — centered behind the RIFLE, not the title -->
-        <div class="pvRing"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="34" stroke="#6fd67f" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="2.2" fill="#6fd67f"/><path d="M50 6v20M50 74v20M6 50h20M74 50h20" stroke="#6fd67f" stroke-width="1"/></svg></div>
+        <div class="pvRing"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="34" stroke="#2e5bff" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="2.2" fill="#7aa0ff"/><path d="M50 6v20M50 74v20M6 50h20M74 50h20" stroke="#2e5bff" stroke-width="1"/></svg></div>
       </div>
       <div id="pvSkinName"></div>
       <div id="mPickRow">
@@ -478,7 +596,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
       <div class="upanel">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <button class="parr" id="loPrev">&#9664;</button>
-          <b id="loName" style="font-size:17px;letter-spacing:2.5px;color:#f5e6a8;text-align:center;flex:1">LONGSHOT</b>
+          <b id="loName" style="font-size:17px;letter-spacing:2.5px;color:#e8eeff;text-align:center;flex:1">LONGSHOT</b>
           <button class="parr" id="loNext">&#9654;</button>
         </div>
         <div id="loStats" style="margin-top:8px">
@@ -486,14 +604,14 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
           <div class="stat"><div class="sl"><span>BULLET SPEED</span><b id="loVelV"></b></div><div class="sbar"><i id="loVelF"></i></div></div>
           <div class="stat"><div class="sl"><span>RELOAD TIME</span><b id="loRelV"></b></div><div class="sbar"><i id="loRelF"></i></div></div>
         </div>
-        <p id="loDesc" style="font-size:11.5px;line-height:1.6;color:#8aa086;letter-spacing:1px;text-align:center;margin-top:10px;text-transform:none"></p>
+        <p id="loDesc" style="font-size:11.5px;line-height:1.6;color:#8fa3d9;letter-spacing:1px;text-align:center;margin-top:10px;text-transform:none"></p>
         <button class="ubtn" id="loEquip">EQUIP</button>
       </div>
     </div></div>
     <div class="tabPanel" id="tabSkins"><div class="uiscroll" style="display:flex;flex-direction:column">
       <div class="uhead">SKINS</div>
       <div class="pvSlot" id="pvSkins" style="flex:none;height:170px"></div>
-      <div id="skinPvName" style="text-align:center;font-size:12px;letter-spacing:2.5px;color:#cfe3c8;margin:4px 0 8px"></div><!-- LOBBY POLISH : tighter header, more grid shows -->
+      <div id="skinPvName" style="text-align:center;font-size:12px;letter-spacing:2.5px;color:#e8eeff;margin:4px 0 8px"></div><!-- LOBBY POLISH : tighter header, more grid shows -->
       <div class="chips" id="skinChips">
         <button class="chip on" data-f="all">ALL</button>
         <button class="chip" data-f="owned">OWNED</button>
@@ -521,7 +639,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
         <div class="sethead dng"><!-- 11.4 -->DANGER</div>
         <button class="ubtn deny" id="stReset" style="border:1px solid #7a3a30">RESET PROGRESS</button>
       </div>
-      <p style="font-size:10px;color:#7d8f7a;letter-spacing:1px;text-align:center;margin-top:12px">FULL SETTINGS (KILLCAM, RETICLE, INVERT…) LIVE IN THE GEAR PANEL</p>
+      <p style="font-size:10px;color:#7e90c4;letter-spacing:1px;text-align:center;margin-top:12px">FULL SETTINGS (KILLCAM, RETICLE, INVERT…) LIVE IN THE GEAR PANEL</p>
     </div></div>
   </div>
   <div id="menuVerSlot"></div><!-- LOBBY FIX : the version badge (moved here by JS at boot) sits tiny + faint just above the tab bar -->
@@ -576,8 +694,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='11.4'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='11.5'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'11.5',lines:[ // SYNC 11.5 : blue theme + sign-in log disclosure — visual only, zero behavior change
+  '<b>NEW COLORS</b> — the menus wear deep blue now (the muddy green is gone), and the sign-in log in Settings tucks behind a tap']},
  {v:'11.4',lines:[ // SYNC 11.4 : settings polish — grouped sections, toggle switches, slider readouts; zero behavior change
   '<b>SETTINGS, REBUILT</b> — grouped sections, proper toggle switches and slider readouts — same settings, same saves, far less ugly']},
  {v:'11.3',lines:[ // SYNC 11.3 : URL-fragment token flow — the Google round trip returns on our own origin; no popup, no cross-site storage handoff for iOS to block
@@ -4576,7 +4696,7 @@ function renderBriefing(){
   $('briefBody').innerHTML=
    '<h2>MISSION '+n+'</h2>'+
    '<div class="tip" style="margin-top:2px">'+missionFlavor(n)+'</div>'+
-   (briefFromPause?'':'<div class="mhead" style="margin:12px 0 2px"><button class="mbtn sm" id="brfPrev" style="visibility:'+(n>1?'visible':'hidden')+'">&#9664;</button><span style="font-size:10px;letter-spacing:2px;color:#8aa086">CHANGE MISSION</span><button class="mbtn sm" id="brfNext" style="visibility:'+(n<missionUnlockMax()?'visible':'hidden')+'">&#9654;</button></div>')+
+   (briefFromPause?'':'<div class="mhead" style="margin:12px 0 2px"><button class="mbtn sm" id="brfPrev" style="visibility:'+(n>1?'visible':'hidden')+'">&#9664;</button><span style="font-size:10px;letter-spacing:2px;color:#8fa3d9">CHANGE MISSION</span><button class="mbtn sm" id="brfNext" style="visibility:'+(n<missionUnlockMax()?'visible':'hidden')+'">&#9654;</button></div>')+
    '<div class="obj" style="margin-top:12px"><span>OBJECTIVE</span><b>ELIMINATE ALL RED HVTs</b><b>DESTROY '+sabTotalFor(n)+' SABOTAGE TARGETS</b></div>'+
    '<div class="tip">Ghost: alarm under 25% = 2× score · 100% = they hunt you</div>'+
    '<div class="mbest">MISSION BEST <b>'+(best?best.toLocaleString('en-US'):'—')+'</b>'+(bt?' &nbsp;·&nbsp; BEST TIME <b>'+fmtTime(bt)+'</b>':'')+'</div>';
@@ -4665,7 +4785,7 @@ function renderSkins(){
       (s.killFx?skFxCardHtml(s):'')+
       '</button>';
   }
-  grid.innerHTML=h||'<p style="grid-column:1/-1;text-align:center;color:#8aa086;font-size:11px;letter-spacing:2px">NOTHING HERE</p>';
+  grid.innerHTML=h||'<p style="grid-column:1/-1;text-align:center;color:#8fa3d9;font-size:11px;letter-spacing:2px">NOTHING HERE</p>';
   const cards=grid.querySelectorAll('.skcard');
   for(const c of cards)bindEl(c,()=>{pvSkinId=c.getAttribute('data-sk');applyPvTint();renderSkins();tick();});
   const fbs=grid.querySelectorAll('.skfxbtn'); // LOBBY POLISH : the kill-effect toggle is its own control — bindEl stops propagation, so the card's select handler never fires
@@ -5566,6 +5686,44 @@ bindEl($('stReset'),()=>openConfirm('RESET PROGRESS?','Missions, bests, rifles, 
   var tb=document.querySelector('[data-tab="settings"]');if(tb)tb.addEventListener('click',function(){setTimeout(all,0);});
   var sb=$('setBtn');if(sb)sb.addEventListener('click',function(){setTimeout(all,0);});
   var ps=$('pSettings');if(ps)ps.addEventListener('click',function(){setTimeout(all,0);});
+})();
+/* SYNC 11.5 : sign-in log disclosure — DISPLAY ONLY. Collapses/expands the
+   existing #syncDetBody behind #syncDetTgl; reads (never writes) the stored
+   attempt outcome; never touches the log, storage keys or sync logic.
+   Default: expanded only when the last recorded attempt failed — the same
+   stored signals SYNC's lobby box keys off (lssync_failAt vs the attempt
+   counter, with the persisted log's newest outcome as tiebreak — a later
+   successful attempt clears the failure). A manual toggle holds until the
+   panel closes, then the default re-applies on the next open. */
+(function(){ // SYNC 11.5
+  var det=$('syncDet'),tgl=$('syncDetTgl');if(!det||!tgl)return;
+  var userSet=false;
+  function lastFailed(){
+    try{
+      var failAt=+(localStorage.getItem('lssync_failAt')||0),att=+(localStorage.getItem('lssync_attempt')||0);
+      if(failAt>0&&failAt>=att)return true;
+      var a=[];try{a=JSON.parse(localStorage.getItem('lssync_log')||'[]');}catch(e){}
+      if(a&&a.length)for(var i=a.length-1;i>=0;i--){var m=String((a[i]&&a[i].m)||'');
+        if(m.indexOf('signin-failed')===0)return true;
+        if(m.indexOf('signed-in')===0)return false;}
+    }catch(e){}
+    return false;
+  }
+  function applyDefault(){det.classList.toggle('detopen',lastFailed());}
+  tgl.addEventListener('click',function(){userSet=true;det.classList.toggle('detopen');});
+  function onOpen(){if(!userSet)setTimeout(applyDefault,0);}
+  /* the game's buttons fire touchstart/mousedown via bindBtn/bindEl (a
+     touch tap's click is preventDefault'd away), so hook all three —
+     onOpen/onClose are idempotent, repeat fires are harmless */
+  function hook(el,fn){if(!el)return;el.addEventListener('touchstart',fn,{passive:true});el.addEventListener('mousedown',fn);el.addEventListener('click',fn);}
+  hook($('setBtn'),onOpen);
+  hook($('pSettings'),onOpen);
+  hook($('syncChip'),onOpen);
+  hook(document.querySelector('[data-tab="settings"]'),onOpen);
+  function onClose(){userSet=false;}
+  hook($('setX'),onClose);
+  hook($('setClose'),onClose);
+  applyDefault();
 })();
 window.addEventListener('resize',()=>pvResize());
 /* ---- persisted GHOSTLINE prefs (audio buses / haptics / layout / briefing seen) ---- */
