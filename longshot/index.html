@@ -356,6 +356,8 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
   <div class="panel" id="setPanel">
     <button id="setX" aria-label="Close settings">&times;</button>
     <h1>SETTINGS</h1>
+    <div class="setrow" id="syncRow"><span>Google account</span><span><button class="mbtn" id="syncBtn">SIGN IN WITH GOOGLE</button><button class="mbtn" id="syncOut" style="display:none">SIGN OUT</button></span></div>
+    <div class="setrow" id="syncRow2" style="display:none"><span id="syncWho" style="color:#8aa086">Cloud save</span><span id="syncStatus" style="color:#8aa086"></span></div>
     <div class="setrow"><span>Invert Y aim</span><input type="checkbox" id="invY"></div>
     <div class="setrow"><span>Invert X aim</span><input type="checkbox" id="invX"></div>
     <div class="setrow"><span>Aim sensitivity</span><input type="range" id="sens" min="0.5" max="2" step="0.1" value="1"></div>
@@ -525,8 +527,12 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='11.0'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='11.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'11.1',lines:[ // SYNC 11.1 : Google sign-in + cloud save
+  '<b>GOOGLE SIGN-IN</b> — link your account at the top of Settings and your progress follows you between devices',
+  '<b>CLOUD SAVE</b> — credits, XP, rifles, skins, kill effects and mission bests sync to your Google account',
+  '<b>YOURS STAYS YOURS</b> — controls, graphics and sound settings stay per-device, exactly as you set them']},
  {v:'11.0',lines:[ // WORLD 11.0 : the valley got real — models, explosions, free roam, walking
   '<b>WORLD OVERHAUL</b> — real soldier models with walk animations, new pines, broadleaf trees, rocks and outpost props',
   '<b>EXPLOSIVE BARRELS</b> — shoot the red barrels: radius kills, chain reactions, big alarm spike. Sabotage targets detonate properly now',
@@ -3510,6 +3516,7 @@ function updateHUD(){
    dragging the sensitivity slider. Closing resumes. The PAUSED chip shows
    only mid-mission; in the menu there is nothing to pause. */
 function openSettings(){$('card2').style.display='flex';$('setPanel').style.display='block';G.settingsOpen=true;
+  try{SYNC.kick();SYNC.render();}catch(e){} // SYNC 11.1 : lazy SDK load on Settings open
   $('pauseChip').style.display=(G.state==='play')?'block':'none';}
 function closeSettings(){$('card2').style.display='none';$('setPanel').style.display='none';G.settingsOpen=false;
   $('pauseChip').style.display='none';}
@@ -4654,6 +4661,7 @@ function closeConfirm(){$('confirmRoot').style.display='none';confirmFn=null;}
 function resetProgress(){ // progress keys only — settings + seen-version survive, then a clean reload
   const keys=['longshot_best','longshot_mbest','longshot_mtime','longshot_rifles','longshot_rifle','longshot_credits','longshot_xp','longshot_skinsOwned','longshot_skin','longshot_ghostMissions','longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn']; // LOBBY POLISH : mythic grind counters + per-skin kill-effect enables wipe too
   for(const k of keys){try{localStorage.removeItem(k);}catch(e){}}
+  try{SYNC.onReset();}catch(e){} // SYNC 11.1 : the wipe must reach the cloud too, or the old save resurrects on next sync
   location.reload();
 }
 /* ---- 3D rifle preview : one small renderer + one canvas, re-parented into
@@ -5503,6 +5511,243 @@ $('verBadge').textContent='v'+LS_VER; // VERSION BADGE : the running build, alwa
 {const _mv=$('menuVerSlot');if(_mv)_mv.appendChild($('verBadge'));} // LOBBY FIX : the badge node itself moves to the bottom of the lobby, tiny + faint just above the tab bar — same element, same text logic, self-update untouched
 startMission(menuMissionBoot()); // BOOT TO PROGRESS : the menu opens on the player's picked mission (persisted), defaulting to the furthest unlocked
 requestAnimationFrame(frame);
+
+/* ==================== SYNC 11.1 — Google sign-in + cloud save (Firebase) ====================
+   Auth (Google) + Firestore behind a tiny adapter (FBAPI) so the whole layer
+   stubs cleanly in sims and fails soft in the field. The pinned compat SDK
+   loads LAZILY from the official gstatic CDN — on Settings open, or at boot
+   only when this device has signed in before / a redirect sign-in is in
+   flight — and NEVER blocks boot or gameplay. If it cannot load (offline,
+   file:// Files-app preview, CDN blocked) the game behaves exactly as
+   v11.0 and the Settings row shows a quiet "Sign-in unavailable (offline)".
+   Compat (namespaced) builds are used because this page has no bundler or
+   import map: classic script tags load anywhere the game's own sidecar
+   scripts do, and a failed tag is a soft onerror, never a module error.
+   Placement per MW: the sign-in row is the FIRST item of the gear Settings
+   panel — never a lobby button; the lobby stays uncluttered. */
+const FB_CFG={apiKey:"AIzaSyB2JyZ9G94SchgWnWrbXPfYF6J_1G7uiZc",authDomain:"long-shot-sync.firebaseapp.com",projectId:"long-shot-sync",storageBucket:"long-shot-sync.firebasestorage.app",messagingSenderId:"528453347717",appId:"1:528453347717:web:2f58e61b4f7793d3eb7cec"}; // SYNC 11.1 : public web identifiers (not secrets) — project long-shot-sync under MW's Google account
+const FB_CDN='https://www.gstatic.com/firebasejs/10.12.2/';
+const FBAPI={ // SYNC 11.1 : adapter — every Firebase call the sync layer makes goes through here; sims swap these methods for an in-memory fake
+  ok:false,auth:null,db:null,
+  load:function(){return new Promise(function(res){
+    try{
+      if(window.firebase&&firebase.app&&firebase.auth&&firebase.firestore){res(true);return;}
+      const files=['firebase-app-compat.js','firebase-auth-compat.js','firebase-firestore-compat.js'];
+      let i=0,done=false,to=0;
+      const next=function(){
+        if(done)return;
+        if(i>=files.length){done=true;clearTimeout(to);res(!!(window.firebase&&firebase.auth&&firebase.firestore));return;}
+        clearTimeout(to);to=setTimeout(function(){if(!done){done=true;res(false);}},20000); // progress deadline : 20s without the next file landing = treat as unreachable
+        const s=document.createElement('script');s.src=FB_CDN+files[i];i++;
+        s.onload=next;s.onerror=function(){if(!done){done=true;clearTimeout(to);res(false);}};
+        document.head.appendChild(s);};
+      next();
+    }catch(e){res(false);}
+  });},
+  init:function(){ // after load(): app/auth/db wiring. Never throws.
+    try{
+      if(!firebase.apps.length)firebase.initializeApp(FB_CFG);
+      FBAPI.auth=firebase.auth();FBAPI.db=firebase.firestore();
+      try{const pp=FBAPI.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);if(pp&&pp.catch)pp.catch(function(){});}catch(e){}
+      try{const rp=FBAPI.auth.getRedirectResult();if(rp&&rp.catch)rp.catch(function(){});}catch(e){} // redirect sign-in lands back here; the result itself is consumed via onAuthStateChanged
+      FBAPI.ok=true;return true;
+    }catch(e){FBAPI.ok=false;return false;}
+  },
+  wireAuth:function(){try{FBAPI.auth.onAuthStateChanged(function(u){SYNC.handleAuth(u);},function(){SYNC.handleAuth(null);});}catch(e){}},
+  signIn:function(){
+    try{
+      const prov=new firebase.auth.GoogleAuthProvider();
+      if(isTouch)return FBAPI.auth.signInWithRedirect(prov); // mobile webviews kill popups — redirect is the reliable path
+      return FBAPI.auth.signInWithPopup(prov);
+    }catch(e){return Promise.reject(e);}
+  },
+  signOut:function(){try{return FBAPI.auth.signOut();}catch(e){return Promise.reject(e);}},
+  get:function(uid){
+    return FBAPI.db.collection('saves').doc(uid).get().then(function(snap){
+      if(!snap.exists)return null;const d=snap.data()||{};return {keys:d.keys||{},updatedAt:d.updatedAt||0};});
+  },
+  set:function(uid,data){return FBAPI.db.collection('saves').doc(uid).set(data);}
+};
+const SYNC={
+  /* SYNC 11.1 : PROGRESS keys — the only keys that ever leave the device.
+     SETTINGS keys stay device-local by design and are NEVER synced:
+     longshot_vol, longshot_music, longshot_sfx, longshot_mute, longshot_sens,
+     longshot_sensS, longshot_invX, longshot_invY, longshot_kcam, longshot_retc,
+     longshot_scope, longshot_shake, longshot_autoR, longshot_flash,
+     longshot_qual, longshot_shad, longshot_grass, longshot_part, longshot_fps,
+     longshot_haptics, longshot_left — and the longshot_briefSeen coach-mark. */
+  PKEYS:['longshot_credits','longshot_xp','longshot_best','longshot_rifles','longshot_rifle',
+    'longshot_skinsOwned','longshot_skin','longshot_mbest','longshot_mtime','longshot_ghostMissions',
+    'longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn','longshot_seenver'],
+  NUMK:{longshot_credits:1,longshot_xp:1,longshot_best:1,longshot_rifles:1,longshot_menuMission:1}, // numeric ladders : best-of = max (rifles unlock by ladder, so max IS the union)
+  state:'idle',user:null,dirty:false,_sdkOk:false,_kicked:false,_applying:false,_pushing:false,_pushT:0,_pushTimer:0,_status:'',
+  store:{get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},
+         set:function(k,v){try{localStorage.setItem(k,v);}catch(e){}},
+         del:function(k){try{localStorage.removeItem(k);}catch(e){}}},
+  snapshot:function(){const o={};for(const k of SYNC.PKEYS){const v=SYNC.store.get(k);if(v!=null)o[k]=v;}return o;},
+  _mergeMap:function(sa,sb,fn){let A={},B={};try{A=JSON.parse(sa||'{}')||{};}catch(e){}try{B=JSON.parse(sb||'{}')||{};}catch(e){}
+    if(typeof A!=='object'||Array.isArray(A))A={};if(typeof B!=='object'||Array.isArray(B))B={};
+    const out={},seen={};Object.keys(A).forEach(k=>{seen[k]=1;});Object.keys(B).forEach(k=>{seen[k]=1;});
+    for(const k in seen){const x=A[k],y=B[k];if(x==null)out[k]=y;else if(y==null)out[k]=x;else out[k]=fn(+x||0,+y||0);}
+    return out;},
+  _verMax:function(x,y){if(x==null)return y;if(y==null)return x;
+    const pa=String(x).split('.'),pb=String(y).split('.');
+    for(let i=0;i<Math.max(pa.length,pb.length);i++){const d=(parseInt(pa[i],10)||0)-(parseInt(pb[i],10)||0);if(d>0)return x;if(d<0)return y;}
+    return x;},
+  merge:function(a,b){ // SYNC 11.1 : FIRST-LINK best-of-each. a = this device, b = cloud. Equipped picks stay THIS device's.
+    a=a||{};b=b||{};const out={};
+    for(const k of SYNC.PKEYS){
+      const ha=a[k]!=null,hb=b[k]!=null;if(!ha&&!hb)continue;
+      if(SYNC.NUMK[k]){const x=parseFloat(a[k]),y=parseFloat(b[k]);out[k]=String(Math.max(isNaN(x)?-Infinity:x,isNaN(y)?-Infinity:y));continue;}
+      switch(k){
+        case 'longshot_skinsOwned': case 'longshot_ghostMissions':{ // set union
+          const u=[];const add=function(s){try{const arr=JSON.parse(s||'[]');if(Array.isArray(arr))for(const v of arr)if(u.indexOf(v)<0)u.push(v);}catch(e){}};
+          add(a[k]);add(b[k]);out[k]=JSON.stringify(u);break;}
+        case 'longshot_mbest':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return Math.max(x,y);}));break; // best score per mission
+        case 'longshot_mtime':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return (x>0&&y>0)?Math.min(x,y):(x||y);}));break; // best time = fastest
+        case 'longshot_skinKills':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return Math.max(x,y);}));break; // grind counters per skin
+        case 'longshot_killFxOn':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return !!(x||y);}));break; // enabled anywhere = enabled
+        case 'longshot_grant105':out[k]=(a[k]==='1'||b[k]==='1')?'1':(ha?a[k]:b[k]);break; // claimed anywhere = claimed (no double-dip)
+        case 'longshot_seenver':out[k]=SYNC._verMax(a[k],b[k]);break;
+        default:out[k]=ha?a[k]:b[k]; // longshot_rifle / longshot_skin : this device's current choice wins the first link
+      }
+    }
+    return out;
+  },
+  applySnap:function(keys){ // full-snapshot apply : a progress key absent from the doc is absent locally too (this is how a cloud RESET propagates)
+    SYNC._applying=true;
+    try{for(const k of SYNC.PKEYS){if(keys&&keys[k]!=null)SYNC.store.set(k,keys[k]);else SYNC.store.del(k);}}catch(e){}
+    SYNC._applying=false;SYNC.refreshGame();
+  },
+  refreshGame:function(){ // re-read the cheap live values + repaint the lobby chrome; deep state (rifle pick) re-reads at next boot by design
+    try{G.best=+(SYNC.store.get('longshot_best')||0)||0;const hb=$('hBest');if(hb)hb.textContent=G.best;}catch(e){}
+    try{if(typeof renderTopBar==='function')renderTopBar();}catch(e){}
+    try{if(G.state==='menu'&&typeof renderHome==='function')renderHome();}catch(e){}
+  },
+  push:function(){ // debounced trigger — every progress write funnels here via the lsSet hook
+    if(!SYNC.user)return;SYNC.dirty=true;
+    if(SYNC._pushTimer)clearTimeout(SYNC._pushTimer);
+    SYNC._pushTimer=setTimeout(function(){SYNC._pushTimer=0;SYNC.pushNow();},900);
+  },
+  pushNow:function(){
+    if(!SYNC.user){return Promise.resolve(false);}
+    if(SYNC._pushing){SYNC.dirty=true;return Promise.resolve(false);}
+    SYNC._pushing=true;SYNC._status='Syncing…';SYNC.render();
+    const data={keys:SYNC.snapshot(),updatedAt:Date.now()};
+    let p;try{p=FBAPI.set(SYNC.user.uid,data);}catch(e){p=Promise.reject(e);}
+    return Promise.resolve(p).then(function(){
+      SYNC._pushing=false;SYNC.dirty=false;SYNC.store.set('lssync_ts',String(data.updatedAt));
+      SYNC._status='Synced';SYNC.render();return true;
+    },function(){
+      SYNC._pushing=false;SYNC.dirty=true;SYNC._status='Offline — will retry';SYNC.render();return false;
+    });
+  },
+  linkFlow:function(){ // runs on every sign-in : reset backstop > first-link merge > last-write-wins
+    const uid=SYNC.user&&SYNC.user.uid;if(!uid)return;
+    if(SYNC.store.get('lssync_resetpush')==='1'){
+      SYNC.store.del('lssync_resetpush');SYNC.store.set('lssync_linked',uid);
+      SYNC.pushNow();return; // the reset's reload raced its push — land the cleared state before anything can pull the old save back
+    }
+    SYNC._status='Syncing…';SYNC.render();
+    let gp;try{gp=FBAPI.get(uid);}catch(e){gp=Promise.reject(e);}
+    if(SYNC.store.get('lssync_linked')!==uid){ // FIRST LINK for this account on this device
+      Promise.resolve(gp).then(function(remote){
+        const merged=remote?SYNC.merge(SYNC.snapshot(),remote.keys):SYNC.snapshot();
+        SYNC.applySnap(merged);SYNC.store.set('lssync_linked',uid);
+        SYNC.pushNow();
+      },function(){SYNC._status='Offline — will retry';SYNC.dirty=true;SYNC.render();});
+      return;
+    }
+    Promise.resolve(gp).then(function(remote){ // LINKED : last-write-wins on updatedAt
+      const known=+(SYNC.store.get('lssync_ts')||0);
+      if(remote&&remote.updatedAt>known){SYNC.applySnap(remote.keys);SYNC.store.set('lssync_ts',String(remote.updatedAt));SYNC._status='Synced';SYNC.render();}
+      else SYNC.pushNow();
+    },function(){SYNC._status='Offline — will retry';SYNC.dirty=true;SYNC.render();});
+  },
+  handleAuth:function(u){ // the single funnel for auth state (real SDK callback + sim fakes both land here)
+    try{
+      const wasPending=SYNC.store.get('lssync_pending')==='1';
+      if(wasPending)SYNC.store.del('lssync_pending');
+      if(!u){SYNC.user=null;if(SYNC._sdkOk)SYNC.state='out';
+        if(wasPending)SYNC._status='Sign-in didn’t complete — try again';
+        SYNC.render();return;}
+      SYNC.user={uid:u.uid,displayName:u.displayName||'',email:u.email||''};
+      SYNC.state='in';SYNC.store.set('lssync_was',u.uid);SYNC._status='';SYNC.render();
+      SYNC.linkFlow();
+    }catch(e){}
+  },
+  onReset:function(){ // SYNC 11.1 : resetProgress calls this AFTER the local wipe, BEFORE reload — push the cleared state so the cloud can't resurrect it
+    try{
+      if(!SYNC.user)return;
+      SYNC.store.set('lssync_resetpush','1'); // backstop : if the reload kills the push below, linkFlow lands it next boot
+      SYNC.pushNow();
+    }catch(e){}
+  },
+  noteWrite:function(k){try{if(SYNC._applying||!SYNC.user)return;if(SYNC.PKEYS.indexOf(k)>=0)SYNC.push();}catch(e){}},
+  kick:function(){ // load + init the SDK once, on demand. Failure = the quiet unavailable state, never an error.
+    if(SYNC._kicked)return;SYNC._kicked=true;
+    if(SYNC.state==='idle')SYNC.state='loading';
+    SYNC.render();
+    let lp;try{lp=FBAPI.load();}catch(e){lp=Promise.resolve(false);}
+    Promise.resolve(lp).then(function(ok){
+      let initOk=false;if(ok){try{initOk=FBAPI.init();}catch(e){initOk=false;}}
+      if(!initOk){SYNC._sdkOk=false;if(SYNC.state!=='in')SYNC.state='unavail';SYNC.render();return;}
+      SYNC._sdkOk=true;if(SYNC.state==='loading'||SYNC.state==='idle')SYNC.state='out';SYNC.render();
+      try{FBAPI.wireAuth();}catch(e){}
+    },function(){SYNC._sdkOk=false;if(SYNC.state!=='in')SYNC.state='unavail';SYNC.render();});
+  },
+  signIn:function(){
+    try{
+      SYNC.store.set('lssync_pending','1'); // survives the redirect round trip (sessionStorage would too, but this also covers webview storage quirks via localStorage)
+      SYNC.kick();
+      const go=function(){
+        SYNC._status='Opening Google sign-in…';SYNC.render();
+        let p;try{p=FBAPI.signIn();}catch(e){p=Promise.reject(e);}
+        Promise.resolve(p).then(function(){},function(){SYNC.store.del('lssync_pending');SYNC._status='Sign-in failed — try again';SYNC.render();});
+      };
+      if(SYNC._sdkOk)go();
+      else{let n=0;const iv=setInterval(function(){n++;
+        if(SYNC._sdkOk){clearInterval(iv);go();}
+        else if(SYNC.state==='unavail'||n>48){clearInterval(iv);SYNC.store.del('lssync_pending');SYNC._status='Sign-in unavailable (offline)';SYNC.render();}},250);}
+    }catch(e){}
+  },
+  signOut:function(){
+    try{
+      SYNC.store.del('lssync_was');SYNC.user=null;SYNC.dirty=false;SYNC._status='';
+      let p;try{p=FBAPI.signOut();}catch(e){p=Promise.reject(e);}
+      Promise.resolve(p).then(function(){SYNC.handleAuth(null);},function(){SYNC.handleAuth(null);});
+      SYNC.render(); // from here on push()/pushNow() no-op (no user) — sign-out stops all further pushes
+    }catch(e){}
+  },
+  render:function(){ // Settings row : signed-out = button; signed-in = who + status + sign out; unavailable = quiet text
+    try{
+      const btn=$('syncBtn'),out=$('syncOut'),row2=$('syncRow2'),who=$('syncWho'),st=$('syncStatus');
+      if(!btn||!row2)return;
+      if(SYNC.state==='unavail'){
+        btn.style.display='none';if(out)out.style.display='none';row2.style.display='flex';
+        if(who)who.textContent='Cloud save';if(st)st.textContent='Sign-in unavailable (offline)';return;}
+      if(SYNC.user){
+        btn.style.display='none';if(out)out.style.display='';
+        row2.style.display='flex';
+        if(who)who.textContent='Signed in as '+(SYNC.user.displayName||SYNC.user.email||'Google user');
+        if(st)st.textContent=SYNC._status||'Synced';return;}
+      btn.style.display='';btn.textContent='SIGN IN WITH GOOGLE';if(out)out.style.display='none';
+      row2.style.display=SYNC._status?'flex':'none';
+      if(who)who.textContent='Cloud save';if(st)st.textContent=SYNC._status||'';
+    }catch(e){}
+  },
+  init:function(){
+    try{const orig=lsSet;lsSet=function(k,v){orig(k,v);SYNC.noteWrite(k);};}catch(e){} // one funnel : ANY progress write schedules a push (results, purchases, equips, bests, grants)
+    try{if($('syncBtn'))bindBtn('syncBtn',function(){SYNC.signIn();});}catch(e){}
+    try{if($('syncOut'))bindBtn('syncOut',function(){SYNC.signOut();});}catch(e){}
+    try{document.addEventListener('visibilitychange',function(){try{if(document.hidden)SYNC.push();}catch(e){}});}catch(e){}
+    try{window.addEventListener('online',function(){try{if(SYNC.dirty)SYNC.pushNow();}catch(e){}});}catch(e){}
+    SYNC.render();
+    try{if(SYNC.store.get('lssync_was')||SYNC.store.get('lssync_pending')==='1')setTimeout(function(){SYNC.kick();},1600);}catch(e){} // returning / redirect-returning device : restore the session in the background; a never-signed-in boot stays exactly v11.0
+  }
+};
+try{SYNC.init();}catch(e){}
+/* ==================== end SYNC 11.1 ==================== */
 </script>
 </body>
 </html>
