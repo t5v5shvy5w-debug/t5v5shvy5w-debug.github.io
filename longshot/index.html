@@ -208,6 +208,11 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 .parr.off{opacity:.3} /* LOBBY FIX : first/last mission — arrow stays VISIBLE, just dimmed (was visibility:hidden) */
 #deployBtn{flex:none;width:80%;max-width:400px;height:88px;margin-top:14px;margin-bottom:10px;border-radius:17px;border:2px solid #6fd67f;background:linear-gradient(180deg,#18300f,#0c1a08);color:#d9ffd9;font-family:inherit;font-size:23px;font-weight:800;letter-spacing:7px;box-shadow:0 0 24px rgba(111,214,127,.35),inset 0 0 18px rgba(111,214,127,.12);animation:deployPulse 2.4s ease-in-out infinite,lobbyIn .55s ease .42s backwards;cursor:pointer} /* LOBBY FIX : air above the version line / tab bar ; fade-in runs alongside the glow pulse (different properties) */
 #deployBtn:active{transform:scale(.97)}
+#roamBtn{flex:none;width:64%;max-width:320px;height:44px;margin-bottom:12px;border-radius:12px;border:1.5px solid #7d8f7a;background:linear-gradient(180deg,#1a2417,#0d130c);color:#b9cdb4;font-family:inherit;font-size:13px;font-weight:700;letter-spacing:3px;cursor:pointer;animation:lobbyIn .55s ease .5s backwards}
+#roamBtn:active{transform:scale(.97)}
+#roamTag{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:41;display:none;padding:5px 14px;border:1px solid #6fd67f;border-radius:999px;background:rgba(6,12,6,.72);color:#b6ffc0;font-size:11px;font-weight:800;letter-spacing:3px;pointer-events:none}
+body.roam #roamTag{display:block}
+body.roam #hud{display:none!important}
 @keyframes deployPulse{0%,100%{box-shadow:0 0 16px rgba(111,214,127,.25),inset 0 0 14px rgba(111,214,127,.1)}50%{box-shadow:0 0 32px rgba(111,214,127,.55),inset 0 0 22px rgba(111,214,127,.2)}}
 #tabBar{flex:none;display:flex;border-top:1px solid #3f5f45;background:rgba(5,9,6,.94);padding-bottom:env(safe-area-inset-bottom)}
 .tabbtn{flex:1;background:none;border:none;color:#7d927a;font-family:inherit;font-size:10px;letter-spacing:2px;padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;text-transform:uppercase;transition:transform .08s ease}
@@ -316,6 +321,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
 </div>
 <div id="xhair"></div>
 
+<div id="roamTag">FREE ROAM</div>
 <div id="scope"><canvas id="reticle"></canvas></div>
 <div id="nightTint"></div>
 <div id="zoomWrap"><div id="zoomInner"><input id="zoomSlider" type="range" min="2" max="6" step="0.5" value="4"></div></div>
@@ -373,6 +379,8 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">World: "SWAT" soldier, "Pine", "Twisted Tree", "Rock Medium", "Plant Big", "Exploding Barrel" by Quaternius (CC0 1.0) — poly.pizza</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7d8f7a;text-align:center">World: "Sandbags" by J-Toastie (CC BY) — poly.pizza</p>
     <div class="row"><button class="mbtn" id="setClose">DONE</button></div>
   </div>
 </div>
@@ -412,6 +420,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
         <button class="parr" id="mPickNext">&#9654;</button>
       </div>
       <button id="deployBtn">DEPLOY</button>
+      <button id="roamBtn">FREE ROAM — EXPLORE</button>
     </div>
     <div class="tabPanel" id="tabLoadout"><div class="uiscroll">
       <div class="uhead">LOADOUT</div>
@@ -516,8 +525,12 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='10.9'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='11.0'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'11.0',lines:[ // WORLD 11.0 : the valley got real — models, explosions, free roam, walking
+  '<b>WORLD OVERHAUL</b> — real soldier models with walk animations, new pines, broadleaf trees, rocks and outpost props',
+  '<b>EXPLOSIVE BARRELS</b> — shoot the red barrels: radius kills, chain reactions, big alarm spike. Sabotage targets detonate properly now',
+  '<b>FREE ROAM + WALKING</b> — FREE ROAM in the lobby walks the whole valley with no stakes, and the joystick now walks you during missions too']},
  {v:'10.9',lines:[ // MYTHIC PARTICLES : the mythics shed energy now — on all three
   '<b>MYTHIC PARTICLES</b> — VOIDCURRENT crackles with electric sparks and arc-flares, INFERNO CORE sheds rising embers and drifting ash, STARFORGE drifts in gold-violet stardust',
   '<b>BORN ON THE METAL</b> — every particle lives on the gun itself, in the lobby preview and in your hands in-game',
@@ -954,6 +967,7 @@ let riverTex=null;
   const wm=new THREE.MeshPhongMaterial({color:0x9fc8dc,map:riverTex,transparent:true,opacity:0.9,
     shininess:160,specular:0xffd9a0});
   const river=new THREE.Mesh(g,wm);river.receiveShadow=true;scene.add(river);})();
+var TREE_SPOTS=null,OLD_TREES=null,OLD_ROCKS=[],OLD_BUSHES=null; // WORLD 11.0 : hoisted so the GLB scatter pass can take over these spots
 (function(){
   const spots=[];let guard=0;
   while(spots.length<150&&guard++<3000){
@@ -985,6 +999,7 @@ let riverTex=null;
   cones.count=ci;blobs.count=bi;cones2.count=ci2;blobs2.count=bi2;
   [trunks,cones,blobs,cones2,blobs2].forEach(m=>{m.castShadow=true;m.instanceMatrix.needsUpdate=true;
     if(m.instanceColor)m.instanceColor.needsUpdate=true;scene.add(m);});
+  TREE_SPOTS=spots;OLD_TREES=[trunks,cones,blobs,cones2,blobs2]; // WORLD 11.0
   /* rocks : three dodecahedron variants with deterministic per-vertex jitter —
      beveled, irregular, no two alike (the hash keys off position, so shared
      vertices move together and the surface never cracks) */
@@ -997,13 +1012,13 @@ let riverTex=null;
   for(let v=0;v<3;v++){const rocks=new THREE.InstancedMesh(mkRockGeo(v+1),rockM,20);
     for(let i=0;i<20;i++){const x=rand(-280,280),z=rand(-330,20);
       d.position.set(x,groundH(x,z)+0.2,z);const s=rand(0.4,2.2);d.scale.set(s,s*rand(0.6,1),s);d.rotation.set(rand(0,3),rand(0,3),0);d.updateMatrix();rocks.setMatrixAt(i,d.matrix);}
-    rocks.castShadow=true;rocks.instanceMatrix.needsUpdate=true;scene.add(rocks);}
+    rocks.castShadow=true;rocks.instanceMatrix.needsUpdate=true;scene.add(rocks);OLD_ROCKS.push(rocks);} // WORLD 11.0
   /* ridge bushes near player */
   const bushG=new THREE.IcosahedronGeometry(1,0),bushM=new THREE.MeshLambertMaterial({color:0x39542a});
   const bushes=new THREE.InstancedMesh(bushG,bushM,16);
   for(let i=0;i<16;i++){const x=rand(-14,14),z=rand(10,32);
     d.position.set(x,groundH(x,z)+0.35,z);d.scale.set(rand(1,2.2),rand(0.5,0.9),rand(1,2));d.rotation.set(0,rand(0,3),0);d.updateMatrix();bushes.setMatrixAt(i,d.matrix);}
-  bushes.castShadow=true;bushes.instanceMatrix.needsUpdate=true;scene.add(bushes);})();
+  bushes.castShadow=true;bushes.instanceMatrix.needsUpdate=true;scene.add(bushes);OLD_BUSHES=bushes;})(); // WORLD 11.0
 
 /* grass tufts : instanced crossed planes, static with varied rotation/scale.
    Base transforms are kept in grassBase so the frame loop can lean the tufts
@@ -1612,6 +1627,360 @@ function ensureModel(key){ // lazy-load a rifle's data file + GLB on first need 
   else new THREE.GLTFLoader().load('models/sniper.glb',glbOk,undefined,glbErr);
 })();
 
+
+/* ==================== WORLD 11.0 — real models, explosions, free roam, walking ====================
+   The world pack (models/world-data.js, base64 GLBs) lazy-loads during menu
+   idle, exactly like the rifle models. Until it lands — or if it fails —
+   every system falls back to the v10.9 procedural originals. Credits:
+   "SWAT" soldier / "Pine" / "Twisted Tree" / "Rock Medium" / "Plant Big" /
+   "Exploding Barrel" by Quaternius (CC0); "Sandbags" by J-Toastie (CC BY). */
+var WORLD={ready:false,failed:false,loading:false,proto:{},clips:{},dims:{},
+  rawH:1.852,chestY:1.323,headY:1.532,scatterBuilt:false};
+function worldChestOff(){return WORLD.chestY*(2.6/WORLD.rawH);} // GLB chest height in world units at the standard x1.5 group scale
+
+/* skinned clone : three r128 has no SkeletonUtils in this build, so clone the
+   node tree by hand and rebind each SkinnedMesh to the cloned bones (geometry
+   and bind inverses are shared — only materials get per-enemy clones). */
+function skinClone(src){
+  const map=new Map();
+  function cl(o){
+    let c;
+    if(o.isSkinnedMesh)c=new THREE.SkinnedMesh(o.geometry,o.material);
+    else if(o.isMesh)c=new THREE.Mesh(o.geometry,o.material);
+    else if(o.isBone)c=new THREE.Bone();
+    else c=new THREE.Object3D();
+    c.name=o.name;c.position.copy(o.position);c.quaternion.copy(o.quaternion);c.scale.copy(o.scale);
+    map.set(o,c);
+    for(const ch of o.children)c.add(cl(ch));
+    return c;}
+  const root=cl(src);
+  src.traverse(o=>{if(o.isSkinnedMesh){const c=map.get(o);
+    c.bind(new THREE.Skeleton(o.skeleton.bones.map(b=>map.get(b)),o.skeleton.boneInverses),o.bindMatrix);
+    c.normalizeSkinWeights=o.normalizeSkinWeights;}});
+  return root;}
+
+/* build one enemy figure from the GLB soldier. Returns the same pivot
+   contract the procedural builder produced: legL/legR (hip), armL/armR
+   (shoulder), headG (head), helmetG (poppable headgear group or null),
+   plus mats (per-enemy material clones — the death flash writes these),
+   a decor group riding the head bone position (beret / shades / glint
+   anchor), the animation handle, and the measured chest height. */
+function buildGlbFigure(e){
+  const proto=WORLD.proto.soldier;if(!proto)return null;
+  const fig=skinClone(proto);
+  fig.scale.setScalar(2.6/(WORLD.rawH*1.5)); // fig local scale : group x1.5 -> ~2.6 m world, the old figure's height
+  const bones={};
+  fig.traverse(o=>{bones[o.name]=o;if(o.isMesh){o.frustumCulled=false;o.castShadow=true;}});
+  const matMap=new Map(),mats=[];
+  fig.traverse(o=>{if(o.isMesh){if(!matMap.has(o.material)){const cm=o.material.clone();matMap.set(o.material,cm);mats.push(cm);}
+    o.material=matMap.get(o.material);}});
+  if(e.hvt)for(const m of mats)if(m.name==='Swat')m.color.setRGB(0.40,0.09,0.08); // HVT : the vest/cloth goes red — the established HVT language
+  const mixer=new THREE.AnimationMixer(fig),acts={};
+  const clipFor={walk:'Walk',idle:'Idle_Gun',run:'Run_Shoot',hit:'HitRecieve'};
+  const clips=WORLD.clips.soldier||[];
+  for(const k in clipFor){const clip=clips.find(c=>c.name&&c.name.indexOf(clipFor[k])>=0);
+    if(clip){const a=mixer.clipAction(clip);a.enabled=false;
+      if(k==='hit'){a.setLoop(THREE.LoopOnce);a.clampWhenFinished=true;}
+      acts[k]=a;}}
+  /* head decor : positioned from the MEASURED head-bone spot, in fig units */
+  fig.updateMatrixWorld(true);
+  const headBone=bones['Head']||null;
+  const hp=new THREE.Vector3(0,1.53,0);
+  if(headBone){headBone.getWorldPosition(hp);fig.worldToLocal(hp);}
+  /* CENTER THE SPINE ON THE GROUP AXIS (WORLD 11.0 fix) : the SWAT bind
+     pose holds its head/spine line ~0.09 group-units FORWARD of the model
+     origin. Left alone, that offset tips the ragdoll onto a propped head
+     (rest head 0.48 vs the approved stack's 0.39) and stands the mesh in
+     front of its logical point (chest / patrol / blocker math all key off
+     the group origin). Shifting the fig back by the measured head-pivot
+     x/z puts the body axis through the group origin — feet stay planted
+     (no y change), decor below rides the fig so it is unaffected. */
+  fig.position.x-=hp.x*fig.scale.x;fig.position.z-=hp.z*fig.scale.z;
+  const decor=new THREE.Group();decor.position.copy(hp);fig.add(decor);
+  const LM=c=>new THREE.MeshLambertMaterial({color:c});
+  let helmetG=null;
+  if(e.hvt){
+    const beret=new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.17,0.08,8),LM(0xff2222));
+    beret.position.set(0.04,0.31,0);beret.rotation.z=-0.14;beret.castShadow=true;decor.add(beret);
+    const shades=new THREE.Mesh(new THREE.BoxGeometry(0.23,0.055,0.03),LM(0x0c0e12));
+    shades.position.set(0,0.10,0.135);decor.add(shades);
+    mats.push(beret.material,shades.material);
+  }else if(!e.sniper){
+    helmetG=new THREE.Group();helmetG.position.set(hp.x,hp.y+0.24,hp.z+0.10);fig.add(helmetG);
+    const nub=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.06,0.05),LM(0x1c1f16)); // NVG mount nub : the bit a headshot pops off (the SWAT helmet itself is one mesh with the head)
+    nub.castShadow=true;helmetG.add(nub);mats.push(nub.material);
+  }
+  return {fig:fig,legL:bones['UpperLegL']||null,legR:bones['UpperLegR']||null,
+    armL:bones['UpperArmL']||null,armR:bones['UpperArmR']||null,headG:headBone,helmetG:helmetG,
+    decor:decor,mats:mats,anim:{mixer:mixer,acts:acts,cur:null,curAct:null},chestOff:worldChestOff()};
+}
+
+/* per-frame clip direction for GLB enemies : patrols WALK, converging and
+   relocating enemies RUN with guns up, stationary enemies hold Idle_Gun,
+   a near-miss / hit flinch fires the HitReact one-shot. Runs INSTEAD of the
+   procedural limb-swing writes; the head still takes the radio-scan yaw. */
+function figAnimTick(e,dt,moving){
+  const h=e.figAnim;if(!h)return;
+  let want='idle';
+  if(e.flinchT>0.05&&h.acts.hit)want='hit';
+  else if(moving)want=(e.sprinting||G.converged||e.aimPhase==='reloc')?'run':'walk';
+  if(want!==h.cur){
+    const a=h.acts[want];
+    if(a){if(h.curAct&&h.curAct!==a)h.curAct.fadeOut(0.15);
+      a.enabled=true;a.reset();a.setEffectiveWeight(1);a.fadeIn(0.15);a.play();
+      h.curAct=a;h.cur=want;}}
+  h.mixer.update(dt);
+  if(e.headG&&e.headYaw)e.headG.rotation.y+=e.headYaw;
+}
+
+function loadWorldPack(){
+  if(WORLD.loading||WORLD.ready||WORLD.failed)return;WORLD.loading=true;
+  const s=document.createElement('script');s.src='models/world-data.js';
+  s.onerror=function(){WORLD.failed=true;};
+  s.onload=function(){
+    if(!window.WORLD_GLB){WORLD.failed=true;return;}
+    const loader=new THREE.GLTFLoader();
+    const keys=['soldier','pine','tree','rock','bush','barrel','sandbags'];
+    let pending=keys.length;
+    const done=function(){if(--pending===0)onWorldReady();};
+    keys.forEach(k=>{
+      loader.load(window.WORLD_GLB[k],function(g){
+        WORLD.proto[k]=g.scene;WORLD.clips[k]=g.animations||[];
+        const bb=new THREE.Box3().setFromObject(g.scene),sz=bb.getSize(new THREE.Vector3());
+        WORLD.dims[k]={h:sz.y,w:Math.max(sz.x,sz.z)};
+        if(k==='soldier'){
+          WORLD.rawH=sz.y;g.scene.updateMatrixWorld(true);
+          const cb=g.scene.getObjectByName('Chest'),hb=g.scene.getObjectByName('Head'),v=new THREE.Vector3();
+          if(cb){cb.getWorldPosition(v);WORLD.chestY=v.y-bb.min.y;}
+          if(hb){hb.getWorldPosition(v);WORLD.headY=v.y-bb.min.y;}
+        }
+        done();
+      },undefined,done);
+    });
+  };
+  document.head.appendChild(s);
+}
+function onWorldReady(){
+  if(!WORLD.proto.soldier){WORLD.failed=true;return;}
+  WORLD.ready=true;
+  try{buildWorldScatter();}catch(err){console.warn('[longshot] world scatter failed',err);}
+  if(G.state==='menu')startMission(G.menuMission); // respawn the living valley with real soldiers (lands back in menu)
+}
+
+/* static-model clone with baked node transforms (barrels, sandbags) */
+function cloneStatic(src){
+  const g=new THREE.Group();src.updateMatrixWorld(true);
+  const _p=new THREE.Vector3(),_q=new THREE.Quaternion(),_s=new THREE.Vector3();
+  src.traverse(o=>{if(o.isMesh){const m=new THREE.Mesh(o.geometry,o.material);
+    o.matrixWorld.decompose(_p,_q,_s);
+    m.position.copy(_p);m.quaternion.copy(_q);m.scale.copy(_s);m.castShadow=true;g.add(m);}});
+  return g;}
+
+/* scatter takeover : GLB pines + broadleafs on the SAME spots the procedural
+   cones/blobs used (then the old instanced sets hide), GLB rocks on the old
+   rock instances' transforms, GLB plants on the ridge bush spots. */
+function buildWorldScatter(){
+  if(WORLD.scatterBuilt)return;WORLD.scatterBuilt=true;
+  const dummy=new THREE.Object3D(),_m4=new THREE.Matrix4();
+  function partsOf(root){const arr=[];root.updateMatrixWorld(true);
+    root.traverse(o=>{if(o.isMesh)arr.push({geo:o.geometry,mat:o.material,m4:o.matrixWorld.clone()});});return arr;}
+  function cutout(parts){parts.forEach(p=>{if(p.mat&&p.mat.map){p.mat=p.mat.clone();
+    p.mat.transparent=false;p.mat.alphaTest=0.45;p.mat.side=THREE.DoubleSide;}});} // foliage : alpha-test beats blend-sorting in a forest
+  function instanced(parts,count){return parts.map(p=>{const im=new THREE.InstancedMesh(p.geo,p.mat,count);
+    im.castShadow=true;im.userData.partM4=p.m4;scene.add(im);return im;});}
+  function place(ims,dummy,k){for(const im of ims){_m4.multiplyMatrices(dummy.matrix,im.userData.partM4);im.setMatrixAt(k,_m4);}}
+  function finish(ims){for(const im of ims)im.instanceMatrix.needsUpdate=true;}
+  if(TREE_SPOTS){
+    const pineIdx=[],treeIdx=[];
+    /* DENSITY (perf) : a real pine is 3.4k tris and the broadleaf 10k — planting
+       all 150 spots cost ~900k tris/frame. Thin the far valley, keep the camp
+       surrounds fully dressed : ~48 pines + ~8 broadleafs ≈ 240k tris. */
+    TREE_SPOTS.forEach((sp,i)=>{
+      const nearCamp=Math.hypot(sp[0],sp[2]+CAMP_D)<80;
+      if(i%5<3){if(nearCamp||i%2===0)pineIdx.push(i);}
+      else if(i%5===3){if(nearCamp||i%15===3)treeIdx.push(i);}
+    });
+    if(WORLD.proto.pine){const parts=partsOf(WORLD.proto.pine);cutout(parts);
+      const ims=instanced(parts,pineIdx.length),rawH=(WORLD.dims.pine||{}).h||10;
+      pineIdx.forEach((si,k)=>{const sp=TREE_SPOTS[si];
+        dummy.position.set(sp[0],sp[1]-0.12,sp[2]);dummy.rotation.set(0,sp[4],0);
+        const sc=(10.5/rawH)*sp[3];dummy.scale.set(sc,sc*(0.92+((si*37)%10)*0.016),sc);dummy.updateMatrix();place(ims,dummy,k);});
+      finish(ims);}
+    if(WORLD.proto.tree){const parts=partsOf(WORLD.proto.tree);cutout(parts);
+      const ims=instanced(parts,treeIdx.length),rawH=(WORLD.dims.tree||{}).h||8;
+      treeIdx.forEach((si,k)=>{const sp=TREE_SPOTS[si];
+        dummy.position.set(sp[0],sp[1]-0.12,sp[2]);dummy.rotation.set(0,sp[4],0);
+        const sc=(8.5/rawH)*sp[3];dummy.scale.set(sc,sc*(0.92+((si*53)%10)*0.016),sc);dummy.updateMatrix();place(ims,dummy,k);});
+      finish(ims);}
+    if(OLD_TREES)OLD_TREES.forEach(m=>{m.visible=false;});
+  }
+  if(WORLD.proto.rock&&OLD_ROCKS.length){
+    const parts=partsOf(WORLD.proto.rock),mats4=[],_p=new THREE.Vector3(),_q=new THREE.Quaternion(),_sv=new THREE.Vector3();
+    OLD_ROCKS.forEach(im0=>{for(let i=0;i<im0.count;i++){im0.getMatrixAt(i,_m4);mats4.push(_m4.clone());}});
+    const ims=instanced(parts,mats4.length),rawW=(WORLD.dims.rock||{}).w||1.8;
+    mats4.forEach((mm,k)=>{mm.decompose(_p,_q,_sv);
+      dummy.position.copy(_p);dummy.quaternion.copy(_q);
+      const sc=_sv.x*(2.0/rawW);dummy.scale.set(sc,sc*0.8,sc);dummy.updateMatrix();place(ims,dummy,k);});
+    finish(ims);OLD_ROCKS.forEach(m=>{m.visible=false;});
+  }
+  if(WORLD.proto.bush&&OLD_BUSHES){
+    const parts=partsOf(WORLD.proto.bush);cutout(parts);
+    const _p=new THREE.Vector3(),poss=[];
+    for(let i=0;i<OLD_BUSHES.count;i++){OLD_BUSHES.getMatrixAt(i,_m4);_p.setFromMatrixPosition(_m4);poss.push(_p.clone());}
+    const ims=instanced(parts,poss.length),rawH=(WORLD.dims.bush||{}).h||1;
+    poss.forEach((pp,k)=>{dummy.position.set(pp.x,groundH(pp.x,pp.z)-0.05,pp.z);
+      dummy.rotation.set(0,(k*2.39)%6.28,0);dummy.quaternion.setFromEuler(dummy.rotation);
+      const sc=1.5/rawH;dummy.scale.set(sc,sc,sc);dummy.updateMatrix();place(ims,dummy,k);});
+    finish(ims);OLD_BUSHES.visible=false;
+  }
+  buildBarrels();
+  dressCamp();
+}
+
+/* outpost dressing : sandbag walls at the camp (cover reads, no gameplay
+   anchors move — patrols keep their routes, blockers stay as they were) */
+function dressCamp(){
+  if(!WORLD.proto.sandbags)return;
+  const rawH=(WORLD.dims.sandbags||{}).h||1;
+  const spots=[[6,-CAMP_D+10,0.4],[-8,-CAMP_D-14,2.2],[14,-CAMP_D-6,1.1],[-16,-CAMP_D+20,-0.5]];
+  for(const sp of spots){
+    const g=cloneStatic(WORLD.proto.sandbags);
+    g.scale.setScalar(1.15/rawH);
+    g.position.set(sp[0],groundH(sp[0],sp[1]),sp[1]);g.rotation.y=sp[2];
+    scene.add(g);}
+}
+
+/* ---------------- explosive barrels (WORLD 11.0) ---------------- */
+const BARRELS=[];
+const BARREL_SPOTS=[[-14,-CAMP_D+26],[11,-CAMP_D-30],[-26,-CAMP_D-8],[24,-CAMP_D+16],[3,-CAMP_D+44],[-7,-CAMP_D-52],[30,-CAMP_D-24]];
+let barrelsBuilt=false;
+function buildBarrels(){
+  if(barrelsBuilt||!WORLD.proto.barrel)return;barrelsBuilt=true;
+  const rawH=(WORLD.dims.barrel||{}).h||1.15;
+  for(const sp of BARREL_SPOTS){
+    const g=cloneStatic(WORLD.proto.barrel);
+    g.scale.setScalar(1.15/rawH);
+    g.position.set(sp[0],groundH(sp[0],sp[1]),sp[1]);
+    scene.add(g);
+    BARRELS.push({group:g,pos:new THREE.Vector3(sp[0],groundH(sp[0],sp[1]),sp[1]),alive:true,isBarrel:true});
+    BLOCKERS.push({x:sp[0],z:sp[1],r:1.0}); // patrols (and the walking player) give them a berth
+  }
+}
+function resetBarrels(){for(const b of BARRELS){b.alive=true;if(b.group)b.group.visible=true;}}
+function explodeBarrel(b){
+  if(!b||!b.alive)return;
+  b.alive=false;if(b.group)b.group.visible=false;
+  const p=b.pos.clone();p.y+=0.55;
+  spawnExplosion(p,1.2);sBoom();
+  if(!G.roam)G.alarm=Math.min(100,G.alarm+20); // loud : the tradeoff is by design
+  for(const o of BARRELS)if(o!==b&&o.alive&&o.pos.distanceTo(b.pos)<7)chainQ.push({tg:o,t:0.25}); // chain reaction
+  for(const e of enemies){if(!e.alive)continue;
+    if(e.chest().distanceTo(p)<8){ // radius kills ride the normal kill path — score/chain/blood all behave (killEnemy self-guards roam)
+      _td.copy(e.group.position).sub(b.pos);_td.y=0;
+      if(_td.lengthSq()<0.01)_td.set(0,0,1);_td.normalize();
+      killEnemy(e,_td,false,false,true);}}
+}
+/* a bullet found the barrel : if a victim is in the blast and the killcam is
+   eligible, the cam rides the round to the first victim exactly like a
+   pierce kill (blood defers to the cam beat); the blast resolves the rest */
+function detonateBarrel(b,bullet){
+  if(!b.alive)return;
+  if(bullet&&!G.roam){
+    let first=null,fd=1e9;
+    for(const e of enemies){if(!e.alive)continue;
+      const d=e.chest().distanceTo(b.pos);if(d<8&&d<fd){fd=d;first=e;}}
+    if(first)pierceKill(bullet,first,false,first.chest());
+  }
+  explodeBarrel(b);
+}
+/* sabotage in free roam : the full detonation, none of the paperwork */
+function roamSabBoom(tg){
+  if(!tg.alive)return;
+  tg.alive=false;tg.group.visible=false;if(tg.marker)tg.marker.visible=false;
+  const p=tg.pos.clone();spawnExplosion(p,tg.kind==='fuel'?1.3:1.05);sBoom();
+}
+
+/* ---------------- explosion system (WORLD 11.0) ----------------
+   One call : fireball sprite + shockwave ring on the shared `booms` ticker
+   (extended below with per-boom duration/growth), a buoyant smoke plume,
+   quality-scaled bursts for fire/sparks/debris/dust through the shared
+   particle pool, the shared boom light, and distance-scaled camera shake. */
+const smokeTex=(function(){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+  const g=x.createRadialGradient(64,64,6,64,64,62);
+  g.addColorStop(0,'rgba(216,210,202,0.85)');g.addColorStop(0.55,'rgba(178,172,164,0.42)');g.addColorStop(1,'rgba(160,154,146,0)');
+  x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(cv);})();
+function spawnExplosion(p,scale){
+  scale=scale||1;
+  const q=G.particleMul||1; // burst counts below scale AGAIN inside spawnBurst by the same PARTICLES setting — this only trims the smoke sprites
+  const fp=p.clone();fp.y+=0.4;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:boomTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+  sp.position.copy(fp);sp.scale.set(3*scale,3*scale,1);scene.add(sp);
+  const ring=new THREE.Mesh(boomRingGeo,new THREE.MeshBasicMaterial({color:0xffc37a,transparent:true,opacity:0.9,
+    side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));
+  ring.rotation.x=-Math.PI/2;ring.position.set(p.x,p.y+0.25,p.z);scene.add(ring);
+  booms.push({sp:sp,ring:ring,t:0,dur:0.6,s0:3*scale,grow:17*scale,rgrow:13*scale});
+  const nSmk=Math.round(3*q)+1;
+  for(let i=0;i<nSmk;i++){
+    const sm=new THREE.Sprite(new THREE.SpriteMaterial({map:smokeTex,transparent:true,depthWrite:false,opacity:0,color:0x8a857c}));
+    sm.position.set(p.x+rand(-0.7,0.7),p.y+1+i*0.7,p.z+rand(-0.7,0.7));
+    const ss=(2.6+i*1.1)*scale;sm.scale.set(ss,ss,1);scene.add(sm);
+    booms.push({sp:sm,ring:null,t:-i*0.14,dur:1.7,s0:ss,grow:5*scale,smoke:true});}
+  boomLight.position.copy(p);boomLight.position.y+=1.6;
+  boomLight.intensity=(G.reduceFlash?7:13)*scale;
+  spawnBurst(fp,{color:0xff8a30,n:Math.round(24*scale),sp0:2,sp1:9*scale,up0:2,up1:8,life:0.6,grav:6,add:1,sz:[1.6,2.6]});
+  spawnBurst(fp,{color:0xffc46b,n:Math.round(14*scale),sp0:1,sp1:5*scale,up0:1,up1:5,life:0.4,grav:3,add:1,sz:[1.2,2]});
+  spawnBurst(fp,{color:0xffd9a0,n:Math.round(20*scale),sp0:4,sp1:14*scale,up0:3,up1:10,life:0.75,grav:11,add:1,sz:[0.8,1.3]});
+  spawnBurst(fp,{color:0x3a3630,n:Math.round(13*scale),sp0:2,sp1:8*scale,up0:3,up1:9,life:1.0,grav:12,sz:[1.4,2.2]});
+  spawnBurst(fp,{color:0x6b6257,n:Math.round(12*scale),sp0:1,sp1:3.4,up0:2.5,up1:5.5,life:1.5,grav:-1.5,sz:[2,3.2]});
+  const d=camera.position.distanceTo(p);
+  G.shake=Math.min(0.85,G.shake+scale*clamp(16/(d+10),0.04,0.6)*(G.reduceShake?0.3:1));
+}
+
+/* ---------------- free roam + walking (WORLD 11.0) ---------------- */
+const joyVec={x:0,y:0};const KEYS={};
+document.addEventListener('keydown',e=>{KEYS[e.code]=true;
+  if((G.state==='play'||G.state==='roam')&&(e.code.indexOf('Arrow')===0||e.code==='Space'))e.preventDefault();});
+document.addEventListener('keyup',e=>{KEYS[e.code]=false;});
+/* one movement step, shared by missions (3.5 m/s) and free roam (5 m/s).
+   Joystick vector is look-relative; WASD/arrows mirror it on desktop.
+   NO sway or breath is added — the scope stays exactly as stable as it
+   always was (standing rule). Position writes go to G.px/G.pz, so the
+   converge / return-fire / counter-sniper systems (which all key off the
+   player position) track the walker with zero changes. */
+function stepPlayerMove(dt,speed){
+  if(G.scoped||KC.active||G.pauseOpen||G.settingsOpen)return;
+  let mx=joyVec.x,mz=joyVec.y;
+  if(KEYS['KeyW']||KEYS['ArrowUp'])mz-=1;
+  if(KEYS['KeyS']||KEYS['ArrowDown'])mz+=1;
+  if(KEYS['KeyA']||KEYS['ArrowLeft'])mx-=1;
+  if(KEYS['KeyD']||KEYS['ArrowRight'])mx+=1;
+  const len=Math.hypot(mx,mz);if(len<0.12)return;
+  const cl=Math.min(1,len)/len;mx*=cl;mz*=cl;
+  const sy=Math.sin(G.yaw),cy=Math.cos(G.yaw);
+  let nx=G.px+(cy*mx-sy*(-mz))*speed*dt;
+  let nz=G.pz+(-sy*mx-cy*(-mz))*speed*dt;
+  nx=clamp(nx,-280,280);nz=clamp(nz,-372,190); // valley bounds
+  for(const b of BLOCKERS){ // cheap push-out : tents, crates, tower, tanks, barrels
+    const dx=nx-b.x,dz=nz-b.z,rr=b.r+0.55,d2=dx*dx+dz*dz;
+    if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=b.x+dx/d*rr;nz=b.z+dz/d*rr;}}
+  if(truck.group){
+    const tp=truck.group.position,dx=nx-tp.x,dz=nz-tp.z,rr=3.4,d2=dx*dx+dz*dz;
+    if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=tp.x+dx/d*rr;nz=tp.z+dz/d*rr;}}
+  G.px=nx;G.pz=nz;
+}
+function enterRoam(){
+  if(G.state!=='menu')return;
+  G.rifle=selRifle;lsSet('longshot_rifle',selRifle);
+  startMission(G.menuMission); // full world reset on the picked mission (lands in menu; roam flag is set after, startMission clears it)
+  hideMenu();G.state='roam';G.roam=true;document.body.classList.add('roam');
+  resetBarrels();
+  audio();wlRequest();sClick();buzz(10);updateHUD();
+  toast('FREE ROAM — EXPLORE THE VALLEY');
+}
+function exitRoam(){startMission(G.menuMission);} // startMission clears the roam flag + lands in the menu
+/* ==================== end WORLD 11.0 ==================== */
+
+
 /* ---------------- enemies ---------------- */
 const enemies=[];
 const markerTex=(function(){const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
@@ -1642,7 +2011,7 @@ class Enemy{
   constructor(x,z,hvt,opts){
     this.hvt=hvt;this.alive=true;this.fall=0;
     this.sniper=!!(opts&&opts.sniper); // counter-sniper : stationary post, aim/fire cycle
-    this.aimPhase='idle';this.aimT=rand(1.5,3);this.laser=null;this.glint=null;this.postY=null;this.chestOff=null;
+    this.aimPhase='idle';this.aimT=rand(1.5,3);this.laser=null;this.glint=null;this.postY=null;this.chestOff=null;this.defChest=1.55;this.figAnim=null; // WORLD 11.0 : defChest = this figure's chest height when chestOff is unset (GLB soldier measures taller)
     this.speed=rand(1.3,1.8);this.walkPhase=rand(0,TAU);this.pauseT=rand(0,2);
     this.radio=0;this.headYaw=0; // idle radio-call pose + head scan state
     this.relocT=rand(2,5);this.sprinting=false; // high-alarm relocation state
@@ -1658,6 +2027,11 @@ class Enemy{
     this.discovered=false;this.invest=null;this.investCd=rand(0,0.5); // corpse-discovery state
     this.glintT=rand(0.4,2);this.glintF=0;this.relocP=null; // irregular glint flashes + shoot-and-scoot post
     const g=this.group=new THREE.Group();
+    const F=WORLD.ready?buildGlbFigure(this):null; // WORLD 11.0 : real GLB soldier when the world pack is in — the procedural figure below stays as the fallback
+    if(F){this.legL=F.legL;this.legR=F.legR;this.armL=F.armL;this.armR=F.armR;this.headG=F.headG;this.helmetG=F.helmetG;
+      this.mats=F.mats;this.figAnim=F.anim;this.defChest=F.chestOff;this.decorG=F.decor;g.add(F.fig);}
+    let hg=null;
+    if(!F){
     const uni=hvt?0xa32424:(this.sniper?0x23262c:0x4c5530),skin=0xc9a07a;
     this.mats=[];
     const M=c=>{const m=new THREE.MeshLambertMaterial({color:c});this.mats.push(m);return m;};
@@ -1695,7 +2069,7 @@ class Enemy{
       for(const gx of[-0.18,0,0.18])bx(0.05,0.36,0.05,ghM,gx,0.98,-0.3);}
     /* head : pivot group so idle look-around can yaw it */
     this.headG=new THREE.Group();this.headG.position.set(0,1.4,0);g.add(this.headG);
-    const hg=this.headG;
+    hg=this.headG;
     bx(0.24,0.26,0.24,M(skin),0,0,0,hg);
     if(hvt){const b=new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.17,0.08,8),M(0xff2222));
       b.position.set(0.04,0.18,0);b.rotation.z=-0.14;hg.add(b);
@@ -1732,6 +2106,7 @@ class Enemy{
     bx(0.06,0.12,0.2,gunM,0.06,0.96,-0.14);           // stock
     const gbar=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.3,6),gunM); // barrel + muzzle tip
     gbar.rotation.x=Math.PI/2;gbar.position.set(0.06,1.0,0.88);g.add(gbar);
+    } // WORLD 11.0 : end of the procedural-figure fallback block
     g.scale.setScalar(1.5);
     g.position.set(x,groundH(x,z),z);
     g.rotation.y=rand(0,TAU);
@@ -1744,15 +2119,15 @@ class Enemy{
       mk.scale.set(1.6,1.6,1);mk.position.y=2.6;g.add(mk);this.marker=mk;}
     if(this.sniper){ // scope glint : flashing scope reflection — the tell
       const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:glintTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
-      gl.scale.set(0.5,0.5,1);gl.position.set(0.2,0.04,0.16);hg.add(gl);this.glint=gl;}
+      gl.scale.set(0.5,0.5,1);gl.position.set(0.2,0.04,0.16);(hg||this.decorG).add(gl);this.glint=gl;} // WORLD 11.0 : GLB snipers hang the glint on the head-bone decor group (hg is procedural-only)
     else{ // guard flashlight cone : cheap additive beam, night ops only
       const cone=new THREE.Mesh(coneGeo,coneMat);cone.position.set(0,1.15,0.3);cone.visible=G.night;g.add(cone);}
   }
-  chest(){const p=this.group.position;return new THREE.Vector3(p.x,p.y+(this.chestOff==null?1.55:this.chestOff),p.z);}
+  chest(){const p=this.group.position;return new THREE.Vector3(p.x,p.y+(this.chestOff==null?(this.defChest||1.55):this.chestOff),p.z);}
   update(dt){
     const g=this.group;
     if(!this.alive){this.deathTick(dt);return;} // DEATH 2.0 : weighted per-part collapse (deathTick)
-    if(this.sniper){this.sniperUpdate(dt);return;}
+    if(this.sniper){this.sniperUpdate(dt);if(this.figAnim)figAnimTick(this,dt,this.aimPhase==='reloc');return;} // WORLD 11.0
     if(this.flinchT>0)this.flinchT-=dt; // under-fire reaction timers
     if(this.crouchT>0)this.crouchT-=dt;
     this.walkPhase+=dt*7;
@@ -1815,6 +2190,8 @@ class Enemy{
       }
     }
     resolveBlockers(g); // camp props : slide along tents/crates/tower/tanks instead of clipping through
+    if(this.figAnim){figAnimTick(this,dt,moving);} // WORLD 11.0 : the GLB clips own the bones (walk / idle / run / hit-react)
+    else{
     const sw=moving?Math.sin(this.walkPhase)*0.55:0;
     this.legL.rotation.x=sw;this.legR.rotation.x=-sw;
     const asw=moving?-Math.sin(this.walkPhase)*0.16:0;   // subtle arm counter-swing
@@ -1827,13 +2204,14 @@ class Enemy{
       this.armR.rotation.z=lerp(this.armR.rotation.z,0,Math.min(1,dt*6));
       this.headYaw=lerp(this.headYaw,0,Math.min(1,dt*4));}
     this.headG.rotation.y=this.headYaw;
+    }
     g.position.y=groundH(g.position.x,g.position.z)+(moving?Math.abs(Math.sin(this.walkPhase))*0.06:0)-((this.flinchT>0||this.crouchT>0)?0.32:0); // crouch dip while flinching / holding cover
   }
   /* counter-sniper behavior : hold the post, face the ridge, cycle
      idle -> aim 1.5s (glint swells + laser shimmer) -> fire -> cool */
   sniperUpdate(dt){
     const g=this.group;
-    if(G.state==='menu'){ // LIVING VALLEY : hold the post, face the ridge, idle glint only — the aim cycle (and sniperFire) is never reached in menu
+    if(G.state==='menu'||G.state==='roam'){ // LIVING VALLEY / FREE ROAM : hold the post, face the ridge, idle glint only — the aim cycle (and sniperFire) is never reached
       if(this.postY!=null)g.position.y=this.postY;
       const mdx=G.px-g.position.x,mdz=G.pz-g.position.z;
       g.rotation.y=Math.atan2(mdx,mdz);
@@ -1904,6 +2282,7 @@ class Enemy{
   }
   die(dir,hshot,blast){
     if(!this.alive)return;this.alive=false;
+    if(this.figAnim){this.figAnim.mixer.stopAllAction();this.figAnim.mixer.update(0);} // WORLD 11.0 : stop clips AND snap back to bind pose (one update with no active actions restores it) — deathTick's ragdoll writes assume the neutral pose the procedural figure starts from, not a frozen mid-stride clip pose
     if(this.laser)this.laser.visible=false;
     if(this.glint)this.glint.visible=false;
     if(this.marker)this.marker.visible=false;
@@ -2524,10 +2903,12 @@ function boomFx(p){
   boomLight.position.copy(p);boomLight.position.y+=1.5;boomLight.intensity=G.reduceFlash?4.5:9; // REDUCE FLASHES : halve the explosion light pop
 }
 function boomUpdate(dt){
-  for(let i=booms.length-1;i>=0;i--){const b=booms[i];b.t+=dt;const k=b.t/0.55;
-    if(k>=1){scene.remove(b.sp);scene.remove(b.ring);b.sp.material.dispose();b.ring.material.dispose();booms.splice(i,1);continue;}
-    const s=2.5+k*15;b.sp.scale.set(s,s,1);b.sp.material.opacity=1-k;
-    const rs=1+k*10;b.ring.scale.set(rs,rs,1);b.ring.material.opacity=0.85*(1-k);}
+  for(let i=booms.length-1;i>=0;i--){const b=booms[i];b.t+=dt;const dur=b.dur||0.55,k=b.t/dur; // WORLD 11.0 : per-boom pacing (legacy entries default to the old 0.55 s pop)
+    if(k>=1){scene.remove(b.sp);if(b.ring){scene.remove(b.ring);b.ring.material.dispose();}b.sp.material.dispose();booms.splice(i,1);continue;}
+    if(b.t<0){b.sp.visible=false;continue;} // staggered smoke puffs wait their turn
+    b.sp.visible=true;
+    const s=(b.s0||2.5)+k*(b.grow||15);b.sp.scale.set(s,s,1);b.sp.material.opacity=b.smoke?0.55*(1-k):(1-k);
+    if(b.ring){const rs=1+k*(b.rgrow||10);b.ring.scale.set(rs,rs,1);b.ring.material.opacity=0.85*(1-k);}}
   boomLight.intensity=Math.max(0,boomLight.intensity-dt*24);
   for(let i=0;i<sabTargets.length;i++){const tg=sabTargets[i]; // objective markers pulse
     if(tg.alive){const pu=0.68+0.32*Math.sin(G.swayT*4+tg.ph);
@@ -2545,9 +2926,7 @@ function explodeSab(tg){
   tg.alive=false;tg.group.visible=false;tg.marker.visible=false;
   G.sabDone++;G.score+=50;G.missionScore+=50;scorePop(50,false,false);
   G.alarm=Math.min(100,G.alarm+25);
-  sBoom();boomFx(tg.pos);
-  spawnBurst(tg.pos,{color:0xffa03c,n:40,sp0:2,sp1:9,up0:2,up1:9,life:1.1,grav:7,add:1});   // ember storm
-  spawnBurst(tg.pos,{color:0x554a3a,n:16,sp0:1,sp1:5,up0:3,up1:7,life:1.3,grav:3});          // debris
+  sBoom();spawnExplosion(tg.pos,tg.kind==='fuel'?1.3:1.05); // WORLD 11.0 : sabotage detonates with the full explosion system (fireball / smoke / debris / shake)
   const kr=tg.kind==='fuel'?9:7.5;
   for(const e of enemies){if(!e.alive)continue;
     if(e.chest().distanceTo(tg.pos)<kr){
@@ -2607,7 +2986,7 @@ function fireBullet(){
       setTimeout(()=>toast('TAC RELOAD IS FASTER — RELOAD EARLY'),1750);}
     return;}
   if(G.reloading){G.reloading=false;updateHUD();} // RELOAD CANCEL : ammo>0 is guaranteed here (the empty branch returned) — rounds already seated are yours, fire NOW
-  if(G.fireCd>0||G.state!=='play')return;
+  if(G.fireCd>0||(G.state!=='play'&&G.state!=='roam'))return; // WORLD 11.0 : the rifle works in free roam too
   G.ammo--;G.shots++;G.fireCd=RIFLES[G.rifle].cool;G.lastShotT=G.swayT;
   const dir=new THREE.Vector3();camera.getWorldDirection(dir);
   const m=new THREE.Mesh(bulletGeo,bulletMat);
@@ -2672,7 +3051,7 @@ function pierceKill(b,e,hshot,hitP){
      bullet "arrives" — so DEFER it: kcUpdate bursts spawnBlood at KC.tgt the
      instant the replayed round makes contact. The gate mirrors killEnemy's
      cam gate exactly (first kill of the shot, >300m, killcam not off). */
-  const camWillRun=(b.kills===1&&camera.position.distanceTo(e.group.position)>300&&G.kcam!=='off');
+  const camWillRun=(b.kills===1&&camera.position.distanceTo(e.group.position)>300&&G.kcam!=='off'&&!G.roam); // WORLD 11.0 : no bullet-cam in free roam (its deferred blood would never land)
   if(!camWillRun)spawnBlood(hitP,_kd,hshot);
   /* BULLET-CAM 2.1 : the truth — hitP is the closest point on the bullet's own
      substep segment to the chest (ON the body, found by bulletUpdate), plus a
@@ -2680,14 +3059,14 @@ function pierceKill(b,e,hshot,hitP){
      the shot may drive the cam (killEnemy's cam flag does the gating). */
   const camPath=b.path.slice();camPath.push(hitP.clone());
   killEnemy(e,_kd,b.kills===1,hshot,false,hitP,camPath);
-  if(b.kills===2){G.score+=150;G.missionScore+=150;scorePop(150,false,false,'DOUBLE KILL');}
-  else if(b.kills===3){G.score+=300;G.missionScore+=300;scorePop(300,false,false,'TRIPLE KILL');}
+  if(!G.roam&&b.kills===2){G.score+=150;G.missionScore+=150;scorePop(150,false,false,'DOUBLE KILL');}
+  else if(!G.roam&&b.kills===3){G.score+=300;G.missionScore+=300;scorePop(300,false,false,'TRIPLE KILL');}
 }
 function bulletUpdate(dt){
   const wvx=Math.sin(G.windDir)*G.windSpd,wvz=Math.cos(G.windDir)*G.windSpd;
   for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];
     const steps=Math.max(1,Math.ceil(b.sp*dt/1.5));const sdt=dt/steps;
-    let ground=false,thit=false,shit=null,spent=false;
+    let ground=false,thit=false,shit=null,spent=false,bhit=null; // WORLD 11.0 : bhit = barrel struck this substep
     let nearE=null,nearD2=36; // nearest pass within ~6m that ISN'T a hit -> near-miss reaction
     for(let s=0;s<steps;s++){
       b.vy-=9.8*sdt;b.vx+=wvx*1.6*sdt;b.vz+=wvz*1.6*sdt; // real gravity 9.8 m/s^2 — hold over with the mil-dots
@@ -2730,6 +3109,9 @@ function bulletUpdate(dt){
         const dx=p.x-tg.pos.x,dy=p.y-tg.pos.y,dz=p.z-tg.pos.z;
         if(dx*dx+dy*dy+dz*dz<tg.r*tg.r){shit=tg;break;}}
       if(shit)break;
+      for(const bl of BARRELS){if(!bl.alive)continue; // WORLD 11.0 : explosive barrels — segment-sphere like the driver capsule, so fast rounds can't tunnel through
+        if(segPtD2(px0,py0,pz0,p.x,p.y,p.z,bl.pos.x,bl.pos.y+0.55,bl.pos.z)<1.33){bhit=bl;break;}}
+      if(bhit)break;
       if(p.y<groundH(p.x,p.z)-0.2){ground=true;break;}
     }
     /* BULLET-CAM 2.1 : trail the true flight — one breadcrumb every ~1.5m of
@@ -2741,7 +3123,7 @@ function bulletUpdate(dt){
     _td.set(b.vx,b.vy,b.vz);b.m.lookAt(_tv.copy(b.m.position).add(_td));
     /* SHOT TRACER : short-lived streak segments along the actually-flown path,
        fed into the shared tracers pool — wind drift + drop read on misses too */
-    if(G.state==='play'){const tp=b.m.position,tdx=tp.x-b.tx,tdy=tp.y-b.ty,tdz=tp.z-b.tz;
+    if(G.state==='play'||G.state==='roam'){const tp=b.m.position,tdx=tp.x-b.tx,tdy=tp.y-b.ty,tdz=tp.z-b.tz; // WORLD 11.0 : tracers in roam too
       if(tdx*tdx+tdy*tdy+tdz*tdz>9){ // >=3m since the last streak point
         const tline=new THREE.Line(new THREE.BufferGeometry().setFromPoints([_tpA.set(b.tx,b.ty,b.tz),_tpB.copy(tp)]),
           new THREE.LineBasicMaterial({color:tracerCol,transparent:true,opacity:0.9})); // LOBBY POLISH : tracer color follows the equipped skin (warm default)
@@ -2750,7 +3132,8 @@ function bulletUpdate(dt){
           spawnBurst(tp,{color:scopeFx==='inferno'?0xff7a26:0xe9d8ff,n:scopeFx==='inferno'?3:4,add:1,sp0:0.1,sp1:0.7,up0:-0.2,up1:0.3,life:scopeFx==='inferno'?0.32:0.5,grav:0,sz:[1.1,1.7]});}
         b.tx=tp.x;b.ty=tp.y;b.tz=tp.z;}}
     if(b.kills===0&&nearE&&nearE.alive)reactToDanger(nearE,nearE.hvt); // suppressive fire : HVTs bolt for cover immediately
-    if(shit){explodeSab(shit);scene.remove(b.m);bullets.splice(i,1);}
+    if(shit){if(G.roam)roamSabBoom(shit);else explodeSab(shit);scene.remove(b.m);bullets.splice(i,1);} // WORLD 11.0 : roam sabotage = visual only
+    else if(bhit){detonateBarrel(bhit,b);if(bullets.indexOf(b)>=0){scene.remove(b.m);bullets.splice(i,1);}} // WORLD 11.0
     else if(thit){ // clipped the patrol truck : spark burst + tink, small alarm bump, no kill
       impactPuff(b.m.position,'metal');
       G.alarm=Math.min(100,G.alarm+3);toast('TRUCK HIT — DRIVER STILL UP');
@@ -2906,7 +3289,7 @@ function aimByPixels(dx,dy){
 function touchPos(t){return[t.clientX,t.clientY];}
 document.addEventListener('touchstart',e=>{
   if(KC.active){kcTap();e.preventDefault();return;} // tap during bullet-cam : chase -> orbit, orbit -> end
-  if(G.state!=='play')return;
+  if(G.state!=='play'&&G.state!=='roam')return; // WORLD 11.0 : touch look/joy live in free roam too
   let uiTouch=false;
   for(const t of e.changedTouches){
     const[x,y]=touchPos(t),el=document.elementFromPoint(x,y);
@@ -2934,7 +3317,7 @@ document.addEventListener('touchmove',e=>{
       let dx=(t.clientX-joyCX)/46,dy=(t.clientY-joyCY)/46;
       const l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l;}
       knob.style.transform=`translate(${dx*32}px,${dy*32}px)`;
-      G.px=clamp(G.px+dx*0.09,-9,9);G.pz=clamp(G.pz+dy*0.09,16,30);
+      joyVec.x=dx;joyVec.y=dy; // WORLD 11.0 : the stick is a movement VECTOR now — stepPlayerMove (frame loop) walks the player with it, in missions and roam
     }
   }
   e.preventDefault();
@@ -2942,7 +3325,7 @@ document.addEventListener('touchmove',e=>{
 function touchEnd(e){
   for(const t of e.changedTouches){
     if(t.identifier===aimId){aimId=null;_aimLastT=0;}
-    if(t.identifier===joyId){joyId=null;knob.style.transform='';}
+    if(t.identifier===joyId){joyId=null;knob.style.transform='';joyVec.x=0;joyVec.y=0;} // WORLD 11.0
   }
 }
 document.addEventListener('touchend',touchEnd);document.addEventListener('touchcancel',touchEnd);
@@ -2961,20 +3344,20 @@ $('zoomSlider').addEventListener('input',e=>{G.zoom=+e.target.value;updateHUD();
 /* desktop */
 if(!isTouch){
   renderer.domElement.addEventListener('click',()=>{
-    if(G.state==='play'&&document.pointerLockElement!==renderer.domElement)
+    if((G.state==='play'||G.state==='roam')&&document.pointerLockElement!==renderer.domElement)
       renderer.domElement.requestPointerLock();});
   document.addEventListener('mousemove',e=>{
-    if(document.pointerLockElement===renderer.domElement&&G.state==='play')
+    if(document.pointerLockElement===renderer.domElement&&(G.state==='play'||G.state==='roam'))
       aimByPixels(e.movementX,e.movementY);});
   document.addEventListener('mousedown',e=>{
-    if(document.pointerLockElement!==renderer.domElement||G.state!=='play')return;
+    if(document.pointerLockElement!==renderer.domElement||(G.state!=='play'&&G.state!=='roam'))return;
     if(e.button===0)fireBullet();else if(e.button===2)setScoped(!G.scoped);});
   document.addEventListener('contextmenu',e=>e.preventDefault());
-  document.addEventListener('wheel',e=>{if(G.scoped&&G.state==='play'){
+  document.addEventListener('wheel',e=>{if(G.scoped&&(G.state==='play'||G.state==='roam')){
     G.zoom=clamp(G.zoom+(e.deltaY>0?-0.5:0.5),RIFLES[G.rifle].zmin,G.maxZoom);
     $('zoomSlider').value=G.zoom;updateHUD();}},{passive:true});
   document.addEventListener('keydown',e=>{
-    if(G.state!=='play')return;
+    if(G.state!=='play'&&G.state!=='roam')return;
     if(e.key==='f'||e.key==='F')setScoped(!G.scoped);
     if(e.key==='r'||e.key==='R')startReload();});
 }
@@ -2985,9 +3368,9 @@ function sizeReticle(){ret.width=innerWidth;ret.height=innerHeight;RW=innerWidth
 sizeReticle();
 function setScoped(on){
   if(KC.active)endKillcam(); // scope toggle mid-killcam : restore the camera, then toggle
-  if(on&&G.state!=='play')return;
+  if(on&&(G.state!=='play'&&G.state!=='roam'))return; // WORLD 11.0 : scoping works in free roam
   G.scoped=on;
-  if(on&&joyId!==null){joyId=null;knob.style.transform='';} // scope-in cancels any live joystick drag
+  if(on&&joyId!==null){joyId=null;knob.style.transform='';joyVec.x=0;joyVec.y=0;} // scope-in cancels any live joystick drag (WORLD 11.0 : and its vector)
   if(on){G.scopeT=G.swayT;G.reposAcc=0;} // QUICKSCOPE window starts now ; reposition tracker resets on scoping in
   joyEl.classList.toggle('locked',on); // dim the stick while scoped : visual "locked out" cue
   setScopeRim(0); // stale warning rim must never survive a scope toggle
@@ -3131,7 +3514,7 @@ function openSettings(){$('card2').style.display='flex';$('setPanel').style.disp
 function closeSettings(){$('card2').style.display='none';$('setPanel').style.display='none';G.settingsOpen=false;
   $('pauseChip').style.display='none';}
 bindBtn('setBtn',()=>{ // GEAR : in play it opens the GHOSTLINE pause menu; everywhere else the settings panel, as before
-  if(G.state==='play'){if(G.pauseOpen)closePause();else openPause();}
+  if(G.state==='play'||G.state==='roam'){if(G.pauseOpen)closePause();else openPause();} // WORLD 11.0 : gear pauses free roam too
   else openSettings();
   sClick();});
 bindBtn('setClose',()=>{closeSettings();});
@@ -3490,6 +3873,11 @@ function kcUpdate(dt){
 
 /* ---------------- combat outcomes ---------------- */
 function killEnemy(e,dir,cam,hshot,blast,hitP,camPath){
+  if(G.roam){ // WORLD 11.0 FREE ROAM : pure sandbox — blood + ragdoll + hitmark, ZERO writes to mission / economy / skin counters
+    e.die(dir,hshot,blast);
+    const hm=$('hitmark');hm.classList.remove('pop');hm.classList.remove('hs');hm.classList.remove('kill');void hm.offsetWidth;
+    hm.classList.add(hshot?'hs':'kill');hm.classList.add('pop');
+    sHit(1);return;}
   e.die(dir,hshot,blast);G.kills++;
   const now=G.swayT;
   G.chain=(now-G.lastKillT<8)?G.chain+1:1;G.lastKillT=now;
@@ -3524,7 +3912,7 @@ function killEnemy(e,dir,cam,hshot,blast,hitP,camPath){
 }
 function startReload(){
   const r=RIFLES[G.rifle];
-  if(G.reloading||G.ammo===r.mag||G.state!=='play')return;
+  if(G.reloading||G.ammo===r.mag||(G.state!=='play'&&G.state!=='roam'))return; // WORLD 11.0
   const dur=G.ammo>0?r.reload*0.7:r.reload; // TACTICAL RELOAD : rounds still in the mag — mag swap only, ~30% faster than a dry full cycle
   G.reloading=true;G.reloadT=dur;G.reloadMax=dur;G.reloadFrom=G.ammo;sReload();toast(G.ammo>0?'TAC RELOAD…':'RELOADING…');updateHUD(); // PROGRESSIVE : rounds tick in one by one from reloadFrom (frame loop)
 }
@@ -3565,6 +3953,7 @@ function saveMissionBest(n,v){try{const mb=JSON.parse(lsGet('longshot_mbest','{}
   if(v>(mb[k]||0)){mb[k]=v;lsSet('longshot_mbest',JSON.stringify(mb));}}catch(e){}}
 function startMission(n,instant){
   endKillcam();
+  if(G.roam){G.roam=false;document.body.classList.remove('roam');} // WORLD 11.0 : every mission (re)start leaves free roam behind
   G.mission=n;const cfg=missionCfg(n);
   const rifle=RIFLES[G.rifle];
   G.night=(n%3===0);applyEnvironment(); // every 3rd mission is a NIGHT OP
@@ -3582,6 +3971,7 @@ function startMission(n,instant){
   setScoped(false);
   spawnEnemies(cfg);
   resetSabotage(cfg); // activate this mission's fuel tanks + ammo caches
+  resetBarrels(); // WORLD 11.0 : fresh explosive barrels every mission (no-op until the pack lands)
   G.state='menu';
   selRifle=G.rifle;
   G.menuMission=n;lsSet('longshot_menuMission',n); // GHOSTLINE : the menu picker + briefing track this mission
@@ -3706,7 +4096,7 @@ function frame(now){
   else G.slowT=0;
   if(KC.active)ts=KC.ts; // KILLCAM 2.0 : while the cam runs it choreographs the world clock directly (cruise / bullet-time / freeze / release)
   let gdt=dt*ts;
-  if((G.settingsOpen||G.pauseOpen)&&G.state==='play')gdt=0; // SETTINGS / PAUSE-MENU PAUSE : world clock + all play-state sim freeze while either is open
+  if((G.settingsOpen||G.pauseOpen)&&(G.state==='play'||G.state==='roam'))gdt=0; // SETTINGS / PAUSE-MENU PAUSE : world clock + all play-state sim freeze while either is open (WORLD 11.0 : roam freezes too)
   if(G.introT>=0)G.introT+=dt; // COLD OPEN : the intro timer runs on the frame loop's own real dt — no timers to strand it
   G.swayT+=gdt;
   const t=G.swayT;
@@ -3756,13 +4146,15 @@ function frame(now){
     G.windT+=gdt; // gusts : the single live wind source — HUD, ballistics, dust/grass, flag and ambient audio all read these
     G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7))); // ±40% strength, ~20s swell
     G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77); // heading wanders ±15° on the same swell
+    stepPlayerMove(gdt,3.5); // WORLD 11.0 : in-mission walking (joystick / WASD) — position writes feed the existing converge + counter-sniper systems
     for(const e of enemies)e.update(gdt);
     {let ma=0;for(const e of enemies)if(e.sniper&&e.alive&&e.aimPhase==='aim')ma=Math.max(ma,1-e.aimT/1.5);
      setScopeRim(G.scoped?ma:0);} // SNIPER WARNING RIM : hottest aim progress drives the scope rim
     truckUpdate(gdt);
     bulletUpdate(gdt);tracerUpdate(gdt);
-    for(let i=chainQ.length-1;i>=0;i--){chainQ[i].t-=gdt; // chained fuel detonations
-      if(chainQ[i].t<=0){const tq=chainQ[i].tg;chainQ.splice(i,1);if(tq.alive)explodeSab(tq);}}
+    for(let i=chainQ.length-1;i>=0;i--){chainQ[i].t-=gdt; // chained detonations (fuel tanks + WORLD 11.0 barrels share the queue)
+      if(chainQ[i].t<=0){const tq=chainQ[i].tg;chainQ.splice(i,1);
+        if(tq.isBarrel){if(tq.alive)explodeBarrel(tq);}else if(tq.alive)explodeSab(tq);}}
     if(((frame._hf=(frame._hf||0)+1)%10)===0)updateHUD();
   }
   else if(G.state==='menu'){ /* LIVING VALLEY : patrols walk their routes and the truck cruises
@@ -3772,6 +4164,25 @@ function frame(now){
      HVT relocation needs alarm >50, and sniperUpdate hard-returns before its aim cycle. */
     for(const e of enemies)e.update(gdt);
     truckUpdate(gdt);
+  }
+  else if(G.state==='roam'){ /* WORLD 11.0 FREE ROAM : the valley with no stakes — patrols walk
+     their routes as living scenery (converge needs alarm-100 state that roam never raises,
+     patrol fire lives in the converged branch, counter-snipers hold their posts), the truck
+     stays parked, barrels + sabotage still detonate, and every counter stays untouched. */
+    if(G.fireCd>0)G.fireCd-=gdt;
+    if(G.reloading){G.reloadT-=gdt; // same progressive reload as missions
+      const rM=RIFLES[G.rifle].mag,want=Math.min(rM,(G.reloadFrom||0)+Math.floor((G.reloadMax-G.reloadT)/(G.reloadMax/rM)+1e-4));
+      if(want>G.ammo){G.ammo=want;updateHUD();}
+      if(G.reloadT<=0){G.reloading=false;G.ammo=rM;updateHUD();}}
+    G.windT+=gdt; // the valley still breathes
+    G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7)));
+    G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77);
+    stepPlayerMove(gdt,5.0);
+    for(const e of enemies)e.update(gdt);
+    bulletUpdate(gdt);tracerUpdate(gdt);
+    for(let i=chainQ.length-1;i>=0;i--){chainQ[i].t-=gdt; // barrel chains tick in roam too
+      if(chainQ[i].t<=0){const tq=chainQ[i].tg;chainQ.splice(i,1);
+        if(tq.isBarrel){if(tq.alive)explodeBarrel(tq);}else if(tq.alive)explodeSab(tq);}}
   }
   { /* CONTEXTUAL HUD FADE : 4 quiet seconds in play and the panel drops to 45%;
        any HUD value change (tracked in updateHUD) pops it back to full */
@@ -3810,7 +4221,7 @@ function frame(now){
     _m4.lookAt(_md,_campLook,_YUP);_qDrift.setFromRotationMatrix(_m4);
     camera.quaternion.slerpQuaternions(_qPlay,_qDrift,G.menuBlend);
     rifle.visible=false;
-  }else if(G.state==='play')rifle.visible=!G.scoped;
+  }else if(G.state==='play'||G.state==='roam')rifle.visible=!G.scoped; // WORLD 11.0
   const fovT=(G.scoped?68/Math.max(2,G.zoom):68)*(G.slowmo>0?0.78:1); // smooth scope zoom : ~120ms ease, no snap
   G.fovCur+=(fovT-G.fovCur)*Math.min(1,dt*14);
   camera.fov=G.fovCur;camera.updateProjectionMatrix();
@@ -4123,7 +4534,7 @@ function closeBriefing(){
 }
 
 /* ---- PAUSE menu (in-game gear) + RESULTS screen ---- */
-function openPause(){if(G.state!=='play'||G.pauseOpen)return;G.pauseOpen=true;$('pauseRoot').style.display='flex';}
+function openPause(){if((G.state!=='play'&&G.state!=='roam')||G.pauseOpen)return;G.pauseOpen=true;$('pRestart').style.display=G.roam?'none':'';$('pauseRoot').style.display='flex';} // WORLD 11.0 : no RESTART in free roam
 function closePause(){G.pauseOpen=false;const p=$('pauseRoot');if(p)p.style.display='none';}
 function showResults(html){$('resultsPanel').innerHTML=html;$('resultsRoot').style.display='flex';}
 function hideResults(){$('resultsRoot').style.display='none';}
@@ -5030,6 +5441,7 @@ function skinFxTick(dt){ // hooked into the main frame loop
 
 /* ---- menu wiring ---- */
 bindEl($('deployBtn'),deployMission);
+bindEl($('roamBtn'),enterRoam); // WORLD 11.0 FREE ROAM
 bindEl($('mPickPrev'),()=>{const n=G.menuMission;if(n>1){startMission(n-1);tick();}else denyBtn($('mPickPrev'));}); // LOBBY FIX : dimmed end arrow gives deny feedback instead of hiding
 bindEl($('mPickNext'),()=>{const n=G.menuMission;if(n<missionUnlockMax()){startMission(n+1);tick();}else denyBtn($('mPickNext'));}); // LOBBY FIX : same, forward end
 bindEl($('pvSkinName'),()=>{openTab('skins');}); // LOBBY FIX : tapping the equipped-skin label jumps straight to the SKINS tab (openTab supplies the click + haptic)
@@ -5051,7 +5463,7 @@ bindEl($('pResume'),()=>{closePause();tick();});
 bindEl($('pRestart'),()=>{closePause();startMission(G.mission,true);});
 bindEl($('pBrief'),()=>{openBriefing(true);tick();});
 bindEl($('pSettings'),()=>{G.setFromPause=true;openSettings();sClick();}); // closing the panel lands back on this pause menu (it never closed)
-bindEl($('pQuit'),()=>{closePause();startMission(G.mission);});
+bindEl($('pQuit'),()=>{closePause();if(G.roam)exitRoam();else startMission(G.mission);}); // WORLD 11.0
 bindEl($('cfCancel'),()=>{closeConfirm();tick();});
 bindEl($('cfYes'),()=>{const f=confirmFn;closeConfirm();if(f)f();});
 /* settings tab : overlapping controls write through the gear panel's own inputs
@@ -5083,6 +5495,7 @@ if(lsGet('longshot_grant105','')!=='1'){ // GHOSTLINE LAUNCH GRANT : +500 CR exa
   setTimeout(()=>{toast('GHOSTLINE LAUNCH GRANT +500 CR');$('toast').style.zIndex='95';},2800);
 }
 
+loadWorldPack(); // WORLD 11.0 : the world model pack streams in during menu idle (procedural fallbacks cover until it lands)
 buildTruck();
 buildSabotage();
 applyGraphics(); // boot-time graphics application : manual preset, or Auto matching the stock behavior
