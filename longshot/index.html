@@ -527,8 +527,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='11.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='11.1.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'11.1.1',lines:[ // SYNC 11.1.1 : sign-in reliability — popup-first so the Google round trip completes on iOS Safari
+  '<b>SIGN-IN FIX</b> — Google sign-in now opens as a popup on every device, so linking your account completes instead of bouncing back unfinished']},
  {v:'11.1',lines:[ // SYNC 11.1 : Google sign-in + cloud save
   '<b>GOOGLE SIGN-IN</b> — link your account at the top of Settings and your progress follows you between devices',
   '<b>CLOUD SAVE</b> — credits, XP, rifles, skins, kill effects and mission bests sync to your Google account',
@@ -5528,7 +5530,7 @@ requestAnimationFrame(frame);
 const FB_CFG={apiKey:"AIzaSyB2JyZ9G94SchgWnWrbXPfYF6J_1G7uiZc",authDomain:"long-shot-sync.firebaseapp.com",projectId:"long-shot-sync",storageBucket:"long-shot-sync.firebasestorage.app",messagingSenderId:"528453347717",appId:"1:528453347717:web:2f58e61b4f7793d3eb7cec"}; // SYNC 11.1 : public web identifiers (not secrets) — project long-shot-sync under MW's Google account
 const FB_CDN='https://www.gstatic.com/firebasejs/10.12.2/';
 const FBAPI={ // SYNC 11.1 : adapter — every Firebase call the sync layer makes goes through here; sims swap these methods for an in-memory fake
-  ok:false,auth:null,db:null,
+  ok:false,auth:null,db:null,_redirErr:'', // SYNC 11.1.1 : error code from a failed redirect return, stashed for handleAuth's status text
   load:function(){return new Promise(function(res){
     try{
       if(window.firebase&&firebase.app&&firebase.auth&&firebase.firestore){res(true);return;}
@@ -5549,17 +5551,21 @@ const FBAPI={ // SYNC 11.1 : adapter — every Firebase call the sync layer make
       if(!firebase.apps.length)firebase.initializeApp(FB_CFG);
       FBAPI.auth=firebase.auth();FBAPI.db=firebase.firestore();
       try{const pp=FBAPI.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);if(pp&&pp.catch)pp.catch(function(){});}catch(e){}
-      try{const rp=FBAPI.auth.getRedirectResult();if(rp&&rp.catch)rp.catch(function(){});}catch(e){} // redirect sign-in lands back here; the result itself is consumed via onAuthStateChanged
+      try{const rp=FBAPI.auth.getRedirectResult();if(rp&&rp.catch)rp.catch(function(e){FBAPI._redirErr=(e&&e.code)||'';});}catch(e){} // SYNC 11.1.1 : keep the failure code — if the return lands user-less, the Settings row names the code instead of shrugging (was a no-op catch)
       FBAPI.ok=true;return true;
     }catch(e){FBAPI.ok=false;return false;}
   },
   wireAuth:function(){try{FBAPI.auth.onAuthStateChanged(function(u){SYNC.handleAuth(u);},function(){SYNC.handleAuth(null);});}catch(e){}},
-  signIn:function(){
-    try{
-      const prov=new firebase.auth.GoogleAuthProvider();
-      if(isTouch)return FBAPI.auth.signInWithRedirect(prov); // mobile webviews kill popups — redirect is the reliable path
-      return FBAPI.auth.signInWithPopup(prov);
-    }catch(e){return Promise.reject(e);}
+  signIn:function(){ // SYNC 11.1.1 : popup FIRST on every platform — iOS Safari ITP partitions the cross-domain auth-handler storage the redirect handoff depends on, so the redirect returns user-less in the field despite a completed consent (v11.1 field report). Redirect survives only as the one-time fallback for environments that refuse popups outright.
+    let prov;try{prov=new firebase.auth.GoogleAuthProvider();}catch(e){return Promise.reject(e);}
+    let pp;try{pp=FBAPI.auth.signInWithPopup(prov);}catch(e){pp=Promise.reject(e);}
+    return Promise.resolve(pp).then(function(r){return r;},function(e){
+      const c=e&&e.code;
+      if(c==='auth/popup-blocked'||c==='auth/operation-not-supported-in-this-environment'||c==='auth/web-storage-unsupported'){
+        try{return FBAPI.auth.signInWithRedirect(prov);}catch(e2){return Promise.reject(e2);} // fallback ONCE : the caller's pending flag already covers the return trip
+      }
+      throw e; // popup-closed-by-user / cancelled-popup-request / anything else : classified by SYNC.signIn (a closed popup is a shrug, not a failure)
+    });
   },
   signOut:function(){try{return FBAPI.auth.signOut();}catch(e){return Promise.reject(e);}},
   get:function(uid){
@@ -5669,7 +5675,7 @@ const SYNC={
       const wasPending=SYNC.store.get('lssync_pending')==='1';
       if(wasPending)SYNC.store.del('lssync_pending');
       if(!u){SYNC.user=null;if(SYNC._sdkOk)SYNC.state='out';
-        if(wasPending)SYNC._status='Sign-in didn’t complete — try again';
+        if(wasPending){const rc=FBAPI._redirErr||'';FBAPI._redirErr='';SYNC._status='Sign-in didn’t complete'+(rc?' ('+rc+')':'')+' — try again';} // SYNC 11.1.1 : surface the redirect-return error code when there is one (ITP's silent user-less return has none — it stays the plain string)
         SYNC.render();return;}
       SYNC.user={uid:u.uid,displayName:u.displayName||'',email:u.email||''};
       SYNC.state='in';SYNC.store.set('lssync_was',u.uid);SYNC._status='';SYNC.render();
@@ -5703,7 +5709,10 @@ const SYNC={
       const go=function(){
         SYNC._status='Opening Google sign-in…';SYNC.render();
         let p;try{p=FBAPI.signIn();}catch(e){p=Promise.reject(e);}
-        Promise.resolve(p).then(function(){},function(){SYNC.store.del('lssync_pending');SYNC._status='Sign-in failed — try again';SYNC.render();});
+        Promise.resolve(p).then(function(){},function(e){SYNC.store.del('lssync_pending');const c=e&&e.code;
+          if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'){SYNC._status='';} // SYNC 11.1.1 : he just closed the popup — quiet reset to the signed-out row, NO error text
+          else SYNC._status='Sign-in failed'+(c?' ('+c+')':'')+' — try again'; // SYNC 11.1.1 : terminal failures name their code so the row itself is the field diagnostic
+          SYNC.render();});
       };
       if(SYNC._sdkOk)go();
       else{let n=0;const iv=setInterval(function(){n++;
