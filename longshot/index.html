@@ -543,8 +543,11 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='11.2'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='11.3'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'11.3',lines:[ // SYNC 11.3 : URL-fragment token flow — the Google round trip returns on our own origin; no popup, no cross-site storage handoff for iOS to block
+  '<b>SIGN-IN REBUILT</b> — the Google button now takes you straight to Google and back, with the sign-in riding inside the return link itself — nothing for iOS to block',
+  '<b>ONE-TIME SETUP</b> — this route needs one link added in the Google Cloud console before it works; after that, sign-in just works']},
  {v:'11.2',lines:[ // SYNC 11.2 : sign-in diagnostics + identity chip
   '<b>SIGN-IN DIAGNOSTICS</b> — if Google sign-in fails, the game now shows exactly what happened on screen, and Settings gains a second popup sign-in option',
   '<b>SIGNED IN, VISIBLE</b> — your Google name and photo ride in the lobby top bar while you are signed in']},
@@ -5557,7 +5560,24 @@ requestAnimationFrame(frame);
    synced), a dismissible red box on the lobby shows the latest failure in
    plain words with its real error code, startup env checks (file:// /
    in-app browser / config / origin) run + log at boot, and a signed-in
-   identity chip (photo + first name) rides the lobby top bar. */
+   identity chip (photo + first name) rides the lobby top bar.
+   SYNC 11.3 (field verdict on 11.2 — redirect came back null AND the
+   popup died auth/popup-blocked, on the real origin, in the web app) :
+   every Firebase-managed flow transits the cross-site firebaseapp.com
+   auth handler, and iOS strangles that hop — so the PRIMARY button is
+   now a hand-rolled Google OAuth round trip (SYNC.signIn -> webflow):
+   a top-level navigation to accounts.google.com whose id_token returns
+   inside THIS origin's URL fragment, consumed at boot by
+   SYNC.webflowReturn and handed to Firebase via signInWithCredential.
+   No popup, no cross-origin storage, nothing for ITP to partition.
+   state + nonce are generated per attempt and kept in lssync_oauth
+   (local, never synced); state match is mandatory, and the nonce
+   rides the credential via OAuthProvider (GoogleAuthProvider.credential
+   provably carries no nonce field in the 12.7.0 bundle — probe_nonce).
+   The id_token is scrubbed from the URL before anything logs, and never
+   enters the log, the red box, storage, or a cloud payload. The popup
+   button stays as the manual alternative; the Firebase redirect remains
+   only as boot-time drain (getRedirectResult) for stale 11.1/11.2 state. */
 const FB_CFG={apiKey:"AIzaSyB2JyZ9G94SchgWnWrbXPfYF6J_1G7uiZc",authDomain:"long-shot-sync.firebaseapp.com",projectId:"long-shot-sync",storageBucket:"long-shot-sync.firebasestorage.app",messagingSenderId:"528453347717",appId:"1:528453347717:web:2f58e61b4f7793d3eb7cec"}; // SYNC 11.1 : public web identifiers (not secrets) — project long-shot-sync under MW's Google account
 const FB_CDN='https://www.gstatic.com/firebasejs/12.7.0/';
 const FBAPI={ // SYNC 11.1 : adapter — every Firebase call the sync layer makes goes through here; sims swap these methods for an in-memory fake
@@ -5591,9 +5611,17 @@ const FBAPI={ // SYNC 11.1 : adapter — every Firebase call the sync layer make
     let prov;try{prov=new firebase.auth.GoogleAuthProvider();}catch(e){return Promise.reject(e);}
     try{return FBAPI.auth.signInWithPopup(prov);}catch(e){return Promise.reject(e);}
   },
-  signInRedirect:function(){ // SYNC 11.2 : the redirect as a standalone adapter call — SYNC.signIn (the primary path) lands here. In the field this navigates the page away; the caller's lssync_pending flag covers the return trip.
+  signInRedirect:function(){ // SYNC 11.3 : NO LONGER A BUTTON PATH (the field killed it — SYNC 11.3 header). Kept only as the drain companion of boot-time getRedirectResult for stale 11.1/11.2 pending state; nothing in 11.3 calls it.
     let prov;try{prov=new firebase.auth.GoogleAuthProvider();}catch(e){return Promise.reject(e);}
     try{return FBAPI.auth.signInWithRedirect(prov);}catch(e){return Promise.reject(e);}
+  },
+  signInWithCredential:function(idToken,nonce){ // SYNC 11.3 : hand a Google id_token (arrived in OUR origin's URL fragment via the webflow) to Firebase. The nonce MUST ride: the token Google minted carries the nonce claim we sent, and the accepted carrier in the 12.7.0 compat bundle is the generic OAuthProvider credential ({idToken, rawNonce} -> params.nonce, into the signInWithIdp postBody) — GoogleAuthProvider.credential(idToken, accessToken) builds params with NO nonce field at all (bundle source + runtime toJSON proof, probe_nonce.js). OAuthProvider construction failing falls back to the plain form (better a nonce-less attempt in the log than no attempt).
+    try{
+      let cred=null;
+      if(nonce){try{cred=new firebase.auth.OAuthProvider('google.com').credential({idToken:idToken,rawNonce:nonce});}catch(e){cred=null;}}
+      if(!cred)cred=firebase.auth.GoogleAuthProvider.credential(idToken);
+      return FBAPI.auth.signInWithCredential(cred);
+    }catch(e){return Promise.reject(e);}
   },
   signOut:function(){try{return FBAPI.auth.signOut();}catch(e){return Promise.reject(e);}},
   get:function(uid){
@@ -5800,24 +5828,61 @@ const SYNC={
       try{FBAPI.wireAuth();}catch(e){}
     },function(){SYNC._sdkOk=false;try{SYNC.log('sdk','load FAILED — sign-in unavailable');}catch(e){}if(SYNC.state!=='in')SYNC.state='unavail';SYNC.render();}); // SYNC 11.2 : sdk failure logged
   },
-  signIn:function(){ // SYNC 11.2 : REDIRECT is the primary path (MW's written spec) — started only from the SIGN IN button's direct tap; the SDK is idle-preloaded so the call fires immediately; the return is handled on reload by getRedirectResult + handleAuth, now fully logged. (Replaces the 11.1.1/11.1.2 popup-primary + watchdog flow.)
+  _rand:function(n){ // SYNC 11.3 : n random bytes as hex (state + nonce material) — crypto.getRandomValues, Math.random only as a last-resort fallback
+    let out='';
+    try{const a=new Uint8Array(n);crypto.getRandomValues(a);for(let k=0;k<n;k++)out+=('0'+a[k].toString(16)).slice(-2);return out;}catch(e){}
+    while(out.length<2*n)out+=('0000'+Math.floor(Math.random()*65536).toString(16)).slice(-4);
+    return out.slice(0,2*n);
+  },
+  navTo:function(u){try{location.href=u;}catch(e){}}, // SYNC 11.3 : the one navigation seam (probes stub this to capture the Google URL instead of leaving the page)
+  signIn:function(){ // SYNC 11.3 : PRIMARY = WEBFLOW — a top-level navigation to Google whose id_token returns in THIS origin's URL fragment (see the SYNC 11.3 header). Started only from the SIGN IN button's direct tap; no SDK involvement at all on the way out, so there is no gesture or preload dependency. (Replaces the 11.2 redirect-primary path.)
     try{
       SYNC._attempt=(+(SYNC.store.get('lssync_attempt')||0))+1;SYNC.store.set('lssync_attempt',String(SYNC._attempt));
-      SYNC.log('signin-start','redirect (attempt '+SYNC._attempt+')');
-      SYNC.store.set('lssync_pending','1'); // survives the redirect round trip
-      SYNC.kick();
-      const go=function(){
-        SYNC._status='Opening Google sign-in…';SYNC.render();
-        let p;try{p=FBAPI.signInRedirect();}catch(e){p=Promise.reject(e);}
-        Promise.resolve(p).then(function(){try{SYNC.log('redirect','navigating to Google');}catch(e){}},function(e){
-          SYNC.store.del('lssync_pending');const c=e&&e.code;
-          SYNC._fail('Sign-in failed'+(c?' ('+c+')':''),(e&&e.message)||'');SYNC.render();});
-      };
-      if(SYNC._sdkOk)go();
-      else{let n=0;const iv=setInterval(function(){n++;
-        if(SYNC._sdkOk){clearInterval(iv);go();}
-        else if(SYNC.state==='unavail'||n>48){clearInterval(iv);SYNC.store.del('lssync_pending');SYNC._fail('Sign-in unavailable (offline)','the sign-in SDK did not load');SYNC.render();}},250);}
+      const st=SYNC._rand(16),nn=SYNC._rand(16);
+      SYNC.store.set('lssync_oauth',JSON.stringify({state:st,nonce:nn,ts:Date.now()})); // first-party local state (outside the synced set) — validated on the return visit
+      SYNC.store.del('lssync_pending'); // a stale Firebase-redirect flag from an older build must not corrupt this attempt's return
+      SYNC.log('signin-start','webflow (attempt '+SYNC._attempt+')');
+      SYNC._status='Opening Google sign-in…';SYNC.render();
+      const url='https://accounts.google.com/o/oauth2/v2/auth'
+        +'?client_id='+encodeURIComponent('528453347717-drnfqlv3nus3omnd0siuhsujs510e2lr.apps.googleusercontent.com') // the Firebase web OAuth client (public identifier — it prints in every sign-in URL)
+        +'&redirect_uri='+encodeURIComponent('https://t5v5shvy5w-debug.github.io/longshot/')
+        +'&response_type=id_token'
+        +'&scope='+encodeURIComponent('openid email profile')
+        +'&state='+encodeURIComponent(st)
+        +'&nonce='+encodeURIComponent(nn)
+        +'&prompt=select_account';
+      SYNC.navTo(url); // top-level navigation — the browser leaves for Google; the return lands back here with #id_token=… in the fragment
     }catch(e){}
+  },
+  webflowReturn:function(){ // SYNC 11.3 : consume a webflow return at boot (called once from init). Returns true when a return was present (handled or deliberately ignored).
+    try{
+      // stale sweep first : an attempt state older than 30 min can never complete — drop it (also keeps a forgotten tap from hijacking a later return)
+      let o=null;try{o=JSON.parse(SYNC.store.get('lssync_oauth')||'null');}catch(e){}
+      if(o&&o.ts&&(Date.now()-o.ts)>30*60*1000){SYNC.store.del('lssync_oauth');o=null;SYNC.log('webflow-return','stale sign-in attempt cleared (>30 min)');}
+      const raw=String(location.hash||'');
+      if(raw.indexOf('id_token=')<0&&raw.indexOf('error=')<0)return false;
+      // SCRUB BEFORE ANYTHING ELSE : the fragment can carry the id_token — it must never reach the log, the box, storage, or a payload
+      try{history.replaceState(null,'',location.pathname+location.search);}catch(e){try{location.hash='';}catch(e2){}}
+      const P={};raw.replace(/^#/,'').split('&').forEach(function(kv){const ix=kv.indexOf('=');if(ix>0){let k='',v='';try{k=decodeURIComponent(kv.slice(0,ix));v=decodeURIComponent(kv.slice(ix+1));}catch(e){}if(k)P[k]=v;}});
+      const live=!!(o&&o.state);
+      SYNC.store.del('lssync_oauth'); // single-use : consumed on every terminal path from here
+      if(!live){SYNC.log('webflow-return','ignored (no live sign-in attempt on this device)');return true;}
+      SYNC.store.del('lssync_pending'); // this attempt supersedes any stale redirect bookkeeping
+      if(P.error){SYNC.log('webflow-return','google error: '+P.error);SYNC._fail('Google sign-in didn’t finish ('+P.error+')',P.error_description||'');SYNC.render();return true;}
+      const tok=P.id_token||'';
+      if(!tok||!P.state||P.state!==o.state){SYNC.log('webflow-return','state mismatch — token discarded');SYNC._fail('Sign-in didn’t complete','the return link didn’t match the sign-in started on this device (state check failed)');SYNC.render();return true;}
+      SYNC.log('webflow-return','token received — handing to Firebase'); // the token itself is NEVER logged (hygiene rule, SYNC 11.3)
+      const nn=o.nonce||'';
+      const finish=function(){
+        if(!SYNC._sdkOk){SYNC._fail('Sign-in unavailable (offline)','Google sent you back signed in, but the sign-in tools didn’t load to finish it — reconnect and tap SIGN IN again');SYNC.render();return;}
+        let p;try{p=FBAPI.signInWithCredential(tok,nn);}catch(e){p=Promise.reject(e);}
+        Promise.resolve(p).then(function(){SYNC.log('webflow-return','credential accepted by Firebase');},function(e){const c=e&&e.code;SYNC._fail('Sign-in failed'+(c?' ('+c+')':''),(e&&e.message)||'');SYNC.render();});
+      };
+      SYNC.kick(); // the return visit needs the SDK NOW (ahead of the idle preload); kick is idempotent
+      if(SYNC._sdkOk)finish();
+      else{let n=0;const iv=setInterval(function(){n++;if(SYNC._sdkOk||SYNC.state==='unavail'||n>48){clearInterval(iv);finish();}},250);}
+      return true;
+    }catch(e){return false;}
   },
   signInPopup:function(){ // SYNC 11.2 : the EXPLICIT second path (Settings "Popup sign-in instead") — fired synchronously from its own tap so the popup keeps the user gesture. v11.1.1 classification kept (closed = silent shrug; blocked/unsupported/other surface their exact code), NO auto-redirect fallback and NO navigation watchdog: a promise still unsettled at _popWdMs is LOGGED (popup-no-settle) so a webview hang is visible in the details, and nothing else is done.
     try{
@@ -5915,6 +5980,7 @@ const SYNC={
     try{SYNC.envCheck();}catch(e){} // SYNC 11.2 : env checks first — logged before anything else can speak
     try{if(SYNC.store.get('lssync_pending')==='1')SYNC.log('return','redirect return detected (pending flag was set)');}catch(e){} // SYNC 11.2
     try{SYNC._attempt=+(SYNC.store.get('lssync_attempt')||0)||0;}catch(e){} // SYNC 11.2
+    try{SYNC.webflowReturn();}catch(e){} // SYNC 11.3 : consume a Google webflow return (fragment token) before anything else can read or leak the hash
     try{const orig=lsSet;lsSet=function(k,v){orig(k,v);SYNC.noteWrite(k);};}catch(e){} // one funnel : ANY progress write schedules a push (results, purchases, equips, bests, grants)
     try{if($('syncBtn'))bindBtn('syncBtn',function(){SYNC.signIn();});}catch(e){}
     try{if($('syncOut'))bindBtn('syncOut',function(){SYNC.signOut();});}catch(e){}
