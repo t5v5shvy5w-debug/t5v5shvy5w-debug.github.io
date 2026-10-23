@@ -77,16 +77,42 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #btnWep{right:186px;bottom:calc(92px + env(safe-area-inset-bottom));width:60px;height:60px;font-size:11px}
 #btnRide{left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom));width:164px;height:54px;border-radius:27px;font-size:15px;border-color:rgba(190,230,190,.55)}
 #btnRide:active{transform:translateX(-50%) scale(.93)}
-#btnGas{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:92px;height:92px;font-size:15px;border-color:rgba(190,230,190,.55)}
-#btnBrake{right:118px;bottom:calc(30px + env(safe-area-inset-bottom));width:72px;height:72px;font-size:12px}
-#btnSteerL{left:16px;bottom:calc(30px + env(safe-area-inset-bottom));width:72px;height:72px;font-size:12px}
-#btnSteerR{left:100px;bottom:calc(30px + env(safe-area-inset-bottom));width:72px;height:72px;font-size:12px}
+#btnMap{left:12px;top:calc(188px + env(safe-area-inset-top));width:58px;height:46px;font-size:12px}
+#mapRoot{position:fixed;inset:0;background:rgba(4,8,24,.96);z-index:90;display:none;align-items:center;justify-content:center}
+#mapPanel{background:#0a1230;border:1px solid #2a4a9a;border-radius:12px;padding:12px;box-shadow:0 18px 60px rgba(0,0,0,.6)}
+#mapHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+#mapHead span{color:#8fa3d9;font-size:11px;letter-spacing:2.5px;font-weight:700}
+#mapCv{display:block;width:min(88vw,560px);height:auto;border:1px solid #22366b;border-radius:6px;background:#0a1230}
+#mapLegend{color:#7286b8;font-size:9.5px;letter-spacing:1.4px;margin-top:8px;text-align:center}
+#btnGas{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:104px;height:104px;font-size:16px;border-color:rgba(190,230,190,.55)}
+#btnBrake{right:134px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
+#btnSteerL{left:16px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
+#btnSteerR{left:112px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
+#btnHUp{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:104px;height:104px;font-size:15px;border-color:rgba(190,230,190,.55)}
+#btnHDown{right:134px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
+#btnHYawL{left:16px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:12px}
+#btnHYawR{left:112px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:12px}
+#btnFly{left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom));width:164px;height:54px;border-radius:27px;font-size:15px;border-color:rgba(190,230,190,.55)}
+#btnFly:active{transform:translateX(-50%) scale(.93)}
+#btnPad{left:50%;transform:translateX(-50%);bottom:calc(224px + env(safe-area-inset-bottom));width:164px;height:54px;border-radius:27px;font-size:15px;border-color:rgba(255,196,107,.6)}
+#btnPad:active{transform:translateX(-50%) scale(.93)}
+#heliRoot{position:fixed;inset:0;z-index:88;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.66);padding:16px}
+#heliBanner{position:fixed;left:50%;transform:translateX(-50%);top:calc(86px + env(safe-area-inset-top));z-index:40;display:none;background:rgba(10,14,10,.78);border:2px solid rgba(255,196,107,.75);border-radius:14px;padding:10px 24px;color:#ffd9a0;font-weight:800;letter-spacing:1.2px;font-size:16px;pointer-events:none;text-align:center}
+#spdBox{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(228px + env(safe-area-inset-bottom));z-index:31;flex-direction:column;align-items:center;background:rgba(12,16,12,.55);border:2px solid rgba(190,230,190,.42);border-radius:16px;padding:7px 18px 9px;color:#e8f3e4;pointer-events:none}
+#spdNum{font-size:34px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:1px}
+#spdUnit{font-size:9px;letter-spacing:3px;opacity:.75;margin-top:1px}
+#spdBarWrap{width:150px;height:6px;border-radius:3px;background:rgba(232,243,228,.16);margin-top:6px;overflow:hidden}
+#spdBar{height:100%;width:0%;background:rgba(120,200,120,.88);transition:width .12s linear}
 #concealChip{position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:31;padding:5px 14px;border-radius:20px;background:rgba(8,20,12,.66);border:1px solid rgba(150,230,160,.5);color:#b9f2c2;font-size:11px;letter-spacing:2.5px;font-weight:700;pointer-events:none}
 body.lefthand #btnWep{right:auto;left:186px}
 body.lefthand #btnGas{right:auto;left:16px}
-body.lefthand #btnBrake{right:auto;left:118px}
+body.lefthand #btnBrake{right:auto;left:134px}
 body.lefthand #btnSteerL{left:auto;right:16px}
-body.lefthand #btnSteerR{left:auto;right:100px}
+body.lefthand #btnSteerR{left:auto;right:112px}
+body.lefthand #btnHUp{right:auto;left:16px}
+body.lefthand #btnHDown{right:auto;left:134px}
+body.lefthand #btnHYawL{left:auto;right:16px}
+body.lefthand #btnHYawR{left:auto;right:112px}
 /* ---------- joystick ---------- */
 #joy{position:fixed;left:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:112px;height:112px;border-radius:50%;background:rgba(12,16,12,.38);border:2px solid rgba(190,230,190,.3);z-index:50}
 #joy.locked{opacity:.3}
@@ -500,10 +526,18 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
 <button class="hbtn" id="btnReload">RELD</button>
 <button class="hbtn" id="btnWep" style="display:none">KNIFE</button>
 <button class="hbtn" id="btnRide" style="display:none">RIDE</button>
+<button class="hbtn" id="btnMap" style="display:none">MAP</button>
 <button class="hbtn" id="btnGas" style="display:none">GAS</button>
 <button class="hbtn" id="btnBrake" style="display:none">BRAKE</button>
 <button class="hbtn" id="btnSteerL" style="display:none">LEFT</button>
 <button class="hbtn" id="btnSteerR" style="display:none">RIGHT</button>
+<button class="hbtn" id="btnFly" style="display:none">FLY</button>
+<button class="hbtn" id="btnPad" style="display:none">HELI</button>
+<button class="hbtn" id="btnHUp" style="display:none">RISE</button>
+<button class="hbtn" id="btnHDown" style="display:none">SINK</button>
+<button class="hbtn" id="btnHYawL" style="display:none">TURN L</button>
+<button class="hbtn" id="btnHYawR" style="display:none">TURN R</button>
+<div id="spdBox" style="display:none"><div id="spdNum">0</div><div id="spdUnit">KM/H</div><div id="spdBarWrap"><div id="spdBar"></div></div></div>
 <div id="concealChip" style="display:none">CONCEALED</div>
 <div id="joy"><div id="joyKnob"></div></div>
 
@@ -562,13 +596,15 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v12.0</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v13.0</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">World: "SWAT" soldier, "Pine", "Twisted Tree", "Rock Medium", "Plant Big", "Exploding Barrel" by Quaternius (CC0 1.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">World: "Sandbags" by J-Toastie (CC BY) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Vehicle: "Quad Bike" by Sam Philo (CC BY 4.0) — Icosa Gallery, asset 9vnvW2ZnhGD</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Wildlife: "Stag", "Fox", "Wolf" by Quaternius (CC0 1.0) — Animated Animals pack</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Helicopter: "Helicopter" by Google (CC BY 3.0) — Icosa Gallery, asset 6U2H_0VSAXY</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Knife &amp; suppressor: Kenney "Blaster Kit" (CC0 1.0) — kenney.nl</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Ground texture: "Grass004" by ambientCG (CC0 1.0) — ambientcg.com</p>
     <div class="row"><button class="mbtn" id="setClose">DONE</button></div>
@@ -691,12 +727,23 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
   <button class="ubtn" id="pSettings">SETTINGS</button>
   <button class="ubtn" id="pQuit">QUIT TO MENU</button>
 </div></div>
+<div id="mapRoot"><div id="mapPanel">
+<div id="mapHead"><span>WORLD MAP — GHOSTLINE SURVEY</span><button class="mbtn sm" id="mapClose">CLOSE</button></div>
+<canvas id="mapCv" width="560" height="560"></canvas>
+<div id="mapLegend">DIAMOND = OUTPOST &middot; RING = OBJECTIVE &middot; TRIANGLE = HIDEOUT &middot; H = HELIPAD</div>
+</div></div>
 <div id="resultsRoot"><div class="panel" id="resultsPanel"></div></div>
 <div id="confirmRoot"><div class="panel" style="max-width:min(92vw,380px)">
   <h1 id="cfHead">ARE YOU SURE?</h1>
   <p id="cfText" style="text-transform:uppercase"></p>
   <div class="row"><button class="mbtn" id="cfCancel">CANCEL</button><button class="mbtn" id="cfYes" style="border-color:#7a3a30;color:#e8a79a;background:#1a0f0c">CONFIRM</button></div>
 </div></div>
+<div id="heliRoot"><div class="panel" style="max-width:min(92vw,380px)">
+  <h1 id="heliHead">SPAWN HELICOPTER</h1>
+  <p id="heliText" style="text-transform:uppercase"></p>
+  <div class="row"><button class="mbtn" id="heliNo">CLOSE</button><button class="mbtn" id="heliYes">SPAWN</button></div>
+</div></div>
+<div id="heliBanner">SPAWNING HELI — STAND CLEAR</div>
 
 <script src="three.min.js"></script>
 <script src="gltf-loader.js"></script>
@@ -719,8 +766,15 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='12.0'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='13.0'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'13.0',lines:[ // V13 WORLD EXPANSION : 6 km world, island + bridge, world map, wildlife, the helicopter
+  '<b>THE WORLD EXPANSION</b> — the map is now 6 km across: you start on an island, cross a huge suspension bridge to a mainland with a deep valley, tall cliffs, waterfalls and a lake',
+  '<b>MORE TO HUNT</b> — seven different outposts, sniper hideouts on the rim, wildlife that runs when it hears you (stag, wolf, fox), and secret caches hidden out there — one behind the falls is worth 38,000 CR',
+  '<b>WORLD MAP</b> — the MAP button opens the whole world with a live marker on you',
+  '<b>THE HELICOPTER</b> — a helipad by the bridge landing (marked H on the map). Walk on, spawn her for 500,000 CR — once bought she is yours — wait out the 5-second STAND CLEAR, then fly: smooth, fast, and yes, you can land on the bridge']},
+ {v:'12.1',lines:[ // V12.1 : quad feel patch — 4x top speed + hard launch, free look everywhere, synthesized engine audio
+  '<b>QUAD FEEL PATCH</b> — the quad launches hard and tops out 4x faster, every camera turn limit is gone (look all the way around — even scoped), the quad finally has a voice (a synthesized engine that revs with the throttle), a detail pass (exhaust, headlight, racks, tread), and a proper driving speedometer']},
  {v:'12.0',lines:[ // WORLD OVERHAUL 2 : living grassland, rideable truck, knife, suppressor, hideable bushes
   '<b>WORLD OVERHAUL 2</b> — real grassland ground + dense tufts, hideable bushes (watch for CONCEALED), a rideable quad bike at spawn (it flattens the grass it crosses), a knife on the KNIFE button (silent kills), and a suppressor in LOADOUT — half the shot noise, no flash, and it wears your mythic skin']},
  {v:'11.5',lines:[ // SYNC 11.5 : blue theme + sign-in log disclosure — visual only, zero behavior change
@@ -806,8 +860,50 @@ const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const lerp=(a,b,t)=>a+(b-a)*t;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const TAU=Math.PI*2;
-const CAMP_D=340; // outpost distance downrange in meters — MW wants long shots
+const CAMP_D=1010; // V13 : outpost on the mainland shore (was 340) — real mission re-homing lands in Chunk C
 function sstep(a,b,x){x=clamp((x-a)/(b-a),0,1);return x*x*(3-2*x);}
+/* ==================== V13 — WORLD EXPANSION : geography core ====================
+   6,000 x 6,000 m. Spawn island at the origin (pad 0,24 + quad park), open sea
+   at SEA_Y, and across ~400 m of water the mainland (z < ~-900): rolling
+   heartland, a deep river valley (centerline valleyX(z)) with a lake basin,
+   a high plateau west of the valley (rim ~150-180 m above the floor), and
+   north high country. groundH stays the single source of truth for physics,
+   AI and placement; surfH() is the surface query vehicles / walkers /
+   landings use (Chunk B registers the bridge deck in it). */
+const SEA_Y=-5, LAKE_Y=11;
+function n2(x,z){return Math.sin(x*0.0016+1.7)*Math.cos(z*0.0013-0.6)*0.55+Math.sin(x*0.0043+z*0.0031)*0.3+Math.sin(x*0.011-z*0.0073)*0.15;}
+function valleyX(z){return -900+130*Math.sin(z*0.0011+0.7)+60*Math.sin(z*0.0027);}
+function valleyFloorH(z){return 13+6*sstep(-2150,-2500,z)+40*sstep(-2480,-2580,z)+26*sstep(-2620,-2950,z);}
+const FLATS=[ // flattened sites — later chunks append bridge / outpost / helipad sites
+  {x:0,z:24,r:30,h:4.0},
+  {x:0,z:-1010,r:95,h:20},
+  {x:150,z:-930,r:36,h:24.9}]; // V13 Chunk F : the helipad terrace
+function mainlandH(x,z){
+  let h=24+n2(x,z)*11+Math.sin(x*0.017-z*0.013)*2.2;                    // rolling heartland
+  h+=sstep(1500,2600,Math.abs(x))*34;                                  // hillier flanks
+  h+=sstep(-2350,-2900,z)*95;                                          // north high country
+  const xv=valleyX(z),dv=Math.abs(x-xv);                                // the valley carve
+  const vz=sstep(-980,-1120,z)*(1-sstep(-2850,-3050,z));
+  if(vz>0){
+    let fl=valleyFloorH(z)+n2(x*1.7,z*1.7)*1.1;
+    const lakeD=Math.hypot((x-xv)/215,(z+2050)/330);                   // lake basin
+    fl=lerp(fl,3.5,sstep(1.0,0.5,lakeD));
+    fl-=3.4*sstep(30,10,dv)*(1-sstep(1.0,0.5,lakeD));                  // river channel
+    h=lerp(h,fl,sstep(430,190,dv)*vz);
+  }
+  const pm=sstep(-1060,-1440,x);                                       // west plateau
+  if(pm>0){
+    let ph=168+n2(x*0.8,z*0.8)*8;
+    for(const fz of[-2050,-1560]){                                     // rim stream notches (Chunk B waterfalls)
+      const nd=Math.abs(z-fz);
+      if(nd<30&&x>-1620&&x<-1150)ph-=7*sstep(30,10,nd)*sstep(-1620,-1560,x)*(1-sstep(-1210,-1150,x));
+    }
+    ph=lerp(ph,159.5,sstep(85,30,Math.hypot(x+1420,z+2050)));          // plateau tarn dip (marquee falls feeder)
+    h=lerp(h,ph,pm);
+  }
+  return h;
+}
+
 const $=id=>document.getElementById(id);
 const isTouch=('ontouchstart'in window)||(window.matchMedia&&matchMedia('(pointer: coarse)').matches);
 
@@ -947,8 +1043,8 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.18;
 wrap.appendChild(renderer.domElement);
 const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(0xe6c69c,260,980); // warm golden-hour haze
-const camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.1,2000);
+scene.fog=new THREE.Fog(0xe6c69c,420,2400); // V13 : vista-depth haze for the 6 km world (was 260/980)
+const camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.1,12000); // V13 : far plane covers the 6 km world + backdrop ring
 camera.rotation.order='YXZ';
 scene.add(camera);
 
@@ -1049,7 +1145,7 @@ function updateNightTint(){$('nightTint').style.display=(G.night&&G.scoped)?'blo
 function applyEnvironment(){
   const night=G.night;
   if(night){
-    scene.fog.color.setHex(0x0d1626);scene.fog.near=140;scene.fog.far=760;
+    scene.fog.color.setHex(0x0d1626);scene.fog.near=220;scene.fog.far=1500;
     hemi.color.setHex(0x35496e);hemi.groundColor.setHex(0x0a0c10);hemi.intensity=0.34;
     sun.color.setHex(0x9db8e8);sun.intensity=0.5;sun.position.set(-220,300,-140);
     renderer.toneMappingExposure=1.02;
@@ -1059,7 +1155,7 @@ function applyEnvironment(){
     for(const c of clouds)c.material.color.setHex(0x2c3a55);
     for(const L of lanterns){L.intensity=1.5;L.color.setHex(HWN?0xff7722:0xffa050);} // HALLOWEEN : night lanterns burn pumpkin-orange in season
   }else{
-    scene.fog.color.setHex(0xe6c69c);scene.fog.near=260;scene.fog.far=980;
+    scene.fog.color.setHex(0xe6c69c);scene.fog.near=420;scene.fog.far=2400;
     hemi.color.setHex(0xffd9b0);hemi.groundColor.setHex(0x5a5a3f);hemi.intensity=0.55;
     sun.color.setHex(0xffb066);sun.intensity=1.35;sun.position.set(300,85,-40);
     renderer.toneMappingExposure=1.18;
@@ -1085,12 +1181,12 @@ const clouds=[];
 
 /* distant mountain silhouette ring : jagged hazy ridge wall at ~760m */
 (function(){
-  const SEG=56,RAD=760,pos=[],idx=[],col=[];
+  const SEG=56,RAD=3450,pos=[],idx=[],col=[]; // V13 : ring at the horizon of the 6 km world (was 760)
   const cBase=new THREE.Color(0x7c8ba6),cSnow=new THREE.Color(0xe9eff6),cTmp=new THREE.Color();
   for(let i=0;i<=SEG;i++){
     const a=i/SEG*TAU,px=Math.cos(a)*RAD,pz=Math.sin(a)*RAD;
-    const h=55+95*Math.abs(Math.sin(i*2.39)*0.5+Math.sin(i*5.17)*0.32+Math.sin(i*9.31)*0.18);
-    pos.push(px,-40,pz,px,h,pz);
+    const h=130+230*Math.abs(Math.sin(i*2.39)*0.5+Math.sin(i*5.17)*0.32+Math.sin(i*9.31)*0.18); // V13 : taller far peaks
+    pos.push(px,-90,pz,px,h,pz);
     cTmp.copy(cBase).lerp(cSnow,sstep(92,132,h)); // snow-cap tint on the high peaks (vertex colors)
     col.push(cBase.r,cBase.g,cBase.b,cTmp.r,cTmp.g,cTmp.b);
     if(i<SEG){const b=i*2;idx.push(b,b+1,b+2,b+1,b+3,b+2);}}
@@ -1098,7 +1194,7 @@ const clouds=[];
   geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
   geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
   geo.setIndex(idx);
-  const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,fog:true}));
+  const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,fog:false})); // V13 : beyond the fog far plane now — haze is baked into the vertex colors
   scene.add(m);})();
 
 /* distant birds : dark V shapes gliding in slow circles */
@@ -1116,33 +1212,119 @@ const birds=[];
 })();
 
 /* ---------------- terrain ---------------- */
+/* ==================== V13 Chunk B — roads + bridge deck (geography math) ====================
+   Roads are baked polylines: flat roads take a smoothed, grade-limited profile
+   of the base heightfield; the switchback takes explicit surveyed elevations
+   (a steady ~12% climb). groundH() = groundHBase + the road flatten term, so
+   physics / AI / placement all see the roads. The bridge deck lives in
+   surfH(): deckY(z) over the span, terrain elsewhere. */
+var V13GEO=false;
+const ROADS=[];
+function bakeRoad(pts,w,explicit){
+  const rs=[]; // resample to ~12 m
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i],b=pts[i+1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),n=Math.max(1,Math.round(L/12));
+    for(let k=(i===0?0:1);k<=n;k++){const t=k/n;
+      rs.push({x:lerp(a[0],b[0],t),z:lerp(a[1],b[1],t),h:explicit?lerp(a[2],b[2],t):0});}
+  }
+  if(!explicit){
+    for(const p of rs)p.h=groundHBase(p.x,p.z);
+    for(let pass=0;pass<2;pass++)for(let i=1;i<rs.length-1;i++)
+      rs[i].h=rs[i].h*0.5+(rs[i-1].h+rs[i+1].h)*0.25;
+    for(let pass=0;pass<2;pass++){ // grade-limit to ~11%
+      for(let i=1;i<rs.length;i++){const mx=1.35*1.0;rs[i].h=clamp(rs[i].h,rs[i-1].h-mx,rs[i-1].h+mx);}
+      for(let i=rs.length-2;i>=0;i--){const mx=1.35;rs[i].h=clamp(rs[i].h,rs[i+1].h-mx,rs[i+1].h+mx);}
+    }
+  }
+  let mnx=1e9,mxx=-1e9,mnz=1e9,mxz=-1e9;
+  for(const p of rs){mnx=Math.min(mnx,p.x);mxx=Math.max(mxx,p.x);mnz=Math.min(mnz,p.z);mxz=Math.max(mxz,p.z);}
+  ROADS.push({pts:rs,w:w,bb:[mnx-12,mxx+12,mnz-12,mxz+12]});
+}
+bakeRoad([[0,34],[-12,-110],[8,-250],[-2,-360],[0,-408]],7,false);            // R1 island: pad -> bridge
+bakeRoad([[0,-925],[0,-1010],[6,-1150],[120,-1330],[520,-1420],[900,-1380]],7,false); // R2 mainland spine
+bakeRoad([[120,-1330],[-300,-1420],[-620,-1560],[-700,-1700],[-830,-1850],[-880,-2050],[-870,-2350],[-880,-2470]],6.5,false); // R3 valley road
+bakeRoad([[6,-1150],[-260,-1240],[-560,-1330]],6.5,false);                    // R5 heartland west spur
+bakeRoad([[-1075,-1900,13],[-1160,-1600,50],[-1245,-1900,87],[-1330,-1600,124],[-1415,-1900,161],[-1472,-1830,166],[-1472,-1745,167]],6.5,true); // R4 switchback (~12%)
+ROADS[0].pts[ROADS[0].pts.length-1].h=5.0; // R1 lands exactly on the deck profile
+function roadNear(x,z){
+  let bd=1e18,bh=0;
+  for(const r of ROADS){
+    if(x<r.bb[0]||x>r.bb[1]||z<r.bb[2]||z>r.bb[3])continue;
+    const pts=r.pts;
+    for(let i=0;i<pts.length-1;i++){
+      const a=pts[i],b=pts[i+1],abx=b.x-a.x,abz=b.z-a.z;
+      const t=clamp(((x-a.x)*abx+(z-a.z)*abz)/((abx*abx+abz*abz)||1),0,1);
+      const dx=x-(a.x+abx*t),dz=z-(a.z+abz*t),d2=dx*dx+dz*dz;
+      if(d2<bd){bd=d2;bh=lerp(a.h,b.h,t);}
+    }
+  }
+  return bd<1e17?{d:Math.sqrt(bd),h:bh}:null;
+}
 function groundH(x,z){
-  let h=16*sstep(-40,25,z);                                   // valley 0 -> ridge 16
-  const n=Math.sin(x*0.045)*Math.cos(z*0.05)*1.7+Math.sin(x*0.13+z*0.07)*0.55+Math.sin(x*0.31-z*0.21)*0.18;
-  const od=Math.hypot(x,z+CAMP_D),pd=Math.hypot(x,z-24);
-  h+=n*sstep(26,72,od)*(0.25+0.75*sstep(7,18,pd));            // flatten outpost + player pad
-  h+=sstep(150,330,Math.abs(x))*24;                           // side hills
-  h+=sstep(-330,-520,z+0)*0;                                  // (unused far rise)
+  let h=groundHBase(x,z);
+  if(V13GEO){
+    const rn=roadNear(x,z);
+    if(rn&&rn.d<10.5){const w=sstep(10.5,3.4,rn.d);if(w>0)h=lerp(h,rn.h,w*0.98);}
+  }
   return h;
 }
+/* the bridge deck profile : island viaduct -> level span -> mainland ramp */
+const DECK={x:7.4,z0:-925,z1:-408};
+function deckY(z){
+  const CP=[[-408,5.0],[-470,13.5],[-560,14.5],[-800,14.5],[-875,18.6],[-925,20.3]];
+  if(z>=CP[0][0])return CP[0][1];
+  for(let i=1;i<CP.length;i++){
+    if(z>=CP[i][0]){const a=CP[i-1],b=CP[i];return lerp(b[1],a[1],sstep(b[0],a[0],z));}
+  }
+  return CP[CP.length-1][1];
+}
+V13GEO=true;
+
+function groundHBase(x,z){
+  const rI=Math.hypot(x,z);
+  const isl=3.4+8.5*sstep(470,70,rI)+Math.sin(x*0.02)*Math.cos(z*0.017)*0.8*sstep(300,60,rI);
+  let h=lerp(-15+n2(x*0.5,z*0.5)*1.5,isl,sstep(560,400,rI));            // sea floor -> island
+  const mm=sstep(-740,-1000,z);
+  if(mm>0)h=lerp(h,mainlandH(x,z),mm);
+  const edge=Math.max(Math.abs(x),Math.abs(z));
+  h+=sstep(2620,3020,edge)*130;                                        // rim mountains at the world edge
+  for(let i=0;i<FLATS.length;i++){const f=FLATS[i],d=Math.hypot(x-f.x,z-f.z);
+    if(d<f.r)h=lerp(h,f.h,sstep(f.r,f.r*0.35,d)*0.97);}
+  return h;
+}
+function surfH(x,z){
+  const gh=groundH(x,z);
+  if(x>-DECK.x&&x<DECK.x&&z<DECK.z1&&z>DECK.z0){const dy=deckY(z);if(dy>gh)return dy;} // V13 Chunk B : the bridge deck
+  if(window.__heliTopY){const pdx=x-window.__heliPadX,pdz=z-window.__heliPadZ; // V13 Chunk F : the helipad deck
+    if(pdx*pdx+pdz*pdz<240&&window.__heliTopY>gh)return window.__heliTopY;}
+  return gh;
+}
 (function(){
-  const geo=new THREE.PlaneGeometry(760,760,104,104);geo.rotateX(-Math.PI/2);
+  const geo=new THREE.PlaneGeometry(6000,6000,256,256);geo.rotateX(-Math.PI/2); // V13 : 6 km at 23.4 m cells (was 760 m)
   const pos=geo.attributes.position,col=[];
   const cGrass=new THREE.Color(0x5d7a3c),cGrass2=new THREE.Color(0x6d8a45),
         cDirt=new THREE.Color(0x7d6c4c),cRock=new THREE.Color(0x77776e),tmp=new THREE.Color();
   const cDry=new THREE.Color(0x8a8547); // V12 : dry-grass tint for macro patchiness
-  for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),h=groundH(x,z);pos.setY(i,h);
+  for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);pos.setY(i,groundH(x,z));}
+  geo.computeVertexNormals();
+  const nor=geo.attributes.normal,cSand=new THREE.Color(0x9a8a64),cBed=new THREE.Color(0x4c4638),cSnow=new THREE.Color(0xe9eff6);
+  for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),h=pos.getY(i),ny=nor.getY(i);
     const n=Math.sin(x*0.11+z*0.13)*Math.cos(x*0.05-z*0.09);
     tmp.copy(cGrass).lerp(cGrass2,0.5+0.5*n);
     const dry=Math.sin(x*0.021+1.3)*Math.sin(z*0.017-0.6)+Math.sin(x*0.008-z*0.011)*0.7; // V12 : large-scale dry patches (anti-wallpaper macro variation under the photo texture)
     if(dry>0.55)tmp.lerp(cDry,sstep(0.55,1.35,dry)*0.5);
     const od=Math.hypot(x,z+CAMP_D);
     if(od<46)tmp.lerp(cDirt,sstep(46,20,od)*0.85);            // trampled outpost dirt
-    if(h>11)tmp.lerp(cRock,sstep(11,15,h)*0.7);               // ridge rock
+    const rn=roadNear(x,z); // V13 Chunk B : dirt shoulders under the road ribbons
+    if(rn&&rn.d<7.5)tmp.lerp(cDirt,sstep(7.5,3.2,rn.d)*0.55);
+    if(h>70)tmp.lerp(cRock,sstep(70,120,h)*0.55);             // high country rock
+    if(ny<0.92)tmp.lerp(cRock,sstep(0.92,0.74,ny)*0.8);       // V13 : slope rock (cliffs read as rock, not lawn)
+    if(h<SEA_Y+1.8&&h>SEA_Y-2.6)tmp.lerp(cSand,0.75);         // V13 : beach band at the waterline
+    if(h<=SEA_Y-2.6)tmp.lerp(cBed,0.8);                       // V13 : dark seabed
+    if(h>175)tmp.lerp(cSnow,sstep(175,220,h)*0.75);           // V13 : snow on the highest tops
     if(Math.abs(n)>0.86)tmp.lerp(cDirt,0.35);                 // dirt patches
     col.push(tmp.r,tmp.g,tmp.b);}
   geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
-  geo.computeVertexNormals();
   /* procedural speckle texture : grass/dirt micro-noise multiplied over vertex colors */
   const gtex=(function(){const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');
     x.fillStyle='#e9e9e9';x.fillRect(0,0,256,256);
@@ -1151,23 +1333,24 @@ function groundH(x,z){
       const s=1+Math.random()*2.6;x.fillRect(Math.random()*256,Math.random()*256,s,s);}
     for(let i=0;i<380;i++){x.fillStyle='rgba(150,160,120,0.5)';
       x.fillRect(Math.random()*256,Math.random()*256,1,2+Math.random()*3);}
-    const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(64,64);return t;})();
+    const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(420,420);return t;})(); // V13 : speckle scale held over 6 km
   const m=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true,map:gtex}));
-  m.receiveShadow=true;scene.add(m);})();
+  m.receiveShadow=true;m.userData.isTerrain=true;scene.add(m);})(); // V13 : named so the V12 photo-texture pass finds it at any resolution
 
 /* trees : instanced, varied shapes */
 let riverTex=null;
 /* river : winding water ribbon through the valley, sun catching the specular */
 (function(){
-  const SEG=90,W2=4.5,pos=[],uv=[],idx=[];
-  const cx=i=>{const z=-380+375*i/SEG;return 64+38*Math.sin(z*0.011)+14*Math.sin(z*0.023+1.7);};
-  const cz=i=>-380+375*i/SEG;
+  const SEG=110,W2=5,pos=[],uv=[],idx=[];
+  const cx=i=>valleyX(-2950+1940*i/SEG); // V13 : the river runs the mainland valley now
+  const cz=i=>-2950+1940*i/SEG;
   for(let i=0;i<=SEG;i++){
     const x=cx(i),z=cz(i);
     let dx=cx(Math.min(SEG,i+1))-cx(Math.max(0,i-1)),dz=cz(Math.min(SEG,i+1))-cz(Math.max(0,i-1));
     const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;const nx=-dz,nz=dx;
-    pos.push(x+nx*W2,groundH(x+nx*W2,z+nz*W2)+0.22,z+nz*W2,
-             x-nx*W2,groundH(x-nx*W2,z-nz*W2)+0.22,z-nz*W2);
+    const wy=valleyFloorH(z)-2.2; // V13 : level water in the carved channel
+    pos.push(x+nx*W2,wy,z+nz*W2,
+             x-nx*W2,wy,z-nz*W2);
     uv.push(0,i/9,1,i/9);
     if(i<SEG){const b=i*2;idx.push(b,b+1,b+2,b+1,b+3,b+2);}}
   const g=new THREE.BufferGeometry();
@@ -1190,6 +1373,8 @@ var TREE_SPOTS=null,OLD_TREES=null,OLD_ROCKS=[],OLD_BUSHES=null; // WORLD 11.0 :
   while(spots.length<150&&guard++<3000){
     const x=rand(-280,280),z=rand(-330,5),h=groundH(x,z);
     if(h>11.5)continue;
+    if(h<1.0)continue; // V13 : no trees in the sea
+    if(roadNear(x,z)&&roadNear(x,z).d<5)continue; // V13 Chunk B : roads stay clear
     if(Math.hypot(x,z+CAMP_D)<30)continue;
     if(Math.hypot(x,z-24)<10)continue;
     spots.push([x,h,z,rand(0.7,1.6),rand(0,TAU)]);}
@@ -1280,17 +1465,19 @@ function buildGrassField(){
   const N=q==='low'?800:(q==='medium'?1400:1950);
   const grass=new THREE.InstancedMesh(_grassGeo,_grassMat,N);
   const d=new THREE.Object3D(),tint=new THREE.Color();let placed=0,guard=0;
-  const riverX=z=>64+38*Math.sin(z*0.011)+14*Math.sin(z*0.023+1.7); // river centerline (mirrors the river ribbon build)
+  const riverX=z=>valleyX(z); // V13 : river centerline (mirrors the river ribbon build)
   while(placed<N&&guard++<30000){
     let x,z;const f=placed/N;
     if(f<0.26){x=rand(-34,34);z=rand(-8,42);}                       // ridge (dense near the player)
     else if(f<0.62){x=rand(-120,190);z=rand(-215,-38);}             // mid-field + west valley
     else{x=rand(-190,230);z=rand(-405,-195);}                       // far valley toward the outpost
     const h=groundH(x,z);
-    if(h>11.5)continue;
+    if(h>13.5)continue;
+    if(h<0.6)continue; // V13 : no tufts under water / on the seabed
     if(Math.hypot(x,z+CAMP_D)<36)continue;                          // outpost dirt stays bare
     if(Math.hypot(x,z-24)<5)continue;                               // player pad
-    if(z<-5&&z>-385&&Math.abs(x-riverX(z))<8)continue;              // river ribbon
+    if(roadNear(x,z)&&roadNear(x,z).d<4.5)continue; // V13 Chunk B : roads stay bare
+    if(z<-1000&&z>-2960&&Math.abs(x-riverX(z))<9)continue;            // V13 : river ribbon (mainland valley)
     const sl=Math.abs(groundH(x+1.2,z)-h)+Math.abs(groundH(x,z+1.2)-h);
     if(sl>1.35)continue;                                            // not on cliff faces
     d.position.set(x,h-0.06,z);
@@ -2187,7 +2374,7 @@ document.addEventListener('keyup',e=>{KEYS[e.code]=false;});
    converge / return-fire / counter-sniper systems (which all key off the
    player position) track the walker with zero changes. */
 function stepPlayerMove(dt,speed){
-  if(G.scoped||KC.active||G.pauseOpen||G.settingsOpen)return;
+  if(G.scoped||KC.active||G.pauseOpen||G.settingsOpen||G.mapOpen)return;
   let mx=joyVec.x,mz=joyVec.y;
   if(KEYS['KeyW']||KEYS['ArrowUp'])mz-=1;
   if(KEYS['KeyS']||KEYS['ArrowDown'])mz+=1;
@@ -2198,7 +2385,8 @@ function stepPlayerMove(dt,speed){
   const sy=Math.sin(G.yaw),cy=Math.cos(G.yaw);
   let nx=G.px+(cy*mx-sy*(-mz))*speed*dt;
   let nz=G.pz+(-sy*mx-cy*(-mz))*speed*dt;
-  nx=clamp(nx,-280,280);nz=clamp(nz,-372,190); // valley bounds
+  nx=clamp(nx,-2960,2960);nz=clamp(nz,-2960,2960); // V13 : world bounds (was the old valley box)
+  if(surfH(nx,nz)<-2.2){nx=G.px;nz=G.pz;} // V13 : deep water stops the walker (the bridge deck registers in surfH)
   for(const b of BLOCKERS){ // cheap push-out : tents, crates, tower, tanks, barrels
     const dx=nx-b.x,dz=nz-b.z,rr=b.r+0.55,d2=dx*dx+dz*dz;
     if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=b.x+dx/d*rr;nz=b.z+dz/d*rr;}}
@@ -2889,28 +3077,22 @@ function spawnEnemies(cfg){
     if(e.helmetG&&e.helmetG.parent===scene)scene.remove(e.helmetG); // last mission's popped helmet doesn't litter the new one
     if(e.laser){scene.remove(e.laser);e.laser.geometry.dispose();e.laser.material.dispose();e.laser=null;}});
   enemies.length=0;
-  const spots=[];
-  for(let i=0;i<Math.max(1,cfg.hvts-1);i++){const a=rand(0,TAU),r=rand(6,22);
-    spots.push([rand(-20,20)+Math.cos(a)*r,-CAMP_D+Math.sin(a)*r*0.7,true]);}
-  for(let i=0;i<cfg.guards;i++){const a=rand(0,TAU),r=rand(24,60);
-    spots.push([Math.cos(a)*r*0.8,-CAMP_D+Math.sin(a)*r*0.75,false]);}
-  spots.forEach((s,i)=>{const e=new Enemy(s[0],s[1],s[2]);
-    e.convA=(i/Math.max(1,spots.length))*1.7-0.85+rand(-0.15,0.15); // personal approach bearing — the converging squad fans out
+  /* V13 Chunk C : the garrison distributes across the mission's active
+     outposts (V13C.buildSpots) — totals stay exact : every cfg HVT and guard
+     is placed, counter-snipers post per-outpost, and the truck driver takes
+     his HVT slot only when the mainland camp is active. */
+  const plan=V13C.buildSpots(cfg);
+  plan.spots.forEach((sp,i)=>{const e=new Enemy(sp[0],sp[1],sp[2]);
+    e.convA=(i/Math.max(1,plan.spots.length))*1.7-0.85+rand(-0.15,0.15); // personal approach bearing — the converging squad fans out
     e.convR=rand(60,110); // personal hold range instead of one shared distance
     enemies.push(e);});
-  /* counter-snipers : #1 owns the watchtower, #2 kneels in a crate nest.
-     They count as guards for progress but pay 150 pts — kill them first. */
-  const snN=cfg.snipers||0;
-  for(let i=0;i<snN;i++){
-    if(i===0){const sn=new Enemy(20,-CAMP_D-18,false,{sniper:true});
-      sn.postY=groundH(20,-CAMP_D-18)+7.35;sn.group.position.set(20,sn.postY,-CAMP_D-18);
-      enemies.push(sn);}
-    else{const sn=new Enemy(16,-CAMP_D+13,false,{sniper:true});
-      sn.group.scale.set(1.5,1.12,1.5);sn.chestOff=1.0;sn.prone=true;
-      enemies.push(sn);}
-  }
-  resetTruck();            // the truck's driver takes the last HVT slot
-  enemies.push(driver);
+  plan.snipers.forEach(sp=>{const sn=new Enemy(sp.x,sp.z,false,{sniper:true});
+    if(sp.postY!=null){sn.postY=sp.postY;sn.group.position.set(sp.x,sp.postY,sp.z);}
+    if(sp.prone){sn.group.scale.set(1.5,1.12,1.5);sn.chestOff=1.0;sn.prone=true;}
+    enemies.push(sn);});
+  if(plan.campActive){resetTruck();if(truck.group)truck.group.visible=true;
+    enemies.push(driver);} // the truck's driver takes the last HVT slot
+  else if(truck.group){truck.active=false;truck.group.visible=false;if(driver.group)driver.group.visible=false;}
   G.hvtTotal=cfg.hvts;
 }
 function hvtsAlive(){let n=0;for(const e of enemies)if(e.alive&&e.hvt)n++;return n;}
@@ -3075,10 +3257,16 @@ function truckUpdate(dt){
    Explosions kill through killEnemy so score/chain/completion stay unified,
    and chain-detonations are queued in game time (chainQ) rather than timers. */
 const sabTargets=[],chainQ=[];
-const SAB_SPOTS=[
-  {kind:'fuel',x:-12,z:-CAMP_D-3},{kind:'fuel',x:-7.5,z:-CAMP_D-6.5},{kind:'fuel',x:17,z:-CAMP_D-11},
-  {kind:'fuel',x:-5,z:-CAMP_D-17},{kind:'fuel',x:11,z:-CAMP_D+15},
-  {kind:'ammo',x:-9.5,z:-CAMP_D+11},{kind:'ammo',x:14,z:-CAMP_D+3}];
+const SAB_SPOTS=[ // V13 : site-tagged — a mission only arms its active outposts' targets
+  {kind:'fuel',site:'camp',x:-12,z:-CAMP_D-3},{kind:'fuel',site:'camp',x:-7.5,z:-CAMP_D-6.5},{kind:'fuel',site:'camp',x:17,z:-CAMP_D-11},
+  {kind:'fuel',site:'camp',x:-5,z:-CAMP_D-17},{kind:'fuel',site:'camp',x:11,z:-CAMP_D+15},
+  {kind:'ammo',site:'camp',x:-9.5,z:-CAMP_D+11},{kind:'ammo',site:'camp',x:14,z:-CAMP_D+3},
+  {kind:'fuel',site:'isle',x:-102,z:132},{kind:'ammo',site:'isle',x:-124,z:110},
+  {kind:'fuel',site:'bridge',x:47,z:-966},{kind:'ammo',site:'bridge',x:64,z:-992},
+  {kind:'fuel',site:'logging',x:612,z:-1408},{kind:'ammo',site:'logging',x:634,z:-1436},
+  {kind:'fuel',site:'farm',x:-806,z:-1486},{kind:'ammo',site:'farm',x:-848,z:-1518},
+  {kind:'fuel',site:'lake',x:-1246,z:-1890},{kind:'ammo',site:'lake',x:-1268,z:-1916},
+  {kind:'fuel',site:'radar',x:-1550,z:-2162},{kind:'ammo',site:'radar',x:-1572,z:-2136}];
 for(const s of SAB_SPOTS)BLOCKERS.push({x:s.x,z:s.z,r:1.9}); // sabotage props block patrol movement too
 function buildSabotage(){
   const tankM=new THREE.MeshLambertMaterial({color:0xb02818});
@@ -3119,15 +3307,17 @@ function buildSabotage(){
     g.position.set(s.x,gy,s.z);g.rotation.y=rand(0,TAU);scene.add(g);
     const mk=new THREE.Sprite(new THREE.SpriteMaterial({map:diamondTex,transparent:true,depthWrite:false}));
     mk.scale.set(1.5,1.5,1);mk.position.set(s.x,gy+(s.kind==='fuel'?3.6:2.6),s.z);scene.add(mk);
-    sabTargets.push({kind:s.kind,group:g,marker:mk,alive:false,
+    sabTargets.push({kind:s.kind,site:s.site,group:g,marker:mk,alive:false,
       pos:new THREE.Vector3(s.x,gy+(s.kind==='fuel'?1.2:0.7),s.z),r:s.kind==='fuel'?1.55:1.3,ph:rand(0,TAU)});
   }
 }
 function resetSabotage(cfg){
   let tanks=0;G.sabDone=0;
+  const actSites=V13C.activeFor(G.mission); // V13 : only the mission's outposts arm their targets
   for(const tg of sabTargets){
-    if(tg.kind==='fuel'){tg.alive=tanks<cfg.sabTanks;tanks++;}
-    else tg.alive=true;
+    const onSite=actSites.indexOf(tg.site)>=0;
+    if(tg.kind==='fuel'){tg.alive=onSite&&tanks<cfg.sabTanks;if(onSite)tanks++;}
+    else tg.alive=onSite;
     tg.group.visible=tg.alive;tg.marker.visible=tg.alive;}
   G.sabTotal=sabTargets.filter(t=>t.alive).length;
   chainQ.length=0;
@@ -3353,6 +3543,9 @@ function bulletUpdate(dt){
           if(bullets.indexOf(b)<0)return;
           if(b.kills>=3){spent=true;break;}}
         else if(d2<nearD2){nearD2=d2;nearE=e;}}
+      if(!spent&&typeof V13E!=='undefined'&&V13E.ready)for(const an of V13E.animals){ // V13 wildlife : a round that finds an animal stops there — no score, no economy, just the kill
+        if(!an.alive)continue;const ac=an.center(),adx=p.x-ac.x,ady=p.y-ac.y,adz=p.z-ac.z;
+        if(adx*adx+ady*ady+adz*adz<an.r*an.r){an.die();spent=true;break;}}
       if(spent)break;
       if(truck.active&&driver.alive){_tv.copy(p).sub(truck.group.position);_tv.y-=1.2;
         if(_tv.lengthSq()<100)truck.lastCrackT=G.swayT;} // round cracked past the truck — the driver reacts
@@ -3538,8 +3731,18 @@ function aimByPixels(dx,dy){
     _aimF+=(tf-_aimF)*0.45;}
   _aimLastT=now;
   const s=0.0021*G.sens*_aimF*(G.scoped?0.4*G.sensScope*Math.pow(8/Math.max(2,G.zoom),0.7):1); // speed-aware, stacking with per-zoom scaling; scoped factor scaled by the scoped-sens setting
-  G.yaw=clamp(G.yaw+(G.invertX?dx:-dx)*s,-0.65,0.65);
-  G.pitch=clamp(G.pitch+(G.invertY?dy:-dy)*s,-0.4,0.55);
+  if(typeof V13F!=='undefined'&&V13F.flyOn){ // V13 Chunk F : flight free look — the same unbounded law, on the heli's own offset
+    V13F.lookYaw+=(G.invertX?dx:-dx)*s;
+    V13F.lookPitch=clamp(V13F.lookPitch+(G.invertY?dy:-dy)*s,-1.35,1.35);
+    return;
+  }
+  if(ATV.drive.on){ // V12.1 : driving free look — look offset accumulates unbounded (full 360); pitch keeps only wide poles
+    ATV.lookYaw+=(G.invertX?dx:-dx)*s;
+    ATV.lookPitch=clamp(ATV.lookPitch+(G.invertY?dy:-dy)*s,-1.35,1.35);
+    return;
+  }
+  G.yaw+=(G.invertX?dx:-dx)*s; // V12.1 : TURN LIMIT REMOVED — yaw unclamped in every look state (hip / scoped / knife)
+  G.pitch=clamp(G.pitch+(G.invertY?dy:-dy)*s,-1.55,1.55); // only the anti-flip poles remain (~+-89 deg) — flip protection, not a turn limit
 }
 function touchPos(t){return[t.clientX,t.clientY];}
 document.addEventListener('touchstart',e=>{
@@ -3549,7 +3752,7 @@ document.addEventListener('touchstart',e=>{
   for(const t of e.changedTouches){
     const[x,y]=touchPos(t),el=document.elementFromPoint(x,y);
     if(el&&(el.classList.contains('hbtn')||el.id==='zoomSlider'||el.closest('#zoomWrap')))continue;
-    if(el&&el.closest('#card2,#pauseRoot,#briefRoot')){uiTouch=true;continue;} // SETTINGS / PAUSE / BRIEFING overlays : a tap here must reach the UI — never swallow it into the aim handler
+    if(el&&el.closest('#card2,#pauseRoot,#briefRoot,#mapRoot,#heliRoot')){uiTouch=true;continue;} // SETTINGS / PAUSE / BRIEFING overlays : a tap here must reach the UI — never swallow it into the aim handler
     const jr=joyEl.getBoundingClientRect();
     const inJoy=x>jr.left-30&&x<jr.right+30&&y>jr.top-30&&y<jr.bottom+30;
     if(!G.scoped&&inJoy){ // JOYSTICK RECT FIRST : the half-screen aim rule below used to pre-empt this branch — harmless on the left, fatal for a left-hand-flipped stick parked on the right
@@ -3985,7 +4188,7 @@ function endKillcam(){
   KC.ts=1;kcRushStop(); // world clock restored + rush silenced — every exit path funnels through here
   kcBullet.visible=false;
   G.slowmo=0;G.punchT=0;
-  camera.position.set(G.px,groundH(G.px,G.pz)+1.7,G.pz);
+  camera.position.set(G.px,surfH(G.px,G.pz)+1.7,G.pz); // V13 Chunk B : eye rides the deck too
   camera.rotation.set(G.pitch,G.yaw,0);
   camera.fov=G.scoped?68/G.zoom:68;camera.updateProjectionMatrix();
   G.fovCur=camera.fov; // sync the smooth-zoom state so the frame loop doesn't re-ease from the killcam fov
@@ -4353,7 +4556,7 @@ function frame(now){
   else G.slowT=0;
   if(KC.active)ts=KC.ts; // KILLCAM 2.0 : while the cam runs it choreographs the world clock directly (cruise / bullet-time / freeze / release)
   let gdt=dt*ts;
-  if((G.settingsOpen||G.pauseOpen)&&(G.state==='play'||G.state==='roam'))gdt=0; // SETTINGS / PAUSE-MENU PAUSE : world clock + all play-state sim freeze while either is open (WORLD 11.0 : roam freezes too)
+  if((G.settingsOpen||G.pauseOpen||G.mapOpen||G.heliOpen)&&(G.state==='play'||G.state==='roam'))gdt=0; // V13 Chunk F : the heli popup freezes too // SETTINGS / PAUSE-MENU PAUSE : world clock + all play-state sim freeze while either is open (WORLD 11.0 : roam freezes too)
   if(G.introT>=0)G.introT+=dt; // COLD OPEN : the intro timer runs on the frame loop's own real dt — no timers to strand it
   G.swayT+=gdt;
   const t=G.swayT;
@@ -4403,7 +4606,7 @@ function frame(now){
     G.windT+=gdt; // gusts : the single live wind source — HUD, ballistics, dust/grass, flag and ambient audio all read these
     G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7))); // ±40% strength, ~20s swell
     G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77); // heading wanders ±15° on the same swell
-    if(!ATV.drive.on)stepPlayerMove(gdt,3.5); // WORLD 11.0 : in-mission walking (joystick / WASD) — position writes feed the existing converge + counter-sniper systems (V12 : the ATV drive owns movement while mounted)
+    if(!ATV.drive.on&&!(typeof V13F!=='undefined'&&V13F.flyOn))stepPlayerMove(gdt,3.5); // V13 Chunk F : flight owns movement // WORLD 11.0 : in-mission walking (joystick / WASD) — position writes feed the existing converge + counter-sniper systems (V12 : the ATV drive owns movement while mounted)
     for(const e of enemies)e.update(gdt);
     {let ma=0;for(const e of enemies)if(e.sniper&&e.alive&&e.aimPhase==='aim')ma=Math.max(ma,1-e.aimT/1.5);
      setScopeRim(G.scoped?ma:0);} // SNIPER WARNING RIM : hottest aim progress drives the scope rim
@@ -4434,7 +4637,7 @@ function frame(now){
     G.windT+=gdt; // the valley still breathes
     G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7)));
     G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77);
-    if(!ATV.drive.on)stepPlayerMove(gdt,5.0); // V12 : the ATV drive owns movement while mounted
+    if(!ATV.drive.on&&!(typeof V13F!=='undefined'&&V13F.flyOn))stepPlayerMove(gdt,5.0); // V13 Chunk F : flight owns movement // V12 : the ATV drive owns movement while mounted
     for(const e of enemies)e.update(gdt);
     bulletUpdate(gdt);tracerUpdate(gdt);
     for(let i=chainQ.length-1;i>=0;i--){chainQ[i].t-=gdt; // barrel chains tick in roam too
@@ -4457,7 +4660,7 @@ function frame(now){
   if(KC.active&&G.state!=='play')endKillcam(); // mission ended mid-killcam — restore now
   if(KC.active&&!((G.settingsOpen||G.pauseOpen)&&G.state==='play'))kcUpdate(dt); // killcam freezes with the world while settings / pause menu are open
   if(!KC.active){
-  camera.position.set(G.px,groundH(G.px,G.pz)+1.7,G.pz);
+  camera.position.set(G.px,surfH(G.px,G.pz)+1.7,G.pz); // V13 Chunk B : eye rides the deck too
   const shk=G.shake*(G.reduceShake?0.08:1); // REDUCE SHAKE : same shake state, near-zero amplitude at the camera
   const shX=(Math.random()-0.5)*shk*0.06,shY=(Math.random()-0.5)*shk*0.06;
   G.shake=Math.max(0,G.shake-dt*3.2);
@@ -4483,7 +4686,8 @@ function frame(now){
   G.fovCur+=(fovT-G.fovCur)*Math.min(1,dt*14);
   camera.fov=G.fovCur;camera.updateProjectionMatrix();
   }
-  v12Tick(dt,gdt); // V12 : vehicle / knife / concealment / grass-crush / HUD state — runs post-camera so its overrides (chase cam, rifle hide) win the frame
+  v12Tick(dt,gdt); // V12 :
+  v13Tick(dt,gdt); // V13 : world systems (sun shadow follow + chunk hooks) — vehicle / knife / concealment / grass-crush / HUD state — runs post-camera so its overrides (chase cam, rifle hide) win the frame
   const wantCine=G.slowmo>0||KC.active; // cinematic letterbox : stays up for the whole cam (the bars carry the return fade)
   if(wantCine!==G.cine){G.cine=wantCine;
     $('ctop').style.height=$('cbot').style.height=wantCine?'8vh':'0px';}
@@ -4677,7 +4881,7 @@ function missionTime(n){try{const mt=JSON.parse(lsGet('longshot_mtime','{}'))||{
 function saveMissionTime(n,secs){if(!(secs>0))return;try{const mt=JSON.parse(lsGet('longshot_mtime','{}'))||{};const k='m'+n;if(!mt[k]||secs<mt[k]){mt[k]=Math.round(secs);lsSet('longshot_mtime',JSON.stringify(mt));}}catch(e){}}
 function fmtTime(s){s=Math.max(0,Math.round(s||0));return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
 function menuMissionBoot(){const mx=missionUnlockMax(),sv=+(lsGet('longshot_menuMission','0'))||0;return(sv>=1&&sv<=mx)?sv:mx;}
-function sabTotalFor(n){const cfg=missionCfg(n);let fuel=0,cache=0;for(const tg of sabTargets){if(tg.kind==='fuel')fuel++;else cache++;}return Math.min(fuel,cfg.sabTanks)+cache;} // mirrors resetSabotage()'s count without touching live targets
+function sabTotalFor(n){const cfg=missionCfg(n);const sites=V13C.activeFor(n);let fuel=0,cache=0;for(const tg of sabTargets){if(sites.indexOf(tg.site)<0)continue;if(tg.kind==='fuel')fuel++;else cache++;}return Math.min(fuel,cfg.sabTanks)+cache;} // mirrors resetSabotage()'s count without touching live targets (V13 : site-aware)
 function missionFlavor(n){return n%3===0?'NIGHT OPS':(missionCfg(n).snipers>0?'OVERWATCH':'VALLEY OPS');} // flavor from real mission params only
 function missionStars(n){ // honest stars : completed / ghost run / at-or-near your global best
   if(!missionBest(n))return 0;
@@ -4761,6 +4965,7 @@ function renderBriefing(){
    '<div class="tip" style="margin-top:2px">'+missionFlavor(n)+'</div>'+
    (briefFromPause?'':'<div class="mhead" style="margin:12px 0 2px"><button class="mbtn sm" id="brfPrev" style="visibility:'+(n>1?'visible':'hidden')+'">&#9664;</button><span style="font-size:10px;letter-spacing:2px;color:#8fa3d9">CHANGE MISSION</span><button class="mbtn sm" id="brfNext" style="visibility:'+(n<missionUnlockMax()?'visible':'hidden')+'">&#9654;</button></div>')+
    '<div class="obj" style="margin-top:12px"><span>OBJECTIVE</span><b>ELIMINATE ALL RED HVTs</b><b>DESTROY '+sabTotalFor(n)+' SABOTAGE TARGETS</b></div>'+
+   '<div class="tip" style="color:#8fa3d9">'+V13C.briefLine(n)+'</div>'+
    '<div class="tip">Ghost: alarm under 25% = 2× score · 100% = they hunt you</div>'+
    '<div class="mbest">MISSION BEST <b>'+(best?best.toLocaleString('en-US'):'—')+'</b>'+(bt?' &nbsp;·&nbsp; BEST TIME <b>'+fmtTime(bt)+'</b>':'')+'</div>';
   if(!briefFromPause){ // mid-game (from pause) the panel is read-only : arrows would restart the run
@@ -4907,7 +5112,7 @@ let confirmFn=null;
 function openConfirm(head,text,fn){$('cfHead').textContent=head;$('cfText').textContent=text;confirmFn=fn;$('confirmRoot').style.display='flex';}
 function closeConfirm(){$('confirmRoot').style.display='none';confirmFn=null;}
 function resetProgress(){ // progress keys only — settings + seen-version survive, then a clean reload
-  const keys=['longshot_best','longshot_mbest','longshot_mtime','longshot_rifles','longshot_rifle','longshot_credits','longshot_xp','longshot_skinsOwned','longshot_skin','longshot_ghostMissions','longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn','longshot_supp']; // LOBBY POLISH : mythic grind counters + per-skin kill-effect enables wipe too (V12 : suppressor installs wipe too)
+  const keys=['longshot_best','longshot_mbest','longshot_mtime','longshot_rifles','longshot_rifle','longshot_credits','longshot_xp','longshot_skinsOwned','longshot_skin','longshot_ghostMissions','longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn','longshot_supp','longshot_loot','longshot_heli']; // LOBBY POLISH : mythic grind counters + per-skin kill-effect enables wipe too (V12 : suppressor installs wipe too)
   for(const k of keys){try{localStorage.removeItem(k);}catch(e){}}
   try{SYNC.onReset();}catch(e){} // SYNC 11.1 : the wipe must reach the cloud too, or the old save resurrects on next sync
   location.reload();
@@ -5756,13 +5961,13 @@ function v12TerrainApply(D){
   if(!D)return;
   let terr=V12.terrain;
   if(!terr){
-    scene.traverse(o=>{if(!terr&&o.isMesh&&o.geometry&&o.geometry.attributes&&o.geometry.attributes.position&&o.geometry.attributes.position.count===11025)terr=o;});
+    scene.traverse(o=>{if(!terr&&o.isMesh&&o.geometry&&o.geometry.attributes&&o.geometry.attributes.position&&o.userData&&o.userData.isTerrain)terr=o;});
     if(!terr)return;V12.terrain=terr;
   }
   const low=G.quality==='low';V12.texLow=low;
   const maxAn=Math.min(8,renderer.capabilities.getMaxAnisotropy());
   const mk=url=>{const t=new THREE.TextureLoader().load(url);
-    t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(115,115);t.anisotropy=maxAn;return t;};
+    t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(900,900);t.anisotropy=maxAn;return t;}; // V13 : tile scale held over 6 km
   const mat=new THREE.MeshPhongMaterial({vertexColors:true,
     map:mk(low?D.grassC512:D.grassC),normalMap:mk(D.grassN),shininess:0,specular:0x111111});
   mat.color.setRGB(1.32,1.32,1.32); // the photo map is darker than the old near-white speckle — lift so the tuned vertex tones land where they were
@@ -6125,6 +6330,17 @@ function knifeHit(){
     killEnemy(best,dir,false,false,false,best.chest(),null,true); // melee gate: silent, no skin counter, no bullet-cam
     sTone(160,0.08,'square',0.06);
   }
+  else if(typeof V13E!=='undefined'&&V13E.ready){ // V13 : knife vs wildlife — silent, scoreless
+    let ba=null,bad=2.3;
+    for(const an of V13E.animals){
+      if(!an.alive)continue;
+      const dx=an.x-G.px,dz=an.z-G.pz,dh=Math.hypot(dx,dz);
+      if(dh>bad||dh<0.01)continue;
+      if((dx*_kf.x+dz*_kf.z)/(dh*fh)<0.45)continue;
+      ba=an;bad=dh;
+    }
+    if(ba){ba.die();sTone(160,0.08,'square',0.06);}
+  }
 }
 function knifeTick(dt){
   if(!KNF.grp)return;
@@ -6144,6 +6360,7 @@ function knifeTick(dt){
 /* ---------- D : the rideable ("Quad Bike" by Sam Philo, CC BY 4.0) ---------- */
 const ATV={grp:null,wFL:null,wFR:null,wRear:null,wheelR:0.37,spin:0,spinAxis:'x',
   drive:{on:false,spd:0,steer:0,head:3.35,x:4.5,z:24},
+  lookYaw:0,lookPitch:0,ySm:null, // V12.1 : free-look offset (unbounded) + smoothed ride height
   camPos:new THREE.Vector3(-2,20,32),gas:false,brake:false,sL:false,sR:false};
 const _av1=new THREE.Vector3(),_av2=new THREE.Vector3();
 function atvWheelPivot(node){
@@ -6187,9 +6404,132 @@ function atvBuild(sc){
   if(wfr)ATV.wFR=atvWheelPivot(wfr);
   if(wr)ATV.wRear=atvWheelPivot(wr);
   if(ATV.wFL){const wb=new THREE.Box3().setFromObject(wfl);ATV.wheelR=Math.max(0.2,wb.getSize(new THREE.Vector3()).y/2);}
+  atvDetailKit();
   atvReset();
 }
+
+/* ---------- V12.1 : quad detail kit — in-code parts on the licensed GLB ----------
+   The Sam Philo quad is flat-color low-poly; this kit dresses the SAME model
+   (footer credit unchanged): exhaust + muffler, headlight + lenses, front/rear
+   racks, footboards, suspension arms, bar grips + cables, a vinyl seat overlay
+   (its height is sampled from the real geometry), procedural tire-tread
+   sleeves riding the wheel spin groups, and a shading pass on the body
+   material (roughness down — the plastics read as molded, not matte).
+   Everything is parented to ATV.grp (or the spin groups) in build-time grp
+   space (identity transform during build): wheel pivots, rider/camera
+   offsets, crush footprint and spawn are untouched. Tri cost is counted
+   into ATV.kitTris and probe-asserted < 6000. */
+function kitCanvasTex(w,h,fn,rx,ry){
+  const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;if(rx)t.repeat.set(rx,ry||1);return t;
+}
+function atvDetailKit(){
+  if(!ATV.grp||ATV.kitDone)return;ATV.kitDone=true;ATV.kitTris=0;ATV.kitParts=0;
+  const grp=ATV.grp;grp.updateMatrixWorld(true);
+  const kit=new THREE.Group();grp.add(kit);ATV.kitGrp=kit;
+  const M={
+    steel:new THREE.MeshPhongMaterial({color:0x8a8f96,shininess:85,specular:0xcccccc}),
+    darkMetal:new THREE.MeshPhongMaterial({color:0x33373b,shininess:40,specular:0x777777}),
+    rubber:new THREE.MeshPhongMaterial({color:0x17181a,shininess:6,specular:0x222222}),
+    lens:new THREE.MeshPhongMaterial({color:0xfff3c4,emissive:0xffdf8a,emissiveIntensity:0.5,shininess:100,specular:0xffffff}),
+  };
+  const treadTex=kitCanvasTex(128,64,(x,w,h)=>{
+    x.fillStyle='#17181a';x.fillRect(0,0,w,h);
+    x.strokeStyle='#2a2c30';x.lineWidth=8;
+    for(let i=-1;i<6;i++){x.beginPath();x.moveTo(i*32,68);x.lineTo(i*32+26,-4);x.stroke();
+      x.beginPath();x.moveTo(i*32+16,68);x.lineTo(i*32+42,-4);x.stroke();}
+    x.fillStyle='#101113';x.fillRect(0,26,w,12);
+  },8,1);
+  M.tread=new THREE.MeshPhongMaterial({map:treadTex,bumpMap:treadTex,bumpScale:0.5,shininess:8,specular:0x1a1a1a});
+  const vinylTex=kitCanvasTex(128,128,(x,w,h)=>{
+    x.fillStyle='#101113';x.fillRect(0,0,w,h);
+    x.fillStyle='#151619';for(let i=0;i<300;i++)x.fillRect(Math.random()*w,Math.random()*h,2,2);
+    x.strokeStyle='#2e3033';x.lineWidth=2;x.setLineDash([6,5]);
+    x.beginPath();x.moveTo(10,0);x.lineTo(10,h);x.stroke();
+    x.beginPath();x.moveTo(w-10,0);x.lineTo(w-10,h);x.stroke();
+  },1,1);
+  M.vinyl=new THREE.MeshPhongMaterial({map:vinylTex,shininess:22,specular:0x333333});
+  function add(mesh,parent){
+    mesh.castShadow=true;(parent||kit).add(mesh);ATV.kitParts++;
+    const g=mesh.geometry;ATV.kitTris+=(g.index?g.index.count:g.attributes.position.count)/3;
+    return mesh;
+  }
+  function box(sx,sy,sz,x,y,z,mat,rx){
+    const m=add(new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat));
+    m.position.set(x,y,z);if(rx)m.rotation.x=rx;return m;
+  }
+  function limb(ax,ay,az,bx,by,bz,r,mat,seg){
+    const a=new THREE.Vector3(ax,ay,az),b=new THREE.Vector3(bx,by,bz),dir=new THREE.Vector3().subVectors(b,a);
+    const m=add(new THREE.Mesh(new THREE.CylinderGeometry(r,r,dir.length(),seg||10),mat));
+    m.position.copy(a).addScaledVector(dir,0.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());
+    return m;
+  }
+  // body shading pass: the merged Body mesh gets its own material clone — plastics read molded, not matte
+  grp.traverse(o=>{if(o.isMesh&&o.name==='Body'){const cm=o.material.clone();cm.roughness=0.48;cm.metalness=0.06;o.material=cm;ATV.kitBodyMat=cm;}});
+  // exhaust pipe + muffler (right side, exiting rear)
+  limb(0.30,0.38,-0.02, 0.36,0.50,-0.58, 0.034,M.darkMetal,10);
+  limb(0.37,0.53,-0.56, 0.37,0.53,-1.02, 0.062,M.steel,14);
+  const cap=add(new THREE.Mesh(new THREE.CircleGeometry(0.048,16),M.rubber));
+  cap.position.set(0.37,0.53,-1.025);cap.rotation.y=Math.PI;
+  // headlight: housing + twin lenses on the front cowl
+  box(0.34,0.12,0.08, 0,0.86,1.03, M.darkMetal,-0.15);
+  for(const lx of [-0.095,0.095]){
+    const lens=add(new THREE.Mesh(new THREE.CircleGeometry(0.048,20),M.lens));
+    lens.position.set(lx,0.865,1.072);lens.rotation.x=-0.15;
+  }
+  // racks: rails + crossbars, front and rear
+  for(const rk of [{y:0.88,z:0.60},{y:0.92,z:-0.62}]){
+    box(0.03,0.025,0.46, -0.26,rk.y,rk.z, M.darkMetal);
+    box(0.03,0.025,0.46,  0.26,rk.y,rk.z, M.darkMetal);
+    for(const dz of [-0.18,0,0.18])box(0.55,0.025,0.035, 0,rk.y,rk.z+dz, M.darkMetal);
+  }
+  // footboards + grip ribs
+  for(const fx2 of [-0.70,0.70]){
+    box(0.30,0.035,0.66, fx2,0.28,-0.02, M.rubber);
+    for(const dz of [-0.22,0,0.22])box(0.26,0.014,0.04, fx2,0.303,-0.02+dz, M.darkMetal);
+  }
+  // suspension arms: chassis to each wheel hub
+  limb( 0.20,0.40, 0.60,  0.50,0.27, 0.65, 0.028,M.darkMetal,8);
+  limb(-0.20,0.40, 0.60, -0.50,0.27, 0.65, 0.028,M.darkMetal,8);
+  limb( 0.20,0.42,-0.56,  0.48,0.27,-0.59, 0.028,M.darkMetal,8);
+  limb(-0.20,0.42,-0.56, -0.48,0.27,-0.59, 0.028,M.darkMetal,8);
+  // handlebar grips + cables
+  limb(-0.38,1.10,0.40, -0.24,1.10,0.40, 0.023,M.rubber,10);
+  limb( 0.24,1.10,0.40,  0.38,1.10,0.40, 0.023,M.rubber,10);
+  limb( 0.04,1.09,0.40,  0.10,0.82,0.50, 0.008,M.rubber,6);
+  limb(-0.04,1.09,0.40, -0.08,0.84,0.52, 0.008,M.rubber,6);
+  // seat overlay: height sampled from the Body geometry in the seat zone
+  let seatY=0.92;
+  grp.traverse(o=>{if(o.isMesh&&o.name==='Body'){
+    const pa=o.geometry.attributes.position,v=new THREE.Vector3();let mx=0;
+    for(let i=0;i<pa.count;i++){v.fromBufferAttribute(pa,i).applyMatrix4(o.matrixWorld);
+      if(Math.abs(v.x)<0.30&&v.z>-0.62&&v.z<0.10&&v.y>mx)mx=v.y;}
+    if(mx>0.5)seatY=mx;
+  }});
+  const seat=box(0.46,0.045,0.78, 0,seatY-0.004,-0.24, M.vinyl,-0.05);
+  ATV.kitSeatY=seatY;
+  // tire-tread sleeves riding the spin groups (rear axle carries two tires on one node)
+  function sleeve(spin,cen){
+    if(!spin)return;
+    const g=new THREE.CylinderGeometry(ATV.wheelR+0.004,ATV.wheelR+0.004,0.20,20,1,true);
+    const m=new THREE.Mesh(g,M.tread);m.castShadow=true;
+    m.position.copy(spin.worldToLocal(cen.clone()));
+    const invQ=spin.getWorldQuaternion(new THREE.Quaternion()).invert();
+    const ax=new THREE.Vector3(1,0,0).applyQuaternion(invQ).normalize();
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),ax);
+    spin.add(m);ATV.kitParts++;ATV.kitTris+=(g.index?g.index.count:g.attributes.position.count)/3;
+  }
+  const wc=new THREE.Vector3();
+  if(ATV.wFL){ATV.wFL.spin.getWorldPosition(wc);sleeve(ATV.wFL.spin,wc);}
+  if(ATV.wFR){ATV.wFR.spin.getWorldPosition(wc);sleeve(ATV.wFR.spin,wc);}
+  if(ATV.wRear){ATV.wRear.spin.getWorldPosition(wc);
+    sleeve(ATV.wRear.spin,new THREE.Vector3(wc.x-0.54,wc.y,wc.z));
+    sleeve(ATV.wRear.spin,new THREE.Vector3(wc.x+0.54,wc.y,wc.z));}
+}
 function atvReset(){
+  engStop(); // V12.1 : a fresh deploy silences the engine if it was somehow running
+  ATV.lookYaw=0;ATV.lookPitch=0;ATV.ySm=null;
   ATV.drive.on=false;ATV.drive.spd=0;ATV.drive.steer=0;
   ATV.drive.x=4.5;ATV.drive.z=24;ATV.drive.head=3.35;
   ATV.gas=ATV.brake=ATV.sL=ATV.sR=false;
@@ -6197,15 +6537,22 @@ function atvReset(){
 }
 function atvPlace(dt){
   const d=ATV.drive;if(!ATV.grp)return;
-  ATV.grp.position.set(d.x,groundH(d.x,d.z)+
-    (d.on?Math.sin(G.swayT*31)*0.012*Math.min(1,Math.abs(d.spd)/6):0),d.z); // gentle suspension bob, ∝ speed
+  const gh=surfH(d.x,d.z),spA=Math.abs(d.spd); // V13 Chunk B : deck-aware ride height
+  if(ATV.ySm==null||!d.on)ATV.ySm=gh; // parked: planted exactly as v12.0; mounted: smoothed ride height (below)
+  else{ // V12.1 : speed-proof terrain following — rises are met fast, drops fall slower (brief air off crests; never a launch, never a sink)
+    const dy=gh-ATV.ySm,cap=(dy>0?30:14)*(dt>0?dt:0.016);
+    ATV.ySm+=Math.max(-cap,Math.min(cap,dy));
+  }
+  ATV.grp.position.set(d.x,ATV.ySm+
+    (d.on?Math.sin(G.swayT*31)*0.012*Math.min(1,spA/6):0),d.z); // gentle suspension bob, ∝ speed
   const fx=Math.sin(d.head),fz=Math.cos(d.head);
   const px2=Math.cos(d.head),pz2=-Math.sin(d.head); // local +X in world (the model's left, post-yaw)
-  const hF=groundH(d.x+fx*0.7,d.z+fz*0.7),hB=groundH(d.x-fx*0.7,d.z-fz*0.7); // quad fit: probes at the axles
-  const hP=groundH(d.x+px2*0.55,d.z+pz2*0.55),hS=groundH(d.x-px2*0.55,d.z-pz2*0.55);
-  const pitch=Math.atan2(hB-hF,1.4),roll=Math.atan2(hP-hS,1.1);
+  const pd=0.7+Math.min(2.6,spA*0.05),qd=0.55+Math.min(1.8,spA*0.035); // V12.1 : ground probes widen with speed — pitch/roll read what the wheels are about to meet
+  const hF=surfH(d.x+fx*pd,d.z+fz*pd),hB=surfH(d.x-fx*pd,d.z-fz*pd);
+  const hP=surfH(d.x+px2*qd,d.z+pz2*qd),hS=surfH(d.x-px2*qd,d.z-pz2*qd); // V13 Chunk B : deck-aware tilt probes
+  const pitch=Math.atan2(hB-hF,pd*2),roll=Math.atan2(hP-hS,qd*2);
   ATV.grp.rotation.y=d.head;
-  const k=dt>0?Math.min(1,dt*7):1;
+  const k=dt>0?Math.min(1,dt*(7-Math.min(3.5,spA*0.05))):1;
   ATV.grp.rotation.x+=(pitch-ATV.grp.rotation.x)*k;
   ATV.grp.rotation.z+=(roll-ATV.grp.rotation.z)*k;
 }
@@ -6214,18 +6561,21 @@ function atvMount(){
   if(KNF.out)weaponSwitch(); // the knife auto-holsters on mount
   if(G.scoped)setScoped(false);
   const d=ATV.drive;d.on=true;
+  ATV.lookYaw=0;ATV.lookPitch=0; // V12.1 : free look starts centered on the heading
   ATV.camPos.set(d.x-Math.sin(d.head)*4.8,groundH(d.x,d.z)+2.3,d.z-Math.cos(d.head)*4.8); // quad fit: closer chase cam
   G.px=d.x;G.pz=d.z;
   sClick();buzz(10);V12H.dirty=true;
+  engStart(); // V12.1 : engine wakes (soft start + rev blip)
 }
 function atvDismount(){
   const d=ATV.drive;if(!d.on)return;
   d.on=false;
   const rx=-Math.cos(d.head),rz=Math.sin(d.head); // the vehicle's world-right side
-  G.px=clamp(d.x+rx*2.3,-280,280);
-  G.pz=clamp(d.z+rz*2.3,-372,190);
+  G.px=clamp(d.x+rx*2.3,-2960,2960);
+  G.pz=clamp(d.z+rz*2.3,-2960,2960); // V13 : world bounds
   G.yaw=d.head+Math.PI; // face the way the quad faces
   d.spd=0;
+  engStop(); // V12.1 : engine winds down + stops
   sClick();buzz(8);V12H.dirty=true;
 }
 function atvTick(gdt){
@@ -6235,22 +6585,25 @@ function atvTick(gdt){
   const brake=ATV.brake||KEYS['KeyS']||KEYS['ArrowDown'];
   const sIn=((ATV.sR||KEYS['KeyD']||KEYS['ArrowRight'])?1:0)-((ATV.sL||KEYS['KeyA']||KEYS['ArrowLeft'])?1:0);
   d.steer+=(sIn-d.steer)*Math.min(1,gdt*7);
-  const maxA=0.52-0.30*Math.min(1,Math.abs(d.spd)/14); // speed-sensitive steering
-  if(gas)d.spd+=7.5*gdt*(1-Math.max(0,d.spd)/15.5);       // arcade curve → ~14 m/s top (walk is 3.5)
+  const spA2=Math.abs(d.spd); // V12.1 : steering authority — the v12 curve up to 14 m/s, then it falls off hard (at 56 the quad tracks like an arrow, no spin)
+  const maxA=spA2<=14?0.52-0.30*(spA2/14):Math.max(0.03,0.22*Math.pow(14/spA2,1.6));
+  if(gas)d.spd+=24*gdt*Math.pow(Math.max(0,1-d.spd/58),0.55); // V12.1 : hard launch, strong pull, taper seats it at ~57 m/s (4x the old cap; walk is 3.5)
   if(brake){
     if(d.spd>0.3)d.spd-=13*gdt;
     else d.spd=Math.max(-5,d.spd-5*gdt);                  // brake becomes reverse
   }
-  d.spd-=d.spd*0.35*gdt;                                   // drag
+  d.spd-=d.spd*(gas?0.02:0.35)*gdt;                        // drag (near-zero under throttle — the taper above sets the top end; full drag coasting, unchanged)
   if(!gas&&!brake)d.spd-=Math.sign(d.spd)*Math.min(Math.abs(d.spd),2.0*gdt); // rolling decel
   const fx=Math.sin(d.head),fz=Math.cos(d.head);
-  const slope=(groundH(d.x+fx*2.2,d.z+fz*2.2)-groundH(d.x-fx*2.2,d.z-fz*2.2))/4.4;
+  const slope=(surfH(d.x+fx*2.2,d.z+fz*2.2)-surfH(d.x-fx*2.2,d.z-fz*2.2))/4.4; // V13 Chunk B : deck-aware slope
   d.spd-=slope*9.8*0.55*gdt;                               // hills push back
   if(Math.abs(d.spd)>0.02)
     d.head+=(d.spd/1.3)*Math.tan(-d.steer*maxA)*gdt; // quad fit: 1.3 m wheelbase       // bicycle-ish: signed speed flips reverse steering naturally
-  let nx=clamp(d.x+Math.sin(d.head)*d.spd*gdt,-280,280);
-  let nz=clamp(d.z+Math.cos(d.head)*d.spd*gdt,-372,190);
+  const pvx=d.x,pvz=d.z; // V12.1 : pre-move position — the crush stamps walk the segment actually traveled
+  let nx=clamp(d.x+Math.sin(d.head)*d.spd*gdt,-2960,2960);
+  let nz=clamp(d.z+Math.cos(d.head)*d.spd*gdt,-2960,2960); // V13 : world bounds
   let hit=false;
+  if(surfH(nx,nz)<-3.0){nx=d.x;nz=d.z;hit=true;} // V13 : the quad does not swim — shore stops it (deck registers in surfH)
   for(const b of BLOCKERS){ // soft stop/slide — same blocker set the walker uses, vehicle radius
     const dx=nx-b.x,dz=nz-b.z,rr=b.r+1.5,d2=dx*dx+dz*dz;
     if(d2<rr*rr&&d2>1e-6){const dd=Math.sqrt(d2);nx=b.x+dx/dd*rr;nz=b.z+dz/dd*rr;hit=true;}}
@@ -6270,45 +6623,142 @@ function atvTick(gdt){
   if(ATV.wFR){ATV.wFR.spin.rotation[sax]=ATV.spin;ATV.wFR.steer.rotation.y=steerVis;}
   if(ATV.wRear)ATV.wRear.spin.rotation[sax]=ATV.spin;
   const sgn=d.spd<0?-1:1; // grass crush under the wheels (grass only — never bushes)
-  grassCrushAt(d.x,d.z,fx*sgn,fz*sgn,1.05,1); // quad fit: crush footprint
-  grassCrushAt(d.x+fx*0.62,d.z+fz*0.62,fx*sgn,fz*sgn,0.85,1);
+  const segD=Math.hypot(d.x-pvx,d.z-pvz),cSteps=Math.min(5,Math.max(1,Math.ceil(segD/0.9))); // V12.1 : distance-stepped — at 56 m/s a single stamp per frame would dot the trail
+  for(let csi=0;csi<=cSteps;csi++){
+    const cx2=pvx+(d.x-pvx)*csi/cSteps,cz2=pvz+(d.z-pvz)*csi/cSteps;
+    grassCrushAt(cx2,cz2,fx*sgn,fz*sgn,1.05,1); // quad fit: crush footprint
+    grassCrushAt(cx2+fx*0.62,cz2+fz*0.62,fx*sgn,fz*sgn,0.85,1);
+  }
   atvPlace(gdt);
+  engUpdate(gdt); // V12.1 : engine follows throttle + road speed
 }
 function atvCam(dt){
   const d=ATV.drive;
   const fx=Math.sin(d.head),fz=Math.cos(d.head);
-  _av1.set(d.x-fx*4.8,0,d.z-fz*4.8); // quad fit: chase distance
+  _av1.set(d.x-fx*4.8,0,d.z-fz*4.8); // quad fit: chase distance (position spring + terrain clearance unchanged from v12.0)
   _av1.y=Math.max(groundH(_av1.x,_av1.z)+2.0,groundH(d.x,d.z)+1.7);
   ATV.camPos.lerp(_av1,1-Math.exp(-dt*4.5));
   camera.position.copy(ATV.camPos);
-  _av2.set(d.x+fx*2.2,groundH(d.x,d.z)+1.0,d.z+fz*2.2);
+  // V12.1 : FREE LOOK — the clamp is gone; the view rides the player's unbounded look offset (fed by aimByPixels).
+  // Same yaw convention as the on-foot camera (dismount hands off at G.yaw = head + PI), so the view never snaps.
+  const psi=d.head+Math.PI+ATV.lookYaw;
+  _av2.set(d.x-Math.sin(psi)*6,groundH(d.x,d.z)+1.0+Math.tan(ATV.lookPitch)*6,d.z-Math.cos(psi)*6);
   camera.lookAt(_av2);
+  const fv=68+Math.min(11,Math.max(0,Math.abs(d.spd)-14)*0.26); // V12.1 : speed FOV — widens as the quad stretches its legs (the frame loop restores 68 on dismount)
+  if(Math.abs(camera.fov-fv)>0.05){camera.fov=fv;camera.updateProjectionMatrix();}
   rifle.visible=false;
+}
+
+/* ---------- D2 : engine audio — synthesized WebAudio, no files ----------
+   Layered oscillators (saw fundamental + detuned square sub) through an
+   RPM-tracking lowpass, plus a bandpassed exhaust-noise layer and an idle
+   putter LFO. RPM is driven by throttle AND road speed: it climbs fast
+   under throttle (the launch), settles at cruise, drops to idle putter.
+   The fundamental is capped low (<= ~130 Hz) — the filter opening sells
+   the top end, never a whine. Output rides the SFX bus via aDest(), so
+   the existing volume / SFX / mute settings all govern it. Nodes are a
+   fixed set per mount, stopped + disconnected on dismount — no leaks. */
+const ENG={on:false,rpm:0.16,nodes:null,blip:0};
+function engStart(){
+  if(ENG.on)return;
+  const ac=audio();if(!ac)return; // muted / audio unavailable — atvTick retries while mounted
+  try{
+    const t=ac.currentTime;
+    const g=ac.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.16,t+0.28); // soft start
+    const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=340;f.Q.value=1.1;
+    const o1=ac.createOscillator();o1.type='sawtooth';o1.frequency.value=62;
+    const o2=ac.createOscillator();o2.type='square';o2.frequency.value=29.5;
+    const og2=ac.createGain();og2.gain.value=0.55;
+    const len=ac.sampleRate|0,buf=ac.createBuffer(1,len,ac.sampleRate),dd=buf.getChannelData(0);
+    for(let i=0;i<len;i++)dd[i]=Math.random()*2-1;
+    const ns=ac.createBufferSource();ns.buffer=buf;ns.loop=true;
+    const nf=ac.createBiquadFilter();nf.type='bandpass';nf.frequency.value=240;nf.Q.value=0.7;
+    const ng=ac.createGain();ng.gain.value=0.045;
+    const lfo=ac.createOscillator();lfo.type='sine';lfo.frequency.value=11;
+    const lg=ac.createGain();lg.gain.value=0.03;
+    lfo.connect(lg);lg.connect(g.gain); // idle putter AM (depth fades as RPM climbs)
+    o1.connect(f);o2.connect(og2);og2.connect(f);ns.connect(nf);nf.connect(ng);ng.connect(f);
+    f.connect(g);g.connect(aDest(ac));
+    o1.start();o2.start();ns.start();lfo.start();
+    ENG.nodes={g,f,o1,o2,og2,ns,nf,ng,lfo,lg};
+    ENG.on=true;ENG.rpm=0.30;ENG.blip=0.35; // starter rev blip
+  }catch(e){ENG.nodes=null;ENG.on=false;}
+}
+function engStop(){
+  if(!ENG.on)return;ENG.on=false;
+  const N=ENG.nodes;ENG.nodes=null;if(!N)return;
+  const ac=(typeof AC!=='undefined')?AC:null;if(!ac)return;
+  try{
+    const t=ac.currentTime;
+    N.g.gain.cancelScheduledValues(t);
+    N.g.gain.setValueAtTime(Math.max(0.0001,N.g.gain.value),t);
+    N.g.gain.exponentialRampToValueAtTime(0.0001,t+0.22); // wind-down
+    const stopAt=t+0.3;
+    N.o1.stop(stopAt);N.o2.stop(stopAt);N.ns.stop(stopAt);N.lfo.stop(stopAt);
+    setTimeout(()=>{try{N.g.disconnect();N.f.disconnect();N.o1.disconnect();N.o2.disconnect();N.og2.disconnect();N.ns.disconnect();N.nf.disconnect();N.ng.disconnect();N.lfo.disconnect();N.lg.disconnect();}catch(e){}},480);
+  }catch(e){}
+}
+function engUpdate(gdt){
+  if(!ATV.drive.on)return;
+  if(!ENG.on){engStart();if(!ENG.on)return;}
+  const N=ENG.nodes;if(!N)return;
+  if(gdt<=0){ // world frozen (pause) — duck the engine to a murmur
+    const ac0=(typeof AC!=='undefined')?AC:null;
+    if(ac0&&ac0.state==='running')N.g.gain.setTargetAtTime(0.02,ac0.currentTime,0.05);
+    return;
+  }
+  const d=ATV.drive;
+  const gas=ATV.gas||KEYS['KeyW']||KEYS['ArrowUp'];
+  const spdN=Math.min(1,Math.abs(d.spd)/57);
+  let tgt=0.16+0.52*spdN+(gas?0.30:0); // idle 0.16 -> cruise ~0.68 -> full-throttle top ~0.98
+  if(ENG.blip>0){ENG.blip-=gdt;tgt=Math.max(tgt,0.55);}
+  const rate=tgt>ENG.rpm?5.5:2.2; // revs climb FAST under throttle (the launch), fall off slower
+  ENG.rpm+=(tgt-ENG.rpm)*Math.min(1,gdt*rate);
+  const ac=(typeof AC!=='undefined')?AC:null;if(!ac||ac.state!=='running')return; // suspend-safe: state waits, params resume when the context does
+  const t=ac.currentTime,r=ENG.rpm;
+  const fund=52+r*78; // 60 Hz at idle -> 130 Hz cap: low on purpose — the filter does the talking, never a whine
+  N.o1.frequency.setTargetAtTime(fund,t,0.03);
+  N.o2.frequency.setTargetAtTime(fund*0.5+1.5,t,0.03); // detuned sub-octave
+  N.f.frequency.setTargetAtTime(280+r*1650+(gas?250:0),t,0.05);
+  N.nf.frequency.setTargetAtTime(180+r*900,t,0.05);
+  N.ng.gain.setTargetAtTime(0.03+r*0.10,t,0.05);
+  N.lfo.frequency.setTargetAtTime(8+r*26,t,0.1);
+  N.lg.gain.setTargetAtTime((1-r)*0.05,t,0.1); // putter strongest at idle
+  N.g.gain.setTargetAtTime(G.muted?0:0.16,t,0.05);
 }
 
 /* ---------- G : HUD state (change-only DOM writes) ---------- */
 const V12H={sig:'',dirty:true};
 function v12HudDirty(){V12H.dirty=true;}
 function v12HudTick(){
-  const inGame=(G.state==='play'||G.state==='roam')&&!G.settingsOpen&&!G.pauseOpen;
+  const inGame=(G.state==='play'||G.state==='roam')&&!G.settingsOpen&&!G.pauseOpen&&!G.mapOpen&&!G.heliOpen;
   const drv=ATV.drive.on;
+  const fly=(typeof V13F!=='undefined'&&V13F.flyOn);
   let sig;
   if(!inGame)sig='off';
+  else if(fly)sig='fly';
   else if(drv)sig='drv';
-  else sig='ft'+(V12.nearVeh?'R':'')+(KNF.out?'K':'')+(isConcealed()?'C':'');
+  else sig='ft'+(V12.nearVeh?'R':'')+(KNF.out?'K':'')+(isConcealed()?'C':'')+((typeof V13F!=='undefined'&&(V13F.nearPad||V13F.nearHeli))?'H':'');
   if(sig===V12H.sig&&!V12H.dirty)return;
   V12H.sig=sig;V12H.dirty=false;
   const show=(id,v)=>{const e=$(id);if(e)e.style.display=v?'flex':'none';};
-  show('btnWep',inGame&&!drv);
+  show('btnWep',inGame&&!drv&&!fly);
   show('btnGas',inGame&&drv);show('btnBrake',inGame&&drv);
   show('btnSteerL',inGame&&drv);show('btnSteerR',inGame&&drv);
-  show('btnRide',inGame&&(drv||V12.nearVeh));
-  show('btnFire',inGame&&!drv);show('btnScope',inGame&&!drv);show('btnReload',inGame&&!drv);
-  const joy=$('joy');if(joy)joy.style.display=(inGame&&!drv)?'block':'none';
-  show('concealChip',inGame&&!drv&&isConcealed());
+  show('btnRide',inGame&&(drv||V12.nearVeh)&&!fly);
+  show('btnMap',inGame);
+  show('spdBox',inGame&&drv); // V12.1 : the speedometer lives with the driving cluster
+  show('btnFire',inGame&&!drv&&!fly);show('btnScope',inGame&&!drv&&!fly);show('btnReload',inGame&&!drv&&!fly);
+  show('btnHUp',inGame&&fly);show('btnHDown',inGame&&fly); // V13 Chunk F : the flight cluster
+  show('btnHYawL',inGame&&fly);show('btnHYawR',inGame&&fly);
+  show('btnFly',inGame&&(fly||(!drv&&typeof V13F!=='undefined'&&V13F.nearHeli)));
+  show('btnPad',inGame&&!drv&&!fly&&(typeof V13F!=='undefined'&&V13F.nearPad));
+  const joy=$('joy');if(joy)joy.style.display=(inGame&&(!drv||fly))?'block':'none'; // V13 Chunk F : the stick is the cyclic in flight
+  show('concealChip',inGame&&!drv&&!fly&&isConcealed());
   if(inGame){
     $('btnRide').textContent=drv?'EXIT':'RIDE';
     $('btnWep').textContent=KNF.out?'RIFLE':'KNIFE';
+    $('btnFly').textContent=fly?'EXIT':'FLY';
   }
 }
 
@@ -6337,7 +6787,7 @@ function v12Tick(dt,gdt){
   }
   if(ATV.grp&&!ATV.drive.on)atvPlace(gdt);
   if(ATV.drive.on&&(G.state==='play'||G.state==='roam')&&!KC.active){
-    atvTick(gdt);atvCam(dt);
+    atvTick(gdt);atvCam(dt);spdHudUpd();
   }else{
     V12.nearVeh=!!ATV.grp&&(G.state==='play'||G.state==='roam')&&
       Math.hypot(G.px-ATV.drive.x,G.pz-ATV.drive.z)<3.4;
@@ -6355,11 +6805,21 @@ function v12Tick(dt,gdt){
   v12HudTick();
 }
 
+/* ---------- V12.1 : driving speedometer (0-220 km/h scale; 56 m/s ~ 202) ---------- */
+let _spdShown=-1;
+function spdHudUpd(){
+  const n=$('spdNum');if(!n)return;
+  const kmh=Math.round(Math.abs(ATV.drive.spd)*3.6);
+  if(kmh===_spdShown)return;_spdShown=kmh; // change-only writes, like the rest of the HUD
+  n.textContent=kmh;
+  const b=$('spdBar');if(b)b.style.width=Math.min(100,kmh/220*100)+'%';
+}
+
 /* ---------- V12 input bindings ---------- */
-bindBtn('btnGas',()=>{ATV.gas=true;},()=>{ATV.gas=false;});
-bindBtn('btnBrake',()=>{ATV.brake=true;},()=>{ATV.brake=false;});
-bindBtn('btnSteerL',()=>{ATV.sL=true;},()=>{ATV.sL=false;});
-bindBtn('btnSteerR',()=>{ATV.sR=true;},()=>{ATV.sR=false;});
+bindBtn('btnGas',()=>{ATV.gas=true;$('btnGas').classList.add('on');},()=>{ATV.gas=false;$('btnGas').classList.remove('on');});
+bindBtn('btnBrake',()=>{ATV.brake=true;$('btnBrake').classList.add('on');},()=>{ATV.brake=false;$('btnBrake').classList.remove('on');});
+bindBtn('btnSteerL',()=>{ATV.sL=true;$('btnSteerL').classList.add('on');},()=>{ATV.sL=false;$('btnSteerL').classList.remove('on');});
+bindBtn('btnSteerR',()=>{ATV.sR=true;$('btnSteerR').classList.add('on');},()=>{ATV.sR=false;$('btnSteerR').classList.remove('on');});
 bindBtn('btnRide',()=>{if(ATV.drive.on)atvDismount();else if(V12.nearVeh)atvMount();});
 bindBtn('btnWep',()=>weaponSwitch());
 bindEl($('loSupp'),()=>suppToggle(selRifle));
@@ -6377,6 +6837,1379 @@ buildAmbient();
 loadV12Pack();
 suppLook(); // PCR-fallback suppressor parts follow state even before the pack lands
 /* ==================== end V12 ==================== */
+
+/* ==================== V13 — WORLD EXPANSION ====================
+   Chunk A : world bones. The geography core (heightfield, island, valley,
+   plateau, FLATS, surfH) lives with the terrain code; this block carries the
+   water surfaces + the per-frame V13 systems hook. Later chunks append their
+   systems here (bridge/roads/falls, outposts, map, ecology/animals, heli). */
+const V13={sunAx:0,sunAz:-96,
+  spots:[['LAKE_VISTA',0,-1010,0,0.0],['CLIFF_VISTA',-1330,-1750,-1.35,0.0]]}; // perf-probe viewpoints
+function v13Tick(dt,gdt){
+  /* the shadow camera covers +-150 m around its target — walk the frustum
+     with the player (shifting light + target together preserves the day /
+     night offsets applyEnvironment chose). Anchor sits 120 m ahead (north)
+     of the player, where the action is. */
+  const ax=G.px,az=G.pz-120,dx=ax-V13.sunAx,dz=az-V13.sunAz;
+  if(dx*dx+dz*dz>1600){
+    sun.position.x+=dx;sun.position.z+=dz;
+    sun.target.position.x+=dx;sun.target.position.z+=dz;
+    sun.target.updateMatrixWorld();
+    V13.sunAx=ax;V13.sunAz=az;
+  }
+  if(typeof v13TickB==='function')v13TickB(dt,gdt);
+  if(typeof v13TickC==='function')v13TickC(dt,gdt);
+  if(typeof v13TickD==='function')v13TickD(dt,gdt);
+  if(typeof v13TickE==='function')v13TickE(dt,gdt);
+  if(typeof v13TickF==='function')v13TickF(dt,gdt);
+}
+/* sea + valley lake : scenery surfaces at SEA_Y / LAKE_Y (no swimming —
+   walkers and the quad stop at the shoreline via the surfH guards). */
+(function(){
+  const sea=new THREE.Mesh(new THREE.PlaneGeometry(12000,12000),
+    new THREE.MeshPhongMaterial({color:0x2e5a74,transparent:true,opacity:0.94,shininess:190,specular:0xffd9a0}));
+  sea.rotation.x=-Math.PI/2;sea.position.y=SEA_Y;sea.receiveShadow=true;scene.add(sea);
+  const lake=new THREE.Mesh(new THREE.CircleGeometry(1,44),
+    new THREE.MeshPhongMaterial({color:0x39687e,transparent:true,opacity:0.92,shininess:170,specular:0xffd9a0}));
+  lake.rotation.x=-Math.PI/2;lake.scale.set(215,330,1);
+  lake.position.set(valleyX(-2050),LAKE_Y,-2050);lake.receiveShadow=true;scene.add(lake);
+})();
+
+/* ==================== V13 Chunk B — bridge, roads, waterfalls ====================
+   Geometry for the crossing + the road network + three surveyed falls.
+   The bridge is ONE merged vertex-colored mesh (steel / concrete / deck)
+   plus a textured deck-top ribbon and a merged lamp-head mesh. Roads are
+   draped ribbons over the road-flattened heightfield. Falls are draped
+   ribbons with a shared scrolling streak texture + mist sprites. */
+const _bg={pos:[],nor:[],col:[],idx:[],off:0};
+const _bgM=new THREE.Matrix4(),_bgN=new THREE.Matrix3(),_bgC=new THREE.Color();
+function pushGeoM(geo,mat4,color){
+  const pa=geo.attributes.position,na=geo.attributes.normal,ia=geo.index;
+  _bgN.getNormalMatrix(mat4);_bgC.setHex(color);
+  const v=new THREE.Vector3();
+  for(let i=0;i<pa.count;i++){
+    v.set(pa.getX(i),pa.getY(i),pa.getZ(i)).applyMatrix4(mat4);
+    _bg.pos.push(v.x,v.y,v.z);
+    v.set(na.getX(i),na.getY(i),na.getZ(i)).applyMatrix3(_bgN).normalize();
+    _bg.nor.push(v.x,v.y,v.z);
+    _bg.col.push(_bgC.r,_bgC.g,_bgC.b);
+  }
+  if(ia)for(let i=0;i<ia.count;i++)_bg.idx.push(ia.getX(i)+_bg.off);
+  else for(let i=0;i<pa.count;i++)_bg.idx.push(i+_bg.off);
+  _bg.off+=pa.count;
+}
+const _BOXG=new THREE.BoxGeometry(1,1,1),_CYLG=new THREE.CylinderGeometry(1,1,1,7);
+const _q4=new THREE.Quaternion(),_e4=new THREE.Euler(),_v4=new THREE.Vector3(),_s4=new THREE.Vector3();
+function pushBox(cx,cy,cz,sx,sy,sz,rx,color){
+  _e4.set(rx||0,0,0);_q4.setFromEuler(_e4);
+  _bgM.compose(_v4.set(cx,cy,cz),_q4,_s4.set(sx,sy,sz));
+  pushGeoM(_BOXG,_bgM,color);
+}
+function pushCyl(ax,ay,az,bx,by,bz,r,color){
+  const dx=bx-ax,dy=by-ay,dz=bz-az,len=Math.hypot(dx,dy,dz);
+  if(len<0.05)return;
+  _q4.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(dx/len,dy/len,dz/len));
+  _bgM.compose(_v4.set((ax+bx)/2,(ay+by)/2,(az+bz)/2),_q4,_s4.set(r,len,r));
+  pushGeoM(_CYLG,_bgM,color);
+}
+function buildMergedMesh(bag,mat){
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(bag.pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(bag.nor,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(bag.col,3));
+  g.setIndex(bag.idx);
+  const m=new THREE.Mesh(g,mat);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m;
+}
+/* ---- the bridge ---- */
+const BR={steel:0x596068,dark:0x3f464e,conc:0x8b8d89,slab:0x4a4a4c,rail:0x707780,cable:0x2e3237};
+(function buildBridge(){
+  const slopeAt=z=>(deckY(z+4)-deckY(z-4))/8;
+  for(let z=-916;z<-412;z+=8.6){ // deck slab + girders, following the profile
+    const zm=z+4.3,dy=deckY(zm),rx=-Math.atan(slopeAt(zm));
+    pushBox(0,dy-0.75,zm,14.8,1.5,9.4,rx,BR.slab);
+    pushBox(-7.0,dy-1.95,zm,0.6,1.7,9.4,rx,BR.steel);
+    pushBox(7.0,dy-1.95,zm,0.6,1.7,9.4,rx,BR.steel);
+    if(zm<-440&&zm>-884&&((z/17)|0)===((z+8.6)/17|0))pushBox(0,dy-2.3,zm,14.6,0.5,0.55,0,BR.dark); // cross beams
+    for(const sx of[-7.05,7.05]){ // guard rails : posts + two rails
+      pushBox(sx,dy+0.55,zm,0.16,1.1,0.16,0,BR.rail);
+      if(((z/24.8)|0)!==(((z+8.6)/24.8)|0)){
+        pushBox(sx,dy+1.08,zm+8,0.1,0.13,25.6,-Math.atan(slopeAt(zm+8)),BR.rail);
+        pushBox(sx,dy+0.68,zm+8,0.1,0.11,25.6,-Math.atan(slopeAt(zm+8)),BR.rail);
+      }
+    }
+  }
+  const towers=[-600,-745];
+  for(const zt of towers){
+    const top=deckY(zt)+38;
+    for(const sx of[-6.8,6.8])pushBox(sx,(top-16)/2,zt,2.4,top+16,2.4,0,BR.conc);
+    pushBox(0,deckY(zt)+18,zt,16,2.0,1.8,0,BR.conc);
+    pushBox(0,deckY(zt)+32,zt,16,2.0,1.8,0,BR.conc);
+    pushBox(0,deckY(zt)-6,zt,16,2.2,2.0,0,BR.conc);
+  }
+  function cableY(z){ // the main cable line (both side planes share it)
+    const t1=deckY(-600)+38,t2=deckY(-745)+38;
+    if(z>-600)return lerp(deckY(-414)+1.5,t1,sstep(-414,-600,z));
+    if(z<-745)return lerp(t2,deckY(-918)+1.5,sstep(-745,-918,z));
+    const t=(z+600)/(-145),sag=21.5;
+    return lerp(t1,t2,t)-Math.sin(t*Math.PI)*sag;
+  }
+  V13.cableY=cableY;
+  for(const sx of[-6.9,6.9]){
+    let prev=null;
+    for(let z=-414;z>=-918;z-=11){
+      const y=cableY(z),p=[sx,y,z];
+      if(prev)pushCyl(prev[0],prev[1],prev[2],p[0],p[1],p[2],0.17,BR.cable);
+      prev=p;
+    }
+    for(let z=-584;z>=-762;z-=16.8){ // suspenders on the main span
+      const cy=cableY(z);if(cy-deckY(z)>2.5)pushCyl(sx,cy,z,sx,deckY(z)+0.1,z,0.06,BR.cable);
+    }
+  }
+  const heads={pos:[],nor:[],col:[],idx:[],off:0}; // lamp heads (own bag -> basic material)
+  let side=1;
+  for(let z=-452;z>=-900;z-=44.3){
+    const sx=side*6.3,dy=deckY(z);side=-side;
+    pushCyl(sx,dy,z,sx,dy+5.4,z,0.09,BR.dark);
+    pushCyl(sx,dy+5.4,z,sx-Math.sign(sx)*1.3,dy+5.72,z,0.06,BR.dark);
+    // swap to the heads bag for the lamp head box
+    const hp=_bg.pos,hn=_bg.nor,hc=_bg.col,hi=_bg.idx,ho=_bg.off;
+    _bg.pos=heads.pos;_bg.nor=heads.nor;_bg.col=heads.col;_bg.idx=heads.idx;_bg.off=heads.off;
+    pushBox(sx-Math.sign(sx)*1.55,dy+5.66,z,0.95,0.13,0.32,0,0xffe6b0);
+    heads.off=_bg.off;
+    _bg.pos=hp;_bg.nor=hn;_bg.col=hc;_bg.idx=hi;_bg.off=ho;
+  }
+  buildMergedMesh(_bg,new THREE.MeshLambertMaterial({vertexColors:true}));
+  buildMergedMesh(heads,new THREE.MeshBasicMaterial({vertexColors:true}));
+  for(let z=-900;z<=-436;z+=9){BLOCKERS.push({x:-7.3,z:z,r:0.75});BLOCKERS.push({x:7.3,z:z,r:0.75});} // rails are walls
+  /* deck-top driving surface : asphalt ribbon on the profile */
+  const cv=document.createElement('canvas');cv.width=cv.height=128;const cx2=cv.getContext('2d');
+  cx2.fillStyle='#3c3f43';cx2.fillRect(0,0,128,128);
+  for(let i=0;i<900;i++){cx2.fillStyle='rgba(255,255,255,'+(Math.random()*0.05)+')';cx2.fillRect(Math.random()*128,Math.random()*128,1.6,1.6);}
+  cx2.fillStyle='rgba(230,230,220,0.85)';cx2.fillRect(3,0,2.4,128);cx2.fillRect(122.6,0,2.4,128);
+  cx2.fillStyle='rgba(240,220,150,0.8)';cx2.fillRect(62.8,4,2.4,56); // one dash per tile
+  const at=new THREE.CanvasTexture(cv);at.wrapS=at.wrapT=THREE.RepeatWrapping;
+  const pos=[],uv=[],idx=[];let vi=0;
+  for(let z=-925;z<-408;z+=8){
+    const dy=deckY(z+4)+0.05;
+    pos.push(-7.2,deckY(z)+0.05,z, 7.2,deckY(z)+0.05,z);
+    uv.push(0,z/16.4,1,z/16.4);
+    if(vi>0){const b=(vi-1)*2;idx.push(b,b+1,b+2,b+1,b+3,b+2);}
+    vi++;
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setIndex(idx);g.computeVertexNormals();
+  const top=new THREE.Mesh(g,new THREE.MeshLambertMaterial({map:at,polygonOffset:true,polygonOffsetFactor:-2}));
+  top.receiveShadow=true;scene.add(top);
+})();
+/* ---- road ribbons ---- */
+(function buildRoads(){
+  const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+  x.fillStyle='#6f5b39';x.fillRect(0,0,128,128);
+  for(let i=0;i<1500;i++){const r=Math.random();
+    x.fillStyle=r<0.5?'rgba(60,46,26,0.5)':'rgba(140,118,78,0.45)';
+    x.fillRect(Math.random()*128,Math.random()*128,1+Math.random()*2.4,1+Math.random()*2.4);}
+  x.fillStyle='rgba(52,40,22,0.55)';x.fillRect(30,0,15,128);x.fillRect(83,0,15,128); // wheel tracks
+  const tex=new THREE.CanvasTexture(cv);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+  const mat=new THREE.MeshLambertMaterial({map:tex,polygonOffset:true,polygonOffsetFactor:-2});
+  for(const r of ROADS){
+    const pos=[],uv=[],idx=[],pts=r.pts;let dist=0;
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i],q=pts[Math.min(pts.length-1,i+1)],o=pts[Math.max(0,i-1)];
+      let dx=q.x-o.x,dz=q.z-o.z;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;
+      const nx=-dz,nz=dx,hw=r.w/2+0.4;
+      if(i>0)dist+=Math.hypot(p.x-o.x,p.z-o.z);
+      const lx=p.x+nx*hw,lz=p.z+nz*hw,rx=p.x-nx*hw,rz=p.z-nz*hw;
+      pos.push(lx,groundH(lx,lz)+0.14,lz, rx,groundH(rx,rz)+0.14,rz);
+      uv.push(0,dist/9,1,dist/9);
+      if(i>0){const b=(i-1)*2;idx.push(b,b+1,b+2,b+1,b+3,b+2);}
+    }
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+    g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+    g.setIndex(idx);g.computeVertexNormals();
+    const m=new THREE.Mesh(g,mat);m.receiveShadow=true;scene.add(m);
+  }
+})();
+/* ---- waterfalls ---- */
+V13.fallsT=0;V13.mists=[];
+const fallsTex=(function(){
+  const cv=document.createElement('canvas');cv.width=128;cv.height=256;const x=cv.getContext('2d');
+  x.clearRect(0,0,128,256);
+  for(let i=0;i<110;i++){
+    const gx=Math.random()*128,w=1+Math.random()*3.4,a=0.16+Math.random()*0.5;
+    const gr=x.createLinearGradient(0,0,0,256);
+    gr.addColorStop(0,'rgba(225,245,255,'+a+')');gr.addColorStop(1,'rgba(170,215,240,'+(a*0.7)+')');
+    x.fillStyle=gr;x.fillRect(gx,Math.random()*-30,w,286);
+  }
+  const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
+})();
+function fallsRibbon(path,width,op){
+  const pts=[]; // resample ~4 m
+  for(let i=0;i<path.length-1;i++){
+    const a=path[i],b=path[i+1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),n=Math.max(1,Math.round(L/4));
+    for(let k=(i===0?0:1);k<=n;k++){const t=k/n;pts.push([lerp(a[0],b[0],t),lerp(a[1],b[1],t)]);}
+  }
+  let ys=pts.map(p=>groundH(p[0],p[1])+0.34);
+  for(let pass=0;pass<2;pass++){const cp=ys.slice();
+    for(let i=1;i<ys.length-1;i++)ys[i]=cp[i]*0.5+(cp[i-1]+cp[i+1])*0.25;}
+  const pos=[],uv=[],idx=[];let dist=0;
+  for(let i=0;i<pts.length;i++){
+    const p=pts[i],q=pts[Math.min(pts.length-1,i+1)],o=pts[Math.max(0,i-1)];
+    let dx=q[0]-o[0],dz=q[1]-o[1];const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;
+    const nx=-dz,nz=dx,hw=width/2;
+    if(i>0)dist+=Math.hypot(p[0]-o[0],p[1]-o[1]);
+    pos.push(p[0]+nx*hw,ys[i],p[1]+nz*hw, p[0]-nx*hw,ys[i],p[1]-nz*hw);
+    uv.push(0,dist/13,1,dist/13);
+    if(i>0){const b=(i-1)*2;idx.push(b,b+1,b+2,b+1,b+3,b+2);}
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setIndex(idx);g.computeVertexNormals();
+  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:fallsTex,transparent:true,opacity:op,
+    depthWrite:false,side:THREE.DoubleSide}));
+  scene.add(m);return m;
+}
+function mistAt(x,y,z,n,spread){
+  const cv=mistAt.cv||(mistAt.cv=(function(){const c=document.createElement('canvas');c.width=c.height=64;
+    const g2=c.getContext('2d'),gr=g2.createRadialGradient(32,32,2,32,32,30);
+    gr.addColorStop(0,'rgba(240,250,255,0.85)');gr.addColorStop(1,'rgba(240,250,255,0)');
+    g2.fillStyle=gr;g2.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);})());
+  for(let i=0;i<n;i++){
+    const sm=new THREE.SpriteMaterial({map:cv,transparent:true,opacity:0.12,depthWrite:false});
+    const sp=new THREE.Sprite(sm);
+    sp.position.set(x+rand(-spread,spread),y+rand(0,2.5),z+rand(-spread,spread));
+    const sc=rand(7,14);sp.scale.set(sc,sc*0.62,1);
+    sp.userData.ph=rand(0,TAU);scene.add(sp);V13.mists.push(sp);
+  }
+}
+(function buildFalls(){
+  fallsRibbon([[-1408,-2050],[-1330,-2052],[-1250,-2048],[-1180,-2050],[-1152,-2046]],10,0.9); // F1 marquee: tarn -> lake
+  fallsRibbon([[-1395,-1560],[-1300,-1558],[-1215,-1562],[-1132,-1558]],7,0.85);               // F2 notch falls
+  const xh=valleyX(-2530);
+  fallsRibbon([[valleyX(-2565),-2565],[xh,-2530],[valleyX(-2495),-2495],[valleyX(-2462),-2462]],7,0.85); // F3 headwall
+  const foam=new THREE.Mesh(new THREE.CircleGeometry(10,20),
+    new THREE.MeshBasicMaterial({color:0xeaf6ff,transparent:true,opacity:0.4,depthWrite:false}));
+  foam.rotation.x=-Math.PI/2;foam.position.set(-1168,LAKE_Y+0.18,-2048);scene.add(foam);
+  const pool=new THREE.Mesh(new THREE.CircleGeometry(13,22),
+    new THREE.MeshPhongMaterial({color:0x39687e,transparent:true,opacity:0.92,shininess:170,specular:0xffd9a0}));
+  pool.rotation.x=-Math.PI/2;pool.position.set(-1115,12.9,-1558);pool.receiveShadow=true;scene.add(pool);
+  mistAt(-1168,12.6,-2048,5,5);
+  mistAt(-1115,13.6,-1558,4,4);
+  mistAt(valleyX(-2462),12.0,-2462,4,4);
+})();
+/* ---- Chunk B dressing : shoreline rocks, valley boulders, riverbank reeds ---- */
+V13.dressCounts={};
+(function buildDressing(){
+  const dg=new THREE.DodecahedronGeometry(1,0),pa=dg.attributes.position;
+  for(let vi=0;vi<pa.count;vi++){const vx=pa.getX(vi),vy=pa.getY(vi),vz=pa.getZ(vi);
+    const k=0.78+0.45*Math.abs(Math.sin(vx*12.9+vy*78.2+vz*37.7+3.1));
+    pa.setXYZ(vi,vx*k,vy*k*0.82,vz*k);}
+  dg.computeVertexNormals();
+  const spots=[];
+  for(let i=0;i<60&&spots.length<26;i++){const a=rand(0,TAU),r=rand(435,495),x=Math.cos(a)*r,z=Math.sin(a)*r,h=groundH(x,z);
+    if(h>-7&&h<1.5)spots.push([x,z,rand(0.8,2.4)]);}
+  for(let i=0;i<60&&spots.length<46;i++){const x=rand(-700,700),z=rand(-985,-875),h=groundH(x,z);
+    if(h>-7&&h<3)spots.push([x,z,rand(0.8,2.6)]);}
+  for(let i=0;i<50&&spots.length<60;i++){const a=rand(0,TAU),x=valleyX(-2050)+Math.cos(a)*rand(200,255),z=-2050+Math.sin(a)*rand(300,365),h=groundH(x,z);
+    if(h>8&&h<14.5)spots.push([x,z,rand(0.7,2.0)]);}
+  for(let i=0;i<60&&spots.length<82;i++){const z=rand(-2600,-1200),x=valleyX(z)+rand(-190,190),h=groundH(x,z);
+    if(h<32)spots.push([x,z,rand(1.5,4.0)]);}
+  const im=new THREE.InstancedMesh(dg,new THREE.MeshLambertMaterial({color:0x7b7b72}),Math.max(1,spots.length));
+  const d=new THREE.Object3D();
+  spots.forEach((p,i)=>{d.position.set(p[0],groundH(p[0],p[1])+0.2,p[1]);
+    d.rotation.set(rand(0,3),rand(0,3),0);d.scale.set(p[2],p[2]*rand(0.6,1),p[2]);d.updateMatrix();
+    im.setMatrixAt(i,d.matrix);});
+  im.count=spots.length;im.castShadow=true;im.instanceMatrix.needsUpdate=true;scene.add(im);
+  V13.dressCounts.rocks=spots.length;
+  /* reeds : tall cross-plane tufts in the riverbank band */
+  const cv=document.createElement('canvas');cv.width=cv.height=64;const x2=cv.getContext('2d');
+  for(let i=0;i<16;i++){const bx=5+Math.random()*54;
+    x2.strokeStyle='rgba('+(52+Math.random()*30|0)+','+(86+Math.random()*30|0)+',40,0.95)';
+    x2.lineWidth=1.6+Math.random()*1.6;x2.beginPath();x2.moveTo(bx,64);
+    x2.quadraticCurveTo(bx+rand(-5,5),34,bx+rand(-9,9),4+Math.random()*14);x2.stroke();}
+  const rtex=new THREE.CanvasTexture(cv);
+  const geos=[];
+  for(let k=0;k<2;k++){const p=new THREE.PlaneGeometry(1.1,2.0);p.translate(0,0.95,0);p.rotateY(k*Math.PI/2);geos.push(p);}
+  const posA=[],norA=[],uvA=[],idxA=[];let off=0;
+  geos.forEach(p=>{const pa2=p.attributes.position.array,na=p.attributes.normal.array,ua=p.attributes.uv.array,ia=p.index.array;
+    for(let i=0;i<pa2.length;i++)posA.push(pa2[i]);
+    for(let i=0;i<na.length;i++)norA.push(na[i]);
+    for(let i=0;i<ua.length;i++)uvA.push(ua[i]);
+    for(let i=0;i<ia.length;i++)idxA.push(ia[i]+off);
+    off+=pa2.length/3;});
+  const rg=new THREE.BufferGeometry();
+  rg.setAttribute('position',new THREE.Float32BufferAttribute(posA,3));
+  rg.setAttribute('normal',new THREE.Float32BufferAttribute(norA,3));
+  rg.setAttribute('uv',new THREE.Float32BufferAttribute(uvA,2));
+  rg.setIndex(idxA);
+  const rsp=[];
+  for(let i=0;i<700&&rsp.length<130;i++){
+    const z=rand(-2900,-1150),cx=valleyX(z),x=cx+(Math.random()<0.5?-1:1)*rand(5.5,10.5);
+    const gh=groundH(x,z),ry=valleyFloorH(z)-2.2;
+    if(gh>ry-1.7&&gh<ry+1.15)rsp.push([x,gh,z]);
+  }
+  const rim=new THREE.InstancedMesh(rg,new THREE.MeshLambertMaterial({map:rtex,alphaTest:0.35,side:THREE.DoubleSide}),Math.max(1,rsp.length));
+  rsp.forEach((p,i)=>{d.position.set(p[0],p[1]-0.12,p[2]);
+    d.rotation.set(0,rand(0,TAU),0);d.scale.set(rand(0.8,1.3),rand(0.8,1.35),rand(0.8,1.3));d.updateMatrix();
+    rim.setMatrixAt(i,d.matrix);});
+  rim.count=rsp.length;rim.instanceMatrix.needsUpdate=true;scene.add(rim);
+  V13.dressCounts.reeds=rsp.length;
+})();
+function v13TickB(dt,gdt){
+  if(gdt>0){
+    V13.fallsT+=gdt;
+    fallsTex.offset.y=-(V13.fallsT*0.55)%1;
+    for(const sp of V13.mists){
+      sp.material.opacity=0.085+0.05*Math.sin(V13.fallsT*0.6+sp.userData.ph);
+      sp.material.rotation=sp.userData.ph+V13.fallsT*0.03;
+    }
+  }
+}
+
+
+/* ==================== V13 Chunk C — outposts, hideouts, secret loot ====================
+   Seven themed outposts replace the single-camp garrison: spawnEnemies now
+   distributes each mission's HVTs / guards / counter-snipers across the
+   mission's active outposts (table below), so early missions play short
+   (island / bridgehead) and late missions play LONG (rim radar post, then
+   combined + grand ops). Sabotage spots are site-tagged to match. Four
+   sniper hideouts overlook the valley; sixteen loot caches hide in remote
+   country (one behind the marquee falls). Cache details live ONLY here +
+   the sealed file — never in reports. */
+const V13C={
+  outposts:[
+    {id:'isle',   name:'ISLAND STARTER CAMP',  cx:-110, cz:120,   w:1.0, rH:16, rG:30, theme:'tents'},
+    {id:'bridge', name:'BRIDGEHEAD CHECKPOINT',cx:55,   cz:-975,  w:1.2, rH:14, rG:26, theme:'checkpoint'},
+    {id:'camp',   name:'MAINLAND CAMP',        cx:0,    cz:-1010, w:1.6, rH:22, rG:60, theme:'camp'},
+    {id:'logging',name:'PINE LOGGING CAMP',    cx:620,  cz:-1420, w:1.1, rH:18, rG:34, theme:'logging'},
+    {id:'farm',   name:'VALLEY FARM',          cx:-820, cz:-1500, w:1.1, rH:18, rG:34, theme:'farm'},
+    {id:'lake',   name:'LAKESIDE CAMP',        cx:-1255,cz:-1900, w:1.2, rH:16, rG:30, theme:'lakeside'},
+    {id:'radar',  name:'CLIFFTOP RADAR POST',  cx:-1560,cz:-2150, w:1.4, rH:16, rG:30, theme:'radar'}
+  ],
+  sets:{1:['isle'],2:['bridge'],3:['camp'],4:['logging'],5:['farm'],6:['lake'],7:['radar'],
+        8:['bridge','camp'],9:['farm','lake']},
+  radarTower:{x:-1548,z:-2138,h:7.85},
+  activeFor:function(n){return this.sets[n]?this.sets[n].slice():this.outposts.map(function(o){return o.id;});},
+  byId:function(id){return this.outposts.find(function(o){return o.id===id;});},
+  rangeTo:function(o){return Math.round(Math.hypot(o.cx-0,o.cz-24));},
+  briefLine:function(n){
+    const act=this.activeFor(n).map(id=>this.byId(id));
+    const names=act.map(o=>o.name).join(' + ');
+    const far=act.reduce((m,o)=>Math.max(m,this.rangeTo(o)),0);
+    return 'AREA: '+names+' · RANGE ≈'+far.toLocaleString('en-US')+' M';
+  },
+  buildSpots:function(cfg){
+    const act=this.activeFor(G.mission).map(id=>this.byId(id));
+    const campActive=act.some(function(o){return o.id==='camp';});
+    let hvts=cfg.hvts-(campActive?1:0); // the truck driver takes one HVT slot when camp is active
+    const byW=act.slice().sort(function(a,b){return b.w-a.w;});
+    const hvtShare={},gShare={};act.forEach(function(o){hvtShare[o.id]=0;gShare[o.id]=0;});
+    let wi=0;while(hvts>0){hvtShare[byW[wi%byW.length].id]++;hvts--;wi++;}
+    const wSum=act.reduce(function(s,o){return s+o.w;},0);
+    let gLeft=cfg.guards;
+    act.forEach(function(o){gShare[o.id]=Math.floor(cfg.guards*o.w/wSum);gLeft-=gShare[o.id];});
+    let gi=0;while(gLeft>0){gShare[byW[gi%byW.length].id]++;gLeft--;gi++;}
+    const spots=[];
+    for(const o of act){
+      for(let i=0;i<hvtShare[o.id];i++){const a=rand(0,TAU),r=rand(4,o.rH);
+        spots.push([o.cx+Math.cos(a)*r,o.cz+Math.sin(a)*r*0.8,true]);}
+      for(let i=0;i<gShare[o.id];i++){const a=rand(0,TAU),r=rand(10,o.rG);
+        spots.push([o.cx+Math.cos(a)*r,o.cz+Math.sin(a)*r*0.8,false]);}
+    }
+    const snipers=[],snN=cfg.snipers||0,has={};act.forEach(function(o){has[o.id]=o;});
+    if(snN>0){
+      if(has.camp)snipers.push({x:20,z:-CAMP_D-18,postY:groundH(20,-CAMP_D-18)+7.35});
+      else if(has.radar)snipers.push({x:this.radarTower.x,z:this.radarTower.z,postY:groundH(this.radarTower.x,this.radarTower.z)+this.radarTower.h});
+      else snipers.push({x:act[0].cx+14,z:act[0].cz+10,prone:true});
+    }
+    if(snN>1){
+      if(has.radar&&!(snipers.length&&snipers[0].x===this.radarTower.x))
+        snipers.push({x:this.radarTower.x,z:this.radarTower.z,postY:groundH(this.radarTower.x,this.radarTower.z)+this.radarTower.h});
+      else if(has.camp)snipers.push({x:16,z:-CAMP_D+13,prone:true});
+      else snipers.push({x:act[0].cx-12,z:act[0].cz-8,prone:true});
+    }
+    return {spots:spots,snipers:snipers,campActive:campActive,act:act};
+  },
+  hideouts:[
+    {id:'H1',x:-1412,z:-1745,tx:-820,tz:-1500},
+    {id:'H2',x:-1330,z:-1250,tx:-700,tz:-1420},
+    {id:'H3',x:-1310,z:-2150,tx:-1255,tz:-1900},
+    {id:'H4',x:-1150,z:-2350,tx:-870,tz:-2350}
+  ],
+  loot:[]
+};
+/* ---- outpost + hideout props : one merged vertex-colored mesh ---- */
+(function buildOutpostProps(){
+  const bag={pos:[],nor:[],col:[],idx:[],off:0};
+  const M=new THREE.Matrix4(),NM=new THREE.Matrix3(),C=new THREE.Color(),V=new THREE.Vector3();
+  const Q=new THREE.Quaternion(),E=new THREE.Euler(),S=new THREE.Vector3();
+  function push(geo,cx,cy,cz,sx,sy,sz,rx,ry,color){
+    E.set(rx||0,ry||0,0);Q.setFromEuler(E);
+    M.compose(V.set(cx,cy,cz),Q,S.set(sx,sy,sz));NM.getNormalMatrix(M);C.setHex(color);
+    const pa=geo.attributes.position,na=geo.attributes.normal,ia=geo.index;
+    for(let i=0;i<pa.count;i++){
+      V.set(pa.getX(i),pa.getY(i),pa.getZ(i)).applyMatrix4(M);
+      bag.pos.push(V.x,V.y,V.z);
+      V.set(na.getX(i),na.getY(i),na.getZ(i)).applyMatrix3(NM).normalize();
+      bag.nor.push(V.x,V.y,V.z);bag.col.push(C.r,C.g,C.b);}
+    if(ia)for(let i=0;i<ia.count;i++)bag.idx.push(ia.getX(i)+bag.off);
+    else for(let i=0;i<pa.count;i++)bag.idx.push(i+bag.off);
+    bag.off+=pa.count;
+  }
+  const BOX=new THREE.BoxGeometry(1,1,1),CYL=new THREE.CylinderGeometry(1,1,1,9);
+  const gy=(x,z)=>groundH(x,z);
+  function box(x,z,w,h,d,color,ry,y0){push(BOX,x,gy(x,z)+(y0!=null?y0:h/2-0.35),z,w,h,d,0,ry||0,color);}
+  function sandArc(cx,cz,ry){
+    for(let i=-1;i<=1;i++){const a=ry+i*0.5,x=cx+Math.sin(a)*3.4,z=cz+Math.cos(a)*3.4;
+      box(x,z,2.6,0.85,0.9,0x9a8a68,-a);}
+  }
+  function tent(x,z,ry,color){box(x,z,3.2,1.5,4.2,color,ry);
+    push(BOX,x,gy(x,z)+1.85,z,3.5,0.28,4.5,0.6,ry,0x4c5540);
+    BLOCKERS.push({x:x,z:z,r:2.2});}
+  function crate(x,z,s){box(x,z,s||1.1,(s||1.1), (s||1.1),0x8a6f46,rand(0,3));}
+  for(const o of V13C.outposts){
+    if(o.id==='camp')continue; // the classic camp dressing already exists
+    const cx=o.cx,cz=o.cz;
+    if(o.theme==='tents'){
+      tent(cx-6,cz-3,0.4,0x5c6644);tent(cx+7,cz+4,-0.5,0x66704c);
+      sandArc(cx+2,cz-9,Math.PI);crate(cx-2,cz+6);crate(cx-0.8,cz+6.4,0.8);
+      push(CYL,cx+3,gy(cx+3,cz+2)+0.25,cz+2,0.8,0.5,0.8,0,0,0x33302a); // cold fire ring
+    }else if(o.theme==='checkpoint'){
+      box(cx-6,cz-2,2.6,2.5,2.6,0x6a7076,0);BLOCKERS.push({x:cx-6,z:cz-2,r:1.9}); // booth
+      push(BOX,cx-6,gy(cx-6,cz-2)+2.72,cz-2,3.2,0.24,3.2,0,0,0x3f464e); // booth roof
+      for(const s of[-1,1]){ // barrier arms across the road side
+        box(cx+s*4.5,cz-10,0.35,1.1,0.35,0x8a8f96,0);
+        push(BOX,cx+s*4.5,gy(cx+s*4.5,cz-10)+1.25,cz-10,6.5,0.16,0.3,0,0.5,0xc23b2a);
+      }
+      sandArc(cx+6,cz+6,2.6);crate(cx+1,cz-6);crate(cx+2.4,cz-6.2,0.85);
+    }else if(o.theme==='logging'){
+      for(const px of[-7,6])for(let lvl=0;lvl<3;lvl++){ // log piles
+        const n=3-lvl;for(let i=0;i<n;i++)
+          push(CYL,cx+px+(i-(n-1)/2)*1.05,gy(cx+px,cz-4)+0.55+lvl*0.92,cz-4,0.46,7,0.46,Math.PI/2,0,0x6e5136);}
+      BLOCKERS.push({x:cx-7,z:cz-4,r:3.4});BLOCKERS.push({x:cx+6,z:cz-4,r:3.4});
+      box(cx-3,cz+8,4.5,2.6,3.4,0x715f42,0.3);BLOCKERS.push({x:cx-3,z:cz+8,r:2.9}); // cabin
+      push(BOX,cx-3,gy(cx-3,cz+8)+3.0,cz+8,5,0.3,4,0.5,0.3,0x54452e);
+      box(cx+5,cz+7,3.4,0.9,1.4,0x8a6f46,-0.2); // saw bench
+      crate(cx+1,cz+2);crate(cx+2.2,cz+2.6,0.8);
+    }else if(o.theme==='farm'){
+      box(cx-8,cz-2,9,5,13,0x7a4436,0.15);BLOCKERS.push({x:cx-8,z:cz-2,r:5.6}); // barn
+      push(BOX,cx-8,gy(cx-8,cz-2)+5.6,cz-2,10,0.35,14,0.55,0.15,0x4c3a2c);
+      push(CYL,cx+7,gy(cx+7,cz-8)+4.4,cz-8,1.7,8.8,1.7,0,0,0x9aa0a4); // silo
+      push(CYL,cx+7,gy(cx+7,cz-8)+9.3,cz-8,0.2,1.2,1.7,0,0,0x707880);
+      BLOCKERS.push({x:cx+7,z:cz-8,r:2.0});
+      for(let i=0;i<4;i++){const bx2=cx+rand(-12,12),bz2=cz+rand(4,14); // hay bales
+        push(CYL,bx2,gy(bx2,bz2)+0.85,bz2,0.85,1.3,0.85,Math.PI/2,rand(0,3),0xc9a84c);}
+      for(let i=0;i<6;i++)box(cx-14+i*3.1,cz+16,0.18,1.0,0.18,0x6b5636,0); // fence line
+      crate(cx+2,cz-4);crate(cx+3.4,cz-3.4,0.85);
+    }else if(o.theme==='lakeside'){
+      tent(cx-5,cz+5,0.9,0x5c6644);tent(cx+6,cz-4,-0.4,0x66704c);
+      push(BOX,cx+13,gy(cx+13,cz+1)+0.25,cz+1,11,0.28,2.2,0,0.35,0x77683f); // dock toward the water
+      sandArc(cx-2,cz-9,Math.PI*0.9);crate(cx,cz+8);crate(cx+1.4,cz+8.4,0.8);
+      push(CYL,cx+2,gy(cx+2,cz-2)+0.25,cz-2,0.8,0.5,0.8,0,0,0x33302a);
+    }else if(o.theme==='radar'){
+      push(CYL,cx,gy(cx,cz)+6.5,cz,0.5,13,0.5,0,0,0x707880); // mast
+      const dish=new THREE.SphereGeometry(3.1,12,6,0,TAU,0,0.95);
+      push(dish,cx,gy(cx,cz)+13.6,cz,1,1,1,-0.7,0.6,0xb9bfc4);
+      BLOCKERS.push({x:cx,z:cz,r:1.4});
+      box(cx+8,cz+6,4.2,2.5,3.2,0x62666a,0.2);BLOCKERS.push({x:cx+8,z:cz+6,r:2.7}); // hut
+      const T=V13C.radarTower; // watch tower the counter-sniper posts on
+      for(const sx of[-1,1])for(const sz of[-1,1])
+        push(BOX,T.x+sx*1.1,gy(T.x,T.z)+T.h/2,T.z+sz*1.1,0.22,T.h,0.22,0,0,0x5a5142);
+      push(BOX,T.x,gy(T.x,T.z)+T.h,T.z,3.1,0.28,3.1,0,0,0x6e5636);
+      push(BOX,T.x,gy(T.x,T.z)+T.h+1.5,T.z,3.4,0.2,3.4,0,0,0x4c5540);
+      BLOCKERS.push({x:T.x,z:T.z,r:1.5});
+      sandArc(cx-6,cz-8,0.6);crate(cx-3,cz+3);crate(cx-1.8,cz+3.5,0.8);
+    }
+  }
+  for(const hd of V13C.hideouts){
+    const ry=Math.atan2(hd.tx-hd.x,hd.tz-hd.z);
+    sandArc(hd.x,hd.z,ry);
+    const tx=hd.x-Math.sin(ry)*2.9,tz=hd.z-Math.cos(ry)*2.9; // tarp behind the parapet
+    push(BOX,tx,gy(tx,tz)+2.35,tz,3.0,0.14,2.4,0.35,ry,0x44543c);
+    for(const s of[-1,1])push(CYL,tx+s*1.3,gy(tx,tz)+1.05,tz,0.06,2.2,0.06,0,0,0x3a3d2a);
+    crate(hd.x+2.6,hd.z+1.8,0.95);
+    BUSH.list.push({x:hd.x-1.8,z:hd.z+1.2,r:3.0});
+    BUSH.list.push({x:hd.x+2.0,z:hd.z-1.6,r:3.0});
+    BLOCKERS.push({x:hd.x+2.6,z:hd.z+1.8,r:0.9});
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(bag.pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(bag.nor,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(bag.col,3));
+  g.setIndex(bag.idx);
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;scene.add(m);
+})();
+/* ---- secret loot : 16 caches. Positions/values live ONLY here + sealed file. ---- */
+V13C.lootDef=[
+  [-1252,-2058,38000],[300,270,10000],[-340,-225,8500],[60,-905,7500],
+  [-1180,-2300,6800],[-960,-2565,6000],[-1395,-1545,5200],[-1560,-2080,4500],
+  [-1290,-1935,3900],[400,-2650,3300],[1500,-1200,2700],[-880,-2560,2100],
+  [-1700,-2250,1600],[350,-150,1200],[900,-1500,800],[-680,-1350,400]
+];
+V13C.lootTotal=V13C.lootDef.reduce(function(s,d){return s+d[2];},0);
+V13C.foundSet=function(){try{const a=JSON.parse(lsGet('longshot_loot','[]'));return Array.isArray(a)?a:[];}catch(e){return[];}};
+(function buildLoot(){
+  const found=V13C.foundSet();
+  const crateG=new THREE.BoxGeometry(0.72,0.5,0.72),lidG=new THREE.BoxGeometry(0.78,0.14,0.78);
+  const crateM=new THREE.MeshLambertMaterial({color:0x2e3236}),lidM=new THREE.MeshLambertMaterial({color:0xc9a227});
+  /* the falls grotto : a rock ledge + overhang tucked behind the F1 curtain */
+  const gx=-1252,gz=-2058;
+  const ledge=new THREE.Mesh(new THREE.BoxGeometry(7.5,1.4,6.5),new THREE.MeshLambertMaterial({color:0x77776e}));
+  ledge.position.set(gx,groundH(gx,gz)+0.1,gz);ledge.castShadow=true;ledge.receiveShadow=true;scene.add(ledge);
+  const roof=new THREE.Mesh(new THREE.BoxGeometry(8,1.1,7),new THREE.MeshLambertMaterial({color:0x6b6b63}));
+  roof.position.set(gx,groundH(gx,gz)+3.6,gz+0.5);roof.rotation.x=0.16;roof.castShadow=true;scene.add(roof);
+  V13C.lootDef.forEach(function(d,i){
+    const x=d[0],z=d[1];
+    const y=(i===0)?groundH(gx,gz)+0.8:groundH(x,z);
+    const grp=new THREE.Group();grp.position.set(x,y,z);grp.rotation.y=rand(0,TAU);
+    const c=new THREE.Mesh(crateG,crateM);c.position.y=0.25;c.castShadow=true;grp.add(c);
+    const l=new THREE.Mesh(lidG,lidM);l.position.y=0.55;grp.add(l);
+    const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:glintTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,color:0xffe9a0}));
+    gl.scale.set(1.6,1.6,1);gl.position.y=1.15;grp.add(gl);
+    const isF=found.indexOf(i)>=0;
+    grp.visible=!isF;scene.add(grp);
+    V13C.loot.push({i:i,x:x,z:z,y:y,v:d[2],grp:grp,glint:gl,found:isF});
+  });
+  V13C.pingT=0;
+})();
+function v13TickC(dt,gdt){
+  const loot=V13C.loot;if(!loot.length)return;
+  for(const c of loot){ // glint shimmer (visible at range, the only finder aid out there)
+    if(c.found)continue;
+    const s=1.25+0.6*Math.sin(G.swayT*2.4+c.i*1.7);
+    c.glint.scale.set(s,s,1);
+  }
+  if(gdt<=0||ATV.drive.on||(G.state!=='play'&&G.state!=='roam'))return;
+  let best=null,bd=1e9;
+  for(const c of loot){if(c.found)continue;
+    const d=Math.hypot(G.px-c.x,G.pz-c.z);if(d<bd){bd=d;best=c;}}
+  if(!best)return;
+  if(bd<2.4){ // pickup — direct CR grant; mission award math untouched
+    best.found=true;best.grp.visible=false;
+    const f=V13C.foundSet();f.push(best.i);lsSet('longshot_loot',JSON.stringify(f));
+    setCredits(credits()+best.v);
+    const n=V13C.foundSet().length;
+    toast('SECRET CACHE FOUND — +'+best.v.toLocaleString('en-US')+' CR ('+n+'/16)');
+    sTone(880,0.12,'sine',0.16);setTimeout(function(){sTone(1318,0.16,'sine',0.16);},110);
+    buzz(40);
+    if(typeof SYNC!=='undefined'&&SYNC.push)SYNC.push();
+    return;
+  }
+  if(bd<30){ // proximity ping : faster as you close in
+    V13C.pingT-=gdt;
+    if(V13C.pingT<=0){
+      V13C.pingT=lerp(0.32,1.7,clamp((bd-4)/26,0,1));
+      sTone(1560,0.06,'sine',0.10);
+    }
+  }
+}
+
+
+/* ==================== V13 Chunk D — world map ====================
+   A full-screen survey map in the menu chrome (deep blue law): the
+   heightfield rendered once to an offscreen canvas (hillshade + water),
+   roads + the bridge deck inked in, then live markers every frame while
+   open — player arrow (position + heading), the quad when dismounted,
+   outpost diamonds, the active objective ring, hideout triangles, and the
+   helipad "H" once Chunk F builds the pad (drawn from its data).
+   NO loot markers — this code never reads the cache table.
+   Opening freezes the world clock exactly like pause/settings (G.mapOpen
+   joins the gdt freeze + the walker/HUD gates). */
+const V13D={built:false,open:false,base:null};
+G.mapOpen=false;
+function mapBuildBase(){
+  const S=560,cv=document.createElement('canvas');cv.width=cv.height=S;
+  const x=cv.getContext('2d'),img=x.createImageData(S,S),d=img.data;
+  const lakeCx=valleyX(-2050),lakeCz=-2050;
+  for(let j=0;j<S;j++){
+    const wz=(j+0.5)/S*6000-3000; // row 0 = far NORTH (map up = -z)
+    for(let i=0;i<S;i++){
+      const wx=-3000+(i+0.5)/S*6000;
+      const h=groundHBase(wx,wz),hE=groundHBase(wx+22,wz);
+      let r,g,b;
+      const inLake=((wx-lakeCx)/235)*((wx-lakeCx)/235)+((wz-lakeCz)/330)*((wz-lakeCz)/330)<1;
+      if(h<-3.5){r=13;g=44;h<-11?(b=66):(b=58);}
+      else if(inLake&&h<LAKE_Y){r=30;g=74;b=102;}
+      else if(h<0.6){r=146;g=128;b=92;}
+      else if(h<3){r=178;g=164;b=118;}
+      else if(h<15){r=93;g=122;b=58;}
+      else if(h<60){r=106;g=133;b=70;}
+      else if(h<118){r=78;g=104;b=56;}
+      else if(h<158){r=128;g=122;b=108;}
+      else if(h<185){r=146;g=140;b=128;}
+      else{r=228;g=233;b=238;}
+      const sh=clamp(0.86+0.30*clamp((h-hE)/14,-1,1),0.62,1.16);
+      const k=(j*S+i)*4;
+      d[k]=Math.min(255,r*sh);d[k+1]=Math.min(255,g*sh);d[k+2]=Math.min(255,b*sh);d[k+3]=255;
+    }
+  }
+  x.putImageData(img,0,0);
+  const w2m=function(wx,wz){return [(wx+3000)/6000*S,(wz+3000)/6000*S];}; // same north-up frame as mapW2M
+  x.strokeStyle='rgba(226,205,160,0.85)';x.lineWidth=1.6;x.lineCap='round'; // dirt roads
+  for(const r of ROADS){
+    x.beginPath();
+    r.pts.forEach(function(p,pi){const m=w2m(p.x,p.z);if(pi===0)x.moveTo(m[0],m[1]);else x.lineTo(m[0],m[1]);});
+    x.stroke();
+  }
+  x.strokeStyle='rgba(235,238,242,0.95)';x.lineWidth=2.6; // the bridge deck
+  x.beginPath();let a=w2m(0,-408),b2=w2m(0,-925);x.moveTo(a[0],a[1]);x.lineTo(b2[0],b2[1]);x.stroke();
+  V13D.base=cv;V13D.built=true;
+}
+function mapW2M(wx,wz){return [(wx+3000)/6000*560,(wz+3000)/6000*560];}
+function openMap(){
+  if(G.state!=='play'&&G.state!=='roam')return;
+  $('mapRoot').style.display='flex';
+  if(!V13D.built){mapDrawPending();setTimeout(function(){mapBuildBase();mapDraw();},40);}
+  G.mapOpen=true;V13D.open=true;v12HudDirty();
+  if(V13D.built)mapDraw();
+}
+function closeMap(){
+  G.mapOpen=false;V13D.open=false;
+  $('mapRoot').style.display='none';v12HudDirty();
+}
+function toggleMap(){if(V13D.open)closeMap();else openMap();}
+function mapDrawPending(){
+  const cv=$('mapCv');if(!cv)return;const x=cv.getContext('2d');
+  x.fillStyle='#0a1230';x.fillRect(0,0,560,560);
+  x.fillStyle='#8fa3d9';x.font='600 15px system-ui';x.textAlign='center';
+  x.fillText('SURVEYING THE VALLEY…',280,286);
+}
+function mapDraw(){
+  const cv=$('mapCv');if(!cv||!V13D.built)return;
+  const x=cv.getContext('2d');
+  x.drawImage(V13D.base,0,0);
+  const T=G.swayT;
+  function diamond(px,py,s,stroke){x.beginPath();x.moveTo(px,py-s);x.lineTo(px+s,py);x.lineTo(px,py+s);x.lineTo(px-s,py);x.closePath();x.strokeStyle=stroke;x.lineWidth=1.6;x.stroke();}
+  for(const o of V13C.outposts){const m=mapW2M(o.cx,o.cz);diamond(m[0],m[1],5,'rgba(255,210,122,0.9)');
+    x.fillStyle='rgba(255,210,122,0.9)';x.fillRect(m[0]-1,m[1]-1,2,2);}
+  /* active objective : pulsing ring on the mission's outposts */
+  const act=V13C.activeFor(G.mission);
+  x.strokeStyle='rgba(255,176,58,0.95)';
+  for(const id of act){const o=V13C.byId(id);if(!o)continue;const m=mapW2M(o.cx,o.cz);
+    x.beginPath();x.arc(m[0],m[1],11+2.5*Math.sin(T*3),0,TAU);x.lineWidth=2;x.stroke();}
+  /* hideouts : pale triangles */
+  x.strokeStyle='rgba(185,200,232,0.95)';x.lineWidth=1.5;
+  for(const hd of V13C.hideouts){const m=mapW2M(hd.x,hd.z);
+    x.beginPath();x.moveTo(m[0],m[1]-5.5);x.lineTo(m[0]+5,m[1]+4);x.lineTo(m[0]-5,m[1]+4);x.closePath();x.stroke();}
+  /* helipad : drawn from Chunk F's pad data the moment it exists */
+  if(typeof V13F!=='undefined'&&V13F.helipad){
+    const m=mapW2M(V13F.helipad.x,V13F.helipad.z);
+    x.strokeStyle='rgba(255,233,160,0.95)';x.lineWidth=1.6;
+    x.strokeRect(m[0]-6,m[1]-6,12,12);
+    x.fillStyle='rgba(255,233,160,0.95)';x.font='700 10px system-ui';x.textAlign='center';x.fillText('H',m[0],m[1]+3.5);
+  }
+  /* the quad, when you're not on it */
+  if(!ATV.drive.on){const m=mapW2M(ATV.drive.x,ATV.drive.z);
+    x.fillStyle='#e8ecf4';x.fillRect(m[0]-3,m[1]-3,6,6);
+    x.font='600 8px system-ui';x.textAlign='left';x.fillText('QUAD',m[0]+5,m[1]+3);}
+  /* the player arrow : position + heading */
+  const pm=mapW2M(G.px,G.pz),fx=-Math.sin(G.yaw),fz=-Math.cos(G.yaw);
+  const ang=Math.atan2(fz,fx); // screen axes: px ~ world x, py ~ world z (north = -z = up)
+  x.save();x.translate(pm[0],pm[1]);x.rotate(ang);
+  x.beginPath();x.moveTo(9,0);x.lineTo(-6,-5.5);x.lineTo(-3,0);x.lineTo(-6,5.5);x.closePath();
+  x.fillStyle='#ffffff';x.fill();x.strokeStyle='#2a4a9a';x.lineWidth=1.4;x.stroke();
+  x.restore();
+  /* north + scale furniture */
+  x.fillStyle='#8fa3d9';x.font='700 13px system-ui';x.textAlign='right';x.fillText('N ↑',548,22);
+  x.textAlign='left';x.font='600 9px system-ui';x.fillText('1,000 M',12,548);
+  x.strokeStyle='rgba(143,163,217,0.8)';x.beginPath();x.moveTo(12,540);x.lineTo(12+1000/6000*560,540);x.stroke();
+}
+function v13TickD(dt,gdt){if(V13D.open&&V13D.built)mapDraw();}
+bindBtn('btnMap',function(){toggleMap();});
+bindEl($('mapClose'),function(){closeMap();});
+document.addEventListener('keydown',function(e){
+  if(e.code==='KeyM'&&(G.state==='play'||G.state==='roam'))toggleMap();
+  if(e.code==='Escape'&&V13D.open)closeMap();
+});
+
+
+/* ==================== V13 Chunk E — ecology placement + wildlife ====================
+   ECOLOGY : all new scatter is placed by rules sampled from the heightfield
+   (height / slope / water-distance), stratified per 500 m cell so the whole
+   6 km carries life — pines high + rocky, broadleaf low + near water, brush
+   on slopes, grass in the meadows, rocks on the steep + high ground. Hard
+   exclusions: roads, the bridge deck, water, outpost floors, the spawn pad,
+   hideouts, loot points, and the reserved helipad clearing (V13E.PAD —
+   Chunk F builds the pad there). Instances are chunked per cell so frustum
+   culling keeps the draw cost local.
+   WILDLIFE : real licensed animals — Quaternius (CC0) Stag / Wolf / Fox,
+   fully rigged with Idle / Eating / Walk / Gallop / Death clips. They
+   graze + wander their habitats, flee gunshots and engine noise, can be
+   shot or knifed (corpse lingers, then fades), pay ZERO CR/XP (outside the
+   frozen economy entirely), and respawn slowly at their habitats. */
+const V13E={ready:false,failed:false,loading:false,built:false,animals:[],ecoPts:[],
+  counts:{pine:0,broadleaf:0,bush:0,rock:0,grass:0},lastShotSeen:-99,respawnT:0,
+  PAD:{x:150,z:-930,r:30},
+  species:{
+    stag:{cap:6,walk:1.6,run:11.5,r:1.15,targetH:1.95,homes:[[-700,-1950],[-850,-1500],[250,-1550]]},
+    wolf:{cap:4,walk:1.9,run:12.5,r:0.85,targetH:1.05,homes:[[-1500,-1900],[700,-1500],[-1200,-2400]]},
+    fox:{cap:6,walk:1.4,run:9.5,r:0.55,targetH:0.66,homes:[[-820,-1440],[560,-1380],[-1150,-1850]]}
+  }};
+function loadV13Animals(){
+  if(V13E.loading||V13E.ready||V13E.failed)return;V13E.loading=true;
+  const s=document.createElement('script');s.src='models/v13-animals-data.js';
+  s.onerror=function(){V13E.failed=true;console.warn('[longshot] animal pack failed — world stays animal-free');};
+  s.onload=function(){
+    if(!window.V13ANIMALS){V13E.failed=true;return;}
+    const parse=function(b64){return new Promise(function(res){
+      try{const bin=atob(b64);const u8=new Uint8Array(bin.length);
+        for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+        new THREE.GLTFLoader().parse(u8.buffer,'',function(g){res(g);},function(){res(null);});
+      }catch(e){res(null);}});};
+    Promise.all([parse(window.V13ANIMALS.stag),parse(window.V13ANIMALS.fox),parse(window.V13ANIMALS.wolf)])
+    .then(function(gs){
+      const names=['stag','fox','wolf'];let okAll=true;
+      gs.forEach(function(g,i){
+        if(!g||!g.scene){okAll=false;return;}
+        const bb=new THREE.Box3().setFromObject(g.scene),sz=bb.getSize(new THREE.Vector3());
+        const sp=V13E.species[names[i]];
+        sp.proto=g.scene;sp.clips=g.animations||[];
+        sp.scale=sp.targetH/Math.max(0.2,sz.y);
+        sp.ch=sp.targetH*0.52;
+      });
+      if(!okAll){V13E.failed=true;return;}
+      V13E.ready=true;
+      for(const k in V13E.species){const sp=V13E.species[k];
+        sp.homes.forEach(function(h,hi){if(hi*2<sp.cap)for(let n=0;n<2&&V13E.animals.filter(a=>a.sp===k).length<sp.cap;n++)spawnAnimal(k,h[0],h[1]);});}
+    });
+  };
+  document.head.appendChild(s);
+}
+function spawnAnimal(sp,hx,hz){
+  const P=V13E.species[sp];if(!P||!P.proto)return null;
+  const fig=skinClone(P.proto);
+  const matMap=new Map();
+  fig.traverse(function(o){if(o.isMesh){o.frustumCulled=false;o.castShadow=true;
+    if(!matMap.has(o.material)){const cm=o.material.clone();matMap.set(o.material,cm);}
+    o.material=matMap.get(o.material);}});
+  fig.scale.setScalar(P.scale);
+  const grp=new THREE.Group();grp.rotation.order='YXZ';grp.add(fig);scene.add(grp);
+  const mixer=new THREE.AnimationMixer(fig),acts={};
+  for(const c of P.clips){const a=mixer.clipAction(c);acts[c.name]=a;
+    if(c.name==='Death'){a.setLoop(THREE.LoopOnce);a.clampWhenFinished=true;}}
+  const an={sp:sp,grp:grp,fig:fig,mixer:mixer,acts:acts,cur:'',alive:true,
+    x:hx+rand(-18,18),z:hz+rand(-18,18),home:{x:hx,z:hz},head:rand(0,TAU),
+    state:'graze',t:rand(2,7),tx:0,tz:0,fleeT:0,deathT:0,r:P.r,ch:P.ch,
+    center:function(){return {x:this.x,y:groundH(this.x,this.z)+this.ch,z:this.z};},
+    play:function(name){
+      if(this.cur===name||!this.acts[name])return;
+      const nx=this.acts[name];
+      if(this.cur&&this.acts[this.cur])this.acts[this.cur].fadeOut(0.22);
+      nx.enabled=true;nx.reset();nx.fadeIn(0.22);nx.play();this.cur=name;},
+    die:function(){
+      if(!this.alive)return;this.alive=false;this.deathT=0;this.play('Death');}};
+  grp.position.set(an.x,groundH(an.x,an.z),an.z);
+  an.play(Math.random()<0.5?'Eating':'Idle');
+  V13E.animals.push(an);return an;
+}
+function animalFleeFrom(x,z,radius){
+  for(const an of V13E.animals){
+    if(!an.alive)continue;
+    const d=Math.hypot(an.x-x,an.z-z);
+    if(d<radius){an.state='flee';an.fleeT=rand(3.2,5);
+      an.head=Math.atan2(an.x-x,an.z-z)+rand(-0.4,0.4);an.play('Gallop');}
+  }
+}
+/* ---------------- ecology scatter ---------------- */
+function ecoSlope(x,z){
+  const e=2.5;
+  return Math.max(Math.abs(groundH(x+e,z)-groundH(x-e,z)),Math.abs(groundH(x,z+e)-groundH(x,z-e)))/(2*e);
+}
+function ecoClear(x,z,h){
+  if(h<0.8)return false;
+  const rn=roadNear(x,z);if(rn&&rn.d<9.5)return false;
+  if(Math.abs(x)<11&&z<-400&&z>-935)return false; // bridge deck strip
+  for(const o of V13C.outposts)if(Math.hypot(x-o.cx,z-o.cz)<o.rG+10)return false;
+  if(Math.hypot(x,z-24)<38)return false; // spawn pad clearing
+  for(const hd of V13C.hideouts)if(Math.hypot(x-hd.x,z-hd.z)<7)return false;
+  if(Math.hypot(x-V13E.PAD.x,z-V13E.PAD.z)<V13E.PAD.r+6)return false;
+  for(const c of V13C.loot)if(Math.hypot(x-c.x,z-c.z)<3.5)return false;
+  return true;
+}
+function protoGeo(key){
+  const src=WORLD.proto[key];if(!src)return null;
+  src.updateMatrixWorld(true);
+  const posA=[],norA=[],colA=[];const C=new THREE.Color();
+  const nm=new THREE.Matrix3(),v=new THREE.Vector3();
+  let any=false;
+  src.traverse(function(o){
+    if(!o.isMesh)return;any=true;
+    const g=o.geometry.index?o.geometry.toNonIndexed():o.geometry;
+    const pa=g.attributes.position,na=g.attributes.normal,ca=g.attributes.color;
+    nm.getNormalMatrix(o.matrixWorld);
+    let mc=null;
+    if(!ca){mc=new THREE.Color(0x6a7a52);
+      if(o.material&&o.material.color)mc.copy(o.material.color);}
+    for(let i=0;i<pa.count;i++){
+      v.set(pa.getX(i),pa.getY(i),pa.getZ(i)).applyMatrix4(o.matrixWorld);
+      posA.push(v.x,v.y,v.z);
+      v.set(na.getX(i),na.getY(i),na.getZ(i)).applyMatrix3(nm).normalize();
+      norA.push(v.x,v.y,v.z);
+      if(ca)colA.push(ca.getX(i),ca.getY(i),ca.getZ(i));
+      else colA.push(mc.r,mc.g,mc.b);
+    }
+  });
+  if(!any)return null;
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(posA,3));
+  geo.setAttribute('normal',new THREE.Float32BufferAttribute(norA,3));
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(colA,3));
+  return geo;
+}
+function buildInstancedByCell(geo,mat,pts,scaleFn){
+  const cells={};
+  for(const p of pts){
+    const key=Math.floor((p.x+3000)/500)+':'+Math.floor((p.z+3000)/500);
+    (cells[key]=cells[key]||[]).push(p);
+  }
+  const d=new THREE.Object3D();let made=0;
+  for(const k in cells){
+    const list=cells[k];
+    const im=new THREE.InstancedMesh(geo,mat,Math.max(1,list.length));
+    list.forEach(function(p,i){
+      d.position.set(p.x,groundH(p.x,p.z)-0.15,p.z);
+      d.rotation.set(0,rand(0,TAU),0);
+      const s=scaleFn(p);d.scale.set(s,s*rand(0.9,1.1),s);
+      d.updateMatrix();im.setMatrixAt(i,d.matrix);
+    });
+    im.count=list.length;im.instanceMatrix.needsUpdate=true;
+    im.castShadow=true;scene.add(im);made++;
+  }
+  return made;
+}
+function buildEcoScatter(){
+  const geos={pine:protoGeo('pine'),broad:protoGeo('tree'),bush:protoGeo('bush'),rock:protoGeo('rock')};
+  const lakeCx=valleyX(-2050);
+  const inLake=function(x,z){const dx=(x-lakeCx)/235,dz=(z+2050)/330;return dx*dx+dz*dz<1.5;};
+  const nearRiver=function(x,z){return Math.abs(x-valleyX(z))<140;};
+  const byCls={pine:[],broadleaf:[],bush:[],rock:[],grass:[]};
+  const CAP={pine:750,broadleaf:650,bush:750,rock:480,grass:3600};
+  for(let cellI=0;cellI<12;cellI++)for(let cellJ=0;cellJ<12;cellJ++){
+    const cx0=-3000+cellI*500,cz0=-3000+cellJ*500;
+    for(let t=0;t<64;t++){
+      const x=cx0+rand(8,492),z=cz0+rand(8,492);
+      const h=groundH(x,z);
+      if(!ecoClear(x,z,h))continue;
+      const sl=ecoSlope(x,z);
+      const roll=Math.random();
+      if(h>=50&&h<=178&&sl<0.55&&byCls.pine.length<CAP.pine&&roll<0.42)
+        byCls.pine.push({x:x,z:z});
+      else if(h>=1&&h<=48&&sl<0.5&&(h<26||inLake(x,z)||nearRiver(x,z))&&byCls.broadleaf.length<CAP.broadleaf&&roll<0.40)
+        byCls.broadleaf.push({x:x,z:z});
+      else if(sl>=0.08&&sl<0.85&&byCls.bush.length<CAP.bush&&roll<0.34){
+        byCls.bush.push({x:x,z:z});
+        if(Math.random()<0.4)BUSH.list.push({x:x,z:z,r:2.4}); // living cover, same rules as the placed bushes
+      }
+      else if((sl>0.3||h>110)&&byCls.rock.length<CAP.rock&&roll<0.30)
+        byCls.rock.push({x:x,z:z});
+      if(h>=1.2&&h<=65&&sl<0.38&&byCls.grass.length<CAP.grass&&Math.random()<0.75)
+        byCls.grass.push({x:x,z:z});
+    }
+  }
+  for(const k in byCls)for(const p of byCls[k]){V13E.ecoPts.push({x:p.x,z:p.z,cls:k});V13E.counts[k]++;}
+  const lm=new THREE.MeshLambertMaterial({vertexColors:true});
+  if(geos.pine)buildInstancedByCell(geos.pine,lm,byCls.pine,function(){return rand(0.85,1.3);});
+  if(geos.broad)buildInstancedByCell(geos.broad,lm,byCls.broadleaf,function(){return rand(0.85,1.25);});
+  if(geos.bush)buildInstancedByCell(geos.bush,lm,byCls.bush,function(){return rand(0.9,1.5);});
+  if(geos.rock)buildInstancedByCell(geos.rock,lm,byCls.rock,function(){return rand(0.8,2.2);});
+  /* grass : cross-plane tufts with a blade texture, per cell like the rest */
+  const cv=document.createElement('canvas');cv.width=cv.height=64;const gx=cv.getContext('2d');
+  for(let i=0;i<22;i++){const bx=4+Math.random()*56;
+    gx.strokeStyle='rgba('+(74+Math.random()*36|0)+','+(116+Math.random()*36|0)+',44,0.95)';
+    gx.lineWidth=1.5+Math.random()*1.5;gx.beginPath();gx.moveTo(bx,64);
+    gx.quadraticCurveTo(bx+rand(-4,4),36,bx+rand(-8,8),8+Math.random()*16);gx.stroke();}
+  const gtex=new THREE.CanvasTexture(cv);
+  const planes=[];const posA=[],norA=[],uvA=[],idxA=[];let off=0;
+  for(let k=0;k<2;k++){const p=new THREE.PlaneGeometry(1.0,0.6);p.translate(0,0.26,0);p.rotateY(k*Math.PI/2);planes.push(p);}
+  planes.forEach(function(p){const pa=p.attributes.position.array,na=p.attributes.normal.array,ua=p.attributes.uv.array,ia=p.index.array;
+    for(let i=0;i<pa.length;i++)posA.push(pa[i]);
+    for(let i=0;i<na.length;i++)norA.push(na[i]);
+    for(let i=0;i<ua.length;i++)uvA.push(ua[i]);
+    for(let i=0;i<ia.length;i++)idxA.push(ia[i]+off);
+    off+=pa.length/3;});
+  const gg=new THREE.BufferGeometry();
+  gg.setAttribute('position',new THREE.Float32BufferAttribute(posA,3));
+  gg.setAttribute('normal',new THREE.Float32BufferAttribute(norA,3));
+  gg.setAttribute('uv',new THREE.Float32BufferAttribute(uvA,2));
+  gg.setIndex(idxA);
+  buildInstancedByCell(gg,new THREE.MeshLambertMaterial({map:gtex,alphaTest:0.3,side:THREE.DoubleSide}),
+    byCls.grass,function(){return rand(0.8,1.5);});
+  V13E.built=true;
+}
+function v13TickE(dt,gdt){
+  if(!V13E.loading&&!V13E.ready&&!V13E.failed)loadV13Animals();
+  if(!V13E.built&&typeof WORLD!=='undefined'&&WORLD.ready&&WORLD.proto&&WORLD.proto.pine){
+    try{buildEcoScatter();}catch(e){console.warn('[longshot] eco scatter failed',e);V13E.built=true;}
+  }
+  if(gdt<=0)return;
+  /* flee stimuli : a fresh gunshot, or the quad roaring close */
+  if(G.lastShotT>V13E.lastShotSeen){V13E.lastShotSeen=G.lastShotT;
+    if(G.state==='play'||G.state==='roam')animalFleeFrom(G.px,G.pz,240);}
+  if(ATV.drive.on&&Math.abs(ATV.drive.spd)>6)animalFleeFrom(ATV.drive.x,ATV.drive.z,55);
+  const spdMul=1;
+  for(let i=V13E.animals.length-1;i>=0;i--){
+    const an=V13E.animals[i],P=V13E.species[an.sp];
+    an.mixer.update(gdt);
+    if(!an.alive){
+      an.deathT+=gdt;
+      if(an.deathT>14&&an.deathT<20){
+        const f=1-(an.deathT-14)/6;
+        an.grp.traverse(function(o){if(o.isMesh){o.material.transparent=true;o.material.opacity=f;}});
+      }
+      if(an.deathT>=20){scene.remove(an.grp);V13E.animals.splice(i,1);}
+      continue;
+    }
+    an.t-=gdt;
+    let mvx=0,mvz=0,sp=0;
+    if(an.state==='graze'){
+      if(an.t<=0){
+        if(Math.random()<0.45){an.state='graze';an.t=rand(3,8);an.play(Math.random()<0.5?'Eating':'Idle');}
+        else{an.state='wander';an.t=rand(6,14);
+          const a=rand(0,TAU),r=rand(12,70);
+          an.tx=an.home.x+Math.cos(a)*r;an.tz=an.home.z+Math.sin(a)*r;an.play('Walk');}
+      }
+    }else if(an.state==='wander'){
+      const dx=an.tx-an.x,dz=an.tz-an.z,dd=Math.hypot(dx,dz);
+      if(dd<2.5||an.t<=0){an.state='graze';an.t=rand(2,6);an.play('Idle');}
+      else{an.head=Math.atan2(dx,dz);sp=P.walk;mvx=Math.sin(an.head);mvz=Math.cos(an.head);}
+    }else if(an.state==='flee'){
+      an.fleeT-=gdt;sp=P.run;mvx=Math.sin(an.head);mvz=Math.cos(an.head);
+      if(an.fleeT<=0){an.state='wander';an.t=rand(5,9);an.tx=an.home.x;an.tz=an.home.z;an.play('Walk');}
+    }
+    if(sp>0){
+      const nx=an.x+mvx*sp*gdt*spdMul,nz=an.z+mvz*sp*gdt*spdMul;
+      if(surfH(nx,nz)>0.2){an.x=nx;an.z=nz;}
+      else an.head+=2.4*gdt; // water or the deck edge : turn away instead of wading in
+    }
+    an.grp.position.set(an.x,groundH(an.x,an.z),an.z);
+    let cur=an.grp.rotation.y,dh=an.head-cur;
+    while(dh>Math.PI)dh-=2*Math.PI;while(dh<-Math.PI)dh+=2*Math.PI;
+    an.grp.rotation.y=cur+dh*Math.min(1,gdt*5);
+    const gf=groundH(an.x+Math.sin(an.head)*1.3,an.z+Math.cos(an.head)*1.3),
+          gb=groundH(an.x-Math.sin(an.head)*1.3,an.z-Math.cos(an.head)*1.3);
+    an.grp.rotation.x=clamp(Math.atan2(gb-gf,2.6),-0.4,0.4);
+  }
+  /* slow habitat respawn : top a species up only when nobody is watching */
+  V13E.respawnT+=gdt;
+  if(V13E.respawnT>20){
+    V13E.respawnT=0;
+    for(const k in V13E.species){const P=V13E.species[k];
+      const alive=V13E.animals.filter(a=>a.sp===k&&a.alive).length;
+      if(alive<P.cap){
+        for(const h of P.homes){
+          if(Math.hypot(G.px-h[0],G.pz-h[1])>170){spawnAnimal(k,h[0],h[1]);break;}
+        }
+      }
+    }
+  }
+}
+(function(){
+  const iv=setInterval(function(){
+    if(typeof G!=='undefined'&&typeof WORLD!=='undefined'){loadV13Animals();clearInterval(iv);}
+  },800);
+})();
+
+/* ==================== V13 Chunk F — the helicopter ====================
+   A real licensed aircraft (Helicopter by Google, CC BY 3.0, Icosa
+   6U2H_0VSAXY — rotor-split into Body / MainRotor / TailRotor offline),
+   a helipad on the reserved clearing (V13E.PAD), MW's purchase flow
+   verbatim (walk on -> popup -> 500,000 CR -> 5 s STAND CLEAR countdown
+   -> she descends), and an arcade flight model tuned smooth-not-choppy:
+   collective, cyclic tilt with inertia + damping, yaw pedals, gentle
+   auto-level, velocity bleed to a hover on release. Landings register on
+   terrain, the helipad, and the bridge deck. Rotor + turbine audio is
+   synthesized on the v12.1 engine conventions (SFX bus, fixed node set,
+   clean start/stop — no leaks). Weapons stay holstered in flight;
+   ownership lives in 'longshot_heli' (OR-merge sync, PKEYS 17 -> 18). */
+const V13F={ready:false,failed:false,loading:false,built:false,
+  PRICE:500000,CEIL:400,
+  helipad:{x:150,z:-930},PAD_R:15,TOP_Y:0,
+  grp:null,mr:null,tr:null,disc:null,navMat:null,padGrp:null,
+  air:'absent', // absent | spawning | parked | flight
+  flyOn:false,
+  fly:{x:150,y:-999,z:-930,head:0.6,vx:0,vy:0,vz:0,onGround:true},
+  rpm:0,tiltP:0,tiltR:0,spinA:0,
+  up:false,down:false,yawL:false,yawR:false,
+  lookYaw:0,lookPitch:0,camPos:new THREE.Vector3(150,40,-960),camInit:false,
+  spawnT:-1,descend:false,popOpen:false,nearPad:false,nearHeli:false,
+  owned:function(){return lsGet('longshot_heli','')==='1';},
+  surfY:function(x,z){ // the landing truth : pad top inside the disc, else the world's own surface
+    const dx=x-this.helipad.x,dz=z-this.helipad.z;
+    if(this.built&&dx*dx+dz*dz<this.PAD_R*this.PAD_R)return this.TOP_Y;
+    return surfH(x,z);
+  },
+  savePark:function(){try{lsSet('longshot_heliPark',JSON.stringify({x:this.fly.x,z:this.fly.z,head:this.fly.head}));}catch(e){}},
+  loadPark:function(){try{const p=JSON.parse(lsGet('longshot_heliPark','')||'null');
+    if(p&&isFinite(p.x)&&isFinite(p.z)){this.fly.x=clamp(p.x,-2960,2960);this.fly.z=clamp(p.z,-2960,2960);
+      this.fly.head=+p.head||0;this.fly.y=this.surfY(this.fly.x,this.fly.z);return true;}}catch(e){}return false;}
+};
+function heliSurfaceY(x,z){return V13F.surfY(x,z);}
+/* ---------------- pack load + build ---------------- */
+function loadV13Heli(){
+  if(V13F.loading||V13F.ready||V13F.failed)return;V13F.loading=true;
+  const s=document.createElement('script');s.src='models/v13-heli-data.js';
+  s.onerror=function(){V13F.failed=true;console.warn('[longshot] heli pack failed — pad stands empty');};
+  s.onload=function(){
+    if(!window.V13HELI){V13F.failed=true;return;}
+    try{
+      const bin=atob(window.V13HELI),u8=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+      new THREE.GLTFLoader().parse(u8.buffer,'',function(g){
+        const sc=g.scene;
+        sc.traverse(function(o){if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
+        const grp=new THREE.Group();grp.rotation.order='YXZ';grp.add(sc);scene.add(grp);
+        V13F.grp=grp;V13F.body=sc;
+        V13F.mr=sc.getObjectByName('MainRotor');V13F.tr=sc.getObjectByName('TailRotor');
+        // rotor blur disc : fades in with RPM over the real blades
+        const disc=new THREE.Mesh(new THREE.CircleGeometry(4.3,36),
+          new THREE.MeshBasicMaterial({color:0xcfd6dd,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));
+        disc.rotation.x=-Math.PI/2;disc.position.y=0.10;
+        if(V13F.mr){V13F.mr.add(disc);V13F.disc=disc;}
+        // nav light : a blinking red bead on the tail fin
+        const nav=new THREE.Mesh(new THREE.SphereGeometry(0.11,8,8),
+          new THREE.MeshBasicMaterial({color:0xff2a22,transparent:true,opacity:0.25}));
+        nav.position.set(0.25,5.6,-7.35);sc.add(nav);V13F.navMat=nav.material;
+        grp.visible=false;
+        V13F.ready=true;
+        // a previously-owned, previously-parked aircraft is simply THERE
+        if(V13F.owned()&&V13F.loadPark()){V13F.air='parked';grp.visible=true;heliPlace(0);}
+      },function(){V13F.failed=true;});
+    }catch(e){V13F.failed=true;}
+  };
+  document.head.appendChild(s);
+}
+function buildHelipad(){
+  if(V13F.built)return;V13F.built=true;
+  const cx=V13F.helipad.x,cz=V13F.helipad.z;
+  const topY=groundH(cx,cz)+0.14;V13F.TOP_Y=topY;
+  window.__heliTopY=topY;window.__heliPadX=cx;window.__heliPadZ=cz; // surfH reads these (TDZ-safe)
+  const g=new THREE.Group();scene.add(g);V13F.padGrp=g;
+  // painted pad : asphalt disc with the H + ring baked into a canvas texture
+  const cv=document.createElement('canvas');cv.width=cv.height=256;const x2=cv.getContext('2d');
+  x2.fillStyle='#33373c';x2.fillRect(0,0,256,256);
+  for(let i=0;i<900;i++){x2.fillStyle='rgba(255,255,255,'+(Math.random()*0.05)+')';x2.fillRect(Math.random()*256,Math.random()*256,2,2);}
+  x2.strokeStyle='#e8e4da';x2.lineWidth=7;x2.beginPath();x2.arc(128,128,112,0,Math.PI*2);x2.stroke();
+  x2.fillStyle='#e8e4da';x2.font='900 118px Arial';x2.textAlign='center';x2.textBaseline='middle';
+  x2.fillText('H',128,134);
+  const tex=new THREE.CanvasTexture(cv);
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(V13F.PAD_R,40),
+    new THREE.MeshLambertMaterial({map:tex}));
+  disc.rotation.x=-Math.PI/2;disc.position.set(cx,topY,cz);disc.receiveShadow=true;g.add(disc);
+  const skirt=new THREE.Mesh(new THREE.CylinderGeometry(V13F.PAD_R+0.7,V13F.PAD_R+1.5,0.3,40),
+    new THREE.MeshLambertMaterial({color:0x555a60}));
+  skirt.position.set(cx,topY-0.16,cz);g.add(skirt);
+  // edge lights : eight warm beads on the rim
+  const lm=new THREE.MeshBasicMaterial({color:0xffc46b});
+  for(let i=0;i<8;i++){const a=i/8*Math.PI*2;
+    const b=new THREE.Mesh(new THREE.SphereGeometry(0.13,8,8),lm);
+    b.position.set(cx+Math.cos(a)*(V13F.PAD_R-0.5),topY+0.12,cz+Math.sin(a)*(V13F.PAD_R-0.5));g.add(b);}
+  // windsock : pole + orange cone that rides the game's own wind
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,5.4,6),
+    new THREE.MeshLambertMaterial({color:0x8a8f96}));
+  pole.position.set(cx+13,topY+2.7,cz+9);pole.castShadow=true;g.add(pole);
+  const sock=new THREE.Mesh(new THREE.ConeGeometry(0.42,2.3,10,1,true),
+    new THREE.MeshLambertMaterial({color:0xe86a1e,side:THREE.DoubleSide}));
+  sock.position.set(cx+13,topY+5.1,cz+9);g.add(sock);V13F.sock=sock;
+}
+/* ---------------- placement ---------------- */
+function heliPlace(dt){
+  const F=V13F,f=F.fly;if(!F.grp)return;
+  F.grp.position.set(f.x,f.y,f.z);
+  F.grp.rotation.y=f.head;
+  const k=dt>0?Math.min(1,dt*7):1;
+  F.grp.rotation.x+=(F.tiltP-F.grp.rotation.x)*k;   // cyclic pitch (nose-down = +)
+  F.grp.rotation.z+=((-F.tiltR)-F.grp.rotation.z)*k; // cyclic roll
+  if(F.mr)F.mr.rotation.y+=F.rpm*36*(dt||0);
+  if(F.tr)F.tr.rotation.x+=F.rpm*52*(dt||0);
+  if(F.disc)F.disc.material.opacity=(F.rpm>0.5?0.34*sstep(0.5,0.95,F.rpm):0);
+  if(F.navMat)F.navMat.opacity=((G.swayT*1.3)%1<0.14)?1:0.22;
+  if(F.sock){ // the sock streams downwind, stiffens with wind speed
+    F.sock.rotation.z=Math.PI/2-0.25-(G.windSpd||1)*0.05;
+    F.sock.rotation.y=-(G.windDir||0);
+  }
+}
+/* ---------------- rotor audio (ENG conventions : fixed nodes, SFX bus) ---------------- */
+const ROTA={on:false,nodes:null};
+function rotStart(){
+  if(ROTA.on)return;
+  const ac=audio();if(!ac)return; // muted / unavailable — the tick retries while spooling
+  try{
+    const t=ac.currentTime;
+    const g=ac.createGain();g.gain.setValueAtTime(0.0001,t);
+    const len=ac.sampleRate|0,buf=ac.createBuffer(1,len,ac.sampleRate),dd=buf.getChannelData(0);
+    for(let i=0;i<len;i++)dd[i]=Math.random()*2-1;
+    const ns=ac.createBufferSource();ns.buffer=buf;ns.loop=true;
+    const nf=ac.createBiquadFilter();nf.type='bandpass';nf.frequency.value=500;nf.Q.value=0.6;
+    const chop=ac.createGain();chop.gain.value=0.05;
+    const lfo=ac.createOscillator();lfo.type='sine';lfo.frequency.value=12;
+    const lg=ac.createGain();lg.gain.value=0.03;
+    lfo.connect(lg);lg.connect(chop.gain); // blade-pass chop on the wash
+    const o1=ac.createOscillator();o1.type='triangle';o1.frequency.value=320;
+    const og=ac.createGain();og.gain.value=0.012; // turbine thread, kept low
+    const o2=ac.createOscillator();o2.type='sine';o2.frequency.value=58;
+    const og2=ac.createGain();og2.gain.value=0.05; // rotor thump fundamental
+    ns.connect(nf);nf.connect(chop);chop.connect(g);
+    o1.connect(og);og.connect(g);o2.connect(og2);og2.connect(g);
+    g.connect(aDest(ac));
+    ns.start();lfo.start();o1.start();o2.start();
+    ROTA.nodes={g,nf,chop,lfo,lg,o1,og,o2,og2,ns};ROTA.on=true;
+  }catch(e){ROTA.nodes=null;ROTA.on=false;}
+}
+function rotStop(){
+  if(!ROTA.on)return;ROTA.on=false;
+  const N=ROTA.nodes;ROTA.nodes=null;if(!N)return;
+  const ac=(typeof AC!=='undefined')?AC:null;if(!ac)return;
+  try{
+    const t=ac.currentTime;
+    N.g.gain.cancelScheduledValues(t);
+    N.g.gain.setValueAtTime(Math.max(0.0001,N.g.gain.value),t);
+    N.g.gain.exponentialRampToValueAtTime(0.0001,t+0.4);
+    const sa=t+0.5;
+    N.ns.stop(sa);N.lfo.stop(sa);N.o1.stop(sa);N.o2.stop(sa);
+    setTimeout(()=>{try{for(const k in N)if(N[k].disconnect)N[k].disconnect();}catch(e){}},650);
+  }catch(e){}
+}
+function rotUpdate(){
+  if(!ROTA.on)return;const N=ROTA.nodes;if(!N)return;
+  const ac=(typeof AC!=='undefined')?AC:null;if(!ac||ac.state!=='running')return;
+  const t=ac.currentTime,r=V13F.rpm;
+  N.g.gain.setTargetAtTime(G.muted?0:0.15*(0.2+0.8*r),t,0.08);
+  N.nf.frequency.setTargetAtTime(320+r*980,t,0.06);
+  N.lfo.frequency.setTargetAtTime(4+r*9.5,t,0.06); // chop rate follows the spool
+  N.lg.gain.setTargetAtTime(0.012+r*0.045,t,0.06);
+  N.o1.frequency.setTargetAtTime(240+r*620,t,0.06);
+  N.o2.frequency.setTargetAtTime(38+r*34,t,0.06);
+}
+/* ---------------- purchase / spawn flow (MW's spec, verbatim shape) ---------------- */
+function heliPopMode(){
+  const F=V13F;
+  if(F.air==='parked'){
+    const onPad=Math.hypot(F.fly.x-F.helipad.x,F.fly.z-F.helipad.z)<3&&Math.abs(F.fly.y-F.TOP_Y)<1;
+    return onPad?'onpad':'recall';
+  }
+  return F.owned()?'owned':'buy';
+}
+function openHeliPop(){
+  const F=V13F;if(F.popOpen)return;F.popOpen=true;G.heliOpen=true;
+  const mode=heliPopMode(),yes=$('heliYes'),no=$('heliNo');
+  no.textContent='CLOSE';yes.style.display='';
+  if(mode==='buy'){
+    $('heliHead').textContent='SPAWN HELICOPTER — 500,000 CR';
+    if(credits()>=F.PRICE){$('heliText').textContent='A DETAILED ROTOR BIRD, DELIVERED TO THIS PAD. YOU HAVE '+credits().toLocaleString('en-US')+' CR.';
+      yes.textContent='SPAWN — 500,000 CR';yes.classList.remove('deny');}
+    else{$('heliText').textContent='PRICE: 500,000 CR — YOU HAVE '+credits().toLocaleString('en-US')+' CR. COME BACK RICHER.';
+      yes.textContent='NEED '+(F.PRICE-credits()).toLocaleString('en-US')+' MORE CR';yes.classList.add('deny');}
+  }else if(mode==='owned'){
+    $('heliHead').textContent='SPAWN HELICOPTER — OWNED';
+    $('heliText').textContent='SHE IS YOURS. DELIVERY TO THIS PAD IS FREE.';
+    yes.textContent='SPAWN HELICOPTER';yes.classList.remove('deny');
+  }else if(mode==='recall'){
+    $('heliHead').textContent='RECALL HELICOPTER';
+    $('heliText').textContent='YOUR HELICOPTER IS PARKED IN THE FIELD. FLY IT BACK HERE? (SHE IS RE-DELIVERED TO THE PAD.)';
+    yes.textContent='RECALL + SPAWN';yes.classList.remove('deny');
+  }else{
+    $('heliHead').textContent='HELICOPTER ON THE PAD';
+    $('heliText').textContent='YOUR HELICOPTER IS ALREADY SITTING ON THIS PAD. GO FLY IT.';
+    yes.style.display='none';
+  }
+  $('heliRoot').style.display='flex';sClick();
+}
+function closeHeliPop(){
+  V13F.popOpen=false;G.heliOpen=false;$('heliRoot').style.display='none';v12HudDirty();
+}
+function confirmHeliSpawn(){
+  const F=V13F,mode=heliPopMode();
+  if(mode==='buy'){
+    if(credits()<F.PRICE){denyBtn($('heliYes'));return;} // insufficient : shake, ZERO deduction, no spawn
+    setCredits(credits()-F.PRICE); // exactly once — the mode flips to OWNED the moment this lands
+    lsSet('longshot_heli','1');
+    toast('HELICOPTER PURCHASED — SHE IS YOURS');
+  }
+  closeHeliPop();
+  F.air='spawning';F.spawnT=5.0;F.descend=false;
+  if(F.grp)F.grp.visible=false;
+  const b=$('heliBanner');if(b)b.style.display='block';
+  sTone(880,0.09,'square',0.07);buzz(12);
+}
+function heliSpawnTick(dt){ // real-time : the world stays live while the countdown runs (that's the point)
+  const F=V13F;if(F.air!=='spawning')return;
+  const b=$('heliBanner');
+  if(!F.descend){
+    F.spawnT-=dt;
+    if(b)b.textContent='SPAWNING HELI — STAND CLEAR — '+Math.max(1,Math.ceil(F.spawnT));
+    if(F.spawnT<=0){
+      F.descend=true;
+      const f=F.fly;f.x=F.helipad.x;f.z=F.helipad.z;f.y=F.TOP_Y+56;f.head=0.6;
+      f.vx=0;f.vy=0;f.vz=0;F.tiltP=0;F.tiltR=0;
+      if(F.grp)F.grp.visible=true;
+      if(b)b.textContent='INCOMING — STAND CLEAR';
+    }
+    return;
+  }
+  // descent : spools up as she comes down; holds at 9 m until the pad disc is clear
+  F.rpm+=(1-F.rpm)*Math.min(1,dt*0.9);
+  if(F.rpm>0.25&&!ROTA.on)rotStart();rotUpdate();
+  const f=F.fly;
+  const clearOfPlayer=Math.hypot(G.px-f.x,G.pz-f.z)>8||(G.state!=='play'&&G.state!=='roam');
+  const floorY=F.TOP_Y,holdY=floorY+9;
+  let ty=f.y-5.2*dt;
+  if(!clearOfPlayer&&ty<holdY)ty=holdY; // hovering over a player who won't move — she waits
+  f.y=Math.max(floorY,ty);
+  heliPlace(dt);
+  if(f.y<=floorY+0.001){
+    F.air='parked';F.descend=false;F.savePark();
+    if(b)b.style.display='none';
+    toast('HELICOPTER ON THE PAD');sTone(196,0.16,'sine',0.10);buzz(20);
+  }
+}
+/* ---------------- enter / exit ---------------- */
+function enterFlight(){
+  const F=V13F;if(F.flyOn||F.air!=='parked'||ATV.drive.on)return;
+  if(KC.active||G.settingsOpen||G.pauseOpen||G.mapOpen)return;
+  if(KNF.out)weaponSwitch();
+  if(G.scoped)setScoped(false);
+  F.flyOn=true;F.air='flight';
+  F.lookYaw=0;F.lookPitch=0;F.camInit=false;
+  rotStart();
+  sClick();buzz(12);v12HudDirty();
+}
+function exitFlight(instant){
+  const F=V13F;if(!F.flyOn)return;
+  F.flyOn=false;F.air='parked';
+  const f=F.fly;
+  const rx=-Math.cos(f.head),rz=Math.sin(f.head); // step out on the right side, like the quad
+  G.px=clamp(f.x+rx*3.4,-2960,2960);G.pz=clamp(f.z+rz*3.4,-2960,2960);
+  G.yaw=f.head+Math.PI;
+  rotStop();
+  F.savePark();
+  if(!instant){sClick();buzz(8);}
+  v12HudDirty();
+}
+/* ---------------- flight ---------------- */
+function heliTick(dt,gdt){
+  const F=V13F,f=F.fly;
+  if(!F.flyOn)return;
+  if(G.state!=='play'&&G.state!=='roam'){ // mission ended / won under us — settle her where she is
+    f.y=F.surfY(f.x,f.z);f.vx=0;f.vy=0;f.vz=0;f.onGround=true;exitFlight(true);heliPlace(0);return;
+  }
+  if(gdt<=0){heliCam(dt);return;} // paused : physics frozen, camera alive (the ATV convention)
+  /* rotor spool : lift only once she is turning near flight RPM */
+  F.rpm+=(1-F.rpm)*Math.min(1,gdt*0.55); // ~2.5 s to flight idle — spool FEELS like spooling
+  if(!ROTA.on)rotStart();rotUpdate();
+  /* inputs : buttons + keys + the joystick as cyclic */
+  const coll=((F.up||KEYS['Space'])?1:0)-((F.down||KEYS['KeyC'])?1:0);
+  const yawIn=((F.yawR||KEYS['ArrowRight'])?1:0)-((F.yawL||KEYS['ArrowLeft'])?1:0);
+  let cycX=joyVec.x,cycY=joyVec.y; // stick right / stick forward(-y)
+  if(KEYS['KeyW']||KEYS['ArrowUp'])cycY-=1;
+  if(KEYS['KeyS']||KEYS['ArrowDown'])cycY+=1;
+  if(KEYS['KeyA'])cycX-=1;
+  if(KEYS['KeyD'])cycX+=1;
+  const cl=Math.hypot(cycX,cycY);if(cl>1){cycX/=cl;cycY/=cl;}
+  f.head-=yawIn*0.85*gdt;
+  /* cyclic : tilt targets — smoothed, so she leans in and out, never snaps */
+  const tP=-cycY*0.40,tR=cycX*0.32;
+  F.tiltP+=(tP-F.tiltP)*Math.min(1,gdt*2.4);
+  F.tiltR+=(tR-F.tiltR)*Math.min(1,gdt*2.4);
+  /* acceleration : the tilted disc pulls her along her own axes */
+  const fx=Math.sin(f.head),fz=Math.cos(f.head),rxv=Math.cos(f.head),rzv=-Math.sin(f.head);
+  const pull=27;
+  f.vx+=(fx*(F.tiltP)*pull+rxv*F.tiltR*pull)*gdt; // tiltP > 0 = nose down = she pulls along her nose
+  f.vz+=(fz*(F.tiltP)*pull+rzv*F.tiltR*pull)*gdt;
+  /* drag : strong bleed with no cyclic input (she settles to a hover),
+     gentle under way (terminal ~98, capped at MAXH — the quad's 56 is far below) */
+  const noCyc=(cycX===0&&cycY===0);
+  const dragK=noCyc?0.85:0.11;
+  f.vx-=f.vx*dragK*gdt;f.vz-=f.vz*dragK*gdt;
+  const hSpd=Math.hypot(f.vx,f.vz),MAXH=82;
+  if(hSpd>MAXH){f.vx*=MAXH/hSpd;f.vz*=MAXH/hSpd;}
+  /* vertical : collective drives a damped climb rate; no input = altitude hold */
+  const lift=F.rpm>0.92;
+  const vyT=lift?coll*15:0;
+  f.vy+=(vyT-f.vy)*Math.min(1,gdt*(coll!==0?1.6:2.6));
+  if(!lift&&!f.onGround)f.vy-=3.2*gdt; // spooled down in the air = she settles, never drops like a stone
+  /* integrate */
+  f.x=clamp(f.x+f.vx*gdt,-2960,2960);f.z=clamp(f.z+f.vz*gdt,-2960,2960);
+  f.y+=f.vy*gdt;
+  if(f.y>F.CEIL){f.y=F.CEIL;if(f.vy>0)f.vy=0;}
+  /* the ground, in all its registered forms */
+  const gy=F.surfY(f.x,f.z);
+  if(f.y<=gy){
+    f.y=gy;
+    if(f.vy<-9.5){ // hard arrival : a bounce and a stopped rotor-wash shudder — no damage model
+      f.vy=-f.vy*0.22;f.vx*=0.5;f.vz*=0.5;sTone(70,0.22,'sine',0.16);buzz(30);
+    }else{
+      if(!f.onGround&&f.vy<-0.5){sTone(120,0.10,'sine',0.08);buzz(10);}
+      f.vy=0;f.onGround=true;f.vx-=f.vx*Math.min(1,gdt*3.2);f.vz-=f.vz*Math.min(1,gdt*3.2);
+    }
+  }else if(f.y>gy+0.4)f.onGround=false;
+  if(f.onGround&&coll>0&&lift){f.y=gy+0.02;f.onGround=false;} // liftoff
+  /* the player IS the helicopter, like the quad */
+  G.px=f.x;G.pz=f.z;G.lastNearT=G.swayT;
+  heliPlace(gdt);
+  heliCam(dt);
+}
+function heliCam(dt){
+  const F=V13F,f=F.fly;
+  const fx=Math.sin(f.head),fz=Math.cos(f.head);
+  _av1.set(f.x-fx*13.5,f.y+4.4,f.z-fz*13.5); // chase anchor behind + above
+  _av1.y=Math.max(_av1.y,groundH(_av1.x,_av1.z)+1.8,f.y+1.2);
+  if(!F.camInit){F.camPos.copy(_av1);F.camInit=true;}
+  F.camPos.lerp(_av1,1-Math.exp(-dt*4.2));
+  camera.position.copy(F.camPos);
+  const psi=f.head+Math.PI+F.lookYaw; // free look rides on top, unbounded (V12.1 law)
+  _av2.set(f.x-Math.sin(psi)*7,f.y+1.6+Math.tan(F.lookPitch)*7,f.z-Math.cos(psi)*7);
+  camera.lookAt(_av2);
+  const spd=Math.hypot(f.vx,f.vz);
+  const fv=68+Math.min(9,spd*0.10);
+  if(Math.abs(camera.fov-fv)>0.05){camera.fov=fv;camera.updateProjectionMatrix();}
+  rifle.visible=false;
+}
+/* ---------------- per-frame ---------------- */
+function v13TickF(dt,gdt){
+  const F=V13F;
+  if(!F.loading&&!F.ready&&!F.failed)loadV13Heli();
+  if(!F.built&&typeof WORLD!=='undefined'&&WORLD.ready)buildHelipad();
+  if(F.air==='spawning')heliSpawnTick(dt);
+  if(F.flyOn)heliTick(dt,gdt);
+  else if(F.air==='parked'){
+    // parked : rotors wind down to still, the airframe just sits there
+    if(F.rpm>0){F.rpm=Math.max(0,F.rpm-dt*0.30);if(F.rpm===0&&ROTA.on)rotStop();else rotUpdate();}
+    heliPlace(dt);
+  }
+  /* proximity prompts (cheap, change-only via the HUD dirty flag) */
+  if(F.built&&(G.state==='play'||G.state==='roam')&&!F.flyOn){
+    const np=!ATV.drive.on&&Math.hypot(G.px-F.helipad.x,G.pz-F.helipad.z)<17;
+    const nh=F.air==='parked'&&Math.hypot(G.px-F.fly.x,G.pz-F.fly.z)<6.5;
+    if(np!==F.nearPad||nh!==F.nearHeli){F.nearPad=np;F.nearHeli=nh;v12HudDirty();}
+  }else if(F.nearPad||F.nearHeli){F.nearPad=false;F.nearHeli=false;v12HudDirty();}
+}
+/* ---------------- bindings ---------------- */
+bindBtn('btnHUp',()=>{V13F.up=true;$('btnHUp').classList.add('on');},()=>{V13F.up=false;$('btnHUp').classList.remove('on');});
+bindBtn('btnHDown',()=>{V13F.down=true;$('btnHDown').classList.add('on');},()=>{V13F.down=false;$('btnHDown').classList.remove('on');});
+bindBtn('btnHYawL',()=>{V13F.yawL=true;$('btnHYawL').classList.add('on');},()=>{V13F.yawL=false;$('btnHYawL').classList.remove('on');});
+bindBtn('btnHYawR',()=>{V13F.yawR=true;$('btnHYawR').classList.add('on');},()=>{V13F.yawR=false;$('btnHYawR').classList.remove('on');});
+bindBtn('btnFly',()=>{if(V13F.flyOn){if(V13F.fly.onGround)exitFlight(false);}else enterFlight();});
+bindEl($('btnPad'),()=>{if(V13F.nearPad&&!V13F.popOpen)openHeliPop();});
+bindEl($('heliNo'),()=>{closeHeliPop();tick();});
+bindEl($('heliYes'),()=>{confirmHeliSpawn();});
+document.addEventListener('keydown',e=>{
+  if(G.state!=='play'&&G.state!=='roam')return;
+  if(V13F.popOpen){if(e.code==='Escape')closeHeliPop();return;}
+  if(e.code==='KeyE'){
+    if(V13F.flyOn){if(V13F.fly.onGround)exitFlight(false);}
+    else if(ATV.drive.on){/* the quad's own E handler owns this press */}
+    else if(V13F.nearHeli)enterFlight();
+    else if(V13F.nearPad)openHeliPop();
+  }
+  if(e.code==='Escape'&&V13F.flyOn&&V13F.fly.onGround)exitFlight(false);
+});
+
+/* ==================== end V13 (Chunk F) ==================== */
+
 
 /* ---- menu wiring ---- */
 bindEl($('deployBtn'),deployMission);
@@ -6603,7 +8436,7 @@ const SYNC={
   PKEYS:['longshot_credits','longshot_xp','longshot_best','longshot_rifles','longshot_rifle',
     'longshot_skinsOwned','longshot_skin','longshot_mbest','longshot_mtime','longshot_ghostMissions',
     'longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn','longshot_seenver',
-    'longshot_supp'], // V12 : per-rifle suppressor installs — PROGRESS-adjacent equipment, syncs like the rest
+    'longshot_supp','longshot_loot','longshot_heli'], // V12/V13 : per-rifle suppressor installs + loot found-set + Chunk F helicopter ownership — PROGRESS, syncs like the rest
   NUMK:{longshot_credits:1,longshot_xp:1,longshot_best:1,longshot_rifles:1,longshot_menuMission:1}, // numeric ladders : best-of = max (rifles unlock by ladder, so max IS the union)
   state:'idle',user:null,dirty:false,_sdkOk:false,_kicked:false,_applying:false,_pushing:false,_pushT:0,_pushTimer:0,_status:'',_popWdMs:20000,_env:null,_attempt:0, // SYNC 11.2 : _popWdMs = popup no-settle LOG window in ms (a hang is logged, never auto-navigated — the 11.1.2 auto-redirect watchdog is retired); _env caches the boot env checks; _attempt mirrors lssync_attempt
   store:{get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},
@@ -6686,7 +8519,7 @@ const SYNC={
       const ha=a[k]!=null,hb=b[k]!=null;if(!ha&&!hb)continue;
       if(SYNC.NUMK[k]){const x=parseFloat(a[k]),y=parseFloat(b[k]);out[k]=String(Math.max(isNaN(x)?-Infinity:x,isNaN(y)?-Infinity:y));continue;}
       switch(k){
-        case 'longshot_skinsOwned': case 'longshot_ghostMissions':{ // set union
+        case 'longshot_skinsOwned': case 'longshot_ghostMissions': case 'longshot_loot':{ // set union
           const u=[];const add=function(s){try{const arr=JSON.parse(s||'[]');if(Array.isArray(arr))for(const v of arr)if(u.indexOf(v)<0)u.push(v);}catch(e){}};
           add(a[k]);add(b[k]);out[k]=JSON.stringify(u);break;}
         case 'longshot_mbest':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return Math.max(x,y);}));break; // best score per mission
@@ -6694,6 +8527,7 @@ const SYNC={
         case 'longshot_skinKills':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return Math.max(x,y);}));break; // grind counters per skin
         case 'longshot_killFxOn':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return !!(x||y);}));break; // enabled anywhere = enabled
         case 'longshot_supp':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return (x||y)?1:0;}));break; // V12 : installed on either device = installed (equipped-if-anywhere OR), stored as 0/1 per rifle
+        case 'longshot_heli':out[k]=(a[k]==='1'||b[k]==='1')?'1':(ha?a[k]:b[k]);break; // V13 Chunk F : owned anywhere = owned
         case 'longshot_grant105':out[k]=(a[k]==='1'||b[k]==='1')?'1':(ha?a[k]:b[k]);break; // claimed anywhere = claimed (no double-dip)
         case 'longshot_seenver':out[k]=SYNC._verMax(a[k],b[k]);break;
         default:out[k]=ha?a[k]:b[k]; // longshot_rifle / longshot_skin : this device's current choice wins the first link
