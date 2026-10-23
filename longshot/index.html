@@ -73,6 +73,20 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #btnFire{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:92px;height:92px;font-size:17px;border-color:rgba(255,160,120,.6)}
 #btnScope{right:28px;bottom:calc(130px + env(safe-area-inset-bottom));width:68px;height:68px;font-size:13px}
 #btnReload{right:116px;bottom:calc(110px + env(safe-area-inset-bottom));width:60px;height:60px;font-size:11px}
+/* V12 HUD : weapon switch, contextual RIDE, driving cluster, concealment chip */
+#btnWep{right:186px;bottom:calc(92px + env(safe-area-inset-bottom));width:60px;height:60px;font-size:11px}
+#btnRide{left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom));width:164px;height:54px;border-radius:27px;font-size:15px;border-color:rgba(190,230,190,.55)}
+#btnRide:active{transform:translateX(-50%) scale(.93)}
+#btnGas{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:92px;height:92px;font-size:15px;border-color:rgba(190,230,190,.55)}
+#btnBrake{right:118px;bottom:calc(30px + env(safe-area-inset-bottom));width:72px;height:72px;font-size:12px}
+#btnSteerL{left:16px;bottom:calc(30px + env(safe-area-inset-bottom));width:72px;height:72px;font-size:12px}
+#btnSteerR{left:100px;bottom:calc(30px + env(safe-area-inset-bottom));width:72px;height:72px;font-size:12px}
+#concealChip{position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:31;padding:5px 14px;border-radius:20px;background:rgba(8,20,12,.66);border:1px solid rgba(150,230,160,.5);color:#b9f2c2;font-size:11px;letter-spacing:2.5px;font-weight:700;pointer-events:none}
+body.lefthand #btnWep{right:auto;left:186px}
+body.lefthand #btnGas{right:auto;left:16px}
+body.lefthand #btnBrake{right:auto;left:118px}
+body.lefthand #btnSteerL{left:auto;right:16px}
+body.lefthand #btnSteerR{left:auto;right:100px}
 /* ---------- joystick ---------- */
 #joy{position:fixed;left:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:112px;height:112px;border-radius:50%;background:rgba(12,16,12,.38);border:2px solid rgba(190,230,190,.3);z-index:50}
 #joy.locked{opacity:.3}
@@ -484,6 +498,13 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
 <button class="hbtn" id="btnFire">FIRE</button>
 <button class="hbtn" id="btnScope">SCOPE</button>
 <button class="hbtn" id="btnReload">RELD</button>
+<button class="hbtn" id="btnWep" style="display:none">KNIFE</button>
+<button class="hbtn" id="btnRide" style="display:none">RIDE</button>
+<button class="hbtn" id="btnGas" style="display:none">GAS</button>
+<button class="hbtn" id="btnBrake" style="display:none">BRAKE</button>
+<button class="hbtn" id="btnSteerL" style="display:none">LEFT</button>
+<button class="hbtn" id="btnSteerR" style="display:none">RIGHT</button>
+<div id="concealChip" style="display:none">CONCEALED</div>
 <div id="joy"><div id="joyKnob"></div></div>
 
 <div id="dmg"></div>
@@ -541,12 +562,15 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v11.5</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v12.0</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">World: "SWAT" soldier, "Pine", "Twisted Tree", "Rock Medium", "Plant Big", "Exploding Barrel" by Quaternius (CC0 1.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">World: "Sandbags" by J-Toastie (CC BY) — poly.pizza</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Vehicle: "Quad Bike" by Sam Philo (CC BY 4.0) — Icosa Gallery, asset 9vnvW2ZnhGD</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Knife &amp; suppressor: Kenney "Blaster Kit" (CC0 1.0) — kenney.nl</p>
+    <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Ground texture: "Grass004" by ambientCG (CC0 1.0) — ambientcg.com</p>
     <div class="row"><button class="mbtn" id="setClose">DONE</button></div>
   </div>
 </div>
@@ -606,6 +630,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
         </div>
         <p id="loDesc" style="font-size:11.5px;line-height:1.6;color:#8fa3d9;letter-spacing:1px;text-align:center;margin-top:10px;text-transform:none"></p>
         <button class="ubtn" id="loEquip">EQUIP</button>
+        <button class="ubtn" id="loSupp" style="margin-top:8px">INSTALL SUPPRESSOR</button>
       </div>
     </div></div>
     <div class="tabPanel" id="tabSkins"><div class="uiscroll" style="display:flex;flex-direction:column">
@@ -694,8 +719,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='11.5'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='12.0'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'12.0',lines:[ // WORLD OVERHAUL 2 : living grassland, rideable truck, knife, suppressor, hideable bushes
+  '<b>WORLD OVERHAUL 2</b> — real grassland ground + dense tufts, hideable bushes (watch for CONCEALED), a rideable quad bike at spawn (it flattens the grass it crosses), a knife on the KNIFE button (silent kills), and a suppressor in LOADOUT — half the shot noise, no flash, and it wears your mythic skin']},
  {v:'11.5',lines:[ // SYNC 11.5 : blue theme + sign-in log disclosure — visual only, zero behavior change
   '<b>NEW COLORS</b> — the menus wear deep blue now (the muddy green is gone), and the sign-in log in Settings tucks behind a tap']},
  {v:'11.4',lines:[ // SYNC 11.4 : settings polish — grouped sections, toggle switches, slider readouts; zero behavior change
@@ -1103,9 +1130,12 @@ function groundH(x,z){
   const pos=geo.attributes.position,col=[];
   const cGrass=new THREE.Color(0x5d7a3c),cGrass2=new THREE.Color(0x6d8a45),
         cDirt=new THREE.Color(0x7d6c4c),cRock=new THREE.Color(0x77776e),tmp=new THREE.Color();
+  const cDry=new THREE.Color(0x8a8547); // V12 : dry-grass tint for macro patchiness
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),h=groundH(x,z);pos.setY(i,h);
     const n=Math.sin(x*0.11+z*0.13)*Math.cos(x*0.05-z*0.09);
     tmp.copy(cGrass).lerp(cGrass2,0.5+0.5*n);
+    const dry=Math.sin(x*0.021+1.3)*Math.sin(z*0.017-0.6)+Math.sin(x*0.008-z*0.011)*0.7; // V12 : large-scale dry patches (anti-wallpaper macro variation under the photo texture)
+    if(dry>0.55)tmp.lerp(cDry,sstep(0.55,1.35,dry)*0.5);
     const od=Math.hypot(x,z+CAMP_D);
     if(od<46)tmp.lerp(cDirt,sstep(46,20,od)*0.85);            // trampled outpost dirt
     if(h>11)tmp.lerp(cRock,sstep(11,15,h)*0.7);               // ridge rock
@@ -1209,50 +1239,72 @@ var TREE_SPOTS=null,OLD_TREES=null,OLD_ROCKS=[],OLD_BUSHES=null; // WORLD 11.0 :
 
 /* grass tufts : instanced crossed planes, static with varied rotation/scale.
    Base transforms are kept in grassBase so the frame loop can lean the tufts
-   with the wind (rotating slice, no per-frame allocation). */
+   with the wind (rotating slice, no per-frame allocation).
+   V12 : the field is ~4.4x denser and covers the whole playable corridor
+   (ridge + valley + mid-field), with per-instance color variation and a
+   crush state per tuft (ATV tracks / footsteps — see V12 block). Density is
+   chosen per quality tier by buildGrassField(). */
 let grassMesh=null;const grassBase=[];const _grassD=new THREE.Object3D();const grassSway={i:0};
-(function(){
-  const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
-  for(let i=0;i<16;i++){
-    const bx=6+Math.random()*52,w=1.6+Math.random()*2.4,h=24+Math.random()*32,lean=(Math.random()-0.5)*10;
-    const gr=x.createLinearGradient(0,64,0,64-h);
-    gr.addColorStop(0,'#33491f');gr.addColorStop(1,'#74963f');
-    x.fillStyle=gr;x.beginPath();
-    x.moveTo(bx-w,64);x.lineTo(bx+w,64);x.lineTo(bx+lean,64-h);x.closePath();x.fill();}
-  const tex=new THREE.CanvasTexture(cv);
-  /* merge 4 planes at 45° into one tuft geometry : a true cross-plane pair
-     (0°/90°) plus the two diagonals — fuller from every angle */
-  const geos=[];
-  for(let k=0;k<4;k++){const p=new THREE.PlaneGeometry(1.5,1.05);p.translate(0,0.5,0);p.rotateY(k*Math.PI/4);geos.push(p);}
-  const posA=[],norA=[],uvA=[],idxA=[];let off=0;
-  geos.forEach(p=>{const pa=p.attributes.position.array,na=p.attributes.normal.array,ua=p.attributes.uv.array,ia=p.index.array;
-    for(let i=0;i<pa.length;i++)posA.push(pa[i]);
-    for(let i=0;i<na.length;i++)norA.push(na[i]);
-    for(let i=0;i<ua.length;i++)uvA.push(ua[i]);
-    for(let i=0;i<ia.length;i++)idxA.push(ia[i]+off);
-    off+=pa.length/3;});
-  const geo=new THREE.BufferGeometry();
-  geo.setAttribute('position',new THREE.Float32BufferAttribute(posA,3));
-  geo.setAttribute('normal',new THREE.Float32BufferAttribute(norA,3));
-  geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvA,2));
-  geo.setIndex(idxA);
-  const mat=new THREE.MeshLambertMaterial({map:tex,alphaTest:0.42,side:THREE.DoubleSide});
-  const N=430,grass=new THREE.InstancedMesh(geo,mat,N);
-  const d=new THREE.Object3D();let placed=0,guard=0;
-  while(placed<N&&guard++<8000){
-    let x,z;
-    if(placed<190){x=rand(-22,22);z=rand(2,36);}                 // near the ridge
-    else{x=rand(-130,130);z=rand(-CAMP_D-70,-50);}                // valley
+let _grassGeo=null,_grassMat=null;
+function buildGrassField(){
+  if(!_grassGeo){
+    const cv=document.createElement('canvas');cv.width=cv.height=64;const x=cv.getContext('2d');
+    for(let i=0;i<22;i++){
+      const bx=4+Math.random()*56,w=1.6+Math.random()*2.6,h=26+Math.random()*34,lean=(Math.random()-0.5)*11;
+      const gr=x.createLinearGradient(0,64,0,64-h);
+      gr.addColorStop(0,'#2f471d');gr.addColorStop(1,'#7ba344');
+      x.fillStyle=gr;x.beginPath();
+      x.moveTo(bx-w,64);x.lineTo(bx+w,64);x.lineTo(bx+lean,64-h);x.closePath();x.fill();}
+    const tex=new THREE.CanvasTexture(cv);
+    /* merge 4 planes at 45° into one tuft geometry : a true cross-plane pair
+       (0°/90°) plus the two diagonals — fuller from every angle */
+    const geos=[];
+    for(let k=0;k<4;k++){const p=new THREE.PlaneGeometry(1.6,1.1);p.translate(0,0.52,0);p.rotateY(k*Math.PI/4);geos.push(p);}
+    const posA=[],norA=[],uvA=[],idxA=[];let off=0;
+    geos.forEach(p=>{const pa=p.attributes.position.array,na=p.attributes.normal.array,ua=p.attributes.uv.array,ia=p.index.array;
+      for(let i=0;i<pa.length;i++)posA.push(pa[i]);
+      for(let i=0;i<na.length;i++)norA.push(na[i]);
+      for(let i=0;i<ua.length;i++)uvA.push(ua[i]);
+      for(let i=0;i<ia.length;i++)idxA.push(ia[i]+off);
+      off+=pa.length/3;});
+    _grassGeo=new THREE.BufferGeometry();
+    _grassGeo.setAttribute('position',new THREE.Float32BufferAttribute(posA,3));
+    _grassGeo.setAttribute('normal',new THREE.Float32BufferAttribute(norA,3));
+    _grassGeo.setAttribute('uv',new THREE.Float32BufferAttribute(uvA,2));
+    _grassGeo.setIndex(idxA);
+    _grassMat=new THREE.MeshLambertMaterial({map:tex,alphaTest:0.42,side:THREE.DoubleSide});
+  }
+  if(grassMesh){scene.remove(grassMesh);grassMesh.dispose();grassMesh=null;}
+  grassBase.length=0;grassSway.i=0;
+  const q=(typeof G!=='undefined'&&G.quality)?G.quality:'high';
+  const N=q==='low'?800:(q==='medium'?1400:1950);
+  const grass=new THREE.InstancedMesh(_grassGeo,_grassMat,N);
+  const d=new THREE.Object3D(),tint=new THREE.Color();let placed=0,guard=0;
+  const riverX=z=>64+38*Math.sin(z*0.011)+14*Math.sin(z*0.023+1.7); // river centerline (mirrors the river ribbon build)
+  while(placed<N&&guard++<30000){
+    let x,z;const f=placed/N;
+    if(f<0.26){x=rand(-34,34);z=rand(-8,42);}                       // ridge (dense near the player)
+    else if(f<0.62){x=rand(-120,190);z=rand(-215,-38);}             // mid-field + west valley
+    else{x=rand(-190,230);z=rand(-405,-195);}                       // far valley toward the outpost
     const h=groundH(x,z);
     if(h>11.5)continue;
-    if(Math.hypot(x,z+CAMP_D)<34)continue;
-    if(Math.hypot(x,z-24)<5)continue;
+    if(Math.hypot(x,z+CAMP_D)<36)continue;                          // outpost dirt stays bare
+    if(Math.hypot(x,z-24)<5)continue;                               // player pad
+    if(z<-5&&z>-385&&Math.abs(x-riverX(z))<8)continue;              // river ribbon
+    const sl=Math.abs(groundH(x+1.2,z)-h)+Math.abs(groundH(x,z+1.2)-h);
+    if(sl>1.35)continue;                                            // not on cliff faces
     d.position.set(x,h-0.06,z);
-    d.scale.set(rand(0.7,1.6),rand(0.7,1.5),rand(0.7,1.6));
+    d.scale.set(rand(0.75,1.7),rand(0.75,1.6),rand(0.75,1.7));
     d.rotation.set(0,rand(0,TAU),0);d.updateMatrix();
-    grassBase.push({x:d.position.x,y:d.position.y,z:d.position.z,sx:d.scale.x,sy:d.scale.y,sz:d.scale.z,ry:d.rotation.y});
+    grassBase.push({x:d.position.x,y:d.position.y,z:d.position.z,sx:d.scale.x,sy:d.scale.y,sz:d.scale.z,ry:d.rotation.y,crush:0,bx:0,bz:0});
+    tint.setRGB(rand(0.8,1.12),rand(0.88,1.1),rand(0.75,1.0));      // per-tuft hue variance
+    grass.setColorAt(placed,tint);
     grass.setMatrixAt(placed,d.matrix);placed++;}
-  grass.count=placed;grass.instanceMatrix.needsUpdate=true;scene.add(grass);grassMesh=grass;})();
+  grass.count=placed;grass.instanceMatrix.needsUpdate=true;
+  if(grass.instanceColor)grass.instanceColor.needsUpdate=true;
+  grass.visible=true; // applyQuality() owns the on/off gate from here (it runs at settings init)
+  scene.add(grass);grassMesh=grass;}
+buildGrassField();
 
 /* floating dust motes near the player's ridge position */
 const dust=(function(){
@@ -2324,7 +2376,8 @@ class Enemy{
     if(G.converged){
       /* fan-out : each guard approaches on a personal bearing (convA) and holds
          at a personal range (convR, 60–110m) instead of bunching on one line */
-      const lost=G.swayT<G.contactLostT; // CONTACT BROKEN : they hunt the last-known spot, guns quiet
+      const concealedNow=isConcealed()&&distP>12; // V12 CONCEALMENT GATE : a player hidden in a bush is a ghost — they hunt the last-known spot, guns quiet (close range still sees him)
+      const lost=G.swayT<G.contactLostT||concealedNow; // CONTACT BROKEN : they hunt the last-known spot, guns quiet
       const tx=lost?G.lostX:px,tz=lost?G.lostZ:pz;
       const tdx=tx-g.position.x,tdz=tz-g.position.z,tdist=Math.hypot(tdx,tdz);
       const toA=Math.atan2(tdx,tdz)+this.convA;
@@ -2355,6 +2408,17 @@ class Enemy{
         if(cdx*cdx+cdz*cdz<10){this.invest.discovered=true;this.invest=null;
           G.alarm=Math.min(100,G.alarm+12);G.lastNearT=G.swayT; // counts as activity — decay won't instantly forgive it
           this.radio=rand(2,3);this.pauseT=2;toast('BODY DISCOVERED — ALARM +12');updateHUD();}}
+      /* V12 SPOT CHECK : on the same 0.5 s cadence family as body discovery — a
+         patrolling guard within ~26 m of the player spots him UNLESS he is
+         concealed in a bush (concealment only holds beyond 12 m). Spotting is
+         per-guard throttled (6 s) so one guard can't machine-gun the alarm. */
+      if(G.state==='play'&&!this.sprinting){
+        if(this.spotCd>0)this.spotCd-=dt;
+        if(this.spotCd<=0){this.spotCd=0.5;
+          if(distP<26&&distP>0.01&&(!isConcealed()||distP<=12)&&G.swayT>=(this.spotHold||0)){
+            this.spotHold=G.swayT+6;this.radio=rand(2,3);this.pauseT=1.2;
+            G.alarm=Math.min(100,G.alarm+15);G.lastNearT=G.swayT;
+            toast('SPOTTED — ALARM +15');updateHUD();}}}
       if(this.hvt&&!this.isDriver&&G.alarm>50){ // hot zone : foot-HVTs bolt to fresh cover every few seconds
         this.relocT-=dt;
         if(this.relocT<=0){this.relocT=rand(3,5);
@@ -2437,7 +2501,9 @@ class Enemy{
         const gs=0.45+0.3*this.glintF;this.glint.scale.set(gs,gs,1);}}
     this.aimT-=dt;
     if(this.aimPhase==='idle'){
-      if(this.aimT<=0){this.aimPhase='aim';this.aimT=1.5;this.showLaser(true);}
+      if(this.aimT<=0){ // V12 CONCEALMENT GATE : a concealed player beyond 12 m is never acquired — the cycle just idles
+        if(isConcealed()&&Math.hypot(G.px-g.position.x,G.pz-g.position.z)>12)this.aimT=rand(0.8,1.4);
+        else{this.aimPhase='aim';this.aimT=1.5;this.showLaser(true);}}
     }else if(this.aimPhase==='aim'){
       this.updateLaser();
       if(this.aimT<=0){this.showLaser(false);sniperFire(this);
@@ -3184,10 +3250,12 @@ function fireBullet(){
   bullets.push({m,sp:vel,vx:dir.x*vel,vy:dir.y*vel,vz:dir.z*vel,life:5, // per-rifle muzzle velocity
     pierced:[],kills:0,throughCab:false,tx:m.position.x,ty:m.position.y,tz:m.position.z, // OVERPENETRATION state + tracer anchor
     path:[m.position.clone()]}); // BULLET-CAM 2.1 : the true flown path, recorded so the cam replays the real arc, never a straight-line lie
-  G.kickT=0;G.shake=0.55;G.flashT=0.14;G.alarm=Math.min(100,G.alarm+10);
+  G.kickT=0;G.shake=0.55;
+  if(suppOn()){G.flashT=0;G.alarm=Math.min(100,G.alarm+5);} // V12 SUPPRESSOR : the single noise-emission point, halved — and no muzzle flash (the smoke puff below still fires)
+  else{G.flashT=0.14;G.alarm=Math.min(100,G.alarm+10);}
   flashSprite.material.rotation=rand(0,TAU);
-  const bl=$('bloom');bl.style.transition='none';bl.style.opacity=G.reduceFlash?0.42:0.85; // REDUCE FLASHES : halve the muzzle bloom
-  requestAnimationFrame(()=>{bl.style.transition='opacity .2s';bl.style.opacity=0;});
+  if(!suppOn()){const bl=$('bloom');bl.style.transition='none';bl.style.opacity=G.reduceFlash?0.42:0.85; // REDUCE FLASHES : halve the muzzle bloom
+  requestAnimationFrame(()=>{bl.style.transition='opacity .2s';bl.style.opacity=0;});}
   if(glbState.active){glbState.cycle=true;glbState.cycPrev=0;glbState.cased=false;glbState.clicked=false;} // GLB BOLT : cycle runs off fireCd; the casing leaves at pull-back, not at the shot
   else ejectShell();
   puffMuzzleSmoke();
@@ -3524,7 +3592,7 @@ function bindBtn(id,down,up){
   el.addEventListener('mousedown',e=>{e.stopPropagation();el.classList.add('on');down();});
   el.addEventListener('mouseup',()=>{el.classList.remove('on');up&&up();});
 }
-bindBtn('btnFire',()=>fireBullet());
+bindBtn('btnFire',()=>{if(KNF.out)knifeSwing();else fireBullet();}); // V12 : FIRE swings while the knife is out
 bindBtn('btnScope',()=>{if(G.scopeHold)setScoped(true);else setScoped(!G.scoped);},()=>{if(G.scopeHold)setScoped(false);}); // SCOPE MODE : TOGGLE taps, HOLD scopes only while pressed
 bindBtn('btnReload',()=>startReload());
 $('zoomSlider').addEventListener('input',e=>{G.zoom=+e.target.value;updateHUD();drawReticle();});
@@ -3538,7 +3606,7 @@ if(!isTouch){
       aimByPixels(e.movementX,e.movementY);});
   document.addEventListener('mousedown',e=>{
     if(document.pointerLockElement!==renderer.domElement||(G.state!=='play'&&G.state!=='roam'))return;
-    if(e.button===0)fireBullet();else if(e.button===2)setScoped(!G.scoped);});
+    if(e.button===0){if(KNF.out)knifeSwing();else fireBullet();}else if(e.button===2)setScoped(!G.scoped);}); // V12 : click swings while the knife is out
   document.addEventListener('contextmenu',e=>e.preventDefault());
   document.addEventListener('wheel',e=>{if(G.scoped&&(G.state==='play'||G.state==='roam')){
     G.zoom=clamp(G.zoom+(e.deltaY>0?-0.5:0.5),RIFLES[G.rifle].zmin,G.maxZoom);
@@ -3556,6 +3624,7 @@ sizeReticle();
 function setScoped(on){
   if(KC.active)endKillcam(); // scope toggle mid-killcam : restore the camera, then toggle
   if(on&&(G.state!=='play'&&G.state!=='roam'))return; // WORLD 11.0 : scoping works in free roam
+  if(on&&KNF.out)return; // V12 : no ADS while the knife is out
   G.scoped=on;
   if(on&&joyId!==null){joyId=null;knob.style.transform='';joyVec.x=0;joyVec.y=0;} // scope-in cancels any live joystick drag (WORLD 11.0 : and its vector)
   if(on){G.scopeT=G.swayT;G.reposAcc=0;} // QUICKSCOPE window starts now ; reposition tracker resets on scoping in
@@ -3720,7 +3789,7 @@ $('setRet').addEventListener('change',e=>{G.retColor=e.target.value;lsSet('longs
    tracker untouched. SHADOWS/GRASS toggle live scene state, PARTICLES
    scales every spawnBurst count, SHOW FPS surfaces the perf tracker's
    own per-second number. */
-const QUALITY_PR={low:0.75,medium:1,high:1.5,ultra:2};
+const QUALITY_PR={low:0.75,medium:1,high:2,ultra:2}; // V12 : HIGH now allows the full 2x pixel-ratio cap (was 1.5)
 const QUALITY_SHADOW={low:512,medium:1024,high:2048,ultra:2048};
 function partMul(v){return v==='low'?0.4:(v==='medium'?0.7:1);}
 function setShadowSize(sz){
@@ -4060,7 +4129,7 @@ function kcUpdate(dt){
 }
 
 /* ---------------- combat outcomes ---------------- */
-function killEnemy(e,dir,cam,hshot,blast,hitP,camPath){
+function killEnemy(e,dir,cam,hshot,blast,hitP,camPath,melee){ // V12 : 8th param melee — a knife kill rides this same path with the silent-treatment guards below
   if(G.roam){ // WORLD 11.0 FREE ROAM : pure sandbox — blood + ragdoll + hitmark, ZERO writes to mission / economy / skin counters
     e.die(dir,hshot,blast);
     const hm=$('hitmark');hm.classList.remove('pop');hm.classList.remove('hs');hm.classList.remove('kill');void hm.offsetWidth;
@@ -4070,13 +4139,13 @@ function killEnemy(e,dir,cam,hshot,blast,hitP,camPath){
   const now=G.swayT;
   G.chain=(now-G.lastKillT<8)?G.chain+1:1;G.lastKillT=now;
   const dist=camera.position.distanceTo(e.group.position);
-  G.hits++;if(hshot)G.hsCount++;if(dist>G.longest)G.longest=dist;if(G.chain>G.bestChain)G.bestChain=G.chain; // hsCount : GHOSTLINE results counter only — no scoring effect
+  if(!melee)G.hits++;if(hshot)G.hsCount++;if(dist>G.longest)G.longest=dist;if(G.chain>G.bestChain)G.bestChain=G.chain; // hsCount : GHOSTLINE results counter only — no scoring effect (V12 : G.hits counts BULLET hits — a knife kill is not one)
   const pts0=e.sniper?150:Math.round((100+dist*0.6)*G.chain); // counter-snipers pay a flat 150 bounty
   const quick=!!(cam&&G.scoped&&(now-G.scopeT)<1.2); // QUICKSCOPE : kill within 1.2s of scoping in, +25
   const pts=pts0+(quick?25:0);
   G.score+=pts;G.missionScore+=pts;
   scorePop(pts,hshot,quick);
-  G.alarm=Math.min(100,G.alarm+6);
+  if(!melee)G.alarm=Math.min(100,G.alarm+6); // V12 KNIFE : a melee kill raises NO alarm — the blade is silent
   for(const o of enemies){ // witnessed kill : anyone close and facing the drop bolts for cover
     if(o===e||!o.alive||o.sniper||o.isDriver)continue;
     const op=o.group.position,ep=e.group.position;
@@ -4094,7 +4163,7 @@ function killEnemy(e,dir,cam,hshot,blast,hitP,camPath){
   if(!lsGet('lh_kill','')){lsSet('lh_kill','1'); // one-time hint : bodies get found
     setTimeout(()=>toast('BODIES GET FOUND — KEEP THE ALARM DOWN'),1750);}
   if(cam&&dist>300&&G.kcam!=='off')startBulletCam(e,dir,hitP,camPath,hshot); // BULLET-CAM : only for actual bullet kills, never explosion kills (killcam pref can disable); hshot rides along so the deferred blood sprays headshot-wide on impact
-  skinKillHook(e,hitP,cam&&dist>300&&G.kcam!=='off'); // LOBBY POLISH — MYTHIC grind : counts the kill for the WORN grind skin and fires its kill effect if armed — purely additive, reads state only, scoring untouched
+  if(!melee)skinKillHook(e,hitP,cam&&dist>300&&G.kcam!=='off'); // LOBBY POLISH — MYTHIC grind : counts the kill for the WORN grind skin and fires its kill effect if armed — purely additive, reads state only, scoring untouched (V12 : knife kills NEVER count — the knife is not the rifle)
   updateHUD();
   checkMissionDone();
 }
@@ -4334,7 +4403,7 @@ function frame(now){
     G.windT+=gdt; // gusts : the single live wind source — HUD, ballistics, dust/grass, flag and ambient audio all read these
     G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7))); // ±40% strength, ~20s swell
     G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77); // heading wanders ±15° on the same swell
-    stepPlayerMove(gdt,3.5); // WORLD 11.0 : in-mission walking (joystick / WASD) — position writes feed the existing converge + counter-sniper systems
+    if(!ATV.drive.on)stepPlayerMove(gdt,3.5); // WORLD 11.0 : in-mission walking (joystick / WASD) — position writes feed the existing converge + counter-sniper systems (V12 : the ATV drive owns movement while mounted)
     for(const e of enemies)e.update(gdt);
     {let ma=0;for(const e of enemies)if(e.sniper&&e.alive&&e.aimPhase==='aim')ma=Math.max(ma,1-e.aimT/1.5);
      setScopeRim(G.scoped?ma:0);} // SNIPER WARNING RIM : hottest aim progress drives the scope rim
@@ -4365,7 +4434,7 @@ function frame(now){
     G.windT+=gdt; // the valley still breathes
     G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7)));
     G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77);
-    stepPlayerMove(gdt,5.0);
+    if(!ATV.drive.on)stepPlayerMove(gdt,5.0); // V12 : the ATV drive owns movement while mounted
     for(const e of enemies)e.update(gdt);
     bulletUpdate(gdt);tracerUpdate(gdt);
     for(let i=chainQ.length-1;i>=0;i--){chainQ[i].t-=gdt; // barrel chains tick in roam too
@@ -4414,6 +4483,7 @@ function frame(now){
   G.fovCur+=(fovT-G.fovCur)*Math.min(1,dt*14);
   camera.fov=G.fovCur;camera.updateProjectionMatrix();
   }
+  v12Tick(dt,gdt); // V12 : vehicle / knife / concealment / grass-crush / HUD state — runs post-camera so its overrides (chase cam, rifle hide) win the frame
   const wantCine=G.slowmo>0||KC.active; // cinematic letterbox : stays up for the whole cam (the bars carry the return fade)
   if(wantCine!==G.cine){G.cine=wantCine;
     $('ctop').style.height=$('cbot').style.height=wantCine?'8vh':'0px';}
@@ -4436,17 +4506,9 @@ function frame(now){
   { /* grass sway : tufts lean with the real wind vector in a rolling wave — read wind off the ground.
          Only a rotating slice of instances is recomposed per frame; no allocations. */
     if(grassMesh&&grassBase.length){
-      const wvx=Math.sin(G.windDir),wvz=Math.cos(G.windDir),lb=G.windSpd*0.022;
       const n=grassBase.length;
       grassSway.i=(grassSway.i+80)%n;
-      for(let k=0;k<80;k++){
-        const b=grassBase[(grassSway.i+k)%n];
-        const lk=lb*(0.55+0.45*Math.sin(t*2.4+b.x*0.12+b.z*0.09));
-        _grassD.position.set(b.x,b.y,b.z);
-        _grassD.scale.set(b.sx,b.sy,b.sz);
-        _grassD.rotation.set(wvz*lk,b.ry,-wvx*lk);
-        _grassD.updateMatrix();
-        grassMesh.setMatrixAt((grassSway.i+k)%n,_grassD.matrix);}
+      for(let k=0;k<80;k++)grassComposeIdx((grassSway.i+k)%n,t); // V12 : one compose for wind sway + crush state
       grassMesh.instanceMatrix.needsUpdate=true;}}
   { /* drifting dust motes around the ridge : no allocations, in-place float32 writes */
     const a=dust.userData.arr,n=dust.userData.n;
@@ -4607,6 +4669,7 @@ function applyRifleLook(){ // in-game viewmodel : the equipped skin beats the pe
   tracerCol=kind==='inferno'?0xff9a3c:(kind==='star'?0xf6dcff:0xffe2a8);
   syncVmSkinFX();
   tintScopeGlass(kind);
+  suppLook(); // V12 : suppressor attach + paint follows every rifle-look change
 }
 /* ---- mission meta helpers (display only — same generators the game uses) ---- */
 function ghostMissions(){try{const a=JSON.parse(lsGet('longshot_ghostMissions','[]'));if(Array.isArray(a))return a;}catch(e){}return[];}
@@ -4740,6 +4803,10 @@ function renderLoadout(){
   if(locked){b.textContent='LOCKED — CLEAR MISSION '+r.unlock;b.className='ubtn off';}
   else if(selRifle===G.rifle){b.textContent='EQUIPPED';b.className='ubtn eq';}
   else{b.textContent='EQUIP';b.className='ubtn';}
+  const sb=$('loSupp'); // V12 : per-rifle suppressor install state
+  if(locked){sb.textContent='SUPPRESSOR — LOCKED';sb.className='ubtn off';}
+  else if(suppOn(selRifle)){sb.textContent='SUPPRESSOR INSTALLED — TAP TO REMOVE';sb.className='ubtn eq';}
+  else{sb.textContent='INSTALL SUPPRESSOR — HALF THE NOISE, NO FLASH';sb.className='ubtn';}
   applyPvTint();
 }
 function cycleBrowseRifle(d){let i=RIFLE_ORDER.indexOf(selRifle);if(i<0)i=0;selRifle=RIFLE_ORDER[(i+d+RIFLE_ORDER.length)%RIFLE_ORDER.length];ensureModel(selRifle);renderLoadout();tick();}
@@ -4840,7 +4907,7 @@ let confirmFn=null;
 function openConfirm(head,text,fn){$('cfHead').textContent=head;$('cfText').textContent=text;confirmFn=fn;$('confirmRoot').style.display='flex';}
 function closeConfirm(){$('confirmRoot').style.display='none';confirmFn=null;}
 function resetProgress(){ // progress keys only — settings + seen-version survive, then a clean reload
-  const keys=['longshot_best','longshot_mbest','longshot_mtime','longshot_rifles','longshot_rifle','longshot_credits','longshot_xp','longshot_skinsOwned','longshot_skin','longshot_ghostMissions','longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn']; // LOBBY POLISH : mythic grind counters + per-skin kill-effect enables wipe too
+  const keys=['longshot_best','longshot_mbest','longshot_mtime','longshot_rifles','longshot_rifle','longshot_credits','longshot_xp','longshot_skinsOwned','longshot_skin','longshot_ghostMissions','longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn','longshot_supp']; // LOBBY POLISH : mythic grind counters + per-skin kill-effect enables wipe too (V12 : suppressor installs wipe too)
   for(const k of keys){try{localStorage.removeItem(k);}catch(e){}}
   try{SYNC.onReset();}catch(e){} // SYNC 11.1 : the wipe must reach the cloud too, or the old save resurrects on next sync
   location.reload();
@@ -5126,6 +5193,7 @@ function applyPvTint(){ // preview tint : the PREVIEWED skin (pvSkinId) on the b
   const pvRoot=pv.fit&&pv.fit.children&&pv.fit.children[0]; // MYTHIC FX : the PREVIEWED skin's flow on the preview clone's own materials — AFTER the tint, same as the viewmodel, so the flow's emissive wins
   if(pvRoot)fxApplyMats(pvRoot,fxCollectMats(pvRoot),new Set(pv.stockGLB.concat(pv.stockProc)),sk.fx||null,'pv');
   syncPvSkinFX(); // LOBBY POLISH : the preview's MYTHIC effect package follows the previewed skin + browsed rifle
+  suppPvLook(); // V12 : the preview clone's suppressor follows the browsed rifle + previewed skin
 }
 
 /* ================= LOBBY POLISH — MYTHIC SKINS (Phase 5) =================
@@ -5628,6 +5696,688 @@ function skinFxTick(dt){ // hooked into the main frame loop
 }
 /* ================= end MYTHIC block ================= */
 
+/* ==================== V12 — WORLD OVERHAUL 2 ====================
+   One additive block: textured ground + dense crushable grass (A), world
+   detail + ambient life (B), hideable bushes + concealment (C), the
+   rideable quad bike (D), the knife (E), per-rifle suppressors (F), HUD
+   additions (G). Frozen systems are touched ONLY at these named gates:
+     - fireBullet : suppOn() halves the single +10 noise emission to +5 and
+       zeroes the muzzle flash (one guarded branch at the emission line).
+     - killEnemy : 8th param `melee` — knife kills skip the +6 alarm, the
+       skin-kill hook and the bullet-hit counter; scoring/counters otherwise
+       ride the normal path.
+     - Enemy.update converged branch + sniperUpdate aim entry + a new patrol
+       spot-check : all consult the single gate isConcealed().
+     - SYNC.PKEYS + SYNC.merge + RESET list : 'longshot_supp' (OR-merge).
+     - Frame loop : stepPlayerMove skipped while driving (2 sites), one
+       v12Tick() call post-camera, grass sway composes via grassComposeIdx().
+     - applyRifleLook / applyPvTint : suppLook() / suppPvLook() funnels.
+   Assets (models/v12-data.js, lazy like the world pack): "Quad Bike" by
+   Sam Philo (CC BY 4.0, via Icosa Gallery), "Knife" + suppressor by Kenney (CC0), Grass004 ground
+   textures by ambientCG (CC0). Procedural fallbacks cover until it lands. */
+
+/* ---------- shared state + data pack ---------- */
+const V12={ready:false,failed:false,loading:false,terrain:null,terrMat:null,texLow:false,
+  qualSeen:'',prevState:'',crushSet:new Set(),pcrSupp:[],suppScene:null,wasConcealed:false,
+  nearVeh:false,walkT:0,_pvSuppMats:[]};
+function loadV12Pack(){
+  if(V12.loading||V12.ready||V12.failed)return;V12.loading=true;
+  const s=document.createElement('script');s.src='models/v12-data.js';
+  s.onload=()=>{v12PackInit();};
+  s.onerror=()=>{V12.failed=true;console.warn('[longshot] v12 data pack failed to load — procedural fallbacks stay');};
+  document.head.appendChild(s);
+}
+function v12GLB(b64){
+  return new Promise(res=>{
+    try{const bin=atob(b64);const u8=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+      new THREE.GLTFLoader().parse(u8.buffer,'',g=>res(g.scene),()=>res(null));
+    }catch(e){res(null);}});
+}
+function v12PackInit(){
+  const D=window.V12DATA;
+  if(!D){V12.failed=true;return;}
+  try{v12TerrainApply(D);}catch(e){console.warn('[longshot] v12 terrain apply failed',e);}
+  Promise.all([v12GLB(D.quad),v12GLB(D.knife),v12GLB(D.supp)]).then(([veh,knf,sup])=>{
+    try{
+      if(sup)V12.suppScene=sup;
+      if(veh)atvBuild(veh);
+      if(knf)knifeBuild(knf);
+      V12.ready=true;
+      suppLook();suppPvLook();
+    }catch(e){V12.failed=true;console.warn('[longshot] v12 pack init failed — fallbacks stay',e);}
+  });
+}
+/* A : real grass ground — Grass004 photo texture (color + normal) over the
+   existing vertex-color tint field, so patches/dry areas break the tiling.
+   Phong replaces Lambert here ONLY so the normal map can live (r128 Lambert
+   has no normal maps); shininess 0 keeps the matte read. */
+function v12TerrainApply(D){
+  if(!D)return;
+  let terr=V12.terrain;
+  if(!terr){
+    scene.traverse(o=>{if(!terr&&o.isMesh&&o.geometry&&o.geometry.attributes&&o.geometry.attributes.position&&o.geometry.attributes.position.count===11025)terr=o;});
+    if(!terr)return;V12.terrain=terr;
+  }
+  const low=G.quality==='low';V12.texLow=low;
+  const maxAn=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+  const mk=url=>{const t=new THREE.TextureLoader().load(url);
+    t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(115,115);t.anisotropy=maxAn;return t;};
+  const mat=new THREE.MeshPhongMaterial({vertexColors:true,
+    map:mk(low?D.grassC512:D.grassC),normalMap:mk(D.grassN),shininess:0,specular:0x111111});
+  mat.color.setRGB(1.32,1.32,1.32); // the photo map is darker than the old near-white speckle — lift so the tuned vertex tones land where they were
+  if(V12.terrMat){if(V12.terrMat.map)V12.terrMat.map.dispose();if(V12.terrMat.normalMap)V12.terrMat.normalMap.dispose();V12.terrMat.dispose();}
+  V12.terrMat=mat;terr.material=mat;terr.receiveShadow=true;
+}
+
+/* ---------- A2 : grass compose (wind sway + crush in one pass) ---------- */
+function grassComposeIdx(i,t){
+  const b=grassBase[i];if(!b||!grassMesh)return;
+  const wvx=Math.sin(G.windDir),wvz=Math.cos(G.windDir),lb=G.windSpd*0.022;
+  const lk=lb*(0.55+0.45*Math.sin(t*2.4+b.x*0.12+b.z*0.09));
+  const cq=b.crush||0;
+  _grassD.position.set(b.x,b.y,b.z);
+  _grassD.scale.set(b.sx,b.sy*(1-0.78*cq),b.sz);
+  _grassD.rotation.set(wvz*lk+(b.bx||0)*cq*0.95,b.ry,-wvx*lk+(b.bz||0)*cq*0.95);
+  _grassD.updateMatrix();
+  grassMesh.setMatrixAt(i,_grassD.matrix);
+}
+/* Addendum 2 : crush — GRASS ONLY. Tufts inside the radius squash + bend
+   along the travel direction, then spring back over ~22 s. Only affected
+   instances are recomposed (they ride the sway pass's existing upload —
+   no new per-frame buffer work). Bushes are a different InstancedMesh and
+   are never touched here. */
+function grassCrushAt(x,z,dx,dz,r,amt){
+  if(!grassMesh||!G.grass)return;
+  const r2=r*r;
+  for(let i=0;i<grassBase.length;i++){
+    const b=grassBase[i],ddx=b.x-x,ddz=b.z-z,d2=ddx*ddx+ddz*ddz;
+    if(d2<r2){
+      const t2=amt*(1-Math.sqrt(d2)/r*0.45);
+      if(t2>(b.crush||0)){b.crush=t2;b.bx=dz;b.bz=-dx;}
+      if(b.crush>0.02)V12.crushSet.add(i);
+    }
+  }
+}
+function grassCrushTick(gdt,t){
+  if(!V12.crushSet.size||!grassMesh)return;
+  let n=0;
+  for(const i of V12.crushSet){
+    const b=grassBase[i];
+    if(!b){V12.crushSet.delete(i);continue;}
+    b.crush=Math.max(0,(b.crush||0)-gdt/22);
+    grassComposeIdx(i,t);
+    if(b.crush<=0){b.crush=0;grassComposeIdx(i,t);V12.crushSet.delete(i);}
+    if(++n>260)break;
+  }
+  grassMesh.instanceMatrix.needsUpdate=true;
+}
+
+/* ---------- C : hideable bushes + the concealment gate ---------- */
+const BUSH={list:[],mesh:null};
+function bushGeo(){
+  const posA=[],norA=[],colA=[],idxA=[];let off=0;
+  const cBase=new THREE.Color(0x2c4a20),cTop=new THREE.Color(0x5d8440),tc=new THREE.Color();
+  const blobs=[[0,0.62,0,1.05],[0.72,0.45,0.28,0.72],[-0.68,0.5,-0.2,0.78],[0.15,0.42,-0.66,0.66],[-0.3,0.4,0.62,0.6]];
+  for(const bl of blobs){
+    const g=new THREE.IcosahedronGeometry(bl[3],1),pa=g.attributes.position;
+    for(let i=0;i<pa.count;i++){ // deterministic jitter — position hash, shared verts move together (the rock trick)
+      const vx=pa.getX(i),vy=pa.getY(i),vz=pa.getZ(i);
+      const k=0.82+0.36*Math.abs(Math.sin(vx*12.9+vy*78.2+vz*37.7+bl[0]*91.7));
+      pa.setXYZ(i,vx*k,vy*k*0.82,vz*k);}
+    g.computeVertexNormals();
+    const na=g.attributes.normal,hm=rand(0.9,1.08);
+    for(let i=0;i<pa.count;i++){
+      posA.push(pa.getX(i)+bl[0],pa.getY(i)+bl[1],pa.getZ(i)+bl[2]);
+      norA.push(na.getX(i),na.getY(i),na.getZ(i));
+      const f=clamp((pa.getY(i)+bl[1])/1.7,0,1);
+      tc.copy(cBase).lerp(cTop,f);
+      colA.push(tc.r*hm,tc.g*hm,tc.b*hm);}
+    if(g.index)for(let i=0;i<g.index.array.length;i++)idxA.push(g.index.array[i]+off);
+    else for(let i=0;i<pa.count;i++)idxA.push(i+off); // r128 polyhedron geometry is non-indexed
+    off+=pa.count;
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(posA,3));
+  geo.setAttribute('normal',new THREE.Float32BufferAttribute(norA,3));
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(colA,3));
+  geo.setIndex(idxA);
+  return geo;
+}
+function buildBushes(){
+  if(BUSH.mesh)return;
+  const spots=[];
+  const put=(x,z,s)=>{if(Math.hypot(x,z+CAMP_D)<40)return;spots.push({x:x,z:z,s:s});};
+  [[-16,26],[19,30],[-27,12],[30,8],[-9,38],[24,-4]].forEach(p=>put(p[0],p[1],rand(1.5,2.0))); // ridge flanks
+  for(let i=0;i<12;i++)put(rand(-150,190),rand(-230,-45),rand(1.5,2.2));                        // mid-field
+  for(let i=0;i<8;i++){const a=rand(0,TAU),dd=rand(48,85);put(Math.cos(a)*dd,-CAMP_D+Math.sin(a)*dd,rand(1.6,2.3));} // outpost approaches
+  const im=new THREE.InstancedMesh(bushGeo(),new THREE.MeshLambertMaterial({vertexColors:true}),spots.length);
+  const d=new THREE.Object3D();
+  spots.forEach((sp,i)=>{
+    d.position.set(sp.x,groundH(sp.x,sp.z)-0.15,sp.z);
+    d.scale.set(sp.s,sp.s*rand(0.8,0.95),sp.s);
+    d.rotation.set(0,rand(0,TAU),0);d.updateMatrix();
+    im.setMatrixAt(i,d.matrix);
+    BUSH.list.push({x:sp.x,z:sp.z,r:1.5*sp.s});
+  });
+  im.castShadow=true;im.instanceMatrix.needsUpdate=true;
+  scene.add(im);BUSH.mesh=im;
+}
+/* THE concealment gate — consulted by the converged branch, the counter-
+   sniper aim cycle and the patrol spot-check (all in Enemy.update /
+   sniperUpdate). In a bush + quiet gun + on foot = unseen beyond 12 m. */
+function isConcealed(){
+  if(ATV.drive.on)return false;                 // a quad in a bush is still not hidden
+  if(G.swayT-G.lastShotT<2)return false;         // a shot within 2 s gives you away
+  const px=G.px,pz=G.pz;
+  for(let i=0;i<BUSH.list.length;i++){
+    const b=BUSH.list[i],dx=px-b.x,dz=pz-b.z;
+    if(dx*dx+dz*dz<b.r*b.r)return true;
+  }
+  return false;
+}
+
+/* ---------- B : prop scatter + wildflowers + ambient extensions ---------- */
+function buildScatter(){
+  const d=new THREE.Object3D();
+  const crates=new THREE.InstancedMesh(new THREE.BoxGeometry(0.95,0.95,0.95),
+    new THREE.MeshLambertMaterial({color:0x8a6f46}),20);
+  const cspots=[[8,-332,0],[-11,-322,0],[16,-318,0],[-4,-352,0],[26,-300,0],[-24,-296,0],
+    [40,-210,0],[-52,-180,0],[70,-120,0],[-80,-90,0],[12,-150,0],[-18,-240,0],[55,-260,0],
+    [-35,-350,0],[90,-330,0],[-95,-260,0],[8,-332,1],[-11,-322,1],[16,-318,1],[-35,-350,1]];
+  cspots.forEach((p,i)=>{
+    d.position.set(p[0],groundH(p[0],p[1])+0.48+p[2]*0.97,p[1]);
+    d.rotation.set(0,rand(0,TAU),0);d.scale.setScalar(rand(0.9,1.25));d.updateMatrix();
+    crates.setMatrixAt(i,d.matrix);});
+  crates.castShadow=true;crates.instanceMatrix.needsUpdate=true;scene.add(crates);
+  const logG=new THREE.CylinderGeometry(0.22,0.26,2.6,7);logG.rotateZ(Math.PI/2);
+  const logs=new THREE.InstancedMesh(logG,new THREE.MeshLambertMaterial({color:0x5d4630}),10);
+  const lspots=[[30,18],[-38,-60],[52,-140],[-64,-205],[96,-96],[-110,-150],[18,-262],[130,-230],[-150,-320],[44,-330]];
+  lspots.forEach((p,i)=>{
+    d.position.set(p[0],groundH(p[0],p[1])+0.24,p[1]);
+    d.rotation.set(0,rand(0,TAU),0);d.scale.setScalar(rand(0.85,1.3));d.updateMatrix();
+    logs.setMatrixAt(i,d.matrix);});
+  logs.castShadow=true;logs.instanceMatrix.needsUpdate=true;scene.add(logs);
+  const rockM=new THREE.MeshLambertMaterial({color:0x7b7b72});
+  const mkRock=seed=>{const g2=new THREE.DodecahedronGeometry(1,0),pa=g2.attributes.position;
+    for(let vi=0;vi<pa.count;vi++){const vx=pa.getX(vi),vy=pa.getY(vi),vz=pa.getZ(vi);
+      const k=0.78+0.45*Math.abs(Math.sin(vx*12.9+vy*78.2+vz*37.7+seed*17.3));
+      pa.setXYZ(vi,vx*k,vy*k*0.82,vz*k);}
+    g2.computeVertexNormals();return g2;};
+  const rocks=new THREE.InstancedMesh(mkRock(7),rockM,12);
+  const rspots=[[-46,6],[58,-40],[-88,-120],[104,-170],[-130,-240],[150,-290],[-160,-60],[76,-356],[-58,-318],[120,-60],[-24,-190],[180,-150]];
+  rspots.forEach((p,i)=>{
+    const s=rand(0.7,2.0);
+    d.position.set(p[0],groundH(p[0],p[1])+0.2,p[1]);
+    d.rotation.set(rand(0,3),rand(0,3),0);d.scale.set(s,s*rand(0.6,1),s);d.updateMatrix();
+    rocks.setMatrixAt(i,d.matrix);});
+  rocks.castShadow=true;rocks.instanceMatrix.needsUpdate=true;scene.add(rocks);
+}
+function buildFlowers(){
+  const cv=document.createElement('canvas');cv.width=cv.height=32;const x=cv.getContext('2d');
+  x.strokeStyle='#3d5c2e';x.lineWidth=2;
+  x.beginPath();x.moveTo(16,32);x.lineTo(16,12);x.stroke();
+  const cols=['#f5f0dc','#e8c84a','#c9a0e8','#f2f2f2'];
+  for(let i=0;i<5;i++){x.fillStyle=cols[i%cols.length];
+    x.beginPath();x.arc(8+Math.random()*16,4+Math.random()*9,2.6,0,TAU);x.fill();}
+  const tex=new THREE.CanvasTexture(cv);
+  const geos=[];
+  for(let k=0;k<2;k++){const p=new THREE.PlaneGeometry(0.55,0.45);p.translate(0,0.2,0);p.rotateY(k*Math.PI/2);geos.push(p);}
+  const posA=[],norA=[],uvA=[],idxA=[];let off=0;
+  geos.forEach(p=>{const pa=p.attributes.position.array,na=p.attributes.normal.array,ua=p.attributes.uv.array,ia=p.index.array;
+    for(let i=0;i<pa.length;i++)posA.push(pa[i]);
+    for(let i=0;i<na.length;i++)norA.push(na[i]);
+    for(let i=0;i<ua.length;i++)uvA.push(ua[i]);
+    for(let i=0;i<ia.length;i++)idxA.push(ia[i]+off);
+    off+=pa.length/3;});
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(posA,3));
+  geo.setAttribute('normal',new THREE.Float32BufferAttribute(norA,3));
+  geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvA,2));
+  geo.setIndex(idxA);
+  const im=new THREE.InstancedMesh(geo,new THREE.MeshLambertMaterial({map:tex,alphaTest:0.4,side:THREE.DoubleSide}),240);
+  const d=new THREE.Object3D(),tint=new THREE.Color();
+  const riverX=z=>64+38*Math.sin(z*0.011)+14*Math.sin(z*0.023+1.7);
+  let placed=0,guard=0;
+  while(placed<240&&guard++<6000){
+    let x,z;
+    if(placed<70){x=rand(-40,60);z=rand(-10,40);}
+    else{const rz=rand(-360,-20);const side=Math.random()<0.5?-1:1;x=riverX(rz)+side*rand(8,17);z=rz;}
+    const h=groundH(x,z);if(h>11.5)continue;
+    if(Math.hypot(x,z+CAMP_D)<38)continue;
+    d.position.set(x,h-0.02,z);d.rotation.set(0,rand(0,TAU),0);
+    d.scale.setScalar(rand(0.8,1.5));d.updateMatrix();
+    im.setMatrixAt(placed,d.matrix);
+    tint.setRGB(rand(0.85,1.1),rand(0.85,1.1),rand(0.85,1.1));im.setColorAt(placed,tint);
+    placed++;}
+  im.count=placed;im.instanceMatrix.needsUpdate=true;
+  if(im.instanceColor)im.instanceColor.needsUpdate=true;
+  scene.add(im);
+}
+function buildAmbient(){
+  const bmat=birds.length?birds[0].wl.material:null;
+  if(bmat)for(let i=0;i<4;i++){ // a second, higher, wider flock on the same glide system
+    const g2=new THREE.Group();
+    const gl=new THREE.PlaneGeometry(3.4,1.1);gl.translate(-1.7,0,0);
+    const gr=new THREE.PlaneGeometry(3.4,1.1);gr.translate(1.7,0,0);
+    const wl=new THREE.Mesh(gl,bmat),wr=new THREE.Mesh(gr,bmat);
+    g2.add(wl);g2.add(wr);scene.add(g2);
+    birds.push({g:g2,wl:wl,wr:wr,cx:rand(-260,260),cy:rand(120,170),cz:rand(-600,-200),
+      r:rand(180,320),a:rand(0,TAU),spd:rand(0.05,0.1)*(Math.random()<0.5?1:-1),ph:rand(0,TAU)});}
+  if(clouds.length){ // a higher, larger cloud layer on the same drift system
+    const cmat=clouds[0].material;
+    for(let i=0;i<5;i++){
+      const m=new THREE.Mesh(new THREE.PlaneGeometry(rand(260,380),rand(110,170)),cmat);
+      m.position.set(rand(-700,700),rand(180,240),rand(-800,-150));
+      m.userData.v=rand(0.25,0.6);scene.add(m);clouds.push(m);}}
+}
+
+/* ---------- F : suppressors ---------- */
+function suppMap(){try{const o=JSON.parse(lsGet('longshot_supp','{}'));
+  return(o&&typeof o==='object'&&!Array.isArray(o))?o:{};}catch(e){return{};}}
+function suppOn(key){const m=suppMap();return !!m[key||G.rifle];}
+function suppToggle(key){
+  if(!rifleUnlocked(key)){denyBtn($('loSupp'));return;}
+  const m=suppMap();m[key]=m[key]?0:1;
+  lsSet('longshot_supp',JSON.stringify(m));
+  suppLook();renderLoadout();tick();buzz(8);
+}
+function suppFxPurge(mats,surf){
+  const L=FX_LIVE[surf];
+  for(let i=L.length-1;i>=0;i--)if(mats.indexOf(L[i].m)>=0)L.splice(i,1);
+}
+/* The suppressor's materials are MeshPhongMaterial ON PURPOSE: fxApplyMats
+   only treats materials with a numeric metalness, so the frozen mythic pass
+   can never see these (zero perturbation of the gun's own FX, by
+   construction). The mythic treatment is applied HERE, from the same
+   primitives the system itself uses — the shared flow texture (scrolled by
+   fxFlowTick), the skin's deep base tint, and an FX_LIVE entry in the exact
+   shape fxFlowTick animates. Baked onto the suppressor's own materials —
+   no sleeves, no boxes (v10.8 doctrine). */
+function suppPaint(mats,kind,surf){
+  suppFxPurge(mats,surf);
+  for(const m of mats){
+    if(kind){
+      m.color.setHex(FX_SIGDEEP[kind]);
+      m.emissiveMap=fxFlowTexture(kind);
+      m.emissive.setHex(0xffffff);
+      const base=FX_FLOW[kind].int*0.9;
+      m.emissiveIntensity=base;
+      FX_LIVE[surf].push({m:m,base:base,kind:kind,shim:0,ph:0});
+    }else{
+      m.emissiveMap=null;m.emissive.setHex(0x000000);m.emissiveIntensity=1;
+      m.color.setHex(m.userData._suppBase!=null?m.userData._suppBase:0x232527);
+    }
+    m.needsUpdate=true;
+  }
+}
+function suppBuildFor(rec){
+  if(rec.suppGrp||!V12.suppScene||!rec.wrap)return;
+  const g=V12.suppScene.clone(true),mats=[];
+  g.traverse(o=>{if(o.isMesh){o.frustumCulled=false;
+    const conv=m0=>{const pm=new THREE.MeshPhongMaterial({color:0x232527,shininess:26,specular:0x4a5058});
+      if(m0&&m0.color){const c=m0.color.clone();c.multiplyScalar(0.32);pm.color.copy(c);}
+      pm.userData._suppBase=pm.color.getHex();mats.push(pm);return pm;};
+    o.material=Array.isArray(o.material)?o.material.map(conv):conv(o.material);}});
+  const box=new THREE.Box3().setFromObject(g);
+  const size=box.getSize(new THREE.Vector3()),cen=box.getCenter(new THREE.Vector3());
+  const inner=new THREE.Group();inner.add(g);
+  g.position.set(-cen.x,-cen.y,-box.min.z); // bore axis through the group origin, rear face at z=0
+  const grp=new THREE.Group();grp.name='SUPPV12';grp.add(inner);
+  /* MW's medium spec, in viewmodel units: diameter = 1.6x THIS rifle's
+     measured barrel diameter (clamped 0.075–0.115), length 0.40 (≈205 mm at
+     viewmodel scale) — not too thin, not too thick, not too short, not too long. */
+  const br=barrelR(rec,rec.muzzleV.z);
+  const diaT=clamp(br*2*1.6,0.075,0.115);
+  inner.scale.set(diaT/(size.x||0.14),diaT/(size.y||0.14),0.40/(size.z||0.5));
+  const ax=rec.barrelAxis?rec.barrelAxis.x:rec.muzzleV.x;
+  const ay=rec.barrelAxis?rec.barrelAxis.y:rec.muzzleV.y;
+  grp.position.set(ax,ay,rec.muzzleV.z+0.012); // sits ON the muzzle, extending forward (-Z)
+  grp.visible=false;
+  rec.wrap.add(grp);rec.suppGrp=grp;rec.suppMats=mats;
+}
+function suppAttach(){
+  const rec=VMODELS[glbState.key];
+  if(rec&&rec.status==='ready'&&rec.wrap){
+    suppBuildFor(rec);
+    if(rec.suppGrp&&rec.suppGrp.parent!==rec.wrap)rec.wrap.add(rec.suppGrp); // two loaders race for the PCR wrap — heal parentage if the wrap was swapped after the build
+    if(rec.suppGrp)rec.suppGrp.visible=suppOn(G.rifle);
+  }
+}
+function suppLook(){
+  suppAttach();
+  for(const p of V12.pcrSupp)p.visible=suppOn()&&!glbState.active; // procedural fallback rifle: its built-in can IS the suppressor
+  const rec=VMODELS[glbState.key];
+  if(rec&&rec.suppGrp&&rec.suppMats)suppPaint(rec.suppMats,(equippedSkin()||{}).fx||null,'vm');
+}
+function suppPvLook(){
+  if(typeof pv==='undefined'||!pv.built||!pv.fit)return;
+  let grp=null;
+  pv.fit.traverse(o=>{if(o.name==='SUPPV12')grp=o;});
+  if(!grp){if(V12._pvSuppMats.length)suppFxPurge(V12._pvSuppMats,'pv');return;}
+  grp.visible=suppOn(pvRifleKey());
+  if(!grp.visible){suppFxPurge(V12._pvSuppMats,'pv');V12._pvSuppMats=[];return;}
+  const mats=[];
+  grp.traverse(o=>{if(o.isMesh){const ms=Array.isArray(o.material)?o.material:[o.material];
+    for(const m of ms)if(mats.indexOf(m)<0)mats.push(m);}});
+  V12._pvSuppMats=mats;
+  suppPaint(mats,(skinDef(pvSkinId)||{}).fx||null,'pv');
+}
+(function tagPcrSupp(){ // the procedural rifle's built-in can + its cap/slots, fingerprinted by position
+  for(const ch of rifle.children){
+    if(!ch.isMesh)continue;
+    const p=ch.position;
+    if(p.z<-1.9&&p.z>-2.45&&Math.abs(p.x-0.27)<0.04&&Math.abs(p.y+0.245)<0.04){
+      ch.userData.pcrSupp=true;V12.pcrSupp.push(ch);}
+  }
+})();
+
+/* ---------- E : the knife ---------- */
+const KNF={out:false,grp:null,raise:1,swingT:-9,cd:0,hitDone:true};
+function knifeBuild(sc){
+  if(KNF.grp||!sc)return;
+  const box=new THREE.Box3().setFromObject(sc);
+  const size=box.getSize(new THREE.Vector3());
+  const inner=new THREE.Group();inner.add(sc);
+  inner.rotation.x=-Math.PI/2; // authored grip-at-origin, blade +Y → blade forward (-Z)
+  inner.scale.setScalar(0.52/(size.y||0.352));
+  const grp=new THREE.Group();grp.add(inner);
+  grp.position.set(0.30,-0.34,-0.52);
+  grp.rotation.set(-0.12,0.1,0.08);
+  grp.visible=false;
+  camera.add(grp);KNF.grp=grp;
+}
+function weaponSwitch(){
+  if(ATV.drive.on)return;
+  if(G.state!=='play'&&G.state!=='roam')return;
+  if(KNF.out){
+    KNF.out=false;if(KNF.grp)KNF.grp.visible=false;
+    sTone(500,0.05,'square',0.03);
+  }else{
+    if(G.scoped)setScoped(false);
+    KNF.out=true;KNF.raise=0;
+    if(KNF.grp)KNF.grp.visible=true;
+    sTone(700,0.05,'square',0.03);
+  }
+  V12H.dirty=true;
+}
+function knifeSwing(){
+  if(!KNF.out||ATV.drive.on)return;
+  if(G.state!=='play'&&G.state!=='roam')return;
+  if(G.swayT<KNF.cd)return;
+  KNF.cd=G.swayT+0.38;KNF.swingT=G.swayT;KNF.hitDone=false;
+  sTone(820,0.16,'sine',0.045,-640); // whoosh — a falling sine sweep through the existing tone synth
+}
+const _kf=new THREE.Vector3();
+function knifeHit(){
+  camera.getWorldDirection(_kf);
+  const fh=Math.hypot(_kf.x,_kf.z)||1;
+  let best=null,bd=2.2; // ~2.2 m reach, view-center cone
+  for(const e of enemies){
+    if(!e.alive)continue;
+    const p=e.group.position,dx=p.x-G.px,dz=p.z-G.pz,dh=Math.hypot(dx,dz);
+    if(dh>bd||dh<0.01)continue;
+    if((dx*_kf.x+dz*_kf.z)/(dh*fh)<0.45)continue;
+    best=e;bd=dh;
+  }
+  if(best){
+    const dir=new THREE.Vector3(_kf.x,0,_kf.z).normalize();
+    killEnemy(best,dir,false,false,false,best.chest(),null,true); // melee gate: silent, no skin counter, no bullet-cam
+    sTone(160,0.08,'square',0.06);
+  }
+}
+function knifeTick(dt){
+  if(!KNF.grp)return;
+  if(KNF.raise<1)KNF.raise=Math.min(1,KNF.raise+dt*5.5);
+  let ky=-0.34-(1-KNF.raise)*0.18,kz=-0.52+(1-KNF.raise)*0.12,krx=-0.12;
+  const ph=(G.swayT-KNF.swingT)/0.26;
+  if(ph>=0&&ph<1){
+    const a=Math.sin(ph*Math.PI);
+    krx-=a*0.85;ky-=a*0.04;
+    if(ph>0.35&&!KNF.hitDone){KNF.hitDone=true;knifeHit();}
+  }
+  KNF.grp.position.set(0.30,ky,kz);
+  KNF.grp.rotation.x=krx;
+  if(KNF.out&&(G.state==='play'||G.state==='roam'))rifle.visible=false; // the rifle stays holstered while the knife is out
+}
+
+/* ---------- D : the rideable ("Quad Bike" by Sam Philo, CC BY 4.0) ---------- */
+const ATV={grp:null,wFL:null,wFR:null,wRear:null,wheelR:0.37,spin:0,spinAxis:'x',
+  drive:{on:false,spd:0,steer:0,head:3.35,x:4.5,z:24},
+  camPos:new THREE.Vector3(-2,20,32),gas:false,brake:false,sL:false,sR:false};
+const _av1=new THREE.Vector3(),_av2=new THREE.Vector3();
+function atvWheelPivot(node){
+  const parent=node.parent;if(!parent)return null;
+  ATV.grp.updateMatrixWorld(true);
+  const wp=new THREE.Vector3();node.getWorldPosition(wp);
+  const steerG=new THREE.Group();parent.add(steerG);
+  steerG.position.copy(parent.worldToLocal(wp.clone()));
+  const spinG=new THREE.Group();steerG.add(spinG);
+  spinG.attach(node);
+  return {steer:steerG,spin:spinG};
+}
+function atvBuild(sc){
+  if(ATV.grp||!sc)return;
+  const grp=new THREE.Group();grp.rotation.order='YXZ';
+  const inner=new THREE.Group();grp.add(inner);inner.add(sc);
+  grp.updateMatrixWorld(true);
+  const box=new THREE.Box3().setFromObject(sc);
+  const size=box.getSize(new THREE.Vector3()),cen=box.getCenter(new THREE.Vector3());
+  const wfl=sc.getObjectByName('FrontWheel_L'),wfr=sc.getObjectByName('FrontWheel_R'),wr=sc.getObjectByName('BackWheels');
+  let rotY=0;
+  if(wfl&&wfr&&wr){ // orient: front axle → +Z (the group's forward)
+    const holder=new THREE.Group();holder.add(sc);holder.updateMatrixWorld(true);
+    const cf=new THREE.Box3().setFromObject(wfl).getCenter(new THREE.Vector3())
+      .add(new THREE.Box3().setFromObject(wfr).getCenter(new THREE.Vector3())).multiplyScalar(0.5);
+    const cr=new THREE.Box3().setFromObject(wr).getCenter(new THREE.Vector3());
+    const ax=cf.x-cr.x,az=cf.z-cr.z;
+    if(Math.abs(az)>=Math.abs(ax))rotY=az>=0?0:Math.PI;
+    else rotY=ax>=0?-Math.PI/2:Math.PI/2;
+    const ws=new THREE.Box3().setFromObject(wfl).getSize(new THREE.Vector3());
+    ATV.spinAxis=ws.x<=ws.z?'x':'z'; // the wheel's thin axis (in model space) is its axle — spin around that
+    inner.add(sc); // (re-parent back under inner)
+  }
+  sc.position.set(-cen.x,-box.min.y,-cen.z);
+  inner.rotation.y=rotY;
+  const lenAxis=(Math.abs(size.z)>=Math.abs(size.x))?size.z:size.x;
+  inner.scale.setScalar(2.15/(lenAxis||2.15)); // quad fit: 2.15 m overall length
+  sc.traverse(o=>{if(o.isMesh){o.castShadow=true;}});
+  scene.add(grp);ATV.grp=grp;ATV.inner=inner;
+  if(wfl)ATV.wFL=atvWheelPivot(wfl);
+  if(wfr)ATV.wFR=atvWheelPivot(wfr);
+  if(wr)ATV.wRear=atvWheelPivot(wr);
+  if(ATV.wFL){const wb=new THREE.Box3().setFromObject(wfl);ATV.wheelR=Math.max(0.2,wb.getSize(new THREE.Vector3()).y/2);}
+  atvReset();
+}
+function atvReset(){
+  ATV.drive.on=false;ATV.drive.spd=0;ATV.drive.steer=0;
+  ATV.drive.x=4.5;ATV.drive.z=24;ATV.drive.head=3.35;
+  ATV.gas=ATV.brake=ATV.sL=ATV.sR=false;
+  atvPlace(0);
+}
+function atvPlace(dt){
+  const d=ATV.drive;if(!ATV.grp)return;
+  ATV.grp.position.set(d.x,groundH(d.x,d.z)+
+    (d.on?Math.sin(G.swayT*31)*0.012*Math.min(1,Math.abs(d.spd)/6):0),d.z); // gentle suspension bob, ∝ speed
+  const fx=Math.sin(d.head),fz=Math.cos(d.head);
+  const px2=Math.cos(d.head),pz2=-Math.sin(d.head); // local +X in world (the model's left, post-yaw)
+  const hF=groundH(d.x+fx*0.7,d.z+fz*0.7),hB=groundH(d.x-fx*0.7,d.z-fz*0.7); // quad fit: probes at the axles
+  const hP=groundH(d.x+px2*0.55,d.z+pz2*0.55),hS=groundH(d.x-px2*0.55,d.z-pz2*0.55);
+  const pitch=Math.atan2(hB-hF,1.4),roll=Math.atan2(hP-hS,1.1);
+  ATV.grp.rotation.y=d.head;
+  const k=dt>0?Math.min(1,dt*7):1;
+  ATV.grp.rotation.x+=(pitch-ATV.grp.rotation.x)*k;
+  ATV.grp.rotation.z+=(roll-ATV.grp.rotation.z)*k;
+}
+function atvMount(){
+  if(KC.active||G.settingsOpen||G.pauseOpen)return;
+  if(KNF.out)weaponSwitch(); // the knife auto-holsters on mount
+  if(G.scoped)setScoped(false);
+  const d=ATV.drive;d.on=true;
+  ATV.camPos.set(d.x-Math.sin(d.head)*4.8,groundH(d.x,d.z)+2.3,d.z-Math.cos(d.head)*4.8); // quad fit: closer chase cam
+  G.px=d.x;G.pz=d.z;
+  sClick();buzz(10);V12H.dirty=true;
+}
+function atvDismount(){
+  const d=ATV.drive;if(!d.on)return;
+  d.on=false;
+  const rx=-Math.cos(d.head),rz=Math.sin(d.head); // the vehicle's world-right side
+  G.px=clamp(d.x+rx*2.3,-280,280);
+  G.pz=clamp(d.z+rz*2.3,-372,190);
+  G.yaw=d.head+Math.PI; // face the way the quad faces
+  d.spd=0;
+  sClick();buzz(8);V12H.dirty=true;
+}
+function atvTick(gdt){
+  const d=ATV.drive;
+  if(gdt<=0)return;
+  const gas=ATV.gas||KEYS['KeyW']||KEYS['ArrowUp'];
+  const brake=ATV.brake||KEYS['KeyS']||KEYS['ArrowDown'];
+  const sIn=((ATV.sR||KEYS['KeyD']||KEYS['ArrowRight'])?1:0)-((ATV.sL||KEYS['KeyA']||KEYS['ArrowLeft'])?1:0);
+  d.steer+=(sIn-d.steer)*Math.min(1,gdt*7);
+  const maxA=0.52-0.30*Math.min(1,Math.abs(d.spd)/14); // speed-sensitive steering
+  if(gas)d.spd+=7.5*gdt*(1-Math.max(0,d.spd)/15.5);       // arcade curve → ~14 m/s top (walk is 3.5)
+  if(brake){
+    if(d.spd>0.3)d.spd-=13*gdt;
+    else d.spd=Math.max(-5,d.spd-5*gdt);                  // brake becomes reverse
+  }
+  d.spd-=d.spd*0.35*gdt;                                   // drag
+  if(!gas&&!brake)d.spd-=Math.sign(d.spd)*Math.min(Math.abs(d.spd),2.0*gdt); // rolling decel
+  const fx=Math.sin(d.head),fz=Math.cos(d.head);
+  const slope=(groundH(d.x+fx*2.2,d.z+fz*2.2)-groundH(d.x-fx*2.2,d.z-fz*2.2))/4.4;
+  d.spd-=slope*9.8*0.55*gdt;                               // hills push back
+  if(Math.abs(d.spd)>0.02)
+    d.head+=(d.spd/1.3)*Math.tan(-d.steer*maxA)*gdt; // quad fit: 1.3 m wheelbase       // bicycle-ish: signed speed flips reverse steering naturally
+  let nx=clamp(d.x+Math.sin(d.head)*d.spd*gdt,-280,280);
+  let nz=clamp(d.z+Math.cos(d.head)*d.spd*gdt,-372,190);
+  let hit=false;
+  for(const b of BLOCKERS){ // soft stop/slide — same blocker set the walker uses, vehicle radius
+    const dx=nx-b.x,dz=nz-b.z,rr=b.r+1.5,d2=dx*dx+dz*dz;
+    if(d2<rr*rr&&d2>1e-6){const dd=Math.sqrt(d2);nx=b.x+dx/dd*rr;nz=b.z+dz/dd*rr;hit=true;}}
+  if(TREE_SPOTS)for(const sp of TREE_SPOTS){
+    const dx=nx-sp[0],dz=nz-sp[2],d2=dx*dx+dz*dz;
+    if(d2<1.5*1.5&&d2>1e-6){const dd=Math.sqrt(d2);nx=sp[0]+dx/dd*1.5;nz=sp[2]+dz/dd*1.5;hit=true;}} // quad fit: narrower body
+  if(typeof truck!=='undefined'&&truck.group){
+    const tp=truck.group.position,dx=nx-tp.x,dz=nz-tp.z,d2=dx*dx+dz*dz;
+    if(d2<4.6*4.6&&d2>1e-6){const dd=Math.sqrt(d2);nx=tp.x+dx/dd*4.6;nz=tp.z+dz/dd*4.6;hit=true;}}
+  if(hit)d.spd*=0.45; // soft stop — reverse always backs out
+  d.x=nx;d.z=nz;
+  G.px=d.x;G.pz=d.z;                 // the player IS the quad: converge / snipers / spot-checks all read it
+  G.lastNearT=G.swayT;               // engine noise — the alarm never decays while you drive
+  ATV.spin+=d.spd*gdt/(ATV.wheelR||0.37);
+  const steerVis=-d.steer*maxA,sax=ATV.spinAxis;
+  if(ATV.wFL){ATV.wFL.spin.rotation[sax]=ATV.spin;ATV.wFL.steer.rotation.y=steerVis;}
+  if(ATV.wFR){ATV.wFR.spin.rotation[sax]=ATV.spin;ATV.wFR.steer.rotation.y=steerVis;}
+  if(ATV.wRear)ATV.wRear.spin.rotation[sax]=ATV.spin;
+  const sgn=d.spd<0?-1:1; // grass crush under the wheels (grass only — never bushes)
+  grassCrushAt(d.x,d.z,fx*sgn,fz*sgn,1.05,1); // quad fit: crush footprint
+  grassCrushAt(d.x+fx*0.62,d.z+fz*0.62,fx*sgn,fz*sgn,0.85,1);
+  atvPlace(gdt);
+}
+function atvCam(dt){
+  const d=ATV.drive;
+  const fx=Math.sin(d.head),fz=Math.cos(d.head);
+  _av1.set(d.x-fx*4.8,0,d.z-fz*4.8); // quad fit: chase distance
+  _av1.y=Math.max(groundH(_av1.x,_av1.z)+2.0,groundH(d.x,d.z)+1.7);
+  ATV.camPos.lerp(_av1,1-Math.exp(-dt*4.5));
+  camera.position.copy(ATV.camPos);
+  _av2.set(d.x+fx*2.2,groundH(d.x,d.z)+1.0,d.z+fz*2.2);
+  camera.lookAt(_av2);
+  rifle.visible=false;
+}
+
+/* ---------- G : HUD state (change-only DOM writes) ---------- */
+const V12H={sig:'',dirty:true};
+function v12HudDirty(){V12H.dirty=true;}
+function v12HudTick(){
+  const inGame=(G.state==='play'||G.state==='roam')&&!G.settingsOpen&&!G.pauseOpen;
+  const drv=ATV.drive.on;
+  let sig;
+  if(!inGame)sig='off';
+  else if(drv)sig='drv';
+  else sig='ft'+(V12.nearVeh?'R':'')+(KNF.out?'K':'')+(isConcealed()?'C':'');
+  if(sig===V12H.sig&&!V12H.dirty)return;
+  V12H.sig=sig;V12H.dirty=false;
+  const show=(id,v)=>{const e=$(id);if(e)e.style.display=v?'flex':'none';};
+  show('btnWep',inGame&&!drv);
+  show('btnGas',inGame&&drv);show('btnBrake',inGame&&drv);
+  show('btnSteerL',inGame&&drv);show('btnSteerR',inGame&&drv);
+  show('btnRide',inGame&&(drv||V12.nearVeh));
+  show('btnFire',inGame&&!drv);show('btnScope',inGame&&!drv);show('btnReload',inGame&&!drv);
+  const joy=$('joy');if(joy)joy.style.display=(inGame&&!drv)?'block':'none';
+  show('concealChip',inGame&&!drv&&isConcealed());
+  if(inGame){
+    $('btnRide').textContent=drv?'EXIT':'RIDE';
+    $('btnWep').textContent=KNF.out?'RIFLE':'KNIFE';
+  }
+}
+
+/* ---------- the V12 frame tick (one call, post-camera, from the frame loop) ---------- */
+function v12Tick(dt,gdt){
+  if(((V12._healN=(V12._healN||0)+1)%20)===0){ /* suppressor mythic-paint self-heal : the frozen fx pass purges FX_LIVE
+       entries by wrap traversal — the suppressor's own mats ride the wrap, so
+       a foreign purge can strip its treatment between suppLook calls. Checked
+       every 20th tick (a strip is never latency-critical); re-paints only
+       when actually stripped. */
+    const srec=VMODELS[glbState.key];
+    if(srec&&srec.suppGrp&&srec.suppMats&&srec.suppMats.length){
+      const sfx=(equippedSkin()||{}).fx||null,m0=srec.suppMats[0];
+      const stale=sfx?(m0.emissiveMap!==fxFlowTexture(sfx)||!FX_LIVE.vm.some(en=>en.m===m0))
+                     :(!!m0.emissiveMap||FX_LIVE.vm.some(en=>en.m===m0));
+      if(stale)suppPaint(srec.suppMats,sfx,'vm');
+    }
+  }
+  if(V12.prevState==='menu'&&(G.state==='play'||G.state==='roam'))atvReset(); // fresh deploy: quad back at spawn
+  if((G.state==='win'||G.state==='over')&&ATV.drive.on)atvDismount();
+  V12.prevState=G.state;
+  if(G.quality!==V12.qualSeen){ // quality tier changed: grass density + ground texture res follow
+    V12.qualSeen=G.quality;
+    if(grassMesh)buildGrassField();
+    if(V12.terrain&&(G.quality==='low')!==V12.texLow)v12TerrainApply(window.V12DATA);
+  }
+  if(ATV.grp&&!ATV.drive.on)atvPlace(gdt);
+  if(ATV.drive.on&&(G.state==='play'||G.state==='roam')&&!KC.active){
+    atvTick(gdt);atvCam(dt);
+  }else{
+    V12.nearVeh=!!ATV.grp&&(G.state==='play'||G.state==='roam')&&
+      Math.hypot(G.px-ATV.drive.x,G.pz-ATV.drive.z)<3.4;
+  }
+  if(!ATV.drive.on&&(G.state==='play'||G.state==='roam')){
+    V12.walkT-=dt; // walking bends grass lightly (Addendum 2, optional clause)
+    if(V12.walkT<=0){V12.walkT=0.22;
+      grassCrushAt(G.px,G.pz,-Math.sin(G.yaw),-Math.cos(G.yaw),0.6,0.32);}
+  }
+  grassCrushTick(gdt,G.swayT);
+  knifeTick(dt);
+  const cc=isConcealed();
+  if(cc&&!V12.wasConcealed&&G.converged){G.lostX=G.px;G.lostZ=G.pz;} // they hunt where you vanished
+  V12.wasConcealed=cc;
+  v12HudTick();
+}
+
+/* ---------- V12 input bindings ---------- */
+bindBtn('btnGas',()=>{ATV.gas=true;},()=>{ATV.gas=false;});
+bindBtn('btnBrake',()=>{ATV.brake=true;},()=>{ATV.brake=false;});
+bindBtn('btnSteerL',()=>{ATV.sL=true;},()=>{ATV.sL=false;});
+bindBtn('btnSteerR',()=>{ATV.sR=true;},()=>{ATV.sR=false;});
+bindBtn('btnRide',()=>{if(ATV.drive.on)atvDismount();else if(V12.nearVeh)atvMount();});
+bindBtn('btnWep',()=>weaponSwitch());
+bindEl($('loSupp'),()=>suppToggle(selRifle));
+document.addEventListener('keydown',e=>{
+  if(G.state!=='play'&&G.state!=='roam')return;
+  if(e.code==='KeyQ')weaponSwitch();
+  if(e.code==='KeyE'){if(ATV.drive.on)atvDismount();else if(V12.nearVeh)atvMount();}
+});
+
+/* ---------- V12 init ---------- */
+buildBushes();
+buildScatter();
+buildFlowers();
+buildAmbient();
+loadV12Pack();
+suppLook(); // PCR-fallback suppressor parts follow state even before the pack lands
+/* ==================== end V12 ==================== */
+
 /* ---- menu wiring ---- */
 bindEl($('deployBtn'),deployMission);
 bindEl($('roamBtn'),enterRoam); // WORLD 11.0 FREE ROAM
@@ -5852,7 +6602,8 @@ const SYNC={
      longshot_haptics, longshot_left — and the longshot_briefSeen coach-mark. */
   PKEYS:['longshot_credits','longshot_xp','longshot_best','longshot_rifles','longshot_rifle',
     'longshot_skinsOwned','longshot_skin','longshot_mbest','longshot_mtime','longshot_ghostMissions',
-    'longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn','longshot_seenver'],
+    'longshot_menuMission','longshot_grant105','longshot_skinKills','longshot_killFxOn','longshot_seenver',
+    'longshot_supp'], // V12 : per-rifle suppressor installs — PROGRESS-adjacent equipment, syncs like the rest
   NUMK:{longshot_credits:1,longshot_xp:1,longshot_best:1,longshot_rifles:1,longshot_menuMission:1}, // numeric ladders : best-of = max (rifles unlock by ladder, so max IS the union)
   state:'idle',user:null,dirty:false,_sdkOk:false,_kicked:false,_applying:false,_pushing:false,_pushT:0,_pushTimer:0,_status:'',_popWdMs:20000,_env:null,_attempt:0, // SYNC 11.2 : _popWdMs = popup no-settle LOG window in ms (a hang is logged, never auto-navigated — the 11.1.2 auto-redirect watchdog is retired); _env caches the boot env checks; _attempt mirrors lssync_attempt
   store:{get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},
@@ -5942,6 +6693,7 @@ const SYNC={
         case 'longshot_mtime':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return (x>0&&y>0)?Math.min(x,y):(x||y);}));break; // best time = fastest
         case 'longshot_skinKills':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return Math.max(x,y);}));break; // grind counters per skin
         case 'longshot_killFxOn':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return !!(x||y);}));break; // enabled anywhere = enabled
+        case 'longshot_supp':out[k]=JSON.stringify(SYNC._mergeMap(a[k],b[k],function(x,y){return (x||y)?1:0;}));break; // V12 : installed on either device = installed (equipped-if-anywhere OR), stored as 0/1 per rifle
         case 'longshot_grant105':out[k]=(a[k]==='1'||b[k]==='1')?'1':(ha?a[k]:b[k]);break; // claimed anywhere = claimed (no double-dip)
         case 'longshot_seenver':out[k]=SYNC._verMax(a[k],b[k]);break;
         default:out[k]=ha?a[k]:b[k]; // longshot_rifle / longshot_skin : this device's current choice wins the first link
