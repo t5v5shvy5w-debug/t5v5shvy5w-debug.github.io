@@ -636,7 +636,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v13.1</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v13.2</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -806,8 +806,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='13.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='13.2'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'13.2',lines:[ // V13.2 : world fix patch — ground truth, textures, bridge, water, ATV FOV
+  '<b>WORLD FIX PATCH</b> — the ground is solid now (no more sinking through the island on foot or on the quad), the trees and rocks wear their real colors again, and the bridge is finished: drive it end to end, both ways. The water has no invisible wall anymore — wade the shallows, stop where it gets deep — and the quad\u2019s speed FOV stays calm at full tilt']},
  {v:'13.1',lines:[ // V13.1 : real loading screen — the bar loads the actual files, then PLAY appears under the bar
   '<b>REAL LOADING SCREEN</b> — booting up now loads the game\u2019s files on a proper progress bar (world, quad, wildlife, helicopter, cloud sync), and when everything is in, PLAY appears under the bar. No fake fill: if a file fails, it says so and offers a retry']},
  {v:'13.0',lines:[ // V13 WORLD EXPANSION : 6 km world, island + bridge, world map, wildlife, the helicopter
@@ -1046,9 +1048,10 @@ function n2(x,z){return Math.sin(x*0.0016+1.7)*Math.cos(z*0.0013-0.6)*0.55+Math.
 function valleyX(z){return -900+130*Math.sin(z*0.0011+0.7)+60*Math.sin(z*0.0027);}
 function valleyFloorH(z){return 13+6*sstep(-2150,-2500,z)+40*sstep(-2480,-2580,z)+26*sstep(-2620,-2950,z);}
 const FLATS=[ // flattened sites — later chunks append bridge / outpost / helipad sites
-  {x:0,z:24,r:30,h:4.0},
+  {x:0,z:24,r:52,h:4.0},
   {x:0,z:-1010,r:95,h:20},
-  {x:150,z:-930,r:36,h:24.9}]; // V13 Chunk F : the helipad terrace
+  {x:150,z:-930,r:48,h:24.9}]; // V13 Chunk F : the helipad terrace
+var GRIDH={data:null,cell:6000/256}; // V13.2 : baked height grid (filled after the terrain mesh builds) — var + early : groundH() is called by camp dressing long before the geography section runs
 function mainlandH(x,z){
   let h=24+n2(x,z)*11+Math.sin(x*0.017-z*0.013)*2.2;                    // rolling heartland
   h+=sstep(1500,2600,Math.abs(x))*34;                                  // hillier flanks
@@ -1431,7 +1434,7 @@ function roadNear(x,z){
   }
   return bd<1e17?{d:Math.sqrt(bd),h:bh}:null;
 }
-function groundH(x,z){
+function groundHRaw(x,z){ // V13.2 : analytic ground (bake source only — callers use groundH)
   let h=groundHBase(x,z);
   if(V13GEO){
     const rn=roadNear(x,z);
@@ -1440,9 +1443,9 @@ function groundH(x,z){
   return h;
 }
 /* the bridge deck profile : island viaduct -> level span -> mainland ramp */
-const DECK={x:7.4,z0:-925,z1:-408};
+const DECK={x:7.4,z0:-940,z1:-396}; // V13.2 fix2 : the strip runs apron to apron (was -925..-408)
 function deckY(z){
-  const CP=[[-408,5.0],[-470,13.5],[-560,14.5],[-800,14.5],[-875,18.6],[-925,20.3]];
+  const CP=[[-396,4.35],[-470,13.5],[-560,14.5],[-800,14.5],[-875,18.6],[-908,16.6],[-940,16.45]]; // V13.2 fix2 : both ends apron onto the measured terrain (island foot 4.35 vs ground 4.34; mainland causeway tail 16.45 vs ground 16.35-16.72) — the original ended at 20.3 over 13.7 ground: a 6 m wall
   if(z>=CP[0][0])return CP[0][1];
   for(let i=1;i<CP.length;i++){
     if(z>=CP[i][0]){const a=CP[i-1],b=CP[i];return lerp(b[1],a[1],sstep(b[0],a[0],z));}
@@ -1460,7 +1463,7 @@ function groundHBase(x,z){
   const edge=Math.max(Math.abs(x),Math.abs(z));
   h+=sstep(2620,3020,edge)*130;                                        // rim mountains at the world edge
   for(let i=0;i<FLATS.length;i++){const f=FLATS[i],d=Math.hypot(x-f.x,z-f.z);
-    if(d<f.r)h=lerp(h,f.h,sstep(f.r,f.r*0.35,d)*0.97);}
+    if(d<f.r)h=lerp(h,f.h,sstep(f.r,f.r*0.5,d)*0.97);} // V13.2 : wider full-flat core (was r*0.35 — sub-cell on the spawn pad)
   return h;
 }
 function surfH(x,z){
@@ -1470,6 +1473,20 @@ function surfH(x,z){
     if(pdx*pdx+pdz*pdz<240&&window.__heliTopY>gh)return window.__heliTopY;}
   return gh;
 }
+
+/* ==== V13.2 : WATER BY DEPTH, NOT BY WALL ====
+   waterYAt = the actual water surface over a point (sea / lake / river /
+   falls pool). Movement stops only when the water is genuinely deep —
+   shallows are wadeable, so the shoreline has no invisible wall. */
+function waterYAt(x,z){
+  let wy=SEA_Y;
+  const lx=valleyX(-2050),ldx=(x-lx)/215,ldz=(z+2050)/330;
+  if(ldx*ldx+ldz*ldz<1&&LAKE_Y>wy)wy=LAKE_Y;
+  if(z<-1000&&z>-2980){const dv=Math.abs(x-valleyX(z));if(dv<9){const ry=valleyFloorH(z)-2.2;if(ry>wy)wy=ry;}}
+  const pdx=x+1115,pdz=z+1558;if(pdx*pdx+pdz*pdz<169&&wy<12.9)wy=12.9; // falls pool F2
+  return wy;
+}
+function waterDepth(x,z){return waterYAt(x,z)-surfH(x,z);}
 (function(){
   const geo=new THREE.PlaneGeometry(6000,6000,256,256);geo.rotateX(-Math.PI/2); // V13 : 6 km at 23.4 m cells (was 760 m)
   const pos=geo.attributes.position,col=[];
@@ -1507,6 +1524,32 @@ function surfH(x,z){
     const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(420,420);return t;})(); // V13 : speckle scale held over 6 km
   const m=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true,map:gtex}));
   m.receiveShadow=true;m.userData.isTerrain=true;scene.add(m);})(); // V13 : named so the V12 photo-texture pass finds it at any resolution
+/* ==== V13.2 : ONE GROUND TRUTH ====
+   MW no-clipped through the spawn island on foot AND on the quad. Root
+   cause: the visible terrain is a 257x257 grid sampled from the analytic
+   height function at 23.4 m spacing, while physics sampled the analytic
+   function itself — between grid points the two surfaces disagree by up to
+   ~4 m (measured at the spawn pad), so the player sank into / floated over
+   the visible ground. Fix: bake the grid once and make groundH() read the
+   SAME grid, split into the SAME two triangles PlaneGeometry renders, so
+   visual ground == collision ground everywhere, by construction. (Also a
+   large perf win: no per-call road scan.) */
+function buildGridH(){
+  const d=new Float32Array(257*257);
+  for(let j=0;j<257;j++)for(let i=0;i<257;i++)d[j*257+i]=groundHRaw(-3000+i*GRIDH.cell,-3000+j*GRIDH.cell);
+  GRIDH.data=d;
+}
+function groundH(x,z){
+  const d=GRIDH.data;if(!d)return groundHRaw(x,z);
+  let fx=(x+3000)/GRIDH.cell,fz=(z+3000)/GRIDH.cell;
+  fx=fx<0?0:(fx>255?255:fx);fz=fz<0?0:(fz>255?255:fz);
+  const i=fx|0,j=fz|0,u=fx-i,v=fz-j,o=j*257+i;
+  const A=d[o],B=d[o+257],C=d[o+258],D=d[o+1];
+  if(u+v<=1)return A+(D-A)*u+(B-A)*v;
+  return C+(B-C)*(1-u)+(D-C)*(1-v);
+}
+buildGridH();
+
 
 /* trees : instanced, varied shapes */
 let riverTex=null;
@@ -2554,10 +2597,12 @@ function stepPlayerMove(dt,speed){
   const len=Math.hypot(mx,mz);if(len<0.12)return;
   const cl=Math.min(1,len)/len;mx*=cl;mz*=cl;
   const sy=Math.sin(G.yaw),cy=Math.cos(G.yaw);
-  let nx=G.px+(cy*mx-sy*(-mz))*speed*dt;
-  let nz=G.pz+(-sy*mx-cy*(-mz))*speed*dt;
+  let spdW=speed;const wdHere=waterDepth(G.px,G.pz); // V13.2 : wading drag
+  if(wdHere>0.2)spdW*=1-0.5*clamp((wdHere-0.2)/1.15,0,1);
+  let nx=G.px+(cy*mx-sy*(-mz))*spdW*dt;
+  let nz=G.pz+(-sy*mx-cy*(-mz))*spdW*dt;
   nx=clamp(nx,-2960,2960);nz=clamp(nz,-2960,2960); // V13 : world bounds (was the old valley box)
-  if(surfH(nx,nz)<-2.2){nx=G.px;nz=G.pz;} // V13 : deep water stops the walker (the bridge deck registers in surfH)
+  if(waterDepth(nx,nz)>1.35){nx=G.px;nz=G.pz;} // V13.2 : deep water stops the walker — by DEPTH: chest-deep is the limit, shallows are open (deck/pad register via surfH)
   for(const b of BLOCKERS){ // cheap push-out : tents, crates, tower, tanks, barrels
     const dx=nx-b.x,dz=nz-b.z,rr=b.r+0.55,d2=dx*dx+dz*dz;
     if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=b.x+dx/d*rr;nz=b.z+dz/d*rr;}}
@@ -6764,6 +6809,7 @@ function atvTick(gdt){
     else d.spd=Math.max(-5,d.spd-5*gdt);                  // brake becomes reverse
   }
   d.spd-=d.spd*(gas?0.02:0.35)*gdt;                        // drag (near-zero under throttle — the taper above sets the top end; full drag coasting, unchanged)
+  const awd=waterDepth(d.x,d.z);if(awd>0.15)d.spd-=d.spd*1.1*gdt*Math.min(1,awd); // V13.2 : water drag — the quad plows through shallows, slowed
   if(!gas&&!brake)d.spd-=Math.sign(d.spd)*Math.min(Math.abs(d.spd),2.0*gdt); // rolling decel
   const fx=Math.sin(d.head),fz=Math.cos(d.head);
   const slope=(surfH(d.x+fx*2.2,d.z+fz*2.2)-surfH(d.x-fx*2.2,d.z-fz*2.2))/4.4; // V13 Chunk B : deck-aware slope
@@ -6774,10 +6820,12 @@ function atvTick(gdt){
   let nx=clamp(d.x+Math.sin(d.head)*d.spd*gdt,-2960,2960);
   let nz=clamp(d.z+Math.cos(d.head)*d.spd*gdt,-2960,2960); // V13 : world bounds
   let hit=false;
-  if(surfH(nx,nz)<-3.0){nx=d.x;nz=d.z;hit=true;} // V13 : the quad does not swim — shore stops it (deck registers in surfH)
+  if(waterDepth(nx,nz)>1.0){nx=d.x;nz=d.z;hit=true;} // V13.2 : the quad stops where the water gets deep — by DEPTH, not at a dry-sand line (deck registers via surfH)
   for(const b of BLOCKERS){ // soft stop/slide — same blocker set the walker uses, vehicle radius
     const dx=nx-b.x,dz=nz-b.z,rr=b.r+1.5,d2=dx*dx+dz*dz;
     if(d2<rr*rr&&d2>1e-6){const dd=Math.sqrt(d2);nx=b.x+dx/dd*rr;nz=b.z+dz/dd*rr;hit=true;}}
+  if(d.z<DECK.z1&&d.z>DECK.z0&&surfH(d.x,d.z)>groundH(d.x,d.z)+0.5){ // V13.2 fix2 : riding the deck — the guard rails are walls for the quad too (the 9 m-spaced blocker discs have gaps at speed; a U-turn at 40 m/s used to slip through and stall in the channel)
+    if(nx>6.4){nx=6.4;hit=true;}else if(nx<-6.4){nx=-6.4;hit=true;}}
   if(TREE_SPOTS)for(const sp of TREE_SPOTS){
     const dx=nx-sp[0],dz=nz-sp[2],d2=dx*dx+dz*dz;
     if(d2<1.5*1.5&&d2>1e-6){const dd=Math.sqrt(d2);nx=sp[0]+dx/dd*1.5;nz=sp[2]+dz/dd*1.5;hit=true;}} // quad fit: narrower body
@@ -6807,15 +6855,15 @@ function atvCam(dt){
   const d=ATV.drive;
   const fx=Math.sin(d.head),fz=Math.cos(d.head);
   _av1.set(d.x-fx*4.8,0,d.z-fz*4.8); // quad fit: chase distance (position spring + terrain clearance unchanged from v12.0)
-  _av1.y=Math.max(groundH(_av1.x,_av1.z)+2.0,groundH(d.x,d.z)+1.7);
+  _av1.y=Math.max(surfH(_av1.x,_av1.z)+2.0,surfH(d.x,d.z)+1.7); // V13.2 : chase cam rides surfH — on the bridge deck it used to sit under the sea
   ATV.camPos.lerp(_av1,1-Math.exp(-dt*4.5));
   camera.position.copy(ATV.camPos);
   // V12.1 : FREE LOOK — the clamp is gone; the view rides the player's unbounded look offset (fed by aimByPixels).
   // Same yaw convention as the on-foot camera (dismount hands off at G.yaw = head + PI), so the view never snaps.
   const psi=d.head+Math.PI+ATV.lookYaw;
-  _av2.set(d.x-Math.sin(psi)*6,groundH(d.x,d.z)+1.0+Math.tan(ATV.lookPitch)*6,d.z-Math.cos(psi)*6);
+  _av2.set(d.x-Math.sin(psi)*6,surfH(d.x,d.z)+1.0+Math.tan(ATV.lookPitch)*6,d.z-Math.cos(psi)*6); // V13.2 : look target on the real surface too
   camera.lookAt(_av2);
-  const fv=68+Math.min(11,Math.max(0,Math.abs(d.spd)-14)*0.26); // V12.1 : speed FOV — widens as the quad stretches its legs (the frame loop restores 68 on dismount)
+  const fv=68+Math.min(4,Math.max(0,Math.abs(d.spd)-14)*0.09); // V13.2 : speed FOV toned WAY down per MW — was +11 deg at top speed (68->79), now +4 max (68->72)
   if(Math.abs(camera.fov-fv)>0.05){camera.fov=fv;camera.updateProjectionMatrix();}
   rifle.visible=false;
 }
@@ -7095,7 +7143,7 @@ function buildMergedMesh(bag,mat){
 const BR={steel:0x596068,dark:0x3f464e,conc:0x8b8d89,slab:0x4a4a4c,rail:0x707780,cable:0x2e3237};
 (function buildBridge(){
   const slopeAt=z=>(deckY(z+4)-deckY(z-4))/8;
-  for(let z=-916;z<-412;z+=8.6){ // deck slab + girders, following the profile
+  for(let z=-939.4;z<-392;z+=8.6){ // deck slab + girders, following the profile (V13.2 fix2 : apron to apron)
     const zm=z+4.3,dy=deckY(zm),rx=-Math.atan(slopeAt(zm));
     pushBox(0,dy-0.75,zm,14.8,1.5,9.4,rx,BR.slab);
     pushBox(-7.0,dy-1.95,zm,0.6,1.7,9.4,rx,BR.steel);
@@ -7103,11 +7151,20 @@ const BR={steel:0x596068,dark:0x3f464e,conc:0x8b8d89,slab:0x4a4a4c,rail:0x707780
     if(zm<-440&&zm>-884&&((z/17)|0)===((z+8.6)/17|0))pushBox(0,dy-2.3,zm,14.6,0.5,0.55,0,BR.dark); // cross beams
     for(const sx of[-7.05,7.05]){ // guard rails : posts + two rails
       pushBox(sx,dy+0.55,zm,0.16,1.1,0.16,0,BR.rail);
-      if(((z/24.8)|0)!==(((z+8.6)/24.8)|0)){
-        pushBox(sx,dy+1.08,zm+8,0.1,0.13,25.6,-Math.atan(slopeAt(zm+8)),BR.rail);
-        pushBox(sx,dy+0.68,zm+8,0.1,0.11,25.6,-Math.atan(slopeAt(zm+8)),BR.rail);
-      }
+      // V13.2 : rails follow the deck segment-by-segment — the old 25.6 m
+      // single-slope bars detached from the curving deck and jutted into the air
+      pushBox(sx,dy+1.08,zm,0.1,0.13,9.4,rx,BR.rail);
+      pushBox(sx,dy+0.68,zm,0.1,0.11,9.4,rx,BR.rail);
     }
+  }
+  /* V13.2 : viaduct piers — the high span stands on something (it floated) */
+  for(const pz of[-480,-580,-680,-780,-855,-890]){
+    const top=deckY(pz)-1.6;
+    for(const px of[-5.2,5.2]){
+      const bot=Math.min(groundH(px,pz),top)-1.5;
+      if(top-bot>4)pushBox(px,(top+bot)/2,pz,1.7,top-bot,1.7,0,BR.conc);
+    }
+    pushBox(0,top-0.4,pz,13.4,0.8,2.2,0,BR.conc);
   }
   const towers=[-600,-745];
   for(const zt of towers){
@@ -7151,7 +7208,7 @@ const BR={steel:0x596068,dark:0x3f464e,conc:0x8b8d89,slab:0x4a4a4c,rail:0x707780
   }
   buildMergedMesh(_bg,new THREE.MeshLambertMaterial({vertexColors:true}));
   buildMergedMesh(heads,new THREE.MeshBasicMaterial({vertexColors:true}));
-  for(let z=-900;z<=-436;z+=9){BLOCKERS.push({x:-7.3,z:z,r:0.75});BLOCKERS.push({x:7.3,z:z,r:0.75});} // rails are walls
+  for(let z=-934;z<=-404;z+=9){BLOCKERS.push({x:-7.3,z:z,r:0.75});BLOCKERS.push({x:7.3,z:z,r:0.75});} // rails are walls (V13.2 fix2 : apron to apron)
   /* deck-top driving surface : asphalt ribbon on the profile */
   const cv=document.createElement('canvas');cv.width=cv.height=128;const cx2=cv.getContext('2d');
   cx2.fillStyle='#3c3f43';cx2.fillRect(0,0,128,128);
@@ -7160,7 +7217,7 @@ const BR={steel:0x596068,dark:0x3f464e,conc:0x8b8d89,slab:0x4a4a4c,rail:0x707780
   cx2.fillStyle='rgba(240,220,150,0.8)';cx2.fillRect(62.8,4,2.4,56); // one dash per tile
   const at=new THREE.CanvasTexture(cv);at.wrapS=at.wrapT=THREE.RepeatWrapping;
   const pos=[],uv=[],idx=[];let vi=0;
-  for(let z=-925;z<-408;z+=8){
+  for(let z=-940;z<-392;z+=8){ // V13.2 fix2 : asphalt apron to apron
     const dy=deckY(z+4)+0.05;
     pos.push(-7.2,deckY(z)+0.05,z, 7.2,deckY(z)+0.05,z);
     uv.push(0,z/16.4,1,z/16.4);
@@ -7810,17 +7867,43 @@ function protoGeo(key){
   src.traverse(function(o){
     if(!o.isMesh)return;any=true;
     const g=o.geometry.index?o.geometry.toNonIndexed():o.geometry;
-    const pa=g.attributes.position,na=g.attributes.normal,ca=g.attributes.color;
+    const pa=g.attributes.position,na=g.attributes.normal,ca=g.attributes.color,ua=g.attributes.uv;
     nm.getNormalMatrix(o.matrixWorld);
+    /* V13.2 : bake the model's TEXTURE into the vertex colors. COLOR_0 in
+       these packs is grayscale AO only (r=g=b) — used raw, every ecology
+       tree/bush/rock rendered flat white. Sample the map at each vertex UV
+       and multiply by COLOR_0, exactly like the textured material does.
+       Transparent texels (leaf-card margins) fall back to the texture's
+       average opaque color instead of garbage RGB. */
+    let samp=null;
+    if(o.material&&o.material.map&&o.material.map.image&&ua){
+      try{
+        const sc=document.createElement('canvas');sc.width=sc.height=256;
+        const sx2=sc.getContext('2d');sx2.drawImage(o.material.map.image,0,0,256,256);
+        const id=sx2.getImageData(0,0,256,256),dd=id.data;
+        let ar=0,ag=0,ab=0,an=0;
+        for(let q=0;q<dd.length;q+=16){if(dd[q+3]>=128){ar+=dd[q];ag+=dd[q+1];ab+=dd[q+2];an++;}}
+        samp={d:dd,avg:an?[ar/an/255,ag/an/255,ab/an/255]:[0.4,0.5,0.3]};
+      }catch(e){samp=null;}
+    }
     let mc=null;
-    if(!ca){mc=new THREE.Color(0x6a7a52);
-      if(o.material&&o.material.color)mc.copy(o.material.color);}
+    if(!ca&&!samp){mc=new THREE.Color(key==='rock'?0x8a8578:0x6a7a52);
+      if(o.material&&o.material.color&&key!=='rock')mc.copy(o.material.color);}
     for(let i=0;i<pa.count;i++){
       v.set(pa.getX(i),pa.getY(i),pa.getZ(i)).applyMatrix4(o.matrixWorld);
       posA.push(v.x,v.y,v.z);
       v.set(na.getX(i),na.getY(i),na.getZ(i)).applyMatrix3(nm).normalize();
       norA.push(v.x,v.y,v.z);
-      if(ca)colA.push(ca.getX(i),ca.getY(i),ca.getZ(i));
+      if(samp){
+        let u=ua.getX(i),w=ua.getY(i);u-=Math.floor(u);w-=Math.floor(w);
+        const px=Math.min(255,(u*256)|0),py=Math.min(255,(w*256)|0),o2=(py*256+px)*4;
+        let rr,gg,bb;
+        if(samp.d[o2+3]<128){rr=samp.avg[0];gg=samp.avg[1];bb=samp.avg[2];}
+        else{rr=samp.d[o2]/255;gg=samp.d[o2+1]/255;bb=samp.d[o2+2]/255;}
+        if(ca){rr*=ca.getX(i);gg*=ca.getY(i);bb*=ca.getZ(i);}
+        colA.push(rr,gg,bb);
+      }
+      else if(ca)colA.push(ca.getX(i),ca.getY(i),ca.getZ(i));
       else colA.push(mc.r,mc.g,mc.b);
     }
   });
