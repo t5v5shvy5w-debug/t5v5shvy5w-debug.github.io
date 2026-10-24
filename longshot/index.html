@@ -652,7 +652,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v13.3</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v13.4</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -822,8 +822,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='13.3'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='13.4'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'13.4',lines:[ // V13.4 : showcase hotfix — the lobby rifle renders every load
+  '<b>SHOWCASE HOTFIX</b> — the lobby rifle is back: it was shrinking to nothing on some loads (you saw only the skin\u2019s sparkles), so the showcase now measures and frames it the same way every time. Same rifle, same skin, same sparkles — just actually visible.']},
  {v:'13.3',lines:[ // V13.3 : redeem code + menu revamp — MW2212, loader-matched lobby
   '<b>REDEEM CODE</b> — Settings has a redeem box now: enter MW2212 for +600,000 CR, as many times as you like. <b>MENU REVAMP</b> — the lobby wears the loading screen\u2019s look: the hideout art behind everything, the glowing GHOSTLINE rule, and a DEPLOY button that breathes like the loader.']},
  {v:'13.2',lines:[ // V13.2 : world fix patch — ground truth, textures, bridge, water, ATV FOV
@@ -5427,8 +5429,24 @@ function pvInit(){
   window.addEventListener('orientationchange',()=>setTimeout(pvResize,60)); // LOBBY FIX : … and on orientation change
   if(window.ResizeObserver){try{const ro=new ResizeObserver(()=>{pvResize();});for(const rid of['pvHome','pvLoadout','pvSkins']){const rel=document.getElementById(rid);if(rel)ro.observe(rel);}}catch(e){}} // LOBBY POLISH : re-fit the moment any preview slot changes size
 }
+function pvLocalBox(root){ // V13.4 SHOWCASE : bounding box from LOCAL transforms only — clone() copies position/quaternion/scale exactly, while matrixWorld on a fresh clone is inherited state. Accumulate compose(pos,quat,scale) down the tree and expand each mesh's geometry box through it. Baked skinned meshes are plain Meshes by this point, so their baked positions are handled like any geometry.
+  const box=new THREE.Box3();
+  const _lm=new THREE.Matrix4(),_wm=new THREE.Matrix4(),_gb=new THREE.Box3();
+  (function walk(o,parent){
+    _lm.compose(o.position,o.quaternion,o.scale);
+    if(parent)_wm.multiplyMatrices(parent,_lm);else _wm.copy(_lm);
+    if(o.isMesh&&o.geometry){
+      if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();
+      _gb.copy(o.geometry.boundingBox).applyMatrix4(_wm);
+      box.union(_gb);
+    }
+    const ch=o.children||[];
+    for(let i=0;i<ch.length;i++)walk(ch[i],new THREE.Matrix4().copy(_wm));
+  })(root,null);
+  return box;
+}
 function pvCenterModel(root){ // LOBBY FIX : the old pvFrameModel measured the box through the (possibly scaled) stage group, so the center was wrong and the rifle ORBITED its spin axis, cropped at the edge. Now: measure the DETACHED model, shift it so its bounding-box center sits exactly on the group origin, and yaw it so the long axis lies across the screen. The model is never rotated after this — the GROUP is.
-  const box=new THREE.Box3().setFromObject(root);
+  const box=pvLocalBox(root); // V13.4 SHOWCASE : local-chain box — see pvLocalBox below; setFromObject on a fresh clone read stale matrixWorld and swung pv.size 2.20 <-> 27.95 run to run (27.95 = 2.20 x wrap 12.7, PCR 0.01 missing), which both mis-sized AND mis-centered the clone (wrong center shoves it off-frame while holder-space particles still render — exactly MW's screenshot)
   const holder=new THREE.Group();
   if(box.isEmpty()){pv.size=null;holder.add(root);return holder;}
   const c=box.getCenter(new THREE.Vector3()),s=box.getSize(new THREE.Vector3());
@@ -5483,6 +5501,8 @@ function pvFitPreview(){ // LOBBY POLISH : true-projection auto-fit (see the blo
   const skinsSlot=!!(pvCanvas&&pvCanvas.parentNode&&pvCanvas.parentNode.id==='pvSkins'); // SKINS CLOSER (v10.9) : per-slot targets — the canvas's parent IS the slot it is mounted in
   const TX=skinsSlot?PV_FIT_SKINS.tx:PV_FIT_TX,TY=skinsSlot?PV_FIT_SKINS.ty:PV_FIT_TY;
   const aspect=pvCam.aspect||1.5;
+  const _cdir=pvCam.position.clone().normalize(); // V13.4 SHOWCASE : worst corner view-depth per unit scale (see cap below)
+  const _eUnit=Math.hypot(pv.size.x/2,pv.size.z/2)+(pv.size.y/2)*Math.abs(_cdir.y);
   const visH=2*PV_CAM_D0*Math.tan(pvCam.fov*Math.PI/360),visW=visH*aspect;
   let maxE=0;for(let a=0;a<=90;a+=5){const r=a*Math.PI/180,e=pv.size.x*Math.abs(Math.cos(r))+pv.size.z*Math.abs(Math.sin(r));if(e>maxE)maxE=e;}
   const flat=Math.min(0.80*visW/(maxE||1),0.74*visH/(pv.size.y||1)); // the v10.6 estimate — demoted to a starting guess
@@ -5490,17 +5510,17 @@ function pvFitPreview(){ // LOBBY POLISH : true-projection auto-fit (see the blo
   const cands=[PV_CAM_D0,PV_CAM_D0*1.5,PV_CAM_D0*2.2];
   for(let ci=0;ci<cands.length;ci++){
     const D=cands[ci];let sc=flat*(D/PV_CAM_D0);
-    const cap=flat*(D/PV_CAM_D0)*1.3;
-    for(let it=0;it<5;it++){
+    const cap=Math.min(flat*(D/PV_CAM_D0)*1.3,(D-0.4)/Math.max(_eUnit,1e-3)); // V13.4 SHOWCASE : depth cap — no corner may swing behind the lens (view depth >= 0.4), else pvMeasureAt's depth floor fabricates exploding NDC readings and the loop below ping-pongs into a small-but-'feasible' scale instead of converging
+    for(let it=0;it<40;it++){ // V13.4 SHOWCASE : 5 damped steps never converged on the depth-coupled measure (observed spans 18-47% vs the 86% target); 40 steps with a convergence break land on target whenever the geometry allows it
       const w=pvMeasureAt(sc,D);
       const f=Math.min(TX/Math.max(w.x,1e-3),TY/Math.max(w.y,1e-3)); // SKINS CLOSER : per-slot targets (TX/TY locals)
-      if(f>0.99&&f<1.02)break;
+      if(f>0.98&&f<1.02)break;
       sc*=Math.pow(f,0.85); // damped — projection is not linear in scale when the gun is long against the leash
       if(sc<0.03){sc=0.03;break;}
       if(sc>cap)sc=cap;
     }
     let w=pvMeasureAt(sc,D);
-    for(let g=0;g<6&&(w.x>TX||w.y>TY);g++){sc*=0.82;w=pvMeasureAt(sc,D);} // guarantee pass : whatever the iteration did, the shipped fit is feasible
+    for(let g=0;g<6&&(w.x>TX+0.015||w.y>TY+0.015);g++){sc*=0.82;w=pvMeasureAt(sc,D);} // V13.4 SHOWCASE : guarantee pass aligned with the feasibility test below (target + 0.015) — the strict test used to treat the +0.03 pad-inflated my = 0.79 as a violation of TY = 0.78 and hammer a converged, feasible fit down another x0.82 for nothing
     const feas=(w.x<=TX+0.015&&w.y<=TY+0.015);
     const cand={sc:sc,D:D,mx:w.x,my:w.y,feas:feas};
     if(!best||(cand.feas&&!best.feas)||(cand.feas===best.feas&&cand.mx>best.mx))best=cand;
