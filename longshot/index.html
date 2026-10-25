@@ -68,37 +68,39 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 .meter.lowhp>i{animation:lowhp .75s ease-in-out infinite}
 @keyframes lowhp{0%,100%{opacity:1}50%{opacity:.3}}
 /* ---------- touch buttons : CODM cluster ---------- */
-.hbtn{position:fixed;z-index:50;border-radius:50%;background:rgba(12,16,12,.55);border:2px solid rgba(190,230,190,.42);color:#e8f3e4;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:1px;font-family:inherit}
-.hbtn:active,.hbtn.on{background:rgba(70,140,70,.62);transform:scale(.93)}
-#btnFire{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:92px;height:92px;font-size:17px;border-color:rgba(255,160,120,.6)}
-#btnScope{right:28px;bottom:calc(130px + env(safe-area-inset-bottom));width:68px;height:68px;font-size:13px}
-#btnReload{right:116px;bottom:calc(110px + env(safe-area-inset-bottom));width:60px;height:60px;font-size:11px}
+.hbtn{position:fixed;z-index:50;border-radius:50%;background:rgba(8,14,22,.78);border:2.5px solid rgba(150,190,255,.5);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 4px 16px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.18)}
+.hbtn svg{width:62%;height:62%;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}
+.hbtn:active,.hbtn.on{transform:scale(.90);filter:brightness(1.4)}
+
+#btnFire{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:96px;height:96px;border-color:#ff8a70;color:#ffd0c0}
+#btnScope{right:30px;bottom:calc(136px + env(safe-area-inset-bottom));width:72px;height:72px;border-color:#9db8ff;color:#d5e2ff}
+#btnReload{right:120px;bottom:calc(114px + env(safe-area-inset-bottom));width:68px;height:68px;border-color:#ffcf7a;color:#ffe2ae}
 /* V12 HUD : weapon switch, contextual RIDE, driving cluster, concealment chip */
-#btnWep{right:186px;bottom:calc(92px + env(safe-area-inset-bottom));width:60px;height:60px;font-size:11px}
-#btnRide{left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom));width:164px;height:54px;border-radius:27px;font-size:15px;border-color:rgba(190,230,190,.55)}
-#btnRide:active{transform:translateX(-50%) scale(.93)}
-#btnMap{left:12px;top:calc(188px + env(safe-area-inset-top));width:58px;height:46px;font-size:12px}
-#mapRoot{position:fixed;inset:0;background:rgba(4,8,24,.96);z-index:90;display:none;align-items:center;justify-content:center}
-#mapPanel{background:#0a1230;border:1px solid #2a4a9a;border-radius:12px;padding:12px;box-shadow:0 18px 60px rgba(0,0,0,.6);width:min(96vw,600px);box-sizing:border-box;max-height:94vh;overflow-y:auto}
+#btnWep{right:196px;bottom:calc(96px + env(safe-area-inset-bottom));width:68px;height:68px;border-color:#b8c48a;color:#e4eac2}
+#btnRide{left:20px;bottom:calc(152px + env(safe-area-inset-bottom));width:76px;height:76px;border-color:#7ae08a;color:#c8f2ce}
+#btnRide:active{transform:scale(.90)}
+#btnMap{left:12px;top:calc(188px + env(safe-area-inset-top));width:56px;height:56px;border-color:#9db8ff;color:#d5e2ff}
+#mapRoot{position:fixed;inset:0;background:rgba(4,8,24,.96);z-index:90;display:none;justify-content:center;overflow-y:auto} /* V13.6 P11 : root scrolls; margin:auto (below) centres without clipping a tall panel */
+#mapPanel{background:#0a1230;border:1px solid #2a4a9a;border-radius:12px;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));box-shadow:0 18px 60px rgba(0,0,0,.6);width:min(96vw,600px);box-sizing:border-box;margin:12px auto;max-height:none} /* V13.6 P11 : full button row reachable — no 94vh cap, no centre-clip */
 #mapHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 #mapHead span{color:#8fa3d9;font-size:11px;letter-spacing:2.5px;font-weight:700}
 #mapCv{display:block;width:min(88vw,560px);height:auto;margin:0 auto;border:1px solid #22366b;border-radius:6px;background:#0a1230}
 #mapLegend{color:#7286b8;font-size:9.5px;letter-spacing:1.4px;margin-top:8px;text-align:center}
-#btnGas{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:104px;height:104px;font-size:16px;border-color:rgba(190,230,190,.55)}
-#btnBrake{right:134px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
-#btnSteerL{left:16px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
-#btnSteerR{left:112px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
-#btnHUp{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:104px;height:104px;font-size:15px;border-color:rgba(190,230,190,.55)}
-#btnHDown{right:134px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
-#btnHYawL{right:134px;bottom:calc(134px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:12px} /* V13.5 : TURN joins the right flight cluster — it overlapped the left stick */
-#btnHYawR{right:16px;bottom:calc(140px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:12px} /* V13.5 : TURN joins the right flight cluster */
-#btnSprint{right:116px;bottom:calc(186px + env(safe-area-inset-bottom));width:60px;height:60px;font-size:11px}
-#stamWrap{position:fixed;right:116px;bottom:calc(178px + env(safe-area-inset-bottom));width:60px;height:5px;border-radius:3px;background:rgba(232,243,228,.16);z-index:31;overflow:hidden;pointer-events:none}
+#btnGas{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:88px;height:88px;border-color:#7ae08a;color:#c8f2ce} /* V13.6 P9e : driving cluster re-spaced — see patch136e.py header */
+#btnBrake{right:128px;bottom:calc(30px + env(safe-area-inset-bottom));width:68px;height:68px;border-color:#ff8a70;color:#ffd0c0}
+#btnSteerL{left:16px;bottom:calc(30px + env(safe-area-inset-bottom));width:68px;height:68px;border-color:#9db8ff;color:#d5e2ff}
+#btnSteerR{left:88px;bottom:calc(30px + env(safe-area-inset-bottom));width:68px;height:68px;border-color:#9db8ff;color:#d5e2ff}
+#btnHUp{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:104px;height:104px;border-color:#7ae08a;color:#c8f2ce}
+#btnHDown{right:138px;bottom:calc(30px + env(safe-area-inset-bottom));width:84px;height:84px;border-color:#ffcf7a;color:#ffe2ae}
+#btnHYawL{right:138px;bottom:calc(138px + env(safe-area-inset-bottom));width:84px;height:84px;border-color:#9db8ff;color:#d5e2ff} /* V13.5 : TURN joins the right flight cluster — it overlapped the left stick */
+#btnHYawR{right:16px;bottom:calc(144px + env(safe-area-inset-bottom));width:84px;height:84px;border-color:#9db8ff;color:#d5e2ff} /* V13.5 : TURN joins the right flight cluster */
+#btnSprint{right:120px;bottom:calc(194px + env(safe-area-inset-bottom));width:68px;height:68px;border-color:#7ad0ff;color:#c2e8ff}
+#stamWrap{position:fixed;right:116px;bottom:calc(184px + env(safe-area-inset-bottom));width:60px;height:5px;border-radius:3px;background:rgba(232,243,228,.16);z-index:31;overflow:hidden;pointer-events:none} /* V13.6 P9 : re-seated under the resized SPRINT button */
 #stamFill{height:100%;width:100%;background:rgba(120,200,120,.88)}
-#btnFly{left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom));width:164px;height:54px;border-radius:27px;font-size:15px;border-color:rgba(190,230,190,.55)}
-#btnFly:active{transform:translateX(-50%) scale(.93)}
-#btnPad{left:50%;transform:translateX(-50%);bottom:calc(224px + env(safe-area-inset-bottom));width:164px;height:54px;border-radius:27px;font-size:15px;border-color:rgba(255,196,107,.6)}
-#btnPad:active{transform:translateX(-50%) scale(.93)}
+#btnFly{left:20px;bottom:calc(152px + env(safe-area-inset-bottom));width:76px;height:76px;border-color:#7ad0ff;color:#c2e8ff}
+#btnFly:active{transform:scale(.90)}
+#btnPad{left:20px;bottom:calc(240px + env(safe-area-inset-bottom));width:76px;height:76px;border-color:#ffcf7a;color:#ffe2ae}
+#btnPad:active{transform:scale(.90)}
 #heliRoot{position:fixed;inset:0;z-index:88;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.66);padding:16px}
 #heliBanner{position:fixed;left:50%;transform:translateX(-50%);top:calc(86px + env(safe-area-inset-top));z-index:40;display:none;background:rgba(10,14,10,.78);border:2px solid rgba(255,196,107,.75);border-radius:14px;padding:10px 24px;color:#ffd9a0;font-weight:800;letter-spacing:1.2px;font-size:16px;pointer-events:none;text-align:center}
 #spdBox{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(228px + env(safe-area-inset-bottom));z-index:31;flex-direction:column;align-items:center;background:rgba(12,16,12,.55);border:2px solid rgba(190,230,190,.42);border-radius:16px;padding:7px 18px 9px;color:#e8f3e4;pointer-events:none}
@@ -111,16 +113,20 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #navArrow{display:inline-block}
 #mapNav{margin:8px auto 0;color:#cfeaff;font-size:13px;letter-spacing:1px;font-weight:700;text-align:center;min-height:18px}
 #mapDestRow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px;max-width:100%}
+#mapDestRow .mbtn{padding:10px 13px;font-size:13px;min-height:38px} /* V13.6 P11 : destination row fully legible, never clipped to button tops */
 body.lefthand #btnWep{right:auto;left:186px}
 body.lefthand #btnGas{right:auto;left:16px}
-body.lefthand #btnBrake{right:auto;left:134px}
+body.lefthand #btnBrake{right:auto;left:128px}
 body.lefthand #btnSteerL{left:auto;right:16px}
-body.lefthand #btnSteerR{left:auto;right:112px}
+body.lefthand #btnSteerR{left:auto;right:88px}
 body.lefthand #btnHUp{right:auto;left:16px}
 body.lefthand #btnHDown{right:auto;left:134px}
 body.lefthand #btnHYawL{left:134px;right:auto}
 body.lefthand #btnHYawR{left:16px;right:auto}
 body.lefthand #btnSprint{right:auto;left:116px}
+body.lefthand #btnRide{left:auto;right:20px}
+body.lefthand #btnFly{left:auto;right:20px}
+body.lefthand #btnPad{left:auto;right:20px}
 body.lefthand #stamWrap{right:auto;left:116px}
 /* ---------- joystick ---------- */
 #joy{position:fixed;left:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:112px;height:112px;border-radius:50%;background:rgba(12,16,12,.38);border:2px solid rgba(190,230,190,.3);z-index:50}
@@ -583,23 +589,23 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
 <div id="nightTint"></div>
 <div id="zoomWrap"><div id="zoomInner"><input id="zoomSlider" type="range" min="2" max="6" step="0.5" value="4"></div></div>
 
-<button class="hbtn" id="btnFire">FIRE</button>
-<button class="hbtn" id="btnScope">SCOPE</button>
-<button class="hbtn" id="btnReload">RELD</button>
-<button class="hbtn" id="btnWep" style="display:none">KNIFE</button>
-<button class="hbtn" id="btnRide" style="display:none">RIDE</button>
-<button class="hbtn" id="btnMap" style="display:none">MAP</button>
-<button class="hbtn" id="btnGas" style="display:none">GAS</button>
-<button class="hbtn" id="btnBrake" style="display:none">BRAKE</button>
-<button class="hbtn" id="btnSteerL" style="display:none">LEFT</button>
-<button class="hbtn" id="btnSteerR" style="display:none">RIGHT</button>
-<button class="hbtn" id="btnFly" style="display:none">FLY</button>
-<button class="hbtn" id="btnPad" style="display:none">HELI</button>
-<button class="hbtn" id="btnHUp" style="display:none">RISE</button>
-<button class="hbtn" id="btnHDown" style="display:none">SINK</button>
-<button class="hbtn" id="btnHYawL" style="display:none">TURN L</button>
-<button class="hbtn" id="btnHYawR" style="display:none">TURN R</button>
-<button class="hbtn" id="btnSprint" style="display:none">SPRINT</button>
+<button class="hbtn" id="btnFire" aria-label="Fire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+<button class="hbtn" id="btnScope" aria-label="Scope"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg></button>
+<button class="hbtn" id="btnReload" aria-label="Reload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><path d="M21 3v6h-6"/></svg></button>
+<button class="hbtn" id="btnWep" style="display:none" aria-label="Knife"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21 16 8l5 5L8 21z"/><path d="M14 10l4 4"/></svg></button>
+<button class="hbtn" id="btnRide" style="display:none" aria-label="Ride quad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="17" r="2.5"/><circle cx="18" cy="17" r="2.5"/><path d="M4 14h4l3-5h6l3 5h-2"/></svg></button>
+<button class="hbtn" id="btnMap" style="display:none" aria-label="Map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5l5-2 6 2 5-2v16l-5 2-6-2-5 2z"/><path d="M9 3v16M15 5v16"/><circle cx="12" cy="10" r="1.4" fill="currentColor" stroke="none"/></svg></button>
+<button class="hbtn" id="btnGas" style="display:none" aria-label="Gas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6M6 20l6-6 6 6"/></svg></button>
+<button class="hbtn" id="btnBrake" style="display:none" aria-label="Brake"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10l4 4v10l-4 4H7l-4-4V7z"/><path d="M9 12h6"/></svg></button>
+<button class="hbtn" id="btnSteerL" style="display:none" aria-label="Steer left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg></button>
+<button class="hbtn" id="btnSteerR" style="display:none" aria-label="Steer right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+<button class="hbtn" id="btnFly" style="display:none" aria-label="Fly helicopter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M7 12c0-4 3-5 6-4l6 2v3l-6 1c-3 1-6 0-6-2z"/><path d="M10 15l-2 4M14 15l2 4"/></svg></button>
+<button class="hbtn" id="btnPad" style="display:none" aria-label="Helicopter pad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></button>
+<button class="hbtn" id="btnHUp" style="display:none" aria-label="Rise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V6M7 11l5-5 5 5M4 21h16"/></svg></button>
+<button class="hbtn" id="btnHDown" style="display:none" aria-label="Sink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v14M7 13l5 5 5-5M4 21h16"/></svg></button>
+<button class="hbtn" id="btnHYawL" style="display:none" aria-label="Turn left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.7 2.8L3 8"/><path d="M3 3v5h5"/></svg></button>
+<button class="hbtn" id="btnHYawR" style="display:none" aria-label="Turn right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.7 2.8L21 8"/><path d="M21 3v5h-5"/></svg></button>
+<button class="hbtn" id="btnSprint" style="display:none" aria-label="Sprint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
 <div id="stamWrap" style="display:none"><div id="stamFill"></div></div>
 <div id="spdBox" style="display:none"><div id="spdNum">0</div><div id="spdUnit">KM/H</div><div id="spdBarWrap"><div id="spdBar"></div></div></div>
 <div id="concealChip" style="display:none">CONCEALED</div>
@@ -664,7 +670,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v13.5</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v13.6</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -836,8 +842,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='13.5'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='13.6'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'13.6',lines:[ // V13.6 : on-device verdict fixes — ghillie + net + bags rebuilt, guards fixed, meaner heli, no-surprises sweep
+  '<b>VERDICT FIXES</b> \— the spawn ghillie, the overhead net and the sandbags are rebuilt so they read as camo and sandbags, not stripes and beige boxes. <b>GUARDS FIXED</b> \— camp guards are proper armed soldiers again (the black T-pose figures are gone) and the helicopter wears a meaner nose, bigger tubes and bright edges. <b>NO SURPRISES</b> \— shadows, tracers, map scrolling and the nav arrow in flight are all fixed too. <b>NEW CONTROLS</b> \— the touch buttons are rebuilt as clean icon buttons (no more text ovals) and the helicopter stick now banks and slides the way you push it. <b>SOLID WORLD</b> \— rocks, trees, bridge piers and camp buildings are real walls now, on foot and on the quad. <b>NEW MAP</b> \— outpost labels no longer pile up, the terrain reads properly, and the destination row and compass are fully visible.']},
  {v:'13.5',lines:[ // V13.5 : bug-tour fixes + camp guards + 5 bosses + heli overhaul + sprint + map nav
   '<b>BUG-TOUR FIXES</b> \— the sky stays put wherever you roam, the mountains wear real colors, the whole valley is dressed, and the camp props are built right. <b>CAMPS ARE ALIVE</b> \— guards patrol every outpost, and clearing a big camp calls in its boss: FORGEFATHER, EMBERFALL, PYROCLAST, VULCAN\’S HOUND, and ASHFANG at the lake. <b>HELICOPTER OVERHAUL</b> \— a meaner bird with decor missile tubes, and controls that actually fly. <b>SPRINT</b> \— run faster with a 10-second sprint button, and <b>MAP NAV</b> \— pick a destination and follow the arrow.']},
  {v:'13.4',lines:[ // V13.4 : showcase hotfix — the lobby rifle renders every load
@@ -1618,7 +1626,7 @@ let riverTex=null;
   const wm=new THREE.MeshPhongMaterial({color:0x9fc8dc,map:riverTex,transparent:true,opacity:0.9,
     shininess:160,specular:0xffd9a0});
   const river=new THREE.Mesh(g,wm);river.receiveShadow=true;scene.add(river);})();
-var TREE_SPOTS=null,OLD_TREES=null,OLD_ROCKS=[],OLD_BUSHES=null; // WORLD 11.0 : hoisted so the GLB scatter pass can take over these spots
+var TREE_SPOTS=null,OLD_TREES=null,OLD_ROCKS=[],OLD_BUSHES=null,ROCK_SPOTS=[]; // V13.6 P10 : rock colliders need the build-time positions // WORLD 11.0 : hoisted so the GLB scatter pass can take over these spots
 (function(){
   const spots=[];let guard=0;
   while(spots.length<150&&guard++<3000){
@@ -1664,7 +1672,7 @@ var TREE_SPOTS=null,OLD_TREES=null,OLD_ROCKS=[],OLD_BUSHES=null; // WORLD 11.0 :
     g2.computeVertexNormals();return g2;};
   for(let v=0;v<3;v++){const rocks=new THREE.InstancedMesh(mkRockGeo(v+1),rockM,20);
     for(let i=0;i<20;i++){const x=rand(-280,280),z=rand(-330,20);
-      d.position.set(x,groundH(x,z)+0.2,z);const s=rand(0.4,2.2);d.scale.set(s,s*rand(0.6,1),s);d.rotation.set(rand(0,3),rand(0,3),0);d.updateMatrix();rocks.setMatrixAt(i,d.matrix);}
+      d.position.set(x,groundH(x,z)+0.2,z);const s=rand(0.4,2.2);ROCK_SPOTS.push([x,z,s]);d.scale.set(s,s*rand(0.6,1),s);d.rotation.set(rand(0,3),rand(0,3),0);d.updateMatrix();rocks.setMatrixAt(i,d.matrix);}
     rocks.castShadow=true;rocks.instanceMatrix.needsUpdate=true;scene.add(rocks);OLD_ROCKS.push(rocks);} // WORLD 11.0
   /* ridge bushes near player */
   const bushG=new THREE.IcosahedronGeometry(1,0),bushM=new THREE.MeshLambertMaterial({color:0x39542a});
@@ -1900,28 +1908,34 @@ const campFx={flames:[],smokes:[],light:null}; // campfire flame sprites, smoke 
       geo.setIndex(idx);geo.computeVertexNormals();
       const m=new THREE.Mesh(geo,mat);m.receiveShadow=true;g.add(m);}
   })();
-  /* sandbags in front of player */
+  /* sandbags in front of player : V13.6 rounded pillows + per-bag scale jitter + seam strip + wider tone span */
   const bagM=new THREE.MeshLambertMaterial({color:0x9a8a62});
-  for(let i=0;i<6;i++){const bm=bagM.clone();bm.color.offsetHSL(0,rand(-0.02,0.02),rand(-0.04,0.04)); // V13.5 : per-bag tone jitter — flat beige read as plain boxes
-    const b=new THREE.Mesh(new THREE.BoxGeometry(1.15,0.5,0.7),bm);
+  const bagGeo136=new THREE.SphereGeometry(0.5,14,10);bagGeo136.scale(1.15,0.5,0.7);
+  const seamM136=new THREE.MeshLambertMaterial({color:0x4a4028});
+  for(let i=0;i<6;i++){const bm=bagM.clone();bm.color.offsetHSL(rand(-0.02,0.02),rand(-0.06,0.06),rand(-0.09,0.09));
+    const b=new THREE.Mesh(bagGeo136,bm);b.userData.v136bag=true;
+    b.scale.set(rand(0.9,1.1),rand(0.9,1.1),rand(0.9,1.1));
+    const seam=new THREE.Mesh(new THREE.BoxGeometry(1.17,0.06,0.72),seamM136);seam.userData.v136seam=true;b.add(seam);
     const bx=-4+i*1.6;b.position.set(bx,groundH(bx,20.5)+0.25,20.5);b.rotation.y=rand(-0.2,0.2);b.castShadow=true;scene.add(b);}
-  /* camo net draped over the player's sandbag position : sagged plane on poles */
+  /* camo net : V13.6 de-lattice — canvas redrawn at the plane's own aspect (10.5x4.6),
+     repeat 1,1, wider 0.70 m cord spacing (old: 128x128 cross-hatch, repeat 3,2) */
   (function(){
-    const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
-    x.clearRect(0,0,128,128);
-    x.strokeStyle='rgba(28,44,24,0.95)';x.lineWidth=3;
-    for(let i=-128;i<256;i+=15){
-      x.beginPath();x.moveTo(i,0);x.lineTo(i+128,128);x.stroke();
-      x.beginPath();x.moveTo(i+128,0);x.lineTo(i,128);x.stroke();}
-    for(let i=0;i<70;i++){x.fillStyle='rgba('+(18+Math.random()*28|0)+','+(48+Math.random()*42|0)+','+(18+Math.random()*22|0)+',0.92)';
-      x.beginPath();x.arc(Math.random()*128,Math.random()*128,2+Math.random()*4,0,TAU);x.fill();}
-    const nt=new THREE.CanvasTexture(cv);nt.wrapS=nt.wrapT=THREE.RepeatWrapping;nt.repeat.set(3,2);
+    const cv=document.createElement('canvas');cv.width=1050;cv.height=460;const x=cv.getContext('2d');
+    x.clearRect(0,0,1050,460);
+    x.strokeStyle='rgba(30,48,26,0.95)';x.lineWidth=10;x.lineCap='round';
+    for(let i=-460;i<1510;i+=70){
+      x.beginPath();x.moveTo(i,0);x.lineTo(i+460,460);x.stroke();
+      x.beginPath();x.moveTo(i+460,0);x.lineTo(i,460);x.stroke();}
+    for(let i=0;i<110;i++){x.fillStyle='rgba('+(20+Math.random()*30|0)+','+(52+Math.random()*44|0)+','+(20+Math.random()*24|0)+',0.92)';
+      x.beginPath();x.arc(Math.random()*1050,Math.random()*460,4+Math.random()*9,0,TAU);x.fill();}
+    const nt=new THREE.CanvasTexture(cv);nt.wrapS=nt.wrapT=THREE.ClampToEdgeWrapping;nt.repeat.set(1,1);
     const ng=new THREE.PlaneGeometry(10.5,4.6,12,6);ng.rotateX(-Math.PI/2);
     const np=ng.attributes.position;
     for(let i=0;i<np.count;i++){const px=np.getX(i),pz=np.getZ(i);
       np.setY(i,-0.55*Math.cos(px/10.5*Math.PI)*Math.cos(pz/4.6*Math.PI));}
     ng.computeVertexNormals();
     const net=new THREE.Mesh(ng,new THREE.MeshLambertMaterial({map:nt,transparent:true,alphaTest:0.3,side:THREE.DoubleSide}));
+    net.userData.v136net=true;
     net.position.set(0,groundH(0,20.5)+2.45,20.5);scene.add(net);
     for(const[sx,sz]of[[-5.2,-2.3],[5.2,-2.3],[-5.2,2.3],[5.2,2.3]]){
       const p=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.07,2.7,6),woodM);
@@ -2657,7 +2671,9 @@ function stepPlayerMove(dt,speed){
   let nz=G.pz+(-sy*mx-cy*(-mz))*spdW*dt;
   nx=clamp(nx,-2960,2960);nz=clamp(nz,-2960,2960); // V13 : world bounds (was the old valley box)
   if(waterDepth(nx,nz)>1.35){nx=G.px;nz=G.pz;} // V13.2 : deep water stops the walker — by DEPTH: chest-deep is the limit, shallows are open (deck/pad register via surfH)
+  const onDeckW=G.pz<DECK.z1&&G.pz>DECK.z0&&surfH(G.px,G.pz)>groundH(G.px,G.pz)+0.5; // V13.6 P10f : pier columns (below-deck tops) must not wall deck-top travel
   for(const b of BLOCKERS){ // cheap push-out : tents, crates, tower, tanks, barrels
+    if(b.k==="pier"&&onDeckW)continue; // pier tops end 1.6 m below deck (towers are OBBs now — they pierce the deck and must stay solid)
     if(b.owner&&(b.owner.alive===false||(b.owner.group&&!b.owner.group.visible)))continue; // V13.5 : dead/invisible owners are not walls
     const dx=nx-b.x,dz=nz-b.z,rr=b.r+0.55,d2=dx*dx+dz*dz;
     if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=b.x+dx/d*rr;nz=b.z+dz/d*rr;}}
@@ -2771,23 +2787,23 @@ coneGeo.rotateX(-Math.PI/2+0.16);       // ... swung forward + slightly down
 const coneMat=new THREE.MeshBasicMaterial({color:0xffe9b0,transparent:true,opacity:0.16,
   blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
 /* ---------------- V13.5 : M16A2-profile replica rifle (procedural — NO licensed import is claimed) ---------------- */
-function buildM16(){
-  const g=new THREE.Group();
-  const dk=new THREE.MeshLambertMaterial({color:0x1c1c1c});
-  const mt=new THREE.MeshLambertMaterial({color:0x24241e});
+function buildM16(){ // V13.6 : lightened + thickened + shifted proud of the torso front (vest face 0.19) so it reads at camp distance
+  const g=new THREE.Group();g.position.set(0,0,0.18);
+  const dk=new THREE.MeshLambertMaterial({color:0x5c5c50});
+  const mt=new THREE.MeshLambertMaterial({color:0x4e4e40});
   const bx=(w,h,d,mat,x,y,z,rx)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
     m.position.set(x,y,z);if(rx)m.rotation.x=rx;m.castShadow=true;g.add(m);return m;};
-  bx(0.06,0.13,0.17,dk,0.08,1.0,-0.035); // fixed stock
-  bx(0.07,0.09,0.25,dk,0.08,1.0,0.175); // receiver
-  bx(0.05,0.05,0.20,dk,0.08,1.065,0.175); // carry handle
-  bx(0.05,0.12,0.06,dk,0.08,0.91,0.08,0.35); // pistol grip
-  bx(0.05,0.18,0.09,mt,0.08,0.89,0.24,0.3); // curved 30-round magazine
-  bx(0.08,0.08,0.18,mt,0.08,1.0,0.39); // triangular handguard
-  for(const rz of[0.34,0.39,0.44])bx(0.09,0.09,0.015,dk,0.08,1.0,rz); // handguard ribs
-  bx(0.02,0.06,0.02,dk,0.08,1.05,0.48); // front sight post
-  const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.015,0.015,0.14,6),dk);
+  bx(0.10,0.13,0.17,dk,0.08,1.0,-0.035); // fixed stock
+  bx(0.11,0.09,0.25,dk,0.08,1.0,0.175); // receiver
+  bx(0.08,0.05,0.20,dk,0.08,1.065,0.175); // carry handle
+  bx(0.08,0.12,0.06,dk,0.08,0.91,0.08,0.35); // pistol grip
+  bx(0.08,0.18,0.09,mt,0.08,0.89,0.24,0.3); // curved 30-round magazine
+  bx(0.13,0.08,0.18,mt,0.08,1.0,0.39); // triangular handguard
+  for(const rz of[0.34,0.39,0.44])bx(0.14,0.09,0.015,dk,0.08,1.0,rz); // handguard ribs
+  bx(0.03,0.06,0.02,dk,0.08,1.05,0.48); // front sight post
+  const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.028,0.14,6),dk);
   bar.rotation.x=Math.PI/2;bar.position.set(0.08,1.0,0.55);bar.castShadow=true;g.add(bar);
-  const fh=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.05,6),dk);
+  const fh=new THREE.Mesh(new THREE.CylinderGeometry(0.032,0.032,0.05,6),dk);
   fh.rotation.x=Math.PI/2;fh.position.set(0.08,1.0,0.645);fh.castShadow=true;g.add(fh); // birdcage flash hider
   return g;}
 /* V13.5 : boss camo canvases — woodland (base), ash-grey (pyroclast), dark (hound) */
@@ -2797,10 +2813,10 @@ function bossCamoCanvas(base,cols){
   for(let i=0;i<70;i++){x.fillStyle=cols[i%4];x.beginPath();
     x.ellipse(rand(0,128),rand(0,128),rand(6,22),rand(4,12),rand(0,3),0,TAU);x.fill();}
   return new THREE.CanvasTexture(cv);}
-const bossCamoTex=bossCamoCanvas('#3a4230',['#232a1e','#4a5238','#5a4a2e','#1c211a']);
-const bossAshTex=bossCamoCanvas('#555550',['#3a3a38','#6a6a64','#222220','#7a7a72']);
-const bossDarkTex=bossCamoCanvas('#1e241c',['#141810','#2a2f22','#0e100c','#232a1e']);
-const bossAshfangTex=bossCamoCanvas('#22302e',['#16211f','#2e3d3a','#0f1817','#3a4a44']); // ASHFANG : dark waterlogged armor
+const bossCamoTex=bossCamoCanvas('#5a6a44',['#3d4a30','#6a7a52','#7a6a42','#2c3622']); // V13.6 : woodland camo lightened
+const bossAshTex=bossCamoCanvas('#6d6d66',['#4a4a44','#7d7d74','#333330','#8d8d84']); // V13.6 : ash camo lightened
+const bossDarkTex=bossCamoCanvas('#3d4a34',['#2a3324','#4c5a40','#1c241a','#3a4830']); // V13.6 : dark camo lightened
+const bossAshfangTex=bossCamoCanvas('#3a4d48',['#263631','#4a5d57','#1c2a27','#5a6d66']); // V13.6 : ASHFANG camo lightened (waterlogged look kept, glow accents untouched)
 /* V13.5 : boss gear — one distinct look per boss (MW-locked names + looks, Oct 24).
    Common kit: heavy plate + pauldrons + twin fuel tanks + flamethrower wand + glowing visor + flame cone.
    emberfall: scorched-black plate OVER woodland camo (camo underplate proud at the edges), tallest frame.
@@ -2810,10 +2826,10 @@ const bossAshfangTex=bossCamoCanvas('#22302e',['#16211f','#2e3d3a','#0f1817','#3
 function buildBossGear(e,style){
   const g=e.group;
   const camo=new THREE.MeshLambertMaterial({map:style==='pyroclast'?bossAshTex:(style==='hound'?bossDarkTex:(style==='ashfang'?bossAshfangTex:bossCamoTex))});
-  const armor=new THREE.MeshLambertMaterial({color:0x23282e});
-  const dark=new THREE.MeshLambertMaterial({color:0x14161a});
+  const armor=new THREE.MeshLambertMaterial({color:0x3d454e}); // V13.6 : boss plate lightened
+  const dark=new THREE.MeshLambertMaterial({color:0x2c3138}); // V13.6 : boss dark kit lightened
   const brass=new THREE.MeshLambertMaterial({color:0xa8822e});
-  const scorched=new THREE.MeshLambertMaterial({color:0x17181a});
+  const scorched=new THREE.MeshLambertMaterial({color:0x2a2c2e}); // V13.6 : scorched plate lightened (still darker than the camo underplate)
   const bx=(w,h,d,mat,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
     m.position.set(x,y,z);m.castShadow=true;g.add(m);return m;};
   if(style==='emberfall'){bx(0.66,0.54,0.40,camo,0,1.05,0.04);bx(0.62,0.5,0.42,scorched,0,1.05,0.05);} // scorched-black plate over camo
@@ -2920,18 +2936,18 @@ class Enemy{
     this.discovered=false;this.invest=null;this.investCd=rand(0,0.5); // corpse-discovery state
     this.glintT=rand(0.4,2);this.glintF=0;this.relocP=null; // irregular glint flashes + shoot-and-scoot post
     const g=this.group=new THREE.Group();
-    const F=WORLD.ready?buildGlbFigure(this):null; // WORLD 11.0 : real GLB soldier when the world pack is in — the procedural figure below stays as the fallback
+    const F=null; // V13.6 : procedural figure FORCED for every enemy — the GLB soldier renders black + T-posed on iOS Safari, so buildGlbFigure stays in the file UNUSED for enemies (lobby showcase untouched)
     if(F){this.legL=F.legL;this.legR=F.legR;this.armL=F.armL;this.armR=F.armR;this.headG=F.headG;this.helmetG=F.helmetG;
       this.mats=F.mats;this.figAnim=F.anim;this.defChest=F.chestOff;this.decorG=F.decor;g.add(F.fig);
       this.m16=buildM16();g.add(this.m16);} // V13.5 : the GLB soldier finally carries a rifle
     let hg=null;
     if(!F){
-    const uni=hvt?0xa32424:(this.sniper?0x23262c:0x4c5530),skin=0xc9a07a;
+    const uni=hvt?0xa32424:(this.sniper?0x23262c:0x71804a),skin=0xc9a07a; // V13.6 : guard uniform lightened to mid-tone olive (was 0x4c5530, read near-black at camp distance)
     this.mats=[];
     const M=c=>{const m=new THREE.MeshLambertMaterial({color:c});this.mats.push(m);return m;};
     const bx=(w,h,d,mat,x,y,z,parent)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
       m.position.set(x,y,z);m.castShadow=true;(parent||g).add(m);return m;};
-    const pantsM=M(0x3f4433),bootM=M(0x1e1c16),vestM=M(0x23251e),packM=M(0x3a3d2a);
+    const pantsM=M(0x55603f),bootM=M(0x1e1c16),vestM=M(0x23251e),packM=M(0x3a3d2a); // V13.6 : pants lightened with the uniform
     /* legs : hip pivots so the walk cycle swings from the hip */
     const mkLeg=sx=>{const p=new THREE.Group();p.position.set(sx*0.13,0.62,0);g.add(p);
       bx(0.17,0.5,0.18,pantsM,0,-0.27,0,p);           // thigh
@@ -2974,9 +2990,9 @@ class Enemy{
       const hoodLip=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.26,0.05,8),M(0x3c4828));
       hoodLip.position.set(0,0.06,-0.01);hg.add(hoodLip);}
     else{const helmG=new THREE.Group();hg.add(helmG);this.helmetG=helmG; // helmet rides in its own group — a headshot can pop it off (DEATH 2.0)
-      const hm=new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.21,0.15,8),M(0x2e3324));
+      const hm=new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.21,0.15,8),M(0x4c5538)); // V13.6 : helmet lightened
       hm.position.set(0,0.17,0);hm.castShadow=true;helmG.add(hm);
-      const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.24,0.03,8),M(0x2e3324));
+      const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.24,0.03,8),M(0x4c5538));
       brim.position.set(0,0.11,0.02);helmG.add(brim);
       const strap=new THREE.Mesh(new THREE.CylinderGeometry(0.225,0.225,0.035,8),M(0x1c1f16)); // helmet strap band
       strap.position.set(0,0.09,0);helmG.add(strap);
@@ -3274,6 +3290,7 @@ class Enemy{
       const geo=new THREE.BufferGeometry();
       geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
       this.laser=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0xff4438,transparent:true,opacity:0.22,depthWrite:false}));
+      this.laser.frustumCulled=false; // V13.6 : rewritten endpoints, stale sphere would cull the beam
       scene.add(this.laser);this.updateLaser();}
     if(this.laser)this.laser.visible=on;
   }
@@ -3473,27 +3490,41 @@ const worldFx={haze:[],mastLamp:null,mastGlow:null,spotPivot:null,spotLight:null
   const lam=c=>new THREE.MeshLambertMaterial({color:c});
   const dummy=new THREE.Object3D(),tmpC=new THREE.Color();
   /* --- sniper ridge nest : a real prepared position around the spawn lip --- */
-  const bagM=lam(0x97855f),bagM2=lam(0x8a7a52),bagM3=lam(0x8f7f57),bagG=new THREE.BoxGeometry(1.15,0.42,0.62),nestZ=15.4; // V13.5 : third sandbag tone
+  const bagM=lam(0x97855f),bagM2=lam(0x8a7a52),bagM3=lam(0x8f7f57),nestZ=15.4;
+  const bagG136=new THREE.SphereGeometry(0.5,14,10);bagG136.scale(1.15,0.42,0.62); // V13.6 : rounded pillow, not a box
+  const nestSeamM136=lam(0x453b24);
+  const nestBagMat136=m=>{const c=m.clone();c.color.offsetHSL(rand(-0.02,0.02),rand(-0.06,0.06),rand(-0.09,0.09));return c;};
+  const nestBag136=mat=>{const b=new THREE.Mesh(bagG136,nestBagMat136(mat));b.userData.v136bag=true;
+    b.scale.set(rand(0.9,1.1),rand(0.9,1.1),rand(0.9,1.1));
+    const sm=new THREE.Mesh(new THREE.BoxGeometry(1.17,0.05,0.64),nestSeamM136);sm.userData.v136seam=true;b.add(sm);return b;};
   for(let i=0;i<11;i++){const bx=-8+i*1.6; // front lip : two staggered rows + a partial third
-    const b1=new THREE.Mesh(bagG,i%2?bagM:bagM2);b1.position.set(bx,groundH(bx,nestZ)+0.21,nestZ);b1.rotation.y=rand(-0.16,0.16);b1.castShadow=true;scene.add(b1);
-    const b2=new THREE.Mesh(bagG,i%2?bagM2:bagM);b2.position.set(bx+0.5,groundH(bx+0.5,nestZ-0.55)+0.2,nestZ-0.55);b2.rotation.y=rand(-0.16,0.16);b2.castShadow=true;scene.add(b2);
-    if(i%2===0){const b3=new THREE.Mesh(bagG,bagM3);b3.position.set(bx+0.25,groundH(bx+0.25,nestZ)+0.62,nestZ-0.28);b3.rotation.y=rand(-0.2,0.2);b3.castShadow=true;scene.add(b3);}}
+    const b1=nestBag136(i%2?bagM:bagM2);b1.position.set(bx,groundH(bx,nestZ)+0.21,nestZ);b1.rotation.y=rand(-0.16,0.16);b1.castShadow=true;scene.add(b1);
+    const b2=nestBag136(i%2?bagM2:bagM);b2.position.set(bx+0.5,groundH(bx+0.5,nestZ-0.55)+0.2,nestZ-0.55);b2.rotation.y=rand(-0.16,0.16);b2.castShadow=true;scene.add(b2);
+    if(i%2===0){const b3=nestBag136(bagM3);b3.position.set(bx+0.25,groundH(bx+0.25,nestZ)+0.62,nestZ-0.28);b3.rotation.y=rand(-0.2,0.2);b3.castShadow=true;scene.add(b3);}}
   for(const sx of[-1,1])for(let i=0;i<3;i++){const bx=sx*(9.4+i*0.45),bz=17.6+i*1.5; // side wings curling back
-    const b=new THREE.Mesh(bagG,i%2?bagM:bagM3);b.position.set(bx,groundH(bx,bz)+0.21,bz);b.rotation.y=sx*0.7+rand(-0.15,0.15);b.castShadow=true;scene.add(b);}
-  /* ghillie drape : ragged camo blanket hanging over the front bags */
+    const b=nestBag136(i%2?bagM:bagM3);b.position.set(bx,groundH(bx,bz)+0.21,bz);b.rotation.y=sx*0.7+rand(-0.15,0.15);b.castShadow=true;scene.add(b);}
+  /* ghillie drape : V13.6 ragged ghillie — thick jute strokes (8-11 px = 0.08-0.11 m world),
+     varied angle/length, real gaps (skipped columns), ragged bottom edge */
   (function(){const cv=document.createElement('canvas');cv.width=1024;cv.height=116;const x=cv.getContext('2d');
-    x.fillStyle='#59622f';x.fillRect(0,0,1024,116); // V13.5 : canvas at the plane's own aspect (10.6x1.2 = 8.83) — the 256x96 canvas stretched strokes ~3.3x
-    for(let i=0;i<1300;i++){const gx=rand(0,1024);x.strokeStyle='rgba('+(40+Math.random()*50|0)+','+(58+Math.random()*52|0)+','+(22+Math.random()*26|0)+',0.85)';
-      x.lineWidth=rand(1.5,3.5);x.beginPath();x.moveTo(gx,0);x.lineTo(gx+rand(-7,7),rand(45,96));x.stroke();}
-    for(let i=0;i<50;i++){x.strokeStyle='rgba(146,128,84,0.6)';x.lineWidth=rand(1,2.4);
-      const gx=rand(0,1024);x.beginPath();x.moveTo(gx,0);x.lineTo(gx+rand(-5,5),rand(30,80));x.stroke();}
+    x.fillStyle='#4a5228';x.fillRect(0,0,1024,116);
+    for(let i=0;i<260;i++){x.fillStyle='rgba('+(52+Math.random()*40|0)+','+(66+Math.random()*40|0)+','+(26+Math.random()*24|0)+',0.5)';
+      x.beginPath();x.ellipse(rand(0,1024),rand(0,116),rand(14,44),rand(8,22),rand(0,3),0,TAU);x.fill();}
+    for(let i=0;i<900;i++){ // clustered strokes with real gaps: ~20% of columns skipped outright
+      const gx=rand(0,1024);if(Math.random()<0.20)continue;
+      const len=rand(40,116),ang=rand(-52,52);
+      x.strokeStyle='rgba('+(52+Math.random()*56|0)+','+(74+Math.random()*54|0)+','+(28+Math.random()*30|0)+',0.92)';
+      x.lineWidth=rand(8,11);x.lineCap='round';x.beginPath();x.moveTo(gx,rand(-6,10));x.lineTo(gx+ang,rand(0,10)+len);x.stroke();}
+    for(let i=0;i<70;i++){x.strokeStyle='rgba(150,132,84,0.65)';x.lineWidth=rand(7,10);
+      const gx=rand(0,1024);x.beginPath();x.moveTo(gx,0);x.lineTo(gx+rand(-40,40),rand(50,116));x.stroke();}
     const gt=new THREE.CanvasTexture(cv);
-    const gg=new THREE.PlaneGeometry(10.6,1.2,18,2),gp=gg.attributes.position;
+    const gg=new THREE.PlaneGeometry(10.6,1.2,36,4),gp=gg.attributes.position;
     for(let i=0;i<gp.count;i++){const vx=gp.getX(i),vy=gp.getY(i);
       gp.setZ(i,0.07*Math.sin(vx*2.6)+rand(-0.02,0.02));
-      if(vy<-0.5)gp.setY(i,vy-rand(0,0.24));} // ragged hanging fringe
+      if(vy<-0.5)gp.setY(i,vy-rand(0.05,0.55)-0.12*Math.abs(Math.sin(vx*2.3))); // ragged bottom: 5-55 cm drop + sawtooth (old: 0-24 cm fringe only)
+      else if(vy<0)gp.setY(i,vy-rand(0,0.10));}
     gg.computeVertexNormals();
     const drape=new THREE.Mesh(gg,new THREE.MeshLambertMaterial({map:gt,side:THREE.DoubleSide}));
+    drape.userData.v136drape=true;
     drape.position.set(0,groundH(0,nestZ)+0.86,nestZ-0.42);drape.rotation.x=-0.32;drape.castShadow=true;scene.add(drape);})();
   /* spent brass : ejected casings scattered at the lip */
   const brassM=new THREE.MeshPhongMaterial({color:0xc9a227,shininess:90,specular:0xffe9a8});
@@ -4246,7 +4277,8 @@ function tracerLine(a,b,color,opacity){
   if(!t){const geo=new THREE.BufferGeometry();
     geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
     const mat=new THREE.LineBasicMaterial({transparent:true});
-    const line=new THREE.Line(geo,mat);t={line,geo,mat};}
+    const line=new THREE.Line(geo,mat);line.frustumCulled=false; // V13.6 : pooled geometry is rewritten per shot — a stale sphere would cull live tracers
+    t={line,geo,mat};}
   const at=t.geo.attributes.position;
   at.setXYZ(0,a.x,a.y,a.z);at.setXYZ(1,b.x,b.y,b.z);at.needsUpdate=true;
   t.mat.color.setHex(color);t.mat.opacity=opacity;
@@ -4363,7 +4395,7 @@ document.addEventListener('touchstart',e=>{
   if(!uiTouch)e.preventDefault();
 },{passive:false});
 document.addEventListener('touchmove',e=>{
-  if(e.target&&e.target.closest&&e.target.closest('#card2,.uiscroll,#briefRoot,#pauseRoot'))return; // UI SCROLL : settings panel / GHOSTLINE tab panels / briefing must scroll natively — never block it
+  if(e.target&&e.target.closest&&e.target.closest('#card2,.uiscroll,#briefRoot,#pauseRoot,#mapRoot,#heliRoot') /* V13.6 : map + heli panels must scroll natively on touch */)return; // UI SCROLL : settings panel / GHOSTLINE tab panels / briefing must scroll natively — never block it
   for(const t of e.changedTouches){
     if(t.identifier===aimId){const[x,y]=touchPos(t);aimByPixels(x-lastAX,y-lastAY);lastAX=x;lastAY=y;}
     else if(t.identifier===joyId&&!G.scoped){ // joystick never moves you while scoped
@@ -5355,9 +5387,10 @@ function frame(now){
     if(moonSpr){_skyD.set(-220,300,-140).normalize().multiplyScalar(820);moonSpr.position.copy(camera.position).add(_skyD);}
   }
   { /* V13.5 SHADOW THROTTLE : shadow maps render on frustum steps + every 3rd frame instead of every frame — same 2048 box, same casters, no detail removed */
+    if(V13.shadowDirty){renderer.shadowMap.needsUpdate=true;V13.shadowDirty=false;} // V13.6 : shadowDirty honored at EVERY perf level, incl. 3 (was frozen once stepped to 3)
     if(G.perfLvl<3){
       if(!frame._shInit){frame._shInit=true;renderer.shadowMap.autoUpdate=false;}
-      if(V13.shadowDirty||((frame._shN=(frame._shN||0)+1)%3===0)){renderer.shadowMap.needsUpdate=true;V13.shadowDirty=false;}
+      if((frame._shN=(frame._shN||0)+1)%3===0){renderer.shadowMap.needsUpdate=true;}
     }
   }
   renderer.render(scene,camera);
@@ -6764,7 +6797,7 @@ function buildScatter(){
   const rspots=[[-46,6],[58,-40],[-88,-120],[104,-170],[-130,-240],[150,-290],[-160,-60],[76,-356],[-58,-318],[120,-60],[-24,-190],[180,-150]];
   rspots.forEach((p,i)=>{
     const s=rand(0.7,2.0);
-    d.position.set(p[0],groundH(p[0],p[1])+0.2,p[1]);
+    d.position.set(p[0],groundH(p[0],p[1])+0.2,p[1]);ROCK_SPOTS.push([p[0],p[1],s]);
     d.rotation.set(rand(0,3),rand(0,3),0);d.scale.set(s,s*rand(0.6,1),s);d.updateMatrix();
     rocks.setMatrixAt(i,d.matrix);});
   rocks.castShadow=true;rocks.instanceMatrix.needsUpdate=true;scene.add(rocks);
@@ -7256,16 +7289,16 @@ function atvTick(gdt){
   let nz=clamp(d.z+Math.cos(d.head)*d.spd*gdt,-2960,2960); // V13 : world bounds
   let hit=false;
   if(waterDepth(nx,nz)>1.0){nx=d.x;nz=d.z;hit=true;} // V13.2 : the quad stops where the water gets deep — by DEPTH, not at a dry-sand line (deck registers via surfH)
+  const onDeckQ=d.z<DECK.z1&&d.z>DECK.z0&&surfH(d.x,d.z)>groundH(d.x,d.z)+0.5; // V13.6 P10f : pier columns (below-deck tops) must not wall deck-top travel
   for(const b of BLOCKERS){ // soft stop/slide — same blocker set the walker uses, vehicle radius
+    if(b.k==="pier"&&onDeckQ)continue; // pier tops end 1.6 m below deck (towers are OBBs now — they pierce the deck and must stay solid)
     if(b.owner&&(b.owner.alive===false||(b.owner.group&&!b.owner.group.visible)))continue; // V13.5k : dead/inactive owners are not walls for the quad either (was missing — quad hit detonated-barrel ghosts)
     const dx=nx-b.x,dz=nz-b.z,rr=b.r+1.5,d2=dx*dx+dz*dz;
     if(d2<rr*rr&&d2>1e-6){const dd=Math.sqrt(d2);nx=b.x+dx/dd*rr;nz=b.z+dz/dd*rr;hit=true;}}
   {const ob=obbResolve(nx,nz,1.5);nx=ob[0];nz=ob[1];} // V13.5k : rectangular props
   if(d.z<DECK.z1&&d.z>DECK.z0&&surfH(d.x,d.z)>groundH(d.x,d.z)+0.5){ // V13.2 fix2 : riding the deck — the guard rails are walls for the quad too (the 9 m-spaced blocker discs have gaps at speed; a U-turn at 40 m/s used to slip through and stall in the channel)
     if(nx>6.4){nx=6.4;hit=true;}else if(nx<-6.4){nx=-6.4;hit=true;}}
-  if(TREE_SPOTS)for(const sp of TREE_SPOTS){
-    const dx=nx-sp[0],dz=nz-sp[2],d2=dx*dx+dz*dz;
-    if(d2<1.5*1.5&&d2>1e-6){const dd=Math.sqrt(d2);nx=sp[0]+dx/dd*1.5;nz=sp[2]+dz/dd*1.5;hit=true;}} // quad fit: narrower body
+  // V13.6 P10 : trees now ride BLOCKERS (trunk radius + 1.5 vehicle margin) — the old flat-1.5 loop is gone; it let the quad nose into trunks head-on
   if(typeof truck!=='undefined'&&truck.active&&truck.group&&truck.group.visible){ // V13.5k : hidden/inactive truck is not a wall
     const tp=truck.group.position,dx=nx-tp.x,dz=nz-tp.z,d2=dx*dx+dz*dz;
     if(d2<4.2*4.2&&d2>1e-6){const dd=Math.sqrt(d2);nx=tp.x+dx/dd*4.2;nz=tp.z+dz/dd*4.2;hit=true;}} // V13.5k : 2.7 truck radius + 1.5 vehicle margin (was flat 4.6)
@@ -7389,6 +7422,9 @@ function engUpdate(gdt){
 /* ---------- G : HUD state (change-only DOM writes) ---------- */
 const V12H={sig:'',dirty:true};
 function v12HudDirty(){V12H.dirty=true;}
+const BTN_IC={quad:"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"6\" cy=\"17\" r=\"2.5\"/><circle cx=\"18\" cy=\"17\" r=\"2.5\"/><path d=\"M4 14h4l3-5h6l3 5h-2\"/></svg>",exit:"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 3H6v18h8M17 12H9M13 8l4 4-4 4\"/></svg>",knife:"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 21 16 8l5 5L8 21z\"/><path d=\"M14 10l4 4\"/></svg>",rifle:"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M2 14h13l2-3v3h4v2h-4l-1 3H8l-1-3H2z\"/><path d=\"M9 11V8h3v3\"/></svg>",heli:"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 12h18M7 12c0-4 3-5 6-4l6 2v3l-6 1c-3 1-6 0-6-2z\"/><path d=\"M10 15l-2 4M14 15l2 4\"/></svg>"};
+const BTN_LBL={quad:"Ride quad",exit:"Exit",knife:"Knife",rifle:"Rifle",heli:"Fly helicopter"};
+function setBtnIcon(id,key){const el=$(id);if(!el||el._ic===key)return;el._ic=key;el.innerHTML=BTN_IC[key];el.setAttribute("aria-label",BTN_LBL[key]);} // V13.6 P9 : state shown by ICON, never text
 function v12HudTick(){
   const inGame=(G.state==='play'||G.state==='roam')&&!G.settingsOpen&&!G.pauseOpen&&!G.mapOpen&&!G.heliOpen;
   const drv=ATV.drive.on;
@@ -7416,9 +7452,9 @@ function v12HudTick(){
   const joy=$('joy');if(joy)joy.style.display=(inGame&&(!drv||fly))?'block':'none'; // V13 Chunk F : the stick is the cyclic in flight
   show('concealChip',inGame&&!drv&&!fly&&isConcealed());
   if(inGame){
-    $('btnRide').textContent=drv?'EXIT':'RIDE';
-    $('btnWep').textContent=KNF.out?'RIFLE':'KNIFE';
-    $('btnFly').textContent=fly?'EXIT':'FLY';
+    setBtnIcon('btnRide',drv?'exit':'quad');
+    setBtnIcon('btnWep',KNF.out?'rifle':'knife');
+    setBtnIcon('btnFly',fly?'exit':'heli');
   }
 }
 
@@ -7492,6 +7528,13 @@ document.addEventListener('keydown',e=>{
 /* ---------- V12 init ---------- */
 buildBushes();
 buildScatter();
+(function registerNatureColliders(){ // V13.6 P10 : trees + rocks become real walls
+  if(typeof TREE_SPOTS!=="undefined"&&TREE_SPOTS)for(const sp of TREE_SPOTS){
+    BLOCKERS.push({x:sp[0],z:sp[2],r:0.3*sp[3]+0.15,k:"tree"});}
+  if(typeof ROCK_SPOTS!=="undefined"&&ROCK_SPOTS)for(const rs of ROCK_SPOTS){
+    BLOCKERS.push({x:rs[0],z:rs[1],r:rs[2],k:"rock"});} // GLB takeover rescales to the same world width (2.0/rawW), so r=s holds for both
+})();
+// V13.6 P10f : registration AFTER buildScatter() so the 12 placed rocks join (was 60, now 72)
 buildFlowers();
 buildAmbient();
 loadV12Pack();
@@ -7651,6 +7694,8 @@ const BR={steel:0x596068,dark:0x3f464e,conc:0x8b8d89,slab:0x4a4a4c,rail:0x707780
   buildMergedMesh(_bg,new THREE.MeshLambertMaterial({vertexColors:true}));
   buildMergedMesh(heads,new THREE.MeshBasicMaterial({vertexColors:true}));
   for(let z=-934;z<=-404;z+=9){BLOCKERS.push({x:-7.3,z:z,r:0.3});BLOCKERS.push({x:7.3,z:z,r:0.3});} // V13.5k : rail discs are posts now — the deck guard seals the line (was r0.75 discs with 6.4 m gaps)
+  for(const pz of[-480,-580,-680,-780,-855,-890])for(const px of[-5.2,5.2])BLOCKERS.push({x:px,z:pz,r:1.2,k:'pier'}); // V13.6 P10 : viaduct pier columns (were unwalled — reachable from shallow water at the banks)
+  for(const zt of[-600,-745])for(const sx of[-6.8,6.8])OBBS.push({x:sx,z:zt,hw:1.2,hd:1.2,yaw:0}); // V13.6 P10g : suspension tower legs PIERCE the deck (to deck+38) — face-exact OBB, not a circle (a 1.7 circle stopped deck-edge travel at 4.55/3.6; suppression would clip the leg at guard 6.4 vs face 5.6)
   /* deck-top driving surface : asphalt ribbon on the profile */
   const cv=document.createElement('canvas');cv.width=cv.height=128;const cx2=cv.getContext('2d');
   cx2.fillStyle='#3c3f43';cx2.fillRect(0,0,128,128);
@@ -7934,7 +7979,8 @@ const V13C={
   function box(x,z,w,h,d,color,ry,y0){push(BOX,x,gy(x,z)+(y0!=null?y0:h/2-0.35),z,w,h,d,0,ry||0,color);}
   function sandArc(cx,cz,ry){
     for(let i=-1;i<=1;i++){const a=ry+i*0.5,x=cx+Math.sin(a)*3.4,z=cz+Math.cos(a)*3.4;
-      box(x,z,2.6,0.85,0.9,0x9a8a68,-a);
+      const sc136=new THREE.Color(0x9a8a68);sc136.offsetHSL(rand(-0.02,0.02),rand(-0.06,0.06),rand(-0.09,0.09)); // V13.6 : per-box tone, not one flat beige
+      box(x,z,2.6,0.85,0.9,sc136.getHex(),-a);
       BLOCKERS.push({x:x,z:z,r:1.4});} // V13.5k : sandbag 2.6x0.9 half-diag is 1.38 (was 1.2, corners poked 0.18)
   }
   function tent(x,z,ry,color){box(x,z,3.2,1.5,4.2,color,ry);
@@ -7963,6 +8009,7 @@ const V13C={
         BLOCKERS.push({x:cx+s*4.5,z:cz-10,r:0.25}); // V13.5k : post is 0.35x0.35 (half-diag 0.25; was 0.5, a 2.1 m wall around a fence post)
       }
       push(BOX,cx,gy(cx,cz-10)+1.25,cz-10,9.6,0.16,0.3,0,0,0xc23b2a); // V13.5 : ONE arm spanning post to post (was two yawed slabs ending off the posts, 3.3 m gap)
+      OBBS.push({x:cx,z:cz-10,hw:4.8,hd:0.15,yaw:0}); // V13.6 P10h : down barrier arm is a real wall — ends stay open, drive around the posts
       sandArc(cx+6,cz+6,2.6);crate(cx+1,cz-6);crate(cx+2.4,cz-6.2,0.85);
     }else if(o.theme==='logging'){
       for(const px of[-7,6])for(let lvl=0;lvl<3;lvl++){ // log piles
@@ -7974,6 +8021,7 @@ const V13C={
       box(cx+5-1.3,cz+7,0.18,1.05,1.2,0x5a4630,-0.2); // V13.5 saw bench : legs + dark top (was a flat tan slab on the ground)
       box(cx+5+1.3,cz+7,0.18,1.05,1.2,0x5a4630,-0.2);
       push(BOX,cx+5,gy(cx+5,cz+7)+0.76,cz+7,3.4,0.12,1.4,0,-0.2,0x6e5136);
+      OBBS.push({x:cx+5,z:cz+7,hw:1.7,hd:0.7,yaw:-0.2}); // V13.6 P10h : saw bench is a 3.4x1.4 table at 0.76 m — solid
       crate(cx+1,cz+2);crate(cx+2.2,cz+2.6,0.8);
     }else if(o.theme==='farm'){
       box(cx-8,cz-2,9,5,13,0x7a4436,0.15);OBBS.push({x:cx-8,z:cz-2,hw:4.5,hd:6.5,yaw:0.15}); // V13.5k barn OBB (was r7.9 circle, 3.4 m of empty wall on the 9 m sides)
@@ -7988,6 +8036,7 @@ const V13C={
       for(let i=0;i<6;i++)box(cx-14+i*3.1,cz+16,0.18,1.0,0.18,0x6b5636,0); // fence line
       push(BOX,cx-6.25,gy(cx-6.25,cz+16)+0.35,cz+16,15.5,0.1,0.1,0,0,0x6b5636); // V13.5 : fence rails (was posts alone)
       push(BOX,cx-6.25,gy(cx-6.25,cz+16)+0.6,cz+16,15.5,0.1,0.1,0,0,0x6b5636);
+      OBBS.push({x:cx-6.25,z:cz+16,hw:7.75,hd:0.05,yaw:0}); // V13.6 P10h : fence rails are a real line wall — single open-ended segment, go around the ends
       crate(cx+2,cz-4);crate(cx+3.4,cz-3.4,0.85);
     }else if(o.theme==='lakeside'){
       tent(cx-5,cz+5,0.9,0x5c6644);tent(cx+6,cz-4,-0.4,0x66704c);
@@ -8119,9 +8168,10 @@ function mapBuildBase(){
       const h=groundHBase(wx,wz),hE=groundHBase(wx+22,wz);
       let r,g,b;
       const inLake=((wx-lakeCx)/235)*((wx-lakeCx)/235)+((wz-lakeCz)/330)*((wz-lakeCz)/330)<1;
-      if(h<-3.5){r=13;g=44;h<-11?(b=66):(b=58);}
+      if(h<-3.5){const sk=clamp((-h-3.5)/20,0,1);r=16-8*sk;g=52-22*sk;b=72-18*sk;} /* V13.6 P11 : sea shades by depth instead of one dark block */
       else if(inLake&&h<LAKE_Y){r=30;g=74;b=102;}
-      else if(h<0.6){r=146;g=128;b=92;}
+      else if(h<0.6){r=150;g=138;b=104;}
+      else if(h<1.6){r=205;g=188;b=138;} /* V13.6 P11 : pale dry-sand shore rim so the coastline reads */
       else if(h<3){r=178;g=164;b=118;}
       else if(h<15){r=93;g=122;b=58;}
       else if(h<60){r=106;g=133;b=70;}
@@ -8129,20 +8179,21 @@ function mapBuildBase(){
       else if(h<158){r=128;g=122;b=108;}
       else if(h<185){r=146;g=140;b=128;}
       else{r=228;g=233;b=238;}
-      const sh=clamp(0.86+0.30*clamp((h-hE)/14,-1,1),0.62,1.16);
+      const sh=clamp(0.86+0.30*clamp((h-hE)/14,-1,1),0.62,1.16)*(Math.floor(h/30)!==Math.floor(hE/30)?0.70:1); /* V13.6 P11 : 30 m contour lines break the flat green mass (no extra groundHBase calls) */
       const k=(j*S+i)*4;
       d[k]=Math.min(255,r*sh);d[k+1]=Math.min(255,g*sh);d[k+2]=Math.min(255,b*sh);d[k+3]=255;
     }
   }
   x.putImageData(img,0,0);
   const w2m=function(wx,wz){return [(wx+3000)/6000*S,(wz+3000)/6000*S];}; // same north-up frame as mapW2M
-  x.strokeStyle='rgba(226,205,160,0.85)';x.lineWidth=1.6;x.lineCap='round'; // dirt roads
+  x.strokeStyle='rgba(226,205,160,0.85)';x.lineWidth=2.2;x.lineCap='round'; // dirt roads (V13.6 P11 : wider, reads at phone scale)
   for(const r of ROADS){
     x.beginPath();
     r.pts.forEach(function(p,pi){const m=w2m(p.x,p.z);if(pi===0)x.moveTo(m[0],m[1]);else x.lineTo(m[0],m[1]);});
     x.stroke();
   }
-  x.strokeStyle='rgba(235,238,242,0.95)';x.lineWidth=2.6; // the bridge deck
+  x.strokeStyle='rgba(235,238,242,0.95)';x.lineWidth=3.2; // the bridge deck (V13.6 P11 : wider)
+  x.strokeStyle='rgba(140,190,230,0.55)';x.lineWidth=1.5;x.beginPath();const lm=w2m(lakeCx,-2050);x.ellipse(lm[0],lm[1],235/6000*S,330/6000*S,0,0,TAU);x.stroke();x.strokeStyle='rgba(235,238,242,0.95)';x.lineWidth=3.2; // V13.6 P11 : lake outline ring
   x.beginPath();let a=w2m(0,-408),b2=w2m(0,-925);x.moveTo(a[0],a[1]);x.lineTo(b2[0],b2[1]);x.stroke();
   V13D.base=cv;V13D.built=true;
 }
@@ -8150,9 +8201,31 @@ function mapW2M(wx,wz){return [(wx+3000)/6000*560,(wz+3000)/6000*560];}
 /* V13.5 NAV : bearing math — map is north-up (screen y ~ world z), compass 0 = north (-z), 90 = east (+x) */
 function navBearing(wx,wz){const dx=wx-G.px,dz=wz-G.pz;return {b:(Math.atan2(dx,-dz)*180/Math.PI+360)%360,d:Math.hypot(dx,dz)};}
 function navCompass(b){return ['N','NE','E','SE','S','SW','W','NW'][Math.round(b/45)%8];}
-function navTurn(b){const head=((-G.yaw*180/Math.PI)%360+360)%360;return ((b-head+540)%360)-180;} // + = turn right, - = turn left
+function navTurn(b){const yaw=(typeof V13F!=='undefined'&&V13F.flyOn)?V13F.fly.head+Math.PI:G.yaw;const head=((-yaw*180/Math.PI)%360+360)%360;return ((b-head+540)%360)-180;} // V13.6 : in flight the heading lives in fly.head (yaw-equivalent head+PI) — the old code read the stale on-foot G.yaw
 function navReadout(t){const el=$('mapNav');if(el&&el._t!==t){el._t=t;el.textContent=t;}}
-function mapLabel(x,t,px,py){x.save();x.font='700 13px system-ui';x.textAlign='center';x.lineWidth=4;x.strokeStyle='rgba(4,8,20,0.9)';x.strokeText(t,px,py);x.fillStyle='#eef2ff';x.fillText(t,px,py);x.restore();}
+var mapLblList=[]; // V13.6 P11 : labels are collected during mapDraw, then de-cluttered + drawn with leader lines (no more pile-ups)
+function mapLabel(x,t,px,py){mapLblList.push({t:t,mx:px,my:py});}
+function drawMapLabels(x){ // deterministic: sort by y, stack x-overlapping labels with 4px gaps, shift the whole stack up if it runs past the bottom
+  x.save();x.font='700 12px system-ui';x.textAlign='center';x.textBaseline='middle';
+  const items=mapLblList.map(function(l){const w=x.measureText(l.t).width+14;return {t:l.t,mx:l.mx,my:l.my,w:w,h:20,x:0,y:0};});
+  items.forEach(function(it){it.x=Math.min(Math.max(it.mx-it.w/2,2),558-it.w);it.y=it.my<36?it.my+12:it.my-30;});
+  const res={x0:492,y0:2,x1:552,y1:70}; // compass rose reserve (top-right)
+  function stack(){items.sort(function(a,b){return a.y-b.y;});
+    for(let i=0;i<items.length;i++){const it=items[i];
+      for(let j=0;j<i;j++){const o=items[j];
+        if(it.x<o.x+o.w+2&&o.x<it.x+it.w+2&&it.y<o.y+o.h+4&&o.y<it.y+it.h+4)it.y=o.y+o.h+4;}
+      if(it.x<res.x1+2&&res.x0<it.x+it.w+2&&it.y<res.y1+4&&res.y0<it.y+it.h+4)it.y=res.y1+4;}
+    let over=0;items.forEach(function(it){if(it.y+it.h>558)over=Math.max(over,it.y+it.h-558);});
+    if(over>0)items.forEach(function(it){it.y-=over;});}
+  stack();stack(); // second pass re-guarantees after the upward shift
+  V13D.labelBoxes=items.map(function(it){return {t:it.t,x0:it.x,y0:it.y,x1:it.x+it.w,y1:it.y+it.h};});
+  items.forEach(function(it){
+    const ex=Math.min(Math.max(it.mx,it.x),it.x+it.w),ey=it.my<it.y?it.y:it.y+it.h;
+    if(Math.abs(ey-it.my)>2||Math.abs(ex-it.mx)>2){x.strokeStyle='rgba(230,238,255,0.55)';x.lineWidth=1;x.beginPath();x.moveTo(ex,ey);x.lineTo(it.mx,it.my);x.stroke();}
+    x.fillStyle='rgba(4,8,24,0.78)';x.fillRect(it.x,it.y,it.w,it.h);
+    x.strokeStyle='rgba(143,163,217,0.6)';x.lineWidth=1;x.strokeRect(it.x+0.5,it.y+0.5,it.w-1,it.h-1);
+    x.fillStyle='#eef2ff';x.fillText(it.t,it.x+it.w/2,it.y+it.h/2+0.5);});
+  x.restore();}
 function setMapDest(wx,wz,name){V13D.dest={x:wx,z:wz,name:name};if(V13D.open)mapDraw();toast('DESTINATION: '+name);}
 function clearMapDest(){V13D.dest=null;if(V13D.open)mapDraw();}
 function navChipTick(){ /* V13.5 NAV : live in-game direction chip — the map screen freezes the world, so live following lives here */
@@ -8185,11 +8258,12 @@ function mapDrawPending(){
 function mapDraw(){
   const cv=$('mapCv');if(!cv||!V13D.built)return;
   const x=cv.getContext('2d');
+  mapLblList=[]; // V13.6 P11 : fresh label set each frame
   x.drawImage(V13D.base,0,0);
   const T=G.swayT;
   function diamond(px,py,s,stroke){x.beginPath();x.moveTo(px,py-s);x.lineTo(px+s,py);x.lineTo(px,py+s);x.lineTo(px-s,py);x.closePath();x.strokeStyle=stroke;x.lineWidth=1.6;x.stroke();}
   for(const o of V13C.outposts){const m=mapW2M(o.cx,o.cz);diamond(m[0],m[1],5,'rgba(255,210,122,0.9)');
-    x.fillStyle='rgba(255,210,122,0.9)';x.fillRect(m[0]-1,m[1]-1,2,2);mapLabel(x,o.name,m[0],m[1]-12);}
+    x.fillStyle='rgba(255,210,122,0.9)';x.fillRect(m[0]-1,m[1]-1,2,2);mapLabel(x,o.name,m[0],m[1]);}
   /* active objective : pulsing ring on the mission's outposts */
   const act=V13C.activeFor(G.mission);
   x.strokeStyle='rgba(255,176,58,0.95)';
@@ -8204,10 +8278,10 @@ function mapDraw(){
     const m=mapW2M(V13F.helipad.x,V13F.helipad.z);
     x.strokeStyle='rgba(255,233,160,0.95)';x.lineWidth=1.6;
     x.strokeRect(m[0]-6,m[1]-6,12,12);
-    x.fillStyle='rgba(255,233,160,0.95)';x.font='700 10px system-ui';x.textAlign='center';x.fillText('H',m[0],m[1]+3.5);mapLabel(x,'HELIPAD',m[0],m[1]-14);
+    x.fillStyle='rgba(255,233,160,0.95)';x.font='700 10px system-ui';x.textAlign='center';x.fillText('H',m[0],m[1]+3.5);mapLabel(x,'HELIPAD',m[0],m[1]);
   }
   /* the bridge : labelled at its deck midpoint (deck spans z -408 to -925) */
-  {const bm=mapW2M(0,-666);mapLabel(x,'BRIDGE',bm[0],bm[1]-12);}
+  {const bm=mapW2M(0,-666);mapLabel(x,'BRIDGE',bm[0],bm[1]);}
   /* the quad, when you're not on it */
   if(!ATV.drive.on){const m=mapW2M(ATV.drive.x,ATV.drive.z);
     x.fillStyle='#e8ecf4';x.fillRect(m[0]-3,m[1]-3,6,6);
@@ -8226,15 +8300,16 @@ function mapDraw(){
     x.strokeStyle='rgba(120,220,255,0.95)';x.lineWidth=2;
     x.beginPath();x.arc(dm[0],dm[1],11+2*Math.sin(T*4),0,TAU);x.stroke();
     diamond(dm[0],dm[1],6,'rgba(120,220,255,0.95)');
-    mapLabel(x,V13D.dest.name,dm[0],dm[1]-16);
+    mapLabel(x,V13D.dest.name,dm[0],dm[1]);
     const nb=navBearing(V13D.dest.x,V13D.dest.z);
-    mapLabel(x,Math.round(nb.d)+' M',(pm[0]+dm[0])/2,(pm[1]+dm[1])/2-10);
+    mapLabel(x,Math.round(nb.d)+' M',(pm[0]+dm[0])/2,(pm[1]+dm[1])/2);
     const rel=navTurn(nb.b);
     const turn=Math.abs(rel)<20?'AHEAD':(rel>0?Math.round(rel)+'° RIGHT':Math.round(-rel)+'° LEFT');
     navReadout('▸ '+V13D.dest.name+' · '+navCompass(nb.b)+' · '+Math.round(nb.d)+' M · '+turn);
   }else navReadout('TAP A MARKER OR A BUTTON BELOW TO SET A DESTINATION');
+  drawMapLabels(x);mapLblList=[]; // V13.6 P11 : labels last (above markers/lines), furniture after
   /* north + scale furniture */
-  x.fillStyle='#8fa3d9';x.font='700 13px system-ui';x.textAlign='right';x.fillText('N ↑',548,22);
+  x.save();x.translate(520,46);x.fillStyle='rgba(4,8,24,0.7)';x.beginPath();x.arc(0,0,22,0,TAU);x.fill();x.strokeStyle='rgba(143,163,217,0.9)';x.lineWidth=1.5;x.beginPath();x.arc(0,0,22,0,TAU);x.stroke();x.fillStyle='#ff7a6a';x.beginPath();x.moveTo(0,-17);x.lineTo(5,4);x.lineTo(-5,4);x.closePath();x.fill();x.fillStyle='#8fa3d9';x.beginPath();x.moveTo(0,17);x.lineTo(5,-4);x.lineTo(-5,-4);x.closePath();x.fill();x.fillStyle='#eef2ff';x.font='700 13px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillText('N',0,-32);x.restore();V13D.compass={cx:520,cy:46,r:22}; // V13.6 P11 : readable compass rose, inset from the edges
   x.textAlign='left';x.font='600 9px system-ui';x.fillText('1,000 M',12,548);
   x.strokeStyle='rgba(143,163,217,0.8)';x.beginPath();x.moveTo(12,540);x.lineTo(12+1000/6000*560,540);x.stroke();
 }
@@ -8615,27 +8690,29 @@ function heliSurfaceY(x,z){return V13F.surfY(x,z);}
 /* V13.5 : meaner heli dressing, parented to the GLB scene so it inherits tilt/position.
    Measured Body bbox: x -2.27..2.35, y 0..6.78, z -8.41..5.10 (nose +Z). Parts are placed from the
    MEASURED box, not guesses. Tubes are PURE DECOR — no weapon code, no buttons, no ammo anywhere. */
-function heliMeanerParts(sc){
+function heliMeanerParts(sc){ // V13.6 meaner v2 — DECOR ONLY: no weapon code, no fire button, no ammo anywhere
   try{
     const body=sc.getObjectByName('Body')||sc;
     body.updateMatrixWorld(true);
     const bb=new THREE.Box3().setFromObject(body);
     if(bb.isEmpty())return;
-    const cx=(bb.min.x+bb.max.x)/2,cy=(bb.min.y+bb.max.y)/2;
+    const cx=(bb.min.x+bb.max.x)/2;
     const bw=bb.max.x-bb.min.x;
     const LM=c=>new THREE.MeshLambertMaterial({color:c});
-    const dark=LM(0x1a2530),glass=LM(0x3a5a78),gun=LM(0x23282e),olive=LM(0x3a3d2a);
+    const dark=LM(0x1a2530),bright=LM(0xffc21a),olive=LM(0x3a3d2a);
     const bx=(w,h,d,mat,x,y,z,rx)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
       m.position.set(x,y,z);if(rx)m.rotation.x=rx;m.castShadow=true;sc.add(m);return m;};
-    bx(bw*0.70,1.8,1.2,dark,cx,3.3,bb.max.z-0.2,-0.25); // angular nose cap — breaks the slab nose
-    bx(bw*0.52,0.7,0.15,glass,cx,3.9,bb.max.z+0.45,-0.25); // windshield strip
-    for(const sg of[-1,1]){ // stub wings + DECOR missile tubes
-      bx(2.0,0.22,1.6,gun,cx+sg*(bw/2+1.0),2.2,0.5,0);
-      for(const t of[-0.35,0.35]){
-        const tube=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,2.0,10),olive);
-        tube.rotation.x=Math.PI/2;tube.position.set(cx+sg*(bw/2+1.0+t),1.95,0.5);tube.castShadow=true;sc.add(tube);
-        const tip=new THREE.Mesh(new THREE.ConeGeometry(0.15,0.3,10),gun);
-        tip.rotation.x=Math.PI/2;tip.position.set(cx+sg*(bw/2+1.0+t),1.95,1.65);tip.castShadow=true;sc.add(tip);
+    const nose=bx(4.25,1.7,2.4,dark,cx,3.3,bb.max.z,-0.45);nose.userData.v136nose=true; // wedge: near-full-width, ~1.45 m proud of the nose (bbox), sharper rake
+    const brow=new THREE.Mesh(new THREE.BoxGeometry(4.25,0.22,2.0),bright);brow.position.set(0,0.96,0);brow.userData.v136bright=true;nose.add(brow); // bright nose brow, riding the wedge top face
+    const spine=bx(0.45,0.8,3.2,dark,cx,5.9,-1.0,0);spine.userData.v136spine=true; // dorsal spine: top 6.3 m, above the 5.63 m cabin top
+    for(const sg of[-1,1]){ // stub wings + DECOR tubes mounted CLEAR above the wings
+      const wing=bx(2.6,0.30,1.7,dark,cx+sg*(bw/2+1.0),2.2,0.5,0);wing.userData.v136wing=true;
+      bx(0.20,0.34,1.7,bright,cx+sg*(bw/2+1.0+1.30),2.2,0.5,0).userData.v136bright=true; // bright wing-tip edge
+      for(const t of[-0.55,0.55]){
+        const tube=new THREE.Mesh(new THREE.CylinderGeometry(0.30,0.30,3.5,12),olive);
+        tube.rotation.x=Math.PI/2;tube.position.set(cx+sg*(bw/2+1.0+t),2.85,0.5);tube.castShadow=true;tube.userData.v136tube=true;sc.add(tube);
+        const tip=new THREE.Mesh(new THREE.ConeGeometry(0.30,0.5,12),dark);
+        tip.rotation.x=Math.PI/2;tip.position.set(cx+sg*(bw/2+1.0+t),2.85,2.5);tip.castShadow=true;sc.add(tip);
       }
     }
     const sens=new THREE.Mesh(new THREE.SphereGeometry(0.3,10,10),dark); // chin sensor ball
@@ -8909,7 +8986,7 @@ function heliTick(dt,gdt){
   f.head-=yawIn*0.85*gdt;
   /* cyclic : tilt targets — smoothed, so she leans in and out, never snaps */
   const noCyc=(cycX===0&&cycY===0);
-  const tP=-cycY*0.40,tR=cycX*0.32;
+  const tP=-cycY*0.40,tR=-cycX*0.32; // V13.6 P12 : roll was inverted — screen-right from the chase cam is -X, so a right push must give negative tiltR (model -X side dips, velocity goes screen-right)
   const tiltK=noCyc?5.0:2.4; // V13.5 AUTO-LEVEL : sticks released, she levels briskly instead of wallowing
   F.tiltP+=(tP-F.tiltP)*Math.min(1,gdt*tiltK);
   F.tiltR+=(tR-F.tiltR)*Math.min(1,gdt*tiltK);
