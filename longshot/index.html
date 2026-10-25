@@ -79,10 +79,10 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #btnRide:active{transform:translateX(-50%) scale(.93)}
 #btnMap{left:12px;top:calc(188px + env(safe-area-inset-top));width:58px;height:46px;font-size:12px}
 #mapRoot{position:fixed;inset:0;background:rgba(4,8,24,.96);z-index:90;display:none;align-items:center;justify-content:center}
-#mapPanel{background:#0a1230;border:1px solid #2a4a9a;border-radius:12px;padding:12px;box-shadow:0 18px 60px rgba(0,0,0,.6)}
+#mapPanel{background:#0a1230;border:1px solid #2a4a9a;border-radius:12px;padding:12px;box-shadow:0 18px 60px rgba(0,0,0,.6);width:min(96vw,600px);box-sizing:border-box;max-height:94vh;overflow-y:auto}
 #mapHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 #mapHead span{color:#8fa3d9;font-size:11px;letter-spacing:2.5px;font-weight:700}
-#mapCv{display:block;width:min(88vw,560px);height:auto;border:1px solid #22366b;border-radius:6px;background:#0a1230}
+#mapCv{display:block;width:min(88vw,560px);height:auto;margin:0 auto;border:1px solid #22366b;border-radius:6px;background:#0a1230}
 #mapLegend{color:#7286b8;font-size:9.5px;letter-spacing:1.4px;margin-top:8px;text-align:center}
 #btnGas{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:104px;height:104px;font-size:16px;border-color:rgba(190,230,190,.55)}
 #btnBrake{right:134px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
@@ -90,8 +90,11 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #btnSteerR{left:112px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
 #btnHUp{right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:104px;height:104px;font-size:15px;border-color:rgba(190,230,190,.55)}
 #btnHDown{right:134px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:13px}
-#btnHYawL{left:16px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:12px}
-#btnHYawR{left:112px;bottom:calc(30px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:12px}
+#btnHYawL{right:134px;bottom:calc(134px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:12px} /* V13.5 : TURN joins the right flight cluster — it overlapped the left stick */
+#btnHYawR{right:16px;bottom:calc(140px + env(safe-area-inset-bottom));width:80px;height:80px;font-size:12px} /* V13.5 : TURN joins the right flight cluster */
+#btnSprint{right:116px;bottom:calc(186px + env(safe-area-inset-bottom));width:60px;height:60px;font-size:11px}
+#stamWrap{position:fixed;right:116px;bottom:calc(178px + env(safe-area-inset-bottom));width:60px;height:5px;border-radius:3px;background:rgba(232,243,228,.16);z-index:31;overflow:hidden;pointer-events:none}
+#stamFill{height:100%;width:100%;background:rgba(120,200,120,.88)}
 #btnFly{left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom));width:164px;height:54px;border-radius:27px;font-size:15px;border-color:rgba(190,230,190,.55)}
 #btnFly:active{transform:translateX(-50%) scale(.93)}
 #btnPad{left:50%;transform:translateX(-50%);bottom:calc(224px + env(safe-area-inset-bottom));width:164px;height:54px;border-radius:27px;font-size:15px;border-color:rgba(255,196,107,.6)}
@@ -104,6 +107,10 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #spdBarWrap{width:150px;height:6px;border-radius:3px;background:rgba(232,243,228,.16);margin-top:6px;overflow:hidden}
 #spdBar{height:100%;width:0%;background:rgba(120,200,120,.88);transition:width .12s linear}
 #concealChip{position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:31;padding:5px 14px;border-radius:20px;background:rgba(8,20,12,.66);border:1px solid rgba(150,230,160,.5);color:#b9f2c2;font-size:11px;letter-spacing:2.5px;font-weight:700;pointer-events:none}
+#navChip{position:fixed;top:calc(44px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:31;padding:5px 14px;border-radius:20px;background:rgba(8,16,40,.72);border:1px solid rgba(120,220,255,.55);color:#cfeaff;font-size:12px;letter-spacing:1.5px;font-weight:700;pointer-events:none;white-space:nowrap}
+#navArrow{display:inline-block}
+#mapNav{margin:8px auto 0;color:#cfeaff;font-size:13px;letter-spacing:1px;font-weight:700;text-align:center;min-height:18px}
+#mapDestRow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px;max-width:100%}
 body.lefthand #btnWep{right:auto;left:186px}
 body.lefthand #btnGas{right:auto;left:16px}
 body.lefthand #btnBrake{right:auto;left:134px}
@@ -111,8 +118,10 @@ body.lefthand #btnSteerL{left:auto;right:16px}
 body.lefthand #btnSteerR{left:auto;right:112px}
 body.lefthand #btnHUp{right:auto;left:16px}
 body.lefthand #btnHDown{right:auto;left:134px}
-body.lefthand #btnHYawL{left:auto;right:16px}
-body.lefthand #btnHYawR{left:auto;right:112px}
+body.lefthand #btnHYawL{left:134px;right:auto}
+body.lefthand #btnHYawR{left:16px;right:auto}
+body.lefthand #btnSprint{right:auto;left:116px}
+body.lefthand #stamWrap{right:auto;left:116px}
 /* ---------- joystick ---------- */
 #joy{position:fixed;left:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:112px;height:112px;border-radius:50%;background:rgba(12,16,12,.38);border:2px solid rgba(190,230,190,.3);z-index:50}
 #joy.locked{opacity:.3}
@@ -590,8 +599,11 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
 <button class="hbtn" id="btnHDown" style="display:none">SINK</button>
 <button class="hbtn" id="btnHYawL" style="display:none">TURN L</button>
 <button class="hbtn" id="btnHYawR" style="display:none">TURN R</button>
+<button class="hbtn" id="btnSprint" style="display:none">SPRINT</button>
+<div id="stamWrap" style="display:none"><div id="stamFill"></div></div>
 <div id="spdBox" style="display:none"><div id="spdNum">0</div><div id="spdUnit">KM/H</div><div id="spdBarWrap"><div id="spdBar"></div></div></div>
 <div id="concealChip" style="display:none">CONCEALED</div>
+<div id="navChip" style="display:none"><span id="navArrow">▲</span> <span id="navText"></span></div>
 <div id="joy"><div id="joyKnob"></div></div>
 
 <div id="dmg"></div>
@@ -652,7 +664,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v13.4</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v13.5</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -786,7 +798,9 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
 <div id="mapRoot"><div id="mapPanel">
 <div id="mapHead"><span>WORLD MAP — GHOSTLINE SURVEY</span><button class="mbtn sm" id="mapClose">CLOSE</button></div>
 <canvas id="mapCv" width="560" height="560"></canvas>
-<div id="mapLegend">DIAMOND = OUTPOST &middot; RING = OBJECTIVE &middot; TRIANGLE = HIDEOUT &middot; H = HELIPAD</div>
+<div id="mapNav">TAP A MARKER OR A BUTTON BELOW TO SET A DESTINATION</div>
+<div id="mapDestRow"><button class="mbtn sm" data-dest="isle">ISLE</button><button class="mbtn sm" data-dest="bridge">BRIDGEHEAD</button><button class="mbtn sm" data-dest="camp">CAMP</button><button class="mbtn sm" data-dest="logging">LOGGING</button><button class="mbtn sm" data-dest="farm">FARM</button><button class="mbtn sm" data-dest="lake">LAKE</button><button class="mbtn sm" data-dest="radar">RADAR</button><button class="mbtn sm" data-dest="helipad">HELIPAD</button><button class="mbtn sm" data-dest="bridgept">BRIDGE</button><button class="mbtn sm" data-dest="clear">CLEAR</button></div>
+<div id="mapLegend">DIAMOND = OUTPOST &middot; RING = OBJECTIVE &middot; TRIANGLE = HIDEOUT &middot; H = HELIPAD &middot; TAP A MARKER FOR DIRECTIONS</div>
 </div></div>
 <div id="resultsRoot"><div class="panel" id="resultsPanel"></div></div>
 <div id="confirmRoot"><div class="panel" style="max-width:min(92vw,380px)">
@@ -822,8 +836,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='13.4'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='13.5'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'13.5',lines:[ // V13.5 : bug-tour fixes + camp guards + 5 bosses + heli overhaul + sprint + map nav
+  '<b>BUG-TOUR FIXES</b> \— the sky stays put wherever you roam, the mountains wear real colors, the whole valley is dressed, and the camp props are built right. <b>CAMPS ARE ALIVE</b> \— guards patrol every outpost, and clearing a big camp calls in its boss: FORGEFATHER, EMBERFALL, PYROCLAST, VULCAN\’S HOUND, and ASHFANG at the lake. <b>HELICOPTER OVERHAUL</b> \— a meaner bird with decor missile tubes, and controls that actually fly. <b>SPRINT</b> \— run faster with a 10-second sprint button, and <b>MAP NAV</b> \— pick a destination and follow the arrow.']},
  {v:'13.4',lines:[ // V13.4 : showcase hotfix — the lobby rifle renders every load
   '<b>SHOWCASE HOTFIX</b> — the lobby rifle is back: it was shrinking to nothing on some loads (you saw only the skin\u2019s sparkles), so the showcase now measures and frames it the same way every time. Same rifle, same skin, same sparkles — just actually visible.']},
  {v:'13.3',lines:[ // V13.3 : redeem code + menu revamp — MW2212, loader-matched lobby
@@ -1259,6 +1275,7 @@ let skyMesh=null,daySkyTex=null,sunGlow=null;
  const tex=new THREE.CanvasTexture(cv);
  const sky=new THREE.Mesh(new THREE.SphereGeometry(950,24,14),new THREE.MeshBasicMaterial({map:tex,side:THREE.BackSide,fog:false}));
  skyMesh=sky;daySkyTex=tex;
+ sky.frustumCulled=false;sky.renderOrder=-1;sky.material.depthWrite=false; // V13.5 : dome rides the camera, never culls, never occludes
  scene.add(sky);})();
 /* sun glow disc : warm additive sprite sitting on the horizon toward the sun */
 (function(){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
@@ -1267,7 +1284,7 @@ let skyMesh=null,daySkyTex=null,sunGlow=null;
  x.fillStyle=g;x.fillRect(0,0,128,128);
  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,fog:false,blending:THREE.AdditiveBlending}));
  const d=new THREE.Vector3(300,85,-40).normalize().multiplyScalar(690);
- sp.position.copy(d);sp.scale.set(240,240,1);sunGlow=sp;scene.add(sp);})();
+ sp.position.copy(d);sp.scale.set(240,240,1);sp.frustumCulled=false;sunGlow=sp;scene.add(sp);})();
 
 /* ---------------- NIGHT OPS : lighting preset swapped per mission ----------------
    Every 3rd mission runs at night. ONE scene, two presets: applyEnvironment()
@@ -1287,7 +1304,7 @@ const starsPts=(function(){
  geo.setAttribute('position',new THREE.BufferAttribute(arr,3));
  const pts=new THREE.Points(geo,new THREE.PointsMaterial({color:0xcfe0ff,size:1.7,sizeAttenuation:false,
    transparent:true,opacity:0.9,fog:false,depthWrite:false}));
- pts.visible=false;scene.add(pts);return pts;})();
+ pts.visible=false;pts.frustumCulled=false;scene.add(pts);return pts;})();
 const moonSpr=(function(){const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
  const g=x.createRadialGradient(64,64,8,64,64,62);
  g.addColorStop(0,'rgba(232,240,255,1)');g.addColorStop(0.32,'rgba(210,226,255,.95)');
@@ -1297,7 +1314,7 @@ const moonSpr=(function(){const cv=document.createElement('canvas');cv.width=cv.
  x.beginPath();x.arc(52,52,5,0,TAU);x.fill();x.beginPath();x.arc(76,70,4,0,TAU);x.fill();x.beginPath();x.arc(66,44,3,0,TAU);x.fill();
  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,fog:false}));
  const d=new THREE.Vector3(-220,300,-140).normalize().multiplyScalar(820);
- sp.position.copy(d);sp.scale.set(120,120,1);sp.visible=false;scene.add(sp);return sp;})();
+ sp.position.copy(d);sp.scale.set(120,120,1);sp.frustumCulled=false;sp.visible=false;scene.add(sp);return sp;})();
 /* warm lanterns at the tents : built dark, lit only on night ops */
 const lanterns=[];
 [[-14,-CAMP_D-8],[12,-CAMP_D-6],[2,-CAMP_D+12]].forEach(p=>{
@@ -1376,12 +1393,12 @@ const clouds=[];
 /* distant mountain silhouette ring : jagged hazy ridge wall at ~760m */
 (function(){
   const SEG=56,RAD=3450,pos=[],idx=[],col=[]; // V13 : ring at the horizon of the 6 km world (was 760)
-  const cBase=new THREE.Color(0x7c8ba6),cSnow=new THREE.Color(0xe9eff6),cTmp=new THREE.Color();
+  const cBase=new THREE.Color(0x7c8ba6),cSnow=new THREE.Color(0xb9c4d4),cTmp=new THREE.Color(); // V13.5 : snow tint darkened to hazy blue-grey
   for(let i=0;i<=SEG;i++){
     const a=i/SEG*TAU,px=Math.cos(a)*RAD,pz=Math.sin(a)*RAD;
     const h=130+230*Math.abs(Math.sin(i*2.39)*0.5+Math.sin(i*5.17)*0.32+Math.sin(i*9.31)*0.18); // V13 : taller far peaks
     pos.push(px,-90,pz,px,h,pz);
-    cTmp.copy(cBase).lerp(cSnow,sstep(92,132,h)); // snow-cap tint on the high peaks (vertex colors)
+    cTmp.copy(cBase).lerp(cSnow,sstep(260,340,h)); // V13.5 : only the tallest ~third of peaks snow-cap — every peak read pure white before
     col.push(cBase.r,cBase.g,cBase.b,cTmp.r,cTmp.g,cTmp.b);
     if(i<SEG){const b=i*2;idx.push(b,b+1,b+2,b+1,b+3,b+2);}}
   const geo=new THREE.BufferGeometry();
@@ -1885,7 +1902,8 @@ const campFx={flames:[],smokes:[],light:null}; // campfire flame sprites, smoke 
   })();
   /* sandbags in front of player */
   const bagM=new THREE.MeshLambertMaterial({color:0x9a8a62});
-  for(let i=0;i<6;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(1.15,0.5,0.7),bagM);
+  for(let i=0;i<6;i++){const bm=bagM.clone();bm.color.offsetHSL(0,rand(-0.02,0.02),rand(-0.04,0.04)); // V13.5 : per-bag tone jitter — flat beige read as plain boxes
+    const b=new THREE.Mesh(new THREE.BoxGeometry(1.15,0.5,0.7),bm);
     const bx=-4+i*1.6;b.position.set(bx,groundH(bx,20.5)+0.25,20.5);b.rotation.y=rand(-0.2,0.2);b.castShadow=true;scene.add(b);}
   /* camo net draped over the player's sandbag position : sagged plane on poles */
   (function(){
@@ -2330,7 +2348,7 @@ function buildGlbFigure(e){
   const fig=skinClone(proto);
   fig.scale.setScalar(2.6/(WORLD.rawH*1.5)); // fig local scale : group x1.5 -> ~2.6 m world, the old figure's height
   const bones={};
-  fig.traverse(o=>{bones[o.name]=o;if(o.isMesh){o.frustumCulled=false;o.castShadow=true;}});
+  fig.traverse(o=>{bones[o.name]=o;if(o.isMesh){o.castShadow=true;if(o.geometry){if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();o.geometry.boundingSphere.radius=Math.max(o.geometry.boundingSphere.radius,3);}}}); // V13.5 : soldiers cull with a generous sphere (was frustumCulled=false — every soldier drawn + shadowed from everywhere)
   const matMap=new Map(),mats=[];
   fig.traverse(o=>{if(o.isMesh){if(!matMap.has(o.material)){const cm=o.material.clone();matMap.set(o.material,cm);mats.push(cm);}
     o.material=matMap.get(o.material);}});
@@ -2522,8 +2540,9 @@ function buildBarrels(){
     g.scale.setScalar(1.15/rawH);
     g.position.set(sp[0],groundH(sp[0],sp[1]),sp[1]);
     scene.add(g);
-    BARRELS.push({group:g,pos:new THREE.Vector3(sp[0],groundH(sp[0],sp[1]),sp[1]),alive:true,isBarrel:true});
-    BLOCKERS.push({x:sp[0],z:sp[1],r:1.0}); // patrols (and the walking player) give them a berth
+    const bb={group:g,pos:new THREE.Vector3(sp[0],groundH(sp[0],sp[1]),sp[1]),alive:true,isBarrel:true};
+    BARRELS.push(bb);
+    BLOCKERS.push({x:sp[0],z:sp[1],r:0.55,owner:bb}); // V13.5 : blocker fits the 0.45 m barrel (was 1.0 -> 1.55 m of empty air) + owner-linked so a detonated barrel stops blocking
   }
 }
 function resetBarrels(){for(const b of BARRELS){b.alive=true;if(b.group)b.group.visible=true;}}
@@ -2538,7 +2557,7 @@ function explodeBarrel(b){
     if(e.chest().distanceTo(p)<8){ // radius kills ride the normal kill path — score/chain/blood all behave (killEnemy self-guards roam)
       _td.copy(e.group.position).sub(b.pos);_td.y=0;
       if(_td.lengthSq()<0.01)_td.set(0,0,1);_td.normalize();
-      killEnemy(e,_td,false,false,true);}}
+      if(e.boss)bossHit(e,400,e.chest());else killEnemy(e,_td,false,false,true);}}
 }
 /* a bullet found the barrel : if a victim is in the blast and the killcam is
    eligible, the cam rides the round to the first victim exactly like a
@@ -2607,6 +2626,20 @@ document.addEventListener('keyup',e=>{KEYS[e.code]=false;});
    always was (standing rule). Position writes go to G.px/G.pz, so the
    converge / return-fire / counter-sniper systems (which all key off the
    player position) track the walker with zero changes. */
+G.sprintStam=10;G.sprintLock=false;G.sprintHeld=false;G._sprintActive=false;
+function sprintTick(gdt){ // V13.5 SPRINT : 10 s drain while held+moving, 2/s regain, re-lock until 2 stamina after a full drain
+  if(gdt<=0)return;
+  const want=G.sprintHeld||!!KEYS['ShiftLeft']||!!KEYS['ShiftRight'];
+  const moving=Math.hypot(joyVec.x,joyVec.y)>0.12||!!KEYS['KeyW']||!!KEYS['KeyA']||!!KEYS['KeyS']||!!KEYS['KeyD']||!!KEYS['ArrowUp']||!!KEYS['ArrowDown']||!!KEYS['ArrowLeft']||!!KEYS['ArrowRight'];
+  const flyOn=(typeof V13F!=='undefined'&&V13F.flyOn);
+  const active=want&&moving&&G.sprintStam>0&&!G.sprintLock&&!G.scoped&&!ATV.drive.on&&!flyOn;
+  G._sprintActive=active;
+  if(active){G.sprintStam=Math.max(0,G.sprintStam-gdt);if(G.sprintStam<=0)G.sprintLock=true;}
+  else{G.sprintStam=Math.min(10,G.sprintStam+2*gdt);if(G.sprintLock&&G.sprintStam>=2)G.sprintLock=false;}
+  const pct=Math.round(G.sprintStam*10);
+  if(sprintTick._lp!==pct){sprintTick._lp=pct;const b=$('stamFill');if(b)b.style.width=pct+'%';}
+  const sb=$('btnSprint');if(sb)sb.style.opacity=G.sprintLock?0.35:1;
+}
 function stepPlayerMove(dt,speed){
   if(G.scoped||KC.active||G.pauseOpen||G.settingsOpen||G.mapOpen)return;
   let mx=joyVec.x,mz=joyVec.y;
@@ -2619,24 +2652,91 @@ function stepPlayerMove(dt,speed){
   const sy=Math.sin(G.yaw),cy=Math.cos(G.yaw);
   let spdW=speed;const wdHere=waterDepth(G.px,G.pz); // V13.2 : wading drag
   if(wdHere>0.2)spdW*=1-0.5*clamp((wdHere-0.2)/1.15,0,1);
+  if(G._sprintActive)spdW*=1.7; // V13.5 SPRINT : x1.7 while the button is held and stamina remains
   let nx=G.px+(cy*mx-sy*(-mz))*spdW*dt;
   let nz=G.pz+(-sy*mx-cy*(-mz))*spdW*dt;
   nx=clamp(nx,-2960,2960);nz=clamp(nz,-2960,2960); // V13 : world bounds (was the old valley box)
   if(waterDepth(nx,nz)>1.35){nx=G.px;nz=G.pz;} // V13.2 : deep water stops the walker — by DEPTH: chest-deep is the limit, shallows are open (deck/pad register via surfH)
   for(const b of BLOCKERS){ // cheap push-out : tents, crates, tower, tanks, barrels
+    if(b.owner&&(b.owner.alive===false||(b.owner.group&&!b.owner.group.visible)))continue; // V13.5 : dead/invisible owners are not walls
     const dx=nx-b.x,dz=nz-b.z,rr=b.r+0.55,d2=dx*dx+dz*dz;
     if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=b.x+dx/d*rr;nz=b.z+dz/d*rr;}}
-  if(truck.group){
-    const tp=truck.group.position,dx=nx-tp.x,dz=nz-tp.z,rr=3.4,d2=dx*dx+dz*dz;
+  {const ob=obbResolve(nx,nz,0.55);nx=ob[0];nz=ob[1];} // V13.5k : rectangular props
+  if(G.pz<DECK.z1&&G.pz>DECK.z0&&surfH(G.px,G.pz)>groundH(G.px,G.pz)+0.5){if(nx>6.4)nx=6.4;else if(nx<-6.4)nx=-6.4;} // V13.5k : walker deck guard, OLD-position test like the quad's — a new-position test never fires mid-deck (the step lands off-deck, where surfH is channel-bed)
+  if(truck.active&&truck.group&&truck.group.visible){ // V13.5k : hidden/inactive truck is not a wall (was: any existing group blocked)
+    const tp=truck.group.position,dx=nx-tp.x,dz=nz-tp.z,rr=3.25,d2=dx*dx+dz*dz; // V13.5k3 : truck checks are FLAT (no +0.55 added) so flat = half-diag 2.66 + walker 0.55 (was 3.4, 0.74 m slack; k-pass 2.7 clipped 0.51 into the truck)
     if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=tp.x+dx/d*rr;nz=tp.z+dz/d*rr;}}
   G.px=nx;G.pz=nz;
+}
+/* V13.5 : free-roam camp garrisons — every outpost gets patrollers; the 4 biggest camps get bosses (MW-locked names + looks, Oct 24).
+   Big-camp pick: top 4 by footprint x garrison weight (rG*w) — camp 96, radar 42, logging 37.4, farm 37.4. Near-miss: lake 36.
+   Bosses: FORGEFATHER (mainland camp — the flagship "final" look), EMBERFALL (logging — tallest), VULCAN'S HOUND (farm — leaner),
+   PYROCLAST (radar — hunched furnace). If MW counts more camps as "big", that question goes back to him — no reuse, no invented 5th name.
+   Roam kills stay sandbox (killEnemy's roam branch: zero mission/economy writes) — same as every other roam kill. */
+/* V13.5 BOSS GATE + ENTRANCES : a big camp's boss is called in ONLY after every regular guard of that camp dies.
+   Progress persists per device in localStorage key 'longshot_bossclear' (NO new cloud sync key — sync keys are frozen).
+   Bosses never spawn at enterRoam time; re-entry with bossCalled && !bossDead re-summons the boss with its entrance.
+   Entrances are arrival moments only: no attacks, no HP bar during the entrance, player may shoot mid-entrance. */
+const BOSS_DEFS={camp:{name:'FORGEFATHER',style:'forgefather',scale:[2.75,2.4,2.6],guards:4,entrance:'walk'},
+  logging:{name:'EMBERFALL',style:'emberfall',scale:[2.4,2.75,2.4],guards:3,entrance:'sky'},
+  farm:{name:"VULCAN'S HOUND",style:'hound',scale:[2.1,2.35,2.1],guards:3,entrance:'sprint'},
+  radar:{name:'PYROCLAST',style:'pyroclast',scale:[2.4,2.3,2.4],guards:2,entrance:'rise'},
+  lake:{name:'ASHFANG',style:'ashfang',scale:[2.3,2.6,2.3],guards:2,entrance:'lake'}};
+function bossClearLoad(){try{const v=lsGet('longshot_bossclear','');return v?JSON.parse(v):{};}catch(e){return {};}}
+function bossClearSave(st){try{lsSet('longshot_bossclear',JSON.stringify(st));}catch(e){}}
+function bossClearGet(st,id){return st[id]||{killed:0,bossCalled:false,bossDead:false};}
+function spawnBossForCamp(campId){
+  const def=BOSS_DEFS[campId];const o=V13C.byId(campId);if(!def||!o)return null;
+  const e=new Enemy(o.cx,o.cz,false);
+  e.boss=true;e.bossName=def.name;e.bossStyle=def.style;e.hp=1200;e.roamHostile=true;e.campId=campId;
+  e.campX=o.cx;e.campZ=o.cz;e.campR=o.rG+25;e.convR=26;
+  e.group.scale.set(def.scale[0],def.scale[1],def.scale[2]);e.bossBaseScale=def.scale.slice();
+  const cf=def.scale[1]/1.5;
+  if(e.chestOff!=null)e.chestOff*=cf;else e.defChest=(e.defChest||1.55)*cf;
+  e.speed*=0.85;e.flameT=0;
+  if(e.m16){e.group.remove(e.m16);e.m16=null;}
+  buildBossGear(e,def.style);makeBossBar(e);
+  if(e.bossBar)e.bossBar.visible=false; // bar stays hidden through the entrance
+  const wps=[];for(let k=0;k<5;k++){const wa=k/5*TAU+rand(-0.3,0.3),wr=rand(o.rG*0.3,o.rG*0.7);
+    wps.push([o.cx+Math.cos(wa)*wr,o.cz+Math.sin(wa)*wr]);}
+  e.wps=wps;e.wpi=0;
+  e.entranceKind=def.entrance;e.entranceT=0;
+  if(def.entrance==='sky'){e.group.position.y=groundH(o.cx,o.cz)+60;e.entranceT=3.2;e.fallVy=0;} // EMBERFALL : sky-drop
+  else if(def.entrance==='rise'){e.group.position.y=groundH(o.cx,o.cz)-3;e.entranceT=2.0;} // PYROCLAST : ground-burst
+  else if(def.entrance==='lake'){e.group.position.y=groundH(o.cx,o.cz)-2;e.entranceT=2.5;} // ASHFANG : rises from the waterline in steam/embers
+  else if(def.entrance==='walk'){const a=rand(0,TAU); // FORGEFATHER : gate walk (camps have no explicit gate geometry — camp edge)
+    e.group.position.set(o.cx+Math.cos(a)*10,groundH(o.cx+Math.cos(a)*10,o.cz+Math.sin(a)*10),o.cz+Math.sin(a)*10);
+    e.entranceT=10/2.0+1;}
+  else if(def.entrance==='sprint'){const a=Math.atan2(G.pz-o.cz,G.px-o.cx); // VULCAN'S HOUND : treeline sprint, away from the player
+    const sx=o.cx-Math.cos(a)*25,sz=o.cz-Math.sin(a)*25;
+    e.group.position.set(sx,groundH(sx,sz),sz);e.group.rotation.x=0.18;e.sprinting=true;e.entranceT=25/5.0+1;}
+  enemies.push(e);return e;
+}
+function spawnRoamCampEnemies(){
+  if(typeof V13C==='undefined'||!V13C.outposts)return;
+  const plan=[['isle',2],['bridge',2],['camp',4],['logging',3],['farm',3],['lake',2],['radar',2]];
+  const st=bossClearLoad();
+  for(const pr of plan){const o=V13C.byId(pr[0]);if(!o)continue;
+    let n=pr[1];
+    const def=BOSS_DEFS[pr[0]];
+    if(def){let cs=bossClearGet(st,pr[0]);
+      if(cs.bossDead){cs={killed:0,bossCalled:false,bossDead:false};st[pr[0]]=cs;bossClearSave(st);} // boss fell last session — camp resets fully, gate re-armed
+      else n=Math.max(0,pr[1]-cs.killed);} // mid-clear persistence: only the surviving guards return
+    for(let i=0;i<n;i++){const a=rand(0,TAU),r=rand(6,o.rG*0.8);
+      const e=new Enemy(o.cx+Math.cos(a)*r,o.cz+Math.sin(a)*r,false);
+      e.roamHostile=true;e.campId=pr[0];e.campX=o.cx;e.campZ=o.cz;e.campR=o.rG+25;e.convR=rand(20,30);
+      const wps=[];for(let k=0;k<5;k++){const wa=k/5*TAU+rand(-0.3,0.3),wr=rand(o.rG*0.35,o.rG*0.85);
+        wps.push([o.cx+Math.cos(wa)*wr,o.cz+Math.sin(wa)*wr]);}
+      e.wps=wps;e.wpi=0;enemies.push(e);}
+    if(def){const cs=bossClearGet(st,pr[0]);
+      if(cs.bossCalled&&!cs.bossDead)spawnBossForCamp(pr[0]);}} // called-in boss returns with its entrance; never spawns fresh
 }
 function enterRoam(){
   if(G.state!=='menu')return;
   G.rifle=selRifle;lsSet('longshot_rifle',selRifle);
   startMission(G.menuMission); // full world reset on the picked mission (lands in menu; roam flag is set after, startMission clears it)
   hideMenu();G.state='roam';G.roam=true;document.body.classList.add('roam');
-  resetBarrels();
+  resetBarrels();spawnRoamCampEnemies(); // V13.5 : the valley's camps are garrisoned in roam
   audio();wlRequest();sClick();buzz(10);updateHUD();
   toast('FREE ROAM — EXPLORE THE VALLEY');
 }
@@ -2670,6 +2770,136 @@ coneGeo.translate(0,-3.5,0);            // apex at the guard, beam extending dow
 coneGeo.rotateX(-Math.PI/2+0.16);       // ... swung forward + slightly down
 const coneMat=new THREE.MeshBasicMaterial({color:0xffe9b0,transparent:true,opacity:0.16,
   blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+/* ---------------- V13.5 : M16A2-profile replica rifle (procedural — NO licensed import is claimed) ---------------- */
+function buildM16(){
+  const g=new THREE.Group();
+  const dk=new THREE.MeshLambertMaterial({color:0x1c1c1c});
+  const mt=new THREE.MeshLambertMaterial({color:0x24241e});
+  const bx=(w,h,d,mat,x,y,z,rx)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+    m.position.set(x,y,z);if(rx)m.rotation.x=rx;m.castShadow=true;g.add(m);return m;};
+  bx(0.06,0.13,0.17,dk,0.08,1.0,-0.035); // fixed stock
+  bx(0.07,0.09,0.25,dk,0.08,1.0,0.175); // receiver
+  bx(0.05,0.05,0.20,dk,0.08,1.065,0.175); // carry handle
+  bx(0.05,0.12,0.06,dk,0.08,0.91,0.08,0.35); // pistol grip
+  bx(0.05,0.18,0.09,mt,0.08,0.89,0.24,0.3); // curved 30-round magazine
+  bx(0.08,0.08,0.18,mt,0.08,1.0,0.39); // triangular handguard
+  for(const rz of[0.34,0.39,0.44])bx(0.09,0.09,0.015,dk,0.08,1.0,rz); // handguard ribs
+  bx(0.02,0.06,0.02,dk,0.08,1.05,0.48); // front sight post
+  const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.015,0.015,0.14,6),dk);
+  bar.rotation.x=Math.PI/2;bar.position.set(0.08,1.0,0.55);bar.castShadow=true;g.add(bar);
+  const fh=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.05,6),dk);
+  fh.rotation.x=Math.PI/2;fh.position.set(0.08,1.0,0.645);fh.castShadow=true;g.add(fh); // birdcage flash hider
+  return g;}
+/* V13.5 : boss camo canvases — woodland (base), ash-grey (pyroclast), dark (hound) */
+function bossCamoCanvas(base,cols){
+  const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+  x.fillStyle=base;x.fillRect(0,0,128,128);
+  for(let i=0;i<70;i++){x.fillStyle=cols[i%4];x.beginPath();
+    x.ellipse(rand(0,128),rand(0,128),rand(6,22),rand(4,12),rand(0,3),0,TAU);x.fill();}
+  return new THREE.CanvasTexture(cv);}
+const bossCamoTex=bossCamoCanvas('#3a4230',['#232a1e','#4a5238','#5a4a2e','#1c211a']);
+const bossAshTex=bossCamoCanvas('#555550',['#3a3a38','#6a6a64','#222220','#7a7a72']);
+const bossDarkTex=bossCamoCanvas('#1e241c',['#141810','#2a2f22','#0e100c','#232a1e']);
+const bossAshfangTex=bossCamoCanvas('#22302e',['#16211f','#2e3d3a','#0f1817','#3a4a44']); // ASHFANG : dark waterlogged armor
+/* V13.5 : boss gear — one distinct look per boss (MW-locked names + looks, Oct 24).
+   Common kit: heavy plate + pauldrons + twin fuel tanks + flamethrower wand + glowing visor + flame cone.
+   emberfall: scorched-black plate OVER woodland camo (camo underplate proud at the edges), tallest frame.
+   forgefather: brass trim + heavy backpack rig, broadest silhouette.
+   pyroclast: ash-grey camo, glowing tank lines, hunched stance (static forward pitch — update() only ever writes rotation.y).
+   hound: dark camo + chain detail, flamethrower carried low, leaner frame. */
+function buildBossGear(e,style){
+  const g=e.group;
+  const camo=new THREE.MeshLambertMaterial({map:style==='pyroclast'?bossAshTex:(style==='hound'?bossDarkTex:(style==='ashfang'?bossAshfangTex:bossCamoTex))});
+  const armor=new THREE.MeshLambertMaterial({color:0x23282e});
+  const dark=new THREE.MeshLambertMaterial({color:0x14161a});
+  const brass=new THREE.MeshLambertMaterial({color:0xa8822e});
+  const scorched=new THREE.MeshLambertMaterial({color:0x17181a});
+  const bx=(w,h,d,mat,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+    m.position.set(x,y,z);m.castShadow=true;g.add(m);return m;};
+  if(style==='emberfall'){bx(0.66,0.54,0.40,camo,0,1.05,0.04);bx(0.62,0.5,0.42,scorched,0,1.05,0.05);} // scorched-black plate over camo
+  else bx(0.62,0.5,0.42,camo,0,1.05,0.05); // heavy chest plate
+  bx(0.30,0.22,0.30,camo,-0.42,1.32,0);bx(0.30,0.22,0.30,camo,0.42,1.32,0); // pauldrons — broader than any grunt
+  bx(0.34,0.10,0.30,armor,0,1.36,0); // gorget
+  if(style==='forgefather'){ // brass trim: plate top strip + pauldron rims
+    bx(0.62,0.06,0.44,brass,0,1.32,0.05);
+    bx(0.32,0.05,0.32,brass,-0.42,1.44,0);bx(0.32,0.05,0.32,brass,0.42,1.44,0);
+    bx(0.50,0.60,0.30,armor,0,1.05,-0.38); // heavy backpack rig
+    bx(0.52,0.14,0.32,dark,0,1.38,-0.40); // bedroll
+    bx(0.16,0.34,0.12,armor,-0.33,0.95,-0.40);bx(0.16,0.34,0.12,armor,0.33,0.95,-0.40); // side pouches
+  }
+  if(style==='pyroclast'){ // raised hump pauldrons + hunched pitch
+    bx(0.40,0.30,0.40,camo,-0.42,1.42,0);bx(0.40,0.30,0.40,camo,0.42,1.42,0);
+    g.rotation.x=0.14;
+  }
+  for(const sx of[-0.18,0.18]){ // flamethrower fuel tanks, red-banded
+    const t=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,0.55,8),dark);
+    t.position.set(sx,1.10,-0.30);t.castShadow=true;g.add(t);
+    const band=new THREE.Mesh(new THREE.CylinderGeometry(0.095,0.095,0.08,8),
+      new THREE.MeshLambertMaterial({color:0x8a1f16}));
+    band.position.set(sx,1.10,-0.30);band.castShadow=true;g.add(band);
+    if(style==='pyroclast'){ // glowing tank lines — the walking furnace
+      const gl=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.5,0.03),new THREE.MeshBasicMaterial({color:0xff7a26}));
+      gl.position.set(sx,1.10,-0.20);g.add(gl);}
+  }
+  const wandY=style==='hound'?0.82:1.0; // hound carries the flamethrower low and ready
+  const wand=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.70,8),dark);
+  wand.rotation.x=Math.PI/2;wand.position.set(0.08,wandY,0.35);wand.castShadow=true;g.add(wand);
+  const nozR=style==='ashfang'?0.10:0.06; // ASHFANG : wide-nozzle flamethrower
+  const noz=new THREE.Mesh(new THREE.CylinderGeometry(nozR,0.045,0.14,8),armor);
+  noz.rotation.x=Math.PI/2;noz.position.set(0.08,wandY,0.72);noz.castShadow=true;g.add(noz);
+  const pilot=new THREE.Mesh(new THREE.SphereGeometry(0.035,6,6),new THREE.MeshBasicMaterial({color:0xffa030}));
+  pilot.position.set(0.08,wandY+0.06,0.70);g.add(pilot);
+  if(style==='ashfang'){ // ember seams: glowing seams on chest plate + pauldrons + tall shoulder fins — "rose from the lake"
+    bx(0.64,0.04,0.44,new THREE.MeshBasicMaterial({color:0xff7a26}),0,1.18,0.05);
+    bx(0.04,0.40,0.44,new THREE.MeshBasicMaterial({color:0xff7a26}),-0.20,1.05,0.05);
+    bx(0.04,0.40,0.44,new THREE.MeshBasicMaterial({color:0xff7a26}),0.20,1.05,0.05);
+    bx(0.10,0.34,0.30,camo,-0.47,1.48,0);bx(0.10,0.34,0.30,camo,0.47,1.48,0); // tall fins — silhouette reads boss
+    bx(0.52,0.08,0.34,dark,0,0.78,-0.30); // waterlogged back plate
+  }
+  if(style==='hound'){ // chain detail: diagonal chest strap + belt links
+    for(let ci=0;ci<5;ci++)bx(0.09,0.09,0.05,dark,-0.25+ci*0.125,1.25-ci*0.10,0.28);
+    for(const cx2 of[0.12,0.22]){const link=new THREE.Mesh(new THREE.TorusGeometry(0.06,0.015,6,12),dark);
+      link.position.set(cx2,0.72,0.26);link.castShadow=true;g.add(link);}
+  }
+  bx(0.30,0.08,0.30,new THREE.MeshBasicMaterial({color:(style==='pyroclast'||style==='ashfang')?0xff7a26:0xffb020}),0,1.45,0); // glowing visor band — reads at camp distance
+  const cone=new THREE.Mesh(coneGeo,new THREE.MeshBasicMaterial({color:0xff7a26,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false}));
+  cone.position.set(0,1.05,0.6);cone.scale.set(0.55,0.55,0.95);cone.visible=false;g.add(cone);
+  e.flameCone=cone;e.flameVisT=0;e.bossStyle=style;}
+function makeBossBar(e){
+  const cv=document.createElement('canvas');cv.width=256;cv.height=64;
+  const tex=new THREE.CanvasTexture(cv);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
+  sp.scale.set(1.6,0.4,1);sp.position.set(0,2.0,0);sp.visible=false;e.group.add(sp);
+  e.bossBar=sp;e.bossBarCv=cv;e.bossBarTex=tex;drawBossBar(e);}
+function drawBossBar(e){
+  if(!e.bossBarCv)return;const x=e.bossBarCv.getContext('2d');
+  x.clearRect(0,0,256,64);
+  x.fillStyle='rgba(0,0,0,0.55)';x.fillRect(0,0,256,64);
+  x.fillStyle='#3a0d0d';x.fillRect(8,40,240,14);
+  const f=Math.max(0,e.hp/1200);
+  x.fillStyle=f>0.5?'#ff5533':'#ff2200';x.fillRect(8,40,240*f,14);
+  x.fillStyle='#ffffff';x.font='900 22px Arial';x.textAlign='center';x.textBaseline='middle';
+  x.fillText(e.bossName||'BOSS',128,22);
+  e.bossBarTex.needsUpdate=true;}
+/* V13.5 : boss damage — returns true when the hit was ABSORBED (boss survives), false when the boss dies
+   (caller then runs the normal killEnemy path). Rifle 100 / headshot 200 / knife 150 / blast 400. */
+function bossHit(e,dmg,hitP){
+  if(!e.boss||!e.alive)return false;
+  e.hp-=dmg;e.flinchT=0.3;e.hitFlashT=0.12;e.hitJolt=1;
+  e.group.traverse(function(o){if(o.isMesh&&o.material&&o.material.emissive)o.material.emissive.setHex(0x550000);});
+  if(hitP)spawnBlood(hitP,new THREE.Vector3(0,0,1),false);
+  const hm=$('hitmark');if(hm){hm.classList.remove('pop');void hm.offsetWidth;hm.classList.add('kill');hm.classList.add('pop');}
+  sHit(1);drawBossBar(e);
+  if(e.hp<=0){if(e.bossBar)e.bossBar.visible=false;return false;}
+  return true;}
+function bossFlameTick(e,dist){
+  const g=e.group,fx=Math.sin(g.rotation.y),fz=Math.cos(g.rotation.y);
+  spawnBurst(new THREE.Vector3(g.position.x+fx*2.2,g.position.y+2.6,g.position.z+fz*2.2),
+    {color:0xff7a26,n:10,add:1,sp0:2,sp1:5,up0:0,up1:1,life:0.4,grav:0,sz:[1.2,2.0]});
+  spawnBurst(new THREE.Vector3(G.px,surfH(G.px,G.pz)+1.2,G.pz),
+    {color:0xffa030,n:5,add:1,sp0:1,sp1:3,up0:0,up1:2,life:0.3,grav:0,sz:[0.8,1.4]}); // flame licks the player position
+  if(e.flameCone){e.flameCone.visible=true;e.flameVisT=0.3;}
+  damagePlayer(5,'BOSS FLAME',dist,true);}
 class Enemy{
   constructor(x,z,hvt,opts){
     this.hvt=hvt;this.alive=true;this.fall=0;
@@ -2692,7 +2922,8 @@ class Enemy{
     const g=this.group=new THREE.Group();
     const F=WORLD.ready?buildGlbFigure(this):null; // WORLD 11.0 : real GLB soldier when the world pack is in — the procedural figure below stays as the fallback
     if(F){this.legL=F.legL;this.legR=F.legR;this.armL=F.armL;this.armR=F.armR;this.headG=F.headG;this.helmetG=F.helmetG;
-      this.mats=F.mats;this.figAnim=F.anim;this.defChest=F.chestOff;this.decorG=F.decor;g.add(F.fig);}
+      this.mats=F.mats;this.figAnim=F.anim;this.defChest=F.chestOff;this.decorG=F.decor;g.add(F.fig);
+      this.m16=buildM16();g.add(this.m16);} // V13.5 : the GLB soldier finally carries a rifle
     let hg=null;
     if(!F){
     const uni=hvt?0xa32424:(this.sniper?0x23262c:0x4c5530),skin=0xc9a07a;
@@ -2761,14 +2992,8 @@ class Enemy{
       bx(0.1,0.1,0.12,gloveM,0,-0.3,0.38,p);          // gloved hand
       return p;};
     this.armL=mkArm(-1);this.armR=mkArm(1);
-    /* service rifle held across the chest : body, magazine, optic, stock, barrel */
-    const gunM=M(0x1c1c1c);
-    bx(0.07,0.09,0.85,gunM,0.06,0.98,0.34);
-    bx(0.06,0.16,0.1,gunM,0.06,0.88,0.3);            // magazine
-    bx(0.05,0.07,0.13,gunM,0.06,1.07,0.32);          // optic
-    bx(0.06,0.12,0.2,gunM,0.06,0.96,-0.14);           // stock
-    const gbar=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.3,6),gunM); // barrel + muzzle tip
-    gbar.rotation.x=Math.PI/2;gbar.position.set(0.06,1.0,0.88);g.add(gbar);
+    /* V13.5 : M16A2-profile replica across the chest (replaces the generic box gun) */
+    this.m16=buildM16();g.add(this.m16);
     } // WORLD 11.0 : end of the procedural-figure fallback block
     g.scale.setScalar(1.5);
     g.position.set(x,groundH(x,z),z);
@@ -2797,7 +3022,94 @@ class Enemy{
     const px=G.px,pz=G.pz;
     const dx=px-g.position.x,dz=pz-g.position.z,distP=Math.hypot(dx,dz);
     let mvx=0,mvz=0,moving=false;
-    if(G.converged){
+    if(this.roamHostile&&G.state==='roam'){ /* V13.5 CAMP DEFENSE : roam camp enemies engage on sight — same burst fire as the converged branch, zero mission/alarm writes */
+      if(this.entranceT>0){ /* V13.5 BOSS ENTRANCE : arrival only — no attacks, no bar, player may shoot */
+        if(this.bossBar)this.bossBar.visible=false;
+        if(this.entranceKind==='sky'){ /* EMBERFALL : accelerating sky-drop + ember trail, hard landing */
+          this.fallVy=Math.min(40,(this.fallVy||0)+22*dt);
+          g.position.y-=this.fallVy*dt;
+          this.emberT=(this.emberT||0)-dt;
+          if(this.emberT<=0){this.emberT=0.1;
+            spawnBurst(new THREE.Vector3(g.position.x,g.position.y+2,g.position.z),{color:0xff7a26,n:4,add:1,sp0:0.5,sp1:2,up0:0,up1:1,life:0.5,grav:0,sz:[0.8,1.4]});}
+          this.entranceT-=dt;
+          const gy=groundH(g.position.x,g.position.z);
+          if(g.position.y<=gy||this.entranceT<=0){g.position.y=gy;this.entranceT=0;
+            spawnBurst(new THREE.Vector3(g.position.x,gy+0.5,g.position.z),{color:0x9a8a68,n:20,add:0,sp0:2,sp1:6,up0:1,up1:4,life:0.8,grav:6,sz:[1.2,2.0]});
+            sTone(70,0.22,'sine',0.16);
+            const dd0=Math.hypot(G.px-g.position.x,G.pz-g.position.z);
+            G.shake=Math.min(0.85,G.shake+clamp(16/(dd0+10),0.04,0.6)*(G.reduceShake?0.3:1));}
+          moving=false;
+        }else if(this.entranceKind==='rise'){ /* PYROCLAST : 2 s ash eruption out of the ground */
+          const gy=groundH(g.position.x,g.position.z);
+          const k=1-Math.max(0,this.entranceT)/2.0;
+          g.position.y=gy-3+3*k;
+          this.ashT=(this.ashT||0)-dt;
+          if(this.ashT<=0){this.ashT=0.15;
+            spawnBurst(new THREE.Vector3(g.position.x,gy+0.3,g.position.z),{color:0x6a6a64,n:4,add:0,sp0:1,sp1:3,up0:1,up1:3,life:0.7,grav:3,sz:[1.0,1.6]});}
+          this.entranceT-=dt;
+          if(this.entranceT<=0){this.entranceT=0;g.position.y=gy;
+            spawnBurst(new THREE.Vector3(g.position.x,gy+0.5,g.position.z),{color:0x6a6a64,n:24,add:0,sp0:2,sp1:7,up0:2,up1:6,life:1.0,grav:5,sz:[1.2,2.2]});
+            sTone(70,0.22,'sine',0.16);
+            const dd0=Math.hypot(G.px-g.position.x,G.pz-g.position.z);
+            G.shake=Math.min(0.85,G.shake+clamp(16/(dd0+10),0.04,0.6)*(G.reduceShake?0.3:1));}
+          moving=false;
+        }else if(this.entranceKind==='lake'){ /* ASHFANG : 2.5 s rise from the waterline in steam + embers */
+          const gy=groundH(g.position.x,g.position.z);
+          const k=1-Math.max(0,this.entranceT)/2.5;
+          g.position.y=gy-2+2*k;
+          this.steamT=(this.steamT||0)-dt;
+          if(this.steamT<=0){this.steamT=0.15;
+            spawnBurst(new THREE.Vector3(g.position.x,gy+0.3,g.position.z),{color:0xcfd8dc,n:4,add:0,sp0:1,sp1:3,up0:2,up1:4,life:0.7,grav:-1,sz:[1.0,1.6]});
+            spawnBurst(new THREE.Vector3(g.position.x,gy+0.3,g.position.z),{color:0xff7a26,n:3,add:1,sp0:1,sp1:3,up0:1,up1:3,life:0.5,grav:0,sz:[0.8,1.4]});}
+          this.entranceT-=dt;
+          if(this.entranceT<=0){this.entranceT=0;g.position.y=gy;
+            spawnBurst(new THREE.Vector3(g.position.x,gy+0.5,g.position.z),{color:0xcfd8dc,n:20,add:0,sp0:2,sp1:6,up0:2,up1:5,life:1.0,grav:-1,sz:[1.2,2.2]});
+            spawnBurst(new THREE.Vector3(g.position.x,gy+0.5,g.position.z),{color:0xff7a26,n:12,add:1,sp0:2,sp1:5,up0:1,up1:4,life:0.8,grav:0,sz:[1.0,1.8]});
+            sTone(70,0.22,'sine',0.16);
+            const dd0=Math.hypot(G.px-g.position.x,G.pz-g.position.z);
+            G.shake=Math.min(0.85,G.shake+clamp(16/(dd0+10),0.04,0.6)*(G.reduceShake?0.3:1));}
+          moving=false;
+        }else{ /* FORGEFATHER walk / VULCAN'S HOUND sprint toward the camp centre */
+          const dx=this.campX-g.position.x,dz=this.campZ-g.position.z,dd=Math.hypot(dx,dz);
+          const sp=this.entranceKind==='sprint'?5.0:2.0;
+          if(dd>1.5){g.position.x+=dx/dd*sp*dt;g.position.z+=dz/dd*sp*dt;g.position.y=groundH(g.position.x,g.position.z);
+            g.rotation.y=Math.atan2(dx,dz);moving=true;
+            this.stepT=(this.stepT||0)-dt;
+            if(this.stepT<=0){this.stepT=this.entranceKind==='sprint'?0.2:0.8;
+              spawnBurst(new THREE.Vector3(g.position.x,g.position.y+0.2,g.position.z),{color:0x9a8a68,n:3,add:0,sp0:0.5,sp1:1.5,up0:0.5,up1:1.5,life:0.5,grav:2,sz:[0.8,1.2]});
+              if(this.entranceKind==='walk')sTone(52,0.13,'sine',0.2);}}
+          this.entranceT-=dt;
+          if(this.entranceT<=0||dd<=1.5){this.entranceT=0;if(this.bossStyle==='hound')g.rotation.x=0;this.sprinting=false;}
+        }
+      }else{
+      if(this.bossBar){const dc=Math.hypot(G.px-this.campX,G.pz-this.campZ);this.bossBar.visible=dc<this.campR;}
+      if(this.flameCone&&this.flameVisT>0){this.flameVisT-=dt;if(this.flameVisT<=0)this.flameCone.visible=false;}
+      const concealedNow=isConcealed()&&distP>12;
+      if(!this.roamEngage&&distP<30&&!concealedNow)this.roamEngage=true;
+      else if(this.roamEngage&&(distP>45||concealedNow))this.roamEngage=false;
+      if(this.roamEngage){
+        const tdx=px-g.position.x,tdz=pz-g.position.z,tdist=Math.hypot(tdx,tdz)||0.01;
+        g.rotation.y=Math.atan2(tdx,tdz);
+        if(this.boss&&tdist<16){
+          this.flameT=(this.flameT||0)-dt;
+          if(this.flameT<=0){this.flameT=0.3;bossFlameTick(this,tdist);}
+          if(tdist>10){mvx=tdx/tdist;mvz=tdz/tdist;moving=true;const sp=this.speed*1.2;g.position.x+=mvx*sp*dt;g.position.z+=mvz*sp*dt;g.position.y=groundH(g.position.x,g.position.z);}
+        }else{
+          if(tdist>this.convR){mvx=tdx/tdist;mvz=tdz/tdist;moving=true;const sp=this.speed*1.4;g.position.x+=mvx*sp*dt;g.position.z+=mvz*sp*dt;g.position.y=groundH(g.position.x,g.position.z);}
+          else{this.strafe+=dt*0.5;mvx=Math.cos(this.strafe)*0.4;mvz=Math.sin(this.strafe)*0.4;moving=true;}
+          if(this.burst>0){this.burstT-=dt;if(this.burstT<=0){this.burstT=0.16;this.burst--;fireEnemyRound(this);}}
+          else if(tdist<this.convR+30){this.shootCd-=dt;if(this.shootCd<=0){this.shootCd=rand(2.2,4);enemyShoot(this);}}
+        }
+      }else{
+        if(this.pauseT>0){this.pauseT-=dt;g.rotation.y+=Math.sin(G.swayT*0.7+this.walkPhase)*dt*0.4;}
+        else{const w=this.wps[this.wpi],wx=w[0]-g.position.x,wz=w[1]-g.position.z,wd=Math.hypot(wx,wz);
+          if(wd<2){this.wpi=(this.wpi+1)%this.wps.length;this.stuckT=0;if(Math.random()<0.45)this.pauseT=rand(1,3);}
+          else{mvx=wx/wd;mvz=wz/wd;moving=true;g.position.x+=mvx*this.speed*dt;g.position.z+=mvz*this.speed*dt;g.position.y=groundH(g.position.x,g.position.z);g.rotation.y=Math.atan2(mvx,mvz);this.stuckT+=dt;if(this.stuckT>6){this.stuckT=0;this.wpi=(this.wpi+1)%this.wps.length;}}
+      }
+    }
+    }
+    }
+    else if(G.converged){
       /* fan-out : each guard approaches on a personal bearing (convA) and holds
          at a personal range (convR, 60–110m) instead of bunching on one line */
       const concealedNow=isConcealed()&&distP>12; // V12 CONCEALMENT GATE : a player hidden in a bush is a ghost — they hunt the last-known spot, guns quiet (close range still sees him)
@@ -2866,6 +3178,21 @@ class Enemy{
     }
     resolveBlockers(g); // camp props : slide along tents/crates/tower/tanks instead of clipping through
     if(this.figAnim){figAnimTick(this,dt,moving);} // WORLD 11.0 : the GLB clips own the bones (walk / idle / run / hit-react)
+    if(this.boss&&this.alive&&this.entranceT<=0){ /* V13.5 BOSS PRESENCE : breathing pulse, footstep dust, hit jolt + flash decay */
+      const bs=this.bossBaseScale;
+      if(bs&&!moving){const p=1+0.015*Math.sin(G.swayT*1.5+this.walkPhase);g.scale.set(bs[0]*p,bs[1]*p,bs[2]*p);}
+      else if(bs)g.scale.set(bs[0],bs[1],bs[2]);
+      if(moving){this.stepT=(this.stepT||0)-dt;
+        if(this.stepT<=0){this.stepT=0.45;
+          spawnBurst(new THREE.Vector3(g.position.x,g.position.y+0.2,g.position.z),{color:0x9a8a68,n:3,add:0,sp0:0.5,sp1:1.5,up0:0.5,up1:1.5,life:0.5,grav:2,sz:[0.8,1.2]});}}
+      if(this.hitFlashT>0){this.hitFlashT-=dt;
+        if(this.hitFlashT<=0){g.traverse(function(o){if(o.isMesh&&o.material&&o.material.emissive)o.material.emissive.setHex(0x000000);});}}
+      if(this.hitJolt>0){this.hitJolt=Math.max(0,this.hitJolt-dt*6);
+        g.position.x-=Math.sin(g.rotation.y)*this.hitJolt*0.12;g.position.z-=Math.cos(g.rotation.y)*this.hitJolt*0.12;
+        g.rotation.z=Math.sin(G.swayT*40)*0.03*this.hitJolt;}
+      else g.rotation.z=0;
+      if(this.bossStyle==='pyroclast'&&g.rotation.x!==0.14)g.rotation.x=0.14; // hunch persists (update only writes rotation.y)
+    }
     else{
     const sw=moving?Math.sin(this.walkPhase)*0.55:0;
     this.legL.rotation.x=sw;this.legR.rotation.x=-sw;
@@ -2880,7 +3207,7 @@ class Enemy{
       this.headYaw=lerp(this.headYaw,0,Math.min(1,dt*4));}
     this.headG.rotation.y=this.headYaw;
     }
-    g.position.y=groundH(g.position.x,g.position.z)+(moving?Math.abs(Math.sin(this.walkPhase))*0.06:0)-((this.flinchT>0||this.crouchT>0)?0.32:0); // crouch dip while flinching / holding cover
+    if(!(this.entranceT>0))g.position.y=groundH(g.position.x,g.position.z)+(moving?Math.abs(Math.sin(this.walkPhase))*0.06:0)-((this.flinchT>0||this.crouchT>0)?0.32:0); // crouch dip while flinching / holding cover // V13.5 : entrance-active bosses keep their entrance y (sky fall / ground-burst / lake-rise)
   }
   /* counter-sniper behavior : hold the post, face the ridge, cycle
      idle -> aim 1.5s (glint swells + laser shimmer) -> fire -> cool */
@@ -3105,10 +3432,10 @@ const _md=new THREE.Vector3(),_campLook=new THREE.Vector3(0,groundH(0,-CAMP_D)+3
    dynamically in resolveBlockers once it has rolled to a stop. */
 const BLOCKERS=[
   {x:-14,z:-CAMP_D-8,r:2.8},{x:12,z:-CAMP_D-6,r:2.8},{x:2,z:-CAMP_D+12,r:2.8},      // tents
-  {x:-9.3,z:-CAMP_D+4.5,r:2.4},{x:8.7,z:-CAMP_D-6.7,r:2.2},{x:-2.3,z:-CAMP_D-12.6,r:2.4},{x:16,z:-CAMP_D+9,r:1.3}, // crate piles
-  {x:20,z:-CAMP_D-18,r:2.4},                                                        // watchtower
-  {x:-8,z:-CAMP_D+8,r:0.9},                                                         // flag pole
-  {x:2,z:-CAMP_D-4,r:1.6},                                                          // campfire
+  {x:-9.3,z:-CAMP_D+4.5,r:1.8},{x:8.7,z:-CAMP_D-6.7,r:1.8},{x:-2.3,z:-CAMP_D-12.6,r:2.05},{x:16,z:-CAMP_D+9,r:1.0}, // V13.5k crate piles : radii fit the actual piles (were 2.4/2.2/2.4/1.3, 0.3-0.6 m of empty wall)
+  {x:18.6,z:-CAMP_D-19.4,r:0.25},{x:21.4,z:-CAMP_D-19.4,r:0.25},{x:18.6,z:-CAMP_D-16.6,r:0.25},{x:21.4,z:-CAMP_D-16.6,r:0.25}, // V13.5k watchtower legs : ground contact is 4 posts, not a solid wall (was r2.9)
+  {x:-8,z:-CAMP_D+8,r:0.1},                                                         // V13.5k flag pole : fits the 0.08 m pole (was 0.3, 0.22 m of empty wall)
+  {x:2,z:-CAMP_D-4,r:1.1},                                                          // V13.5k campfire : stone ring outer edge is 1.07 (was 1.6, 0.53 m of empty wall; side logs are step-over)
 ];
 /* sabotage fuel tanks + ammo caches get appended to BLOCKERS after buildSabotage's SAB_SPOTS
    literal executes (a few hundred lines below); the stopped truck registers itself
@@ -3116,12 +3443,27 @@ const BLOCKERS=[
 function resolveBlockers(g){
   const p=g.position;
   for(let i=0;i<BLOCKERS.length;i++){const b=BLOCKERS[i];
+    if(b.owner&&(b.owner.alive===false||(b.owner.group&&!b.owner.group.visible)))continue; // V13.5 : dead/invisible owners are not walls
     const dx=p.x-b.x,dz=p.z-b.z,rr=b.r+0.55,d2=dx*dx+dz*dz;
     if(d2<rr*rr&&d2>0.0001){const d=Math.sqrt(d2);p.x=b.x+dx/d*rr;p.z=b.z+dz/d*rr;}}
-  if(truck.active&&truck.group&&truck.speed<0.6){ // stopped truck is a wall too
-    const tp=truck.group.position,dx=p.x-tp.x,dz=p.z-tp.z,rr=3.4,d2=dx*dx+dz*dz;
+  {const ob=obbResolve(p.x,p.z,0.55);p.x=ob[0];p.z=ob[1];} // V13.5k : rectangular props
+  if(truck.active&&truck.group&&truck.group.visible&&truck.speed<0.6){ // stopped truck is a wall too (V13.5k: visible-gated)
+    const tp=truck.group.position,dx=p.x-tp.x,dz=p.z-tp.z,rr=3.25,d2=dx*dx+dz*dz; // V13.5k3 : flat = half-diag 2.66 + guard 0.55 (was 3.4; k-pass 2.7 clipped)
     if(d2<rr*rr&&d2>0.0001){const d=Math.sqrt(d2);p.x=tp.x+dx/d*rr;p.z=tp.z+dz/d*rr;}}
 }
+const OBBS=[]; // V13.5k : oriented-box colliders for rectangular props — a circle on a rectangle leaves metres of empty wall on the short sides (barn: 3.4 m) and clips the long ends (log piles: 1.2 m)
+function obbResolve(px,pz,rad){ // push a point out of every OBB, expanded by the actor radius; rotation.y convention matches box()/push()
+  for(const o of OBBS){
+    const c=Math.cos(o.yaw),s=Math.sin(o.yaw);
+    const dx=px-o.x,dz=pz-o.z;
+    const lx=c*dx-s*dz,lz=s*dx+c*dz; // world -> box frame
+    const ex=o.hw+rad,ez=o.hd+rad;
+    if(Math.abs(lx)<ex&&Math.abs(lz)<ez){
+      const penX=ex-Math.abs(lx),penZ=ez-Math.abs(lz);
+      let qx=lx,qz=lz;
+      if(penX<penZ)qx=(lx<0?-ex:ex);else qz=(lz<0?-ez:ez);
+      px=o.x+c*qx+s*qz;pz=o.z-s*qx+c*qz;}} // box -> world
+  return [px,pz];}
 /* ---------------- V8.2 WORLD PASS #2 : ridge nest, ring road, river life, sky life, camp dressing ----------------
    Pure set dressing — no hitboxes, patrol logic or balance touched. Animated
    bits (haze drift, mast beacon, tower spotlight) tick in worldFxUpdate,
@@ -3131,20 +3473,20 @@ const worldFx={haze:[],mastLamp:null,mastGlow:null,spotPivot:null,spotLight:null
   const lam=c=>new THREE.MeshLambertMaterial({color:c});
   const dummy=new THREE.Object3D(),tmpC=new THREE.Color();
   /* --- sniper ridge nest : a real prepared position around the spawn lip --- */
-  const bagM=lam(0x97855f),bagM2=lam(0x8a7a52),bagG=new THREE.BoxGeometry(1.15,0.42,0.62),nestZ=15.4;
+  const bagM=lam(0x97855f),bagM2=lam(0x8a7a52),bagM3=lam(0x8f7f57),bagG=new THREE.BoxGeometry(1.15,0.42,0.62),nestZ=15.4; // V13.5 : third sandbag tone
   for(let i=0;i<11;i++){const bx=-8+i*1.6; // front lip : two staggered rows + a partial third
     const b1=new THREE.Mesh(bagG,i%2?bagM:bagM2);b1.position.set(bx,groundH(bx,nestZ)+0.21,nestZ);b1.rotation.y=rand(-0.16,0.16);b1.castShadow=true;scene.add(b1);
     const b2=new THREE.Mesh(bagG,i%2?bagM2:bagM);b2.position.set(bx+0.5,groundH(bx+0.5,nestZ-0.55)+0.2,nestZ-0.55);b2.rotation.y=rand(-0.16,0.16);b2.castShadow=true;scene.add(b2);
-    if(i%2===0){const b3=new THREE.Mesh(bagG,bagM);b3.position.set(bx+0.25,groundH(bx+0.25,nestZ)+0.62,nestZ-0.28);b3.rotation.y=rand(-0.2,0.2);b3.castShadow=true;scene.add(b3);}}
+    if(i%2===0){const b3=new THREE.Mesh(bagG,bagM3);b3.position.set(bx+0.25,groundH(bx+0.25,nestZ)+0.62,nestZ-0.28);b3.rotation.y=rand(-0.2,0.2);b3.castShadow=true;scene.add(b3);}}
   for(const sx of[-1,1])for(let i=0;i<3;i++){const bx=sx*(9.4+i*0.45),bz=17.6+i*1.5; // side wings curling back
-    const b=new THREE.Mesh(bagG,bagM);b.position.set(bx,groundH(bx,bz)+0.21,bz);b.rotation.y=sx*0.7+rand(-0.15,0.15);b.castShadow=true;scene.add(b);}
+    const b=new THREE.Mesh(bagG,i%2?bagM:bagM3);b.position.set(bx,groundH(bx,bz)+0.21,bz);b.rotation.y=sx*0.7+rand(-0.15,0.15);b.castShadow=true;scene.add(b);}
   /* ghillie drape : ragged camo blanket hanging over the front bags */
-  (function(){const cv=document.createElement('canvas');cv.width=256;cv.height=96;const x=cv.getContext('2d');
-    x.fillStyle='#59622f';x.fillRect(0,0,256,96);
-    for(let i=0;i<340;i++){const gx=rand(0,256);x.strokeStyle='rgba('+(40+Math.random()*50|0)+','+(58+Math.random()*52|0)+','+(22+Math.random()*26|0)+',0.85)';
+  (function(){const cv=document.createElement('canvas');cv.width=1024;cv.height=116;const x=cv.getContext('2d');
+    x.fillStyle='#59622f';x.fillRect(0,0,1024,116); // V13.5 : canvas at the plane's own aspect (10.6x1.2 = 8.83) — the 256x96 canvas stretched strokes ~3.3x
+    for(let i=0;i<1300;i++){const gx=rand(0,1024);x.strokeStyle='rgba('+(40+Math.random()*50|0)+','+(58+Math.random()*52|0)+','+(22+Math.random()*26|0)+',0.85)';
       x.lineWidth=rand(1.5,3.5);x.beginPath();x.moveTo(gx,0);x.lineTo(gx+rand(-7,7),rand(45,96));x.stroke();}
     for(let i=0;i<50;i++){x.strokeStyle='rgba(146,128,84,0.6)';x.lineWidth=rand(1,2.4);
-      const gx=rand(0,256);x.beginPath();x.moveTo(gx,0);x.lineTo(gx+rand(-5,5),rand(30,80));x.stroke();}
+      const gx=rand(0,1024);x.beginPath();x.moveTo(gx,0);x.lineTo(gx+rand(-5,5),rand(30,80));x.stroke();}
     const gt=new THREE.CanvasTexture(cv);
     const gg=new THREE.PlaneGeometry(10.6,1.2,18,2),gp=gg.attributes.position;
     for(let i=0;i<gp.count;i++){const vx=gp.getX(i),vy=gp.getY(i);
@@ -3259,10 +3601,11 @@ const worldFx={haze:[],mastLamp:null,mastGlow:null,spotPivot:null,spotLight:null
     BLOCKERS.push({x:26,z:-CAMP_D+10,r:2.6});
     const drumM=lam(0x5c6636),drumM2=lam(0x74503a),drumG=new THREE.CylinderGeometry(0.31,0.31,0.92,10);
     [[0,0,drumM],[0.72,0.3,drumM2],[-0.62,0.42,drumM],[0.18,-0.62,drumM2],[-0.25,0.05,drumM]].forEach(p=>{
-      const d=new THREE.Mesh(drumG,p[2]);d.position.set(-19+p[0],groundH(-19+p[0],-CAMP_D+3+p[1])+0.46,-CAMP_D+3+p[1]);d.castShadow=true;scene.add(d);});
+      const d=new THREE.Mesh(drumG,p[2]);d.position.set(-19+p[0],groundH(-19+p[0],-CAMP_D+3+p[1])+0.46,-CAMP_D+3+p[1]);d.castShadow=true;scene.add(d);
+      BLOCKERS.push({x:-19+p[0],z:-CAMP_D+3+p[1],r:0.35});}); // V13.5k : one circle per drum (r0.31 drums)
     const tipped=new THREE.Mesh(drumG,drumM2);tipped.rotation.z=Math.PI/2;
     tipped.position.set(-17.7,groundH(-17.7,-CAMP_D+3.9)+0.32,-CAMP_D+3.9);tipped.castShadow=true;scene.add(tipped);
-    BLOCKERS.push({x:-19,z:-CAMP_D+3,r:1.5});})();
+    BLOCKERS.push({x:-17.7,z:-CAMP_D+3.9,r:0.6});})(); // V13.5k : tipped drum lies 0.92x0.62 (half-diag 0.55); the old cluster circle r1.5 is gone
   /* --- watchtower spotlight : sweeping cone + real SpotLight, night ops only --- */
   (function(){const twX=20,twZ=-CAMP_D-18,twY=groundH(twX,twZ);
     const pivot=new THREE.Group();pivot.position.set(twX,twY+7.6,twZ);scene.add(pivot);
@@ -3503,7 +3846,7 @@ const SAB_SPOTS=[ // V13 : site-tagged — a mission only arms its active outpos
   {kind:'fuel',site:'farm',x:-806,z:-1486},{kind:'ammo',site:'farm',x:-848,z:-1518},
   {kind:'fuel',site:'lake',x:-1246,z:-1890},{kind:'ammo',site:'lake',x:-1268,z:-1916},
   {kind:'fuel',site:'radar',x:-1550,z:-2162},{kind:'ammo',site:'radar',x:-1572,z:-2136}];
-for(const s of SAB_SPOTS)BLOCKERS.push({x:s.x,z:s.z,r:1.9}); // sabotage props block patrol movement too
+for(const s of SAB_SPOTS)BLOCKERS.push({x:s.x,z:s.z,r:1.15}); // V13.5 : sabotage blocker fits the tank/crate (was 1.9 -> 2.45 m) — owner-linked in buildSabotage
 function buildSabotage(){
   const tankM=new THREE.MeshLambertMaterial({color:0xb02818});
   const darkM=new THREE.MeshLambertMaterial({color:0x2a2a2a});
@@ -3545,6 +3888,8 @@ function buildSabotage(){
     mk.scale.set(1.5,1.5,1);mk.position.set(s.x,gy+(s.kind==='fuel'?3.6:2.6),s.z);scene.add(mk);
     sabTargets.push({kind:s.kind,site:s.site,group:g,marker:mk,alive:false,
       pos:new THREE.Vector3(s.x,gy+(s.kind==='fuel'?1.2:0.7),s.z),r:s.kind==='fuel'?1.55:1.3,ph:rand(0,TAU)});
+    {const tg=sabTargets[sabTargets.length-1]; // V13.5 : link the blocker to its target — inactive (invisible) sites stop blocking
+      for(const b of BLOCKERS)if(b.x===s.x&&b.z===s.z)b.owner=tg;}
   }
 }
 function resetSabotage(cfg){
@@ -3612,7 +3957,7 @@ function explodeSab(tg){
       _td.copy(e.group.position).sub(tg.pos);_td.y=0;
       if(_td.lengthSq()<0.01)_td.set(0,0,1);_td.normalize();
       spawnBurst(e.chest(),{color:0x7d0d0d,n:5,sp0:1,sp1:3,up0:1,up1:3.5,life:0.5,grav:9}); // blast kill : a few red flecks in the fire/dust, no more
-      killEnemy(e,_td,false,false,true);}} // blast kill : DEATH 2.0 launches the body on an arc
+      if(e.boss)bossHit(e,400,e.chest());else killEnemy(e,_td,false,false,true);}} // blast kill : DEATH 2.0 launches the body on an arc
   if(truck.active&&truck.group&&truck.group.position.distanceTo(tg.pos)<kr+2)truck.dead=true; // blast stops the truck
   if(tg.kind==='fuel')for(const o of sabTargets)
     if(o!==tg&&o.alive&&o.kind==='fuel'&&o.pos.distanceTo(tg.pos)<12)chainQ.push({tg:o,t:0.4});
@@ -3623,9 +3968,8 @@ function explodeSab(tg){
    scoped-and-still is the easiest target, moving is the hardest */
 function sniperFire(e){
   const from=e.chest(),to=new THREE.Vector3(G.px,camera.position.y-0.1,G.pz);
-  const geo=new THREE.BufferGeometry().setFromPoints([from,to]);
-  const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:G.night?0xffc080:0xffa050,transparent:true,opacity:1}));
-  scene.add(line);tracers.push({line,t:-0.1});
+  const tl=tracerLine(from,to,G.night?0xffc080:0xffa050,1);
+  tracers.push({line:tl.line,t:-0.1,pooled:tl});
   sTone(rand(900,1200),0.14,'sawtooth',0.07,-500); // incoming crack
   const dist=from.distanceTo(to);
   /* THEY LEAD THE SHOT : a still player is the easiest hit, slow aim drifts
@@ -3770,11 +4114,12 @@ function bulletUpdate(dt){
           if(b.kills>=3){spent=true;break;}}}
       for(const e of enemies){if(!e.alive||b.pierced.indexOf(e)>=0)continue;
         const c=e.chest(),dx=p.x-c.x,dy=p.y-c.y,dz=p.z-c.z,d2=dx*dx+dy*dy+dz*dz;
-        if(d2<1.1){ // OVERPENETRATION : kill resolves inline, the round flies on (cap 3 kills)
+        if(d2<(e.boss?2.56:1.1)){ // OVERPENETRATION : kill resolves inline, the round flies on (cap 3 kills) — V13.5 boss sphere r 1.6 fits the 4.16 m body
           /* TRUE IMPACT : closest point on this substep's segment to the chest
              center — the round's position here can be ~1m short of the body */
           const tt=segPtClosestT(px0,py0,pz0,p.x,p.y,p.z,c.x,c.y,c.z);
           const hitP=new THREE.Vector3(px0+(p.x-px0)*tt,py0+(p.y-py0)*tt,pz0+(p.z-pz0)*tt);
+          if(e.boss&&bossHit(e,p.y>c.y+0.45?200:100,hitP)){b.pierced.push(e);continue;} // V13.5 : boss absorbs the round — the bullet flies on, no kill counted
           pierceKill(b,e,p.y>c.y+0.45,hitP);
           if(bullets.indexOf(b)<0)return;
           if(b.kills>=3){spent=true;break;}}
@@ -3809,9 +4154,8 @@ function bulletUpdate(dt){
        fed into the shared tracers pool — wind drift + drop read on misses too */
     if(G.state==='play'||G.state==='roam'){const tp=b.m.position,tdx=tp.x-b.tx,tdy=tp.y-b.ty,tdz=tp.z-b.tz; // WORLD 11.0 : tracers in roam too
       if(tdx*tdx+tdy*tdy+tdz*tdz>9){ // >=3m since the last streak point
-        const tline=new THREE.Line(new THREE.BufferGeometry().setFromPoints([_tpA.set(b.tx,b.ty,b.tz),_tpB.copy(tp)]),
-          new THREE.LineBasicMaterial({color:tracerCol,transparent:true,opacity:0.9})); // LOBBY POLISH : tracer color follows the equipped skin (warm default)
-        scene.add(tline);tracers.push({line:tline,t:0});
+        const tl=tracerLine(_tpA.set(b.tx,b.ty,b.tz),_tpB.copy(tp),tracerCol,0.9); // LOBBY POLISH : tracer color follows the equipped skin (warm default)
+        tracers.push({line:tl.line,t:0,pooled:tl});
         if(scopeFx==='inferno'||scopeFx==='star'){ // LOBBY POLISH : MYTHIC tracer trails — bounded by this same 3 m gate (at most one small burst per bullet per frame) ; visuals only, ballistics untouched
           spawnBurst(tp,{color:scopeFx==='inferno'?0xff7a26:0xe9d8ff,n:scopeFx==='inferno'?3:4,add:1,sp0:0.1,sp1:0.7,up0:-0.2,up1:0.3,life:scopeFx==='inferno'?0.32:0.5,grav:0,sz:[1.1,1.7]});}
         b.tx=tp.x;b.ty=tp.y;b.tz=tp.z;}}
@@ -3890,17 +4234,31 @@ function fireEnemyRound(e){
   const from=e.chest(),to=new THREE.Vector3(G.px,camera.position.y,G.pz);
   const d=from.distanceTo(to),sp=clamp(d*0.028,2,11); // spread grows with range
   to.x+=rand(-sp,sp);to.y+=rand(-sp,sp)*0.5;to.z+=rand(-sp,sp);
-  const geo=new THREE.BufferGeometry().setFromPoints([from,to]);
-  const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:G.night?0xffa060:0xff7040,transparent:true,opacity:0.95}));
-  scene.add(line);tracers.push({line,t:0});
+  const tl=tracerLine(from,to,G.night?0xffa060:0xff7040,0.95);
+  tracers.push({line:tl.line,t:0,pooled:tl});
   /* distant shots arrive muffled : volume falls and the lowpass closes with range */
   sTone(rand(500,700),0.12,'sawtooth',clamp(5.4/d,0.02,0.09),-200,clamp(9000-d*55,900,5000));
-  if(Math.random()<0.09)damagePlayer(rand(7,13),'PATROL FIRE',d);
+  if(Math.random()<0.09)damagePlayer(rand(7,13),'PATROL FIRE',d,!!e.roamHostile);
 }
+const tracerPool=[]; // V13.5 : pooled tracer lines — shots used to allocate a BufferGeometry + Material per round
+function tracerLine(a,b,color,opacity){
+  let t=tracerPool.pop();
+  if(!t){const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
+    const mat=new THREE.LineBasicMaterial({transparent:true});
+    const line=new THREE.Line(geo,mat);t={line,geo,mat};}
+  const at=t.geo.attributes.position;
+  at.setXYZ(0,a.x,a.y,a.z);at.setXYZ(1,b.x,b.y,b.z);at.needsUpdate=true;
+  t.mat.color.setHex(color);t.mat.opacity=opacity;
+  if(!t.line.parent)scene.add(t.line);
+  return t;}
 function tracerUpdate(dt){
   for(let i=tracers.length-1;i>=0;i--){const t=tracers[i];t.t+=dt;
     t.line.material.opacity=Math.max(0,0.95-t.t*6);
-    if(t.t>0.18){scene.remove(t.line);t.line.geometry.dispose();t.line.material.dispose();tracers.splice(i,1);}}
+    if(t.t>0.18){scene.remove(t.line);
+      if(t.pooled&&tracerPool.length<64)tracerPool.push(t.pooled);
+      else if(!t.pooled){t.line.geometry.dispose();t.line.material.dispose();}
+      tracers.splice(i,1);}}
 }
 /* ---------------- impact particles + shell casings ---------------- */
 const sparks=[];
@@ -3947,12 +4305,13 @@ function shellUpdate(dt){
     s.m.rotation.x+=s.rx*dt;s.m.rotation.z+=s.rz*dt;
     if(s.t>1.5){scene.remove(s.m);shells.splice(i,1);}}
 }
-function damagePlayer(d,src,dist){
-  if(G.state!=='play')return;
+function damagePlayer(d,src,dist,roamOk){
+  if(G.state!=='play'&&!(G.state==='roam'&&roamOk))return;
   if(src)G.lastDmg={src,dist:dist||0}; // DEATH RECAP : the fail card names the killer
   G.hp=Math.max(0,G.hp-d);G.lastDmgT=G.swayT;sHurt();
   const el=$('dmg');el.style.opacity=G.reduceFlash?0.45:0.9;setTimeout(()=>el.style.opacity=0,180);
-  if(G.hp<=0)missionFail();updateHUD();
+  if(G.hp<=0){if(G.state==='roam'){G.hp=100;G.px=0;G.pz=24;toast('TAKEN DOWN — BACK AT THE RIDGE');updateHUD();return;}missionFail();}
+  updateHUD();
 }
 
 /* ---------------- input : touch aim / joystick / buttons ---------------- */
@@ -4574,6 +4933,18 @@ function killEnemy(e,dir,cam,hshot,blast,hitP,camPath,melee){ // V12 : 8th param
     e.die(dir,hshot,blast);
     const hm=$('hitmark');hm.classList.remove('pop');hm.classList.remove('hs');hm.classList.remove('kill');void hm.offsetWidth;
     hm.classList.add(hshot?'hs':'kill');hm.classList.add('pop');
+    if(e.roamHostile&&e.campId){ /* V13.5 BOSS GATE : guard deaths count toward calling the camp's boss */
+      const st2=bossClearLoad(),cs=bossClearGet(st2,e.campId);
+      if(e.boss){cs.bossDead=true;st2[e.campId]=cs;bossClearSave(st2);
+        const cp=e.chest();
+        spawnBurst(new THREE.Vector3(cp.x,cp.y,cp.z),{color:0xff7a26,n:18,add:1,sp0:2,sp1:6,up0:1,up1:4,life:0.8,grav:3,sz:[1.2,2.2]});
+        spawnBurst(new THREE.Vector3(cp.x,cp.y,cp.z),{color:0x6a6a64,n:14,add:0,sp0:2,sp1:5,up0:1,up1:3,life:1.0,grav:4,sz:[1.0,1.8]});
+        sTone(70,0.25,'sine',0.16);toast(e.bossName+' HAS FALLEN');}
+      else{cs.killed=(cs.killed||0)+1;st2[e.campId]=cs;
+        const def2=BOSS_DEFS[e.campId];
+        if(def2&&!cs.bossCalled&&cs.killed>=def2.guards){cs.bossCalled=true;bossClearSave(st2);
+          spawnBossForCamp(e.campId);toast('CAMP CLEARED — '+def2.name+' IS COMING');}
+        else bossClearSave(st2);}}
     sHit(1);return;}
   e.die(dir,hshot,blast);G.kills++;
   const now=G.swayT;
@@ -4771,8 +5142,9 @@ const PERF_PR=[2,1.5,1.2,1.2];
 function applyPerfLvl(){
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,PERF_PR[G.perfLvl]));
   if(G.perfLvl>=3){renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;}
-  else{renderer.shadowMap.autoUpdate=true;renderer.shadowMap.needsUpdate=true;}
+  else{renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;} // V13.5 : the frame-loop throttle governs updates, not every-frame autoUpdate
 }
+const _skyD=new THREE.Vector3(); // V13.5 : scratch vector for the sky-follow block
 function frame(now){
   requestAnimationFrame(frame);
   const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
@@ -4843,7 +5215,7 @@ function frame(now){
     G.windT+=gdt; // gusts : the single live wind source — HUD, ballistics, dust/grass, flag and ambient audio all read these
     G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7))); // ±40% strength, ~20s swell
     G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77); // heading wanders ±15° on the same swell
-    if(!ATV.drive.on&&!(typeof V13F!=='undefined'&&V13F.flyOn))stepPlayerMove(gdt,3.5); // V13 Chunk F : flight owns movement // WORLD 11.0 : in-mission walking (joystick / WASD) — position writes feed the existing converge + counter-sniper systems (V12 : the ATV drive owns movement while mounted)
+    sprintTick(gdt);if(!ATV.drive.on&&!(typeof V13F!=='undefined'&&V13F.flyOn))stepPlayerMove(gdt,4.5); // V13.5 : walk 3.5 -> 4.5 m/s // V13 Chunk F : flight owns movement // WORLD 11.0 : in-mission walking (joystick / WASD) — position writes feed the existing converge + counter-sniper systems (V12 : the ATV drive owns movement while mounted)
     for(const e of enemies)e.update(gdt);
     {let ma=0;for(const e of enemies)if(e.sniper&&e.alive&&e.aimPhase==='aim')ma=Math.max(ma,1-e.aimT/1.5);
      setScopeRim(G.scoped?ma:0);} // SNIPER WARNING RIM : hottest aim progress drives the scope rim
@@ -4874,7 +5246,7 @@ function frame(now){
     G.windT+=gdt; // the valley still breathes
     G.windSpd=Math.max(0.4,G.windBase*(1+0.33*Math.sin(G.windT*0.31)+0.07*Math.sin(G.windT*0.83+1.7)));
     G.windDir=G.windDir0+0.19*Math.sin(G.windT*0.31+0.6)+0.07*Math.sin(G.windT*0.77);
-    if(!ATV.drive.on&&!(typeof V13F!=='undefined'&&V13F.flyOn))stepPlayerMove(gdt,5.0); // V13 Chunk F : flight owns movement // V12 : the ATV drive owns movement while mounted
+    sprintTick(gdt);if(!ATV.drive.on&&!(typeof V13F!=='undefined'&&V13F.flyOn))stepPlayerMove(gdt,6.5); // V13.5 : roam walk 5.0 -> 6.5 m/s // V13 Chunk F : flight owns movement // V12 : the ATV drive owns movement while mounted
     for(const e of enemies)e.update(gdt);
     bulletUpdate(gdt);tracerUpdate(gdt);
     for(let i=chainQ.length-1;i>=0;i--){chainQ[i].t-=gdt; // barrel chains tick in roam too
@@ -4924,6 +5296,7 @@ function frame(now){
   camera.fov=G.fovCur;camera.updateProjectionMatrix();
   }
   v12Tick(dt,gdt); // V12 :
+  navChipTick(); // V13.5 NAV : live direction chip, every frame
   v13Tick(dt,gdt); // V13 : world systems (sun shadow follow + chunk hooks) — vehicle / knife / concealment / grass-crush / HUD state — runs post-camera so its overrides (chase cam, rifle hide) win the frame
   const wantCine=G.slowmo>0||KC.active; // cinematic letterbox : stays up for the whole cam (the bars carry the return fade)
   if(wantCine!==G.cine){G.cine=wantCine;
@@ -4950,7 +5323,7 @@ function frame(now){
       const n=grassBase.length;
       grassSway.i=(grassSway.i+80)%n;
       for(let k=0;k<80;k++)grassComposeIdx((grassSway.i+k)%n,t); // V12 : one compose for wind sway + crush state
-      grassMesh.instanceMatrix.needsUpdate=true;}}
+      if(((grassSway._n=(grassSway._n||0)+1)%3)===0)grassMesh.instanceMatrix.needsUpdate=true;}} // V13.5 : grass buffer uploads every 3rd frame (sway still recomposes every frame)
   { /* drifting dust motes around the ridge : no allocations, in-place float32 writes */
     const a=dust.userData.arr,n=dust.userData.n;
     for(let i=0;i<n;i++){
@@ -4975,6 +5348,18 @@ function frame(now){
       fp.needsUpdate=true;}
     if(riverTex)riverTex.offset.y-=dt*0.045;}
   drawReticle();
+  { /* V13.5 SKY FOLLOW : the dome/sun/stars/moon were origin-anchored — past ~950 m from origin the sky culled into black voids + a visible day-globe rim. They now ride the camera every frame. */
+    if(skyMesh)skyMesh.position.copy(camera.position);
+    starsPts.position.copy(camera.position);
+    if(sunGlow){_skyD.set(300,85,-40).normalize().multiplyScalar(690);sunGlow.position.copy(camera.position).add(_skyD);}
+    if(moonSpr){_skyD.set(-220,300,-140).normalize().multiplyScalar(820);moonSpr.position.copy(camera.position).add(_skyD);}
+  }
+  { /* V13.5 SHADOW THROTTLE : shadow maps render on frustum steps + every 3rd frame instead of every frame — same 2048 box, same casters, no detail removed */
+    if(G.perfLvl<3){
+      if(!frame._shInit){frame._shInit=true;renderer.shadowMap.autoUpdate=false;}
+      if(V13.shadowDirty||((frame._shN=(frame._shN||0)+1)%3===0)){renderer.shadowMap.needsUpdate=true;V13.shadowDirty=false;}
+    }
+  }
   renderer.render(scene,camera);
   pvTick(dt); // GHOSTLINE : the menu's rifle preview renders on this same loop (no-op in play)
 }
@@ -6593,7 +6978,7 @@ function knifeHit(){
   }
   if(best){
     const dir=new THREE.Vector3(_kf.x,0,_kf.z).normalize();
-    killEnemy(best,dir,false,false,false,best.chest(),null,true); // melee gate: silent, no skin counter, no bullet-cam
+    if(!(best.boss&&bossHit(best,150,best.chest())))killEnemy(best,dir,false,false,false,best.chest(),null,true); // melee gate: silent, no skin counter, no bullet-cam
     sTone(160,0.08,'square',0.06);
   }
   else if(typeof V13E!=='undefined'&&V13E.ready){ // V13 : knife vs wildlife — silent, scoreless
@@ -6872,16 +7257,18 @@ function atvTick(gdt){
   let hit=false;
   if(waterDepth(nx,nz)>1.0){nx=d.x;nz=d.z;hit=true;} // V13.2 : the quad stops where the water gets deep — by DEPTH, not at a dry-sand line (deck registers via surfH)
   for(const b of BLOCKERS){ // soft stop/slide — same blocker set the walker uses, vehicle radius
+    if(b.owner&&(b.owner.alive===false||(b.owner.group&&!b.owner.group.visible)))continue; // V13.5k : dead/inactive owners are not walls for the quad either (was missing — quad hit detonated-barrel ghosts)
     const dx=nx-b.x,dz=nz-b.z,rr=b.r+1.5,d2=dx*dx+dz*dz;
     if(d2<rr*rr&&d2>1e-6){const dd=Math.sqrt(d2);nx=b.x+dx/dd*rr;nz=b.z+dz/dd*rr;hit=true;}}
+  {const ob=obbResolve(nx,nz,1.5);nx=ob[0];nz=ob[1];} // V13.5k : rectangular props
   if(d.z<DECK.z1&&d.z>DECK.z0&&surfH(d.x,d.z)>groundH(d.x,d.z)+0.5){ // V13.2 fix2 : riding the deck — the guard rails are walls for the quad too (the 9 m-spaced blocker discs have gaps at speed; a U-turn at 40 m/s used to slip through and stall in the channel)
     if(nx>6.4){nx=6.4;hit=true;}else if(nx<-6.4){nx=-6.4;hit=true;}}
   if(TREE_SPOTS)for(const sp of TREE_SPOTS){
     const dx=nx-sp[0],dz=nz-sp[2],d2=dx*dx+dz*dz;
     if(d2<1.5*1.5&&d2>1e-6){const dd=Math.sqrt(d2);nx=sp[0]+dx/dd*1.5;nz=sp[2]+dz/dd*1.5;hit=true;}} // quad fit: narrower body
-  if(typeof truck!=='undefined'&&truck.group){
+  if(typeof truck!=='undefined'&&truck.active&&truck.group&&truck.group.visible){ // V13.5k : hidden/inactive truck is not a wall
     const tp=truck.group.position,dx=nx-tp.x,dz=nz-tp.z,d2=dx*dx+dz*dz;
-    if(d2<4.6*4.6&&d2>1e-6){const dd=Math.sqrt(d2);nx=tp.x+dx/dd*4.6;nz=tp.z+dz/dd*4.6;hit=true;}}
+    if(d2<4.2*4.2&&d2>1e-6){const dd=Math.sqrt(d2);nx=tp.x+dx/dd*4.2;nz=tp.z+dz/dd*4.2;hit=true;}} // V13.5k : 2.7 truck radius + 1.5 vehicle margin (was flat 4.6)
   if(hit)d.spd*=0.45; // soft stop — reverse always backs out
   d.x=nx;d.z=nz;
   G.px=d.x;G.pz=d.z;                 // the player IS the quad: converge / snipers / spot-checks all read it
@@ -6906,6 +7293,9 @@ function atvCam(dt){
   const fx=Math.sin(d.head),fz=Math.cos(d.head);
   _av1.set(d.x-fx*4.8,0,d.z-fz*4.8); // quad fit: chase distance (position spring + terrain clearance unchanged from v12.0)
   _av1.y=Math.max(surfH(_av1.x,_av1.z)+2.0,surfH(d.x,d.z)+1.7); // V13.2 : chase cam rides surfH — on the bridge deck it used to sit under the sea
+  if(typeof window.__heliTopY==='number'&&typeof window.__heliPadX==='number'){ // V13.5 : near the pad, the chase cam never drops under the disc (terrace-drop case)
+    const pdx=_av1.x-window.__heliPadX,pdz=_av1.z-window.__heliPadZ;
+    if(pdx*pdx+pdz*pdz<361)_av1.y=Math.max(_av1.y,window.__heliTopY+1.7);}
   ATV.camPos.lerp(_av1,1-Math.exp(-dt*4.5));
   camera.position.copy(ATV.camPos);
   // V12.1 : FREE LOOK — the clamp is gone; the view rides the player's unbounded look offset (fed by aimByPixels).
@@ -7021,6 +7411,7 @@ function v12HudTick(){
   show('btnHUp',inGame&&fly);show('btnHDown',inGame&&fly); // V13 Chunk F : the flight cluster
   show('btnHYawL',inGame&&fly);show('btnHYawR',inGame&&fly);
   show('btnFly',inGame&&(fly||(!drv&&typeof V13F!=='undefined'&&V13F.nearHeli)));
+  show('btnSprint',inGame&&!drv&&!fly);show('stamWrap',inGame&&!drv&&!fly); // V13.5 : sprint button + stamina bar, on foot only
   show('btnPad',inGame&&!drv&&!fly&&(typeof V13F!=='undefined'&&V13F.nearPad));
   const joy=$('joy');if(joy)joy.style.display=(inGame&&(!drv||fly))?'block':'none'; // V13 Chunk F : the stick is the cyclic in flight
   show('concealChip',inGame&&!drv&&!fly&&isConcealed());
@@ -7121,6 +7512,7 @@ function v13Tick(dt,gdt){
      of the player, where the action is. */
   const ax=G.px,az=G.pz-120,dx=ax-V13.sunAx,dz=az-V13.sunAz;
   if(dx*dx+dz*dz>1600){
+    V13.shadowDirty=true; // V13.5 : the shadow frustum moved — refresh the shadow map this frame
     sun.position.x+=dx;sun.position.z+=dz;
     sun.target.position.x+=dx;sun.target.position.z+=dz;
     sun.target.updateMatrixWorld();
@@ -7258,7 +7650,7 @@ const BR={steel:0x596068,dark:0x3f464e,conc:0x8b8d89,slab:0x4a4a4c,rail:0x707780
   }
   buildMergedMesh(_bg,new THREE.MeshLambertMaterial({vertexColors:true}));
   buildMergedMesh(heads,new THREE.MeshBasicMaterial({vertexColors:true}));
-  for(let z=-934;z<=-404;z+=9){BLOCKERS.push({x:-7.3,z:z,r:0.75});BLOCKERS.push({x:7.3,z:z,r:0.75});} // rails are walls (V13.2 fix2 : apron to apron)
+  for(let z=-934;z<=-404;z+=9){BLOCKERS.push({x:-7.3,z:z,r:0.3});BLOCKERS.push({x:7.3,z:z,r:0.3});} // V13.5k : rail discs are posts now — the deck guard seals the line (was r0.75 discs with 6.4 m gaps)
   /* deck-top driving surface : asphalt ribbon on the profile */
   const cv=document.createElement('canvas');cv.width=cv.height=128;const cx2=cv.getContext('2d');
   cx2.fillStyle='#3c3f43';cx2.fillRect(0,0,128,128);
@@ -7542,12 +7934,20 @@ const V13C={
   function box(x,z,w,h,d,color,ry,y0){push(BOX,x,gy(x,z)+(y0!=null?y0:h/2-0.35),z,w,h,d,0,ry||0,color);}
   function sandArc(cx,cz,ry){
     for(let i=-1;i<=1;i++){const a=ry+i*0.5,x=cx+Math.sin(a)*3.4,z=cz+Math.cos(a)*3.4;
-      box(x,z,2.6,0.85,0.9,0x9a8a68,-a);}
+      box(x,z,2.6,0.85,0.9,0x9a8a68,-a);
+      BLOCKERS.push({x:x,z:z,r:1.4});} // V13.5k : sandbag 2.6x0.9 half-diag is 1.38 (was 1.2, corners poked 0.18)
   }
   function tent(x,z,ry,color){box(x,z,3.2,1.5,4.2,color,ry);
-    push(BOX,x,gy(x,z)+1.85,z,3.5,0.28,4.5,0.6,ry,0x4c5540);
-    BLOCKERS.push({x:x,z:z,r:2.2});}
-  function crate(x,z,s){box(x,z,s||1.1,(s||1.1), (s||1.1),0x8a6f46,rand(0,3));}
+    /* V13.5 : ridge-pair roof — the old single tilted slab plunged through the walls and towered above them */
+    const tdx=Math.sin(ry)*1.05,tdz=Math.cos(ry)*1.05;
+    push(BOX,x-tdx,gy(x,z)+1.9,z-tdz,3.5,0.24,2.5,-0.6,ry,0x4c5540);
+    push(BOX,x+tdx,gy(x,z)+1.9,z+tdz,3.5,0.24,2.5,0.6,ry,0x4c5540);
+    BLOCKERS.push({x:x,z:z,r:2.6});}
+  function crate(x,z,s){const cs=s||1.1,ry=rand(0,3);
+    box(x,z,cs,cs,cs,0x8a6f46,ry);
+    push(BOX,x,gy(x,z)+0.35,z,cs+0.08,0.14,cs+0.08,0,ry,0x5a4630); // V13.5 : frame band — crates read as crates, not plain beige boxes
+    push(BOX,x,gy(x,z)+cs-0.32,z,cs*0.6,0.05,cs*0.6,0,ry,0xa8905a); // stencil top plate
+    BLOCKERS.push({x:x,z:z,r:0.71*(cs+0.08)});} // V13.5k : crate blocker scales with crate size (was fixed 0.8: small crates got 0.18 m of empty wall, default crates clipped corners)
   for(const o of V13C.outposts){
     if(o.id==='camp')continue; // the classic camp dressing already exists
     const cx=o.cx,cz=o.cz;
@@ -7557,30 +7957,37 @@ const V13C={
       push(CYL,cx+3,gy(cx+3,cz+2)+0.25,cz+2,0.8,0.5,0.8,0,0,0x33302a); // cold fire ring
     }else if(o.theme==='checkpoint'){
       box(cx-6,cz-2,2.6,2.5,2.6,0x6a7076,0);BLOCKERS.push({x:cx-6,z:cz-2,r:1.9}); // booth
-      push(BOX,cx-6,gy(cx-6,cz-2)+2.72,cz-2,3.2,0.24,3.2,0,0,0x3f464e); // booth roof
-      for(const s of[-1,1]){ // barrier arms across the road side
+      push(BOX,cx-6,gy(cx-6,cz-2)+2.27,cz-2,3.2,0.24,3.2,0,0,0x3f464e); // V13.5 booth roof : seated on the booth top (was floating 0.45 m)
+      for(const s of[-1,1]){ // barrier posts
         box(cx+s*4.5,cz-10,0.35,1.1,0.35,0x8a8f96,0);
-        push(BOX,cx+s*4.5,gy(cx+s*4.5,cz-10)+1.25,cz-10,6.5,0.16,0.3,0,0.5,0xc23b2a);
+        BLOCKERS.push({x:cx+s*4.5,z:cz-10,r:0.25}); // V13.5k : post is 0.35x0.35 (half-diag 0.25; was 0.5, a 2.1 m wall around a fence post)
       }
+      push(BOX,cx,gy(cx,cz-10)+1.25,cz-10,9.6,0.16,0.3,0,0,0xc23b2a); // V13.5 : ONE arm spanning post to post (was two yawed slabs ending off the posts, 3.3 m gap)
       sandArc(cx+6,cz+6,2.6);crate(cx+1,cz-6);crate(cx+2.4,cz-6.2,0.85);
     }else if(o.theme==='logging'){
       for(const px of[-7,6])for(let lvl=0;lvl<3;lvl++){ // log piles
         const n=3-lvl;for(let i=0;i<n;i++)
           push(CYL,cx+px+(i-(n-1)/2)*1.05,gy(cx+px,cz-4)+0.55+lvl*0.92,cz-4,0.46,7,0.46,Math.PI/2,0,0x6e5136);}
-      BLOCKERS.push({x:cx-7,z:cz-4,r:3.4});BLOCKERS.push({x:cx+6,z:cz-4,r:3.4});
-      box(cx-3,cz+8,4.5,2.6,3.4,0x715f42,0.3);BLOCKERS.push({x:cx-3,z:cz+8,r:2.9}); // cabin
-      push(BOX,cx-3,gy(cx-3,cz+8)+3.0,cz+8,5,0.3,4,0.5,0.3,0x54452e);
-      box(cx+5,cz+7,3.4,0.9,1.4,0x8a6f46,-0.2); // saw bench
+      OBBS.push({x:cx-7,z:cz-4,hw:1.51,hd:3.5,yaw:0});OBBS.push({x:cx+6,z:cz-4,hw:1.51,hd:3.5,yaw:0}); // V13.5k : log piles are 3.02x7 boxes — the r2.6 circle left 1.1 m of empty wall on the sides AND clipped 1.2 m off the ends
+      box(cx-3,cz+8,4.5,2.6,3.4,0x715f42,0.3);OBBS.push({x:cx-3,z:cz+8,hw:2.25,hd:1.7,yaw:0.3}); // V13.5k cabin OBB (was r2.9 circle, 1.2 m side slack)
+      push(BOX,cx-3,gy(cx-3,cz+8)+2.40,cz+8,5,0.3,4,0,0.3,0x54452e); // V13.5 logging cabin roof : seated flat slab (was a single tilted slab sinking into the walls + floating 1.84 m)
+      box(cx+5-1.3,cz+7,0.18,1.05,1.2,0x5a4630,-0.2); // V13.5 saw bench : legs + dark top (was a flat tan slab on the ground)
+      box(cx+5+1.3,cz+7,0.18,1.05,1.2,0x5a4630,-0.2);
+      push(BOX,cx+5,gy(cx+5,cz+7)+0.76,cz+7,3.4,0.12,1.4,0,-0.2,0x6e5136);
       crate(cx+1,cz+2);crate(cx+2.2,cz+2.6,0.8);
     }else if(o.theme==='farm'){
-      box(cx-8,cz-2,9,5,13,0x7a4436,0.15);BLOCKERS.push({x:cx-8,z:cz-2,r:5.6}); // barn
-      push(BOX,cx-8,gy(cx-8,cz-2)+5.6,cz-2,10,0.35,14,0.55,0.15,0x4c3a2c);
+      box(cx-8,cz-2,9,5,13,0x7a4436,0.15);OBBS.push({x:cx-8,z:cz-2,hw:4.5,hd:6.5,yaw:0.15}); // V13.5k barn OBB (was r7.9 circle, 3.4 m of empty wall on the 9 m sides)
+      push(BOX,cx-8-0.48,gy(cx-8,cz-2)+6.61,cz-2-3.16,10,0.3,7.5,-0.55,0.15,0x4c3a2c); // V13.5 barn roof : ridge pair (was one slab spanning +1.79..+9.41 vs a +4.65 top)
+      push(BOX,cx-8+0.48,gy(cx-8,cz-2)+6.61,cz-2+3.16,10,0.3,7.5,0.55,0.15,0x4c3a2c);
       push(CYL,cx+7,gy(cx+7,cz-8)+4.4,cz-8,1.7,8.8,1.7,0,0,0x9aa0a4); // silo
       push(CYL,cx+7,gy(cx+7,cz-8)+9.3,cz-8,0.2,1.2,1.7,0,0,0x707880);
-      BLOCKERS.push({x:cx+7,z:cz-8,r:2.0});
+      BLOCKERS.push({x:cx+7,z:cz-8,r:1.75}); // V13.5k : silo radius is 1.7 (was 2.0, 0.3 m of empty wall)
       for(let i=0;i<4;i++){const bx2=cx+rand(-12,12),bz2=cz+rand(4,14); // hay bales
-        push(CYL,bx2,gy(bx2,bz2)+0.85,bz2,0.85,1.3,0.85,Math.PI/2,rand(0,3),0xc9a84c);}
+        push(CYL,bx2,gy(bx2,bz2)+0.85,bz2,0.85,1.3,0.85,Math.PI/2,rand(0,3),0xc9a84c);
+        BLOCKERS.push({x:bx2,z:bz2,r:1.1});} // V13.5k : hay bale lying 1.3x1.7 (half-diag 1.07; was 0.9, ends poked 0.17)
       for(let i=0;i<6;i++)box(cx-14+i*3.1,cz+16,0.18,1.0,0.18,0x6b5636,0); // fence line
+      push(BOX,cx-6.25,gy(cx-6.25,cz+16)+0.35,cz+16,15.5,0.1,0.1,0,0,0x6b5636); // V13.5 : fence rails (was posts alone)
+      push(BOX,cx-6.25,gy(cx-6.25,cz+16)+0.6,cz+16,15.5,0.1,0.1,0,0,0x6b5636);
       crate(cx+2,cz-4);crate(cx+3.4,cz-3.4,0.85);
     }else if(o.theme==='lakeside'){
       tent(cx-5,cz+5,0.9,0x5c6644);tent(cx+6,cz-4,-0.4,0x66704c);
@@ -7591,14 +7998,16 @@ const V13C={
       push(CYL,cx,gy(cx,cz)+6.5,cz,0.5,13,0.5,0,0,0x707880); // mast
       const dish=new THREE.SphereGeometry(3.1,12,6,0,TAU,0,0.95);
       push(dish,cx,gy(cx,cz)+13.6,cz,1,1,1,-0.7,0.6,0xb9bfc4);
-      BLOCKERS.push({x:cx,z:cz,r:1.4});
-      box(cx+8,cz+6,4.2,2.5,3.2,0x62666a,0.2);BLOCKERS.push({x:cx+8,z:cz+6,r:2.7}); // hut
+      BLOCKERS.push({x:cx,z:cz,r:0.6}); // V13.5 : radar mast blocker fits the 0.5 m mast (was 1.4)
+      box(cx+8,cz+6,4.2,2.5,3.2,0x62666a,0.2);OBBS.push({x:cx+8,z:cz+6,hw:2.1,hd:1.6,yaw:0.2}); // V13.5k hut OBB (was r2.7 circle, 1.1 m side slack)
+      push(BOX,cx+8,gy(cx+8,cz+6)+2.30,cz+6,4.6,0.3,3.6,0,0.2,0x4c5540); // V13.5 : radar hut roof (had none)
       const T=V13C.radarTower; // watch tower the counter-sniper posts on
       for(const sx of[-1,1])for(const sz of[-1,1])
         push(BOX,T.x+sx*1.1,gy(T.x,T.z)+T.h/2,T.z+sz*1.1,0.22,T.h,0.22,0,0,0x5a5142);
       push(BOX,T.x,gy(T.x,T.z)+T.h,T.z,3.1,0.28,3.1,0,0,0x6e5636);
+      for(const psx of[-1,1])for(const psz of[-1,1])push(BOX,T.x+psx*1.1,gy(T.x,T.z)+T.h+0.77,T.z+psz*1.1,0.22,1.26,0.22,0,0,0x5a5142); // V13.5 : tower roof posts (roof floated 1.26 m)
       push(BOX,T.x,gy(T.x,T.z)+T.h+1.5,T.z,3.4,0.2,3.4,0,0,0x4c5540);
-      BLOCKERS.push({x:T.x,z:T.z,r:1.5});
+      for(const sx of[-1,1])for(const sz of[-1,1])BLOCKERS.push({x:T.x+sx*1.1,z:T.z+sz*1.1,r:0.2}); // V13.5k radar tower legs (was r2.2 solid wall around 4 thin legs; platform is up high)
       sandArc(cx-6,cz-8,0.6);crate(cx-3,cz+3);crate(cx-1.8,cz+3.5,0.8);
     }
   }
@@ -7611,7 +8020,7 @@ const V13C={
     crate(hd.x+2.6,hd.z+1.8,0.95);
     BUSH.list.push({x:hd.x-1.8,z:hd.z+1.2,r:3.0});
     BUSH.list.push({x:hd.x+2.0,z:hd.z-1.6,r:3.0});
-    BLOCKERS.push({x:hd.x+2.6,z:hd.z+1.8,r:0.9});
+    /* V13.5k : no second blocker here — crate() above already pushed the size-derived one (was a duplicate r0.9) */
   }
   const g=new THREE.BufferGeometry();
   g.setAttribute('position',new THREE.Float32BufferAttribute(bag.pos,3));
@@ -7697,7 +8106,7 @@ function v13TickC(dt,gdt){
    NO loot markers — this code never reads the cache table.
    Opening freezes the world clock exactly like pause/settings (G.mapOpen
    joins the gdt freeze + the walker/HUD gates). */
-const V13D={built:false,open:false,base:null};
+const V13D={built:false,open:false,base:null,dest:null};
 G.mapOpen=false;
 function mapBuildBase(){
   const S=560,cv=document.createElement('canvas');cv.width=cv.height=S;
@@ -7738,6 +8147,23 @@ function mapBuildBase(){
   V13D.base=cv;V13D.built=true;
 }
 function mapW2M(wx,wz){return [(wx+3000)/6000*560,(wz+3000)/6000*560];}
+/* V13.5 NAV : bearing math — map is north-up (screen y ~ world z), compass 0 = north (-z), 90 = east (+x) */
+function navBearing(wx,wz){const dx=wx-G.px,dz=wz-G.pz;return {b:(Math.atan2(dx,-dz)*180/Math.PI+360)%360,d:Math.hypot(dx,dz)};}
+function navCompass(b){return ['N','NE','E','SE','S','SW','W','NW'][Math.round(b/45)%8];}
+function navTurn(b){const head=((-G.yaw*180/Math.PI)%360+360)%360;return ((b-head+540)%360)-180;} // + = turn right, - = turn left
+function navReadout(t){const el=$('mapNav');if(el&&el._t!==t){el._t=t;el.textContent=t;}}
+function mapLabel(x,t,px,py){x.save();x.font='700 13px system-ui';x.textAlign='center';x.lineWidth=4;x.strokeStyle='rgba(4,8,20,0.9)';x.strokeText(t,px,py);x.fillStyle='#eef2ff';x.fillText(t,px,py);x.restore();}
+function setMapDest(wx,wz,name){V13D.dest={x:wx,z:wz,name:name};if(V13D.open)mapDraw();toast('DESTINATION: '+name);}
+function clearMapDest(){V13D.dest=null;if(V13D.open)mapDraw();}
+function navChipTick(){ /* V13.5 NAV : live in-game direction chip — the map screen freezes the world, so live following lives here */
+  const el=$('navChip');if(!el)return;
+  const on=V13D.dest&&(G.state==='play'||G.state==='roam')&&!G.settingsOpen&&!G.pauseOpen&&!G.mapOpen&&!G.heliOpen;
+  if(!on){if(el.style.display!=='none')el.style.display='none';return;}
+  const nb=navBearing(V13D.dest.x,V13D.dest.z),rel=navTurn(nb.b);
+  const t=navCompass(nb.b)+' · '+Math.round(nb.d)+' M';
+  if(el._t!==t){el._t=t;$('navText').textContent=t;}
+  $('navArrow').style.transform='rotate('+rel+'deg)';
+  if(el.style.display!=='block')el.style.display='block';}
 function openMap(){
   if(G.state!=='play'&&G.state!=='roam')return;
   $('mapRoot').style.display='flex';
@@ -7763,7 +8189,7 @@ function mapDraw(){
   const T=G.swayT;
   function diamond(px,py,s,stroke){x.beginPath();x.moveTo(px,py-s);x.lineTo(px+s,py);x.lineTo(px,py+s);x.lineTo(px-s,py);x.closePath();x.strokeStyle=stroke;x.lineWidth=1.6;x.stroke();}
   for(const o of V13C.outposts){const m=mapW2M(o.cx,o.cz);diamond(m[0],m[1],5,'rgba(255,210,122,0.9)');
-    x.fillStyle='rgba(255,210,122,0.9)';x.fillRect(m[0]-1,m[1]-1,2,2);}
+    x.fillStyle='rgba(255,210,122,0.9)';x.fillRect(m[0]-1,m[1]-1,2,2);mapLabel(x,o.name,m[0],m[1]-12);}
   /* active objective : pulsing ring on the mission's outposts */
   const act=V13C.activeFor(G.mission);
   x.strokeStyle='rgba(255,176,58,0.95)';
@@ -7778,8 +8204,10 @@ function mapDraw(){
     const m=mapW2M(V13F.helipad.x,V13F.helipad.z);
     x.strokeStyle='rgba(255,233,160,0.95)';x.lineWidth=1.6;
     x.strokeRect(m[0]-6,m[1]-6,12,12);
-    x.fillStyle='rgba(255,233,160,0.95)';x.font='700 10px system-ui';x.textAlign='center';x.fillText('H',m[0],m[1]+3.5);
+    x.fillStyle='rgba(255,233,160,0.95)';x.font='700 10px system-ui';x.textAlign='center';x.fillText('H',m[0],m[1]+3.5);mapLabel(x,'HELIPAD',m[0],m[1]-14);
   }
+  /* the bridge : labelled at its deck midpoint (deck spans z -408 to -925) */
+  {const bm=mapW2M(0,-666);mapLabel(x,'BRIDGE',bm[0],bm[1]-12);}
   /* the quad, when you're not on it */
   if(!ATV.drive.on){const m=mapW2M(ATV.drive.x,ATV.drive.z);
     x.fillStyle='#e8ecf4';x.fillRect(m[0]-3,m[1]-3,6,6);
@@ -7791,6 +8219,20 @@ function mapDraw(){
   x.beginPath();x.moveTo(9,0);x.lineTo(-6,-5.5);x.lineTo(-3,0);x.lineTo(-6,5.5);x.closePath();
   x.fillStyle='#ffffff';x.fill();x.strokeStyle='#2a4a9a';x.lineWidth=1.4;x.stroke();
   x.restore();
+  /* V13.5 NAV : destination pin + dashed guide line + midpoint distance + readout */
+  if(V13D.dest){const dm=mapW2M(V13D.dest.x,V13D.dest.z);
+    x.save();x.setLineDash([9,7]);x.strokeStyle='rgba(120,220,255,0.95)';x.lineWidth=2.5;
+    x.beginPath();x.moveTo(pm[0],pm[1]);x.lineTo(dm[0],dm[1]);x.stroke();x.restore();
+    x.strokeStyle='rgba(120,220,255,0.95)';x.lineWidth=2;
+    x.beginPath();x.arc(dm[0],dm[1],11+2*Math.sin(T*4),0,TAU);x.stroke();
+    diamond(dm[0],dm[1],6,'rgba(120,220,255,0.95)');
+    mapLabel(x,V13D.dest.name,dm[0],dm[1]-16);
+    const nb=navBearing(V13D.dest.x,V13D.dest.z);
+    mapLabel(x,Math.round(nb.d)+' M',(pm[0]+dm[0])/2,(pm[1]+dm[1])/2-10);
+    const rel=navTurn(nb.b);
+    const turn=Math.abs(rel)<20?'AHEAD':(rel>0?Math.round(rel)+'° RIGHT':Math.round(-rel)+'° LEFT');
+    navReadout('▸ '+V13D.dest.name+' · '+navCompass(nb.b)+' · '+Math.round(nb.d)+' M · '+turn);
+  }else navReadout('TAP A MARKER OR A BUTTON BELOW TO SET A DESTINATION');
   /* north + scale furniture */
   x.fillStyle='#8fa3d9';x.font='700 13px system-ui';x.textAlign='right';x.fillText('N ↑',548,22);
   x.textAlign='left';x.font='600 9px system-ui';x.fillText('1,000 M',12,548);
@@ -7799,6 +8241,22 @@ function mapDraw(){
 function v13TickD(dt,gdt){if(V13D.open&&V13D.built)mapDraw();}
 bindBtn('btnMap',function(){toggleMap();});
 bindEl($('mapClose'),function(){closeMap();});
+$('mapCv').addEventListener('click',function(ev){ /* V13.5 NAV : tap a marker to set it as the destination; tap the player arrow to clear */
+  const cv=$('mapCv'),r=cv.getBoundingClientRect();
+  const cx=(ev.clientX-r.left)*560/r.width,cy=(ev.clientY-r.top)*560/r.height;
+  const hit=function(wx,wz){const m=mapW2M(wx,wz);return Math.hypot(cx-m[0],cy-m[1])<26;};
+  const pm2=mapW2M(G.px,G.pz);
+  if(Math.hypot(cx-pm2[0],cy-pm2[1])<26){clearMapDest();return;} /* player arrow first: a tap on yourself clears even when standing on a camp marker */
+  for(const o of V13C.outposts)if(hit(o.cx,o.cz)){setMapDest(o.cx,o.cz,o.name);return;}
+  if(typeof V13F!=='undefined'&&V13F.helipad&&hit(V13F.helipad.x,V13F.helipad.z)){setMapDest(V13F.helipad.x,V13F.helipad.z,'HELIPAD');return;}
+  if(hit(0,-666)){setMapDest(0,-666,'BRIDGE');return;}
+});
+$('mapDestRow').addEventListener('click',function(ev){const b=ev.target.closest('[data-dest]');if(!b)return;
+  const id=b.getAttribute('data-dest');
+  if(id==='clear'){clearMapDest();return;}
+  if(id==='helipad'&&typeof V13F!=='undefined'&&V13F.helipad){setMapDest(V13F.helipad.x,V13F.helipad.z,'HELIPAD');return;}
+  if(id==='bridgept'){setMapDest(0,-666,'BRIDGE');return;}
+  const o=V13C.byId(id);if(o)setMapDest(o.cx,o.cz,o.name);});
 document.addEventListener('keydown',function(e){
   if(e.code==='KeyM'&&(G.state==='play'||G.state==='roam'))toggleMap();
   if(e.code==='Escape'&&V13D.open)closeMap();
@@ -7861,9 +8319,10 @@ function spawnAnimal(sp,hx,hz){
   const P=V13E.species[sp];if(!P||!P.proto)return null;
   const fig=skinClone(P.proto);
   const matMap=new Map();
-  fig.traverse(function(o){if(o.isMesh){o.frustumCulled=false;o.castShadow=true;
+  fig.traverse(function(o){if(o.isMesh){o.castShadow=true;
+    if(o.geometry){if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();o.geometry.boundingSphere.radius=Math.max(o.geometry.boundingSphere.radius,3);}
     if(!matMap.has(o.material)){const cm=o.material.clone();matMap.set(o.material,cm);}
-    o.material=matMap.get(o.material);}});
+    o.material=matMap.get(o.material);}}); // V13.5 : animals cull with a generous sphere (was frustumCulled=false)
   fig.scale.setScalar(P.scale);
   const grp=new THREE.Group();grp.rotation.order='YXZ';grp.add(fig);scene.add(grp);
   const mixer=new THREE.AnimationMixer(fig),acts={};
@@ -7991,24 +8450,24 @@ function buildEcoScatter(){
   const inLake=function(x,z){const dx=(x-lakeCx)/235,dz=(z+2050)/330;return dx*dx+dz*dz<1.5;};
   const nearRiver=function(x,z){return Math.abs(x-valleyX(z))<140;};
   const byCls={pine:[],broadleaf:[],bush:[],rock:[],grass:[]};
-  const CAP={pine:750,broadleaf:650,bush:750,rock:480,grass:3600};
+  const CAP={pine:750,broadleaf:650,bush:750,rock:480,grass:6000}; // V13.5 : meadow grass cap raised — bare ground was sparse by construction
   for(let cellI=0;cellI<12;cellI++)for(let cellJ=0;cellJ<12;cellJ++){
     const cx0=-3000+cellI*500,cz0=-3000+cellJ*500;
-    for(let t=0;t<64;t++){
+    for(let t=0;t<96;t++){ // V13.5 : more ecology trials per cell — the old 64 starved the meadows
       const x=cx0+rand(8,492),z=cz0+rand(8,492);
       const h=groundH(x,z);
       if(!ecoClear(x,z,h))continue;
       const sl=ecoSlope(x,z);
-      const roll=Math.random();
-      if(h>=50&&h<=178&&sl<0.55&&byCls.pine.length<CAP.pine&&roll<0.42)
+      /* V13.5 : a FRESH roll per class — one shared roll wasted ~58% of samples (roll>=0.42 could never become tree/bush/rock) */
+      if(h>=50&&h<=178&&sl<0.55&&byCls.pine.length<CAP.pine&&Math.random()<0.42)
         byCls.pine.push({x:x,z:z});
-      else if(h>=1&&h<=48&&sl<0.5&&(h<26||inLake(x,z)||nearRiver(x,z))&&byCls.broadleaf.length<CAP.broadleaf&&roll<0.40)
+      else if(h>=1&&h<=48&&sl<0.5&&(h<26||inLake(x,z)||nearRiver(x,z))&&byCls.broadleaf.length<CAP.broadleaf&&Math.random()<0.40)
         byCls.broadleaf.push({x:x,z:z});
-      else if(sl>=0.08&&sl<0.85&&byCls.bush.length<CAP.bush&&roll<0.34){
+      else if(sl>=0.08&&sl<0.85&&byCls.bush.length<CAP.bush&&Math.random()<0.34){
         byCls.bush.push({x:x,z:z});
         if(Math.random()<0.4)BUSH.list.push({x:x,z:z,r:2.4}); // living cover, same rules as the placed bushes
       }
-      else if((sl>0.3||h>110)&&byCls.rock.length<CAP.rock&&roll<0.30)
+      else if((sl>0.3||h>110)&&byCls.rock.length<CAP.rock&&Math.random()<0.30)
         byCls.rock.push({x:x,z:z});
       if(h>=1.2&&h<=65&&sl<0.38&&byCls.grass.length<CAP.grass&&Math.random()<0.75)
         byCls.grass.push({x:x,z:z});
@@ -8153,6 +8612,36 @@ const V13F={ready:false,failed:false,loading:false,built:false,
 };
 function heliSurfaceY(x,z){return V13F.surfY(x,z);}
 /* ---------------- pack load + build ---------------- */
+/* V13.5 : meaner heli dressing, parented to the GLB scene so it inherits tilt/position.
+   Measured Body bbox: x -2.27..2.35, y 0..6.78, z -8.41..5.10 (nose +Z). Parts are placed from the
+   MEASURED box, not guesses. Tubes are PURE DECOR — no weapon code, no buttons, no ammo anywhere. */
+function heliMeanerParts(sc){
+  try{
+    const body=sc.getObjectByName('Body')||sc;
+    body.updateMatrixWorld(true);
+    const bb=new THREE.Box3().setFromObject(body);
+    if(bb.isEmpty())return;
+    const cx=(bb.min.x+bb.max.x)/2,cy=(bb.min.y+bb.max.y)/2;
+    const bw=bb.max.x-bb.min.x;
+    const LM=c=>new THREE.MeshLambertMaterial({color:c});
+    const dark=LM(0x1a2530),glass=LM(0x3a5a78),gun=LM(0x23282e),olive=LM(0x3a3d2a);
+    const bx=(w,h,d,mat,x,y,z,rx)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+      m.position.set(x,y,z);if(rx)m.rotation.x=rx;m.castShadow=true;sc.add(m);return m;};
+    bx(bw*0.70,1.8,1.2,dark,cx,3.3,bb.max.z-0.2,-0.25); // angular nose cap — breaks the slab nose
+    bx(bw*0.52,0.7,0.15,glass,cx,3.9,bb.max.z+0.45,-0.25); // windshield strip
+    for(const sg of[-1,1]){ // stub wings + DECOR missile tubes
+      bx(2.0,0.22,1.6,gun,cx+sg*(bw/2+1.0),2.2,0.5,0);
+      for(const t of[-0.35,0.35]){
+        const tube=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,2.0,10),olive);
+        tube.rotation.x=Math.PI/2;tube.position.set(cx+sg*(bw/2+1.0+t),1.95,0.5);tube.castShadow=true;sc.add(tube);
+        const tip=new THREE.Mesh(new THREE.ConeGeometry(0.15,0.3,10),gun);
+        tip.rotation.x=Math.PI/2;tip.position.set(cx+sg*(bw/2+1.0+t),1.95,1.65);tip.castShadow=true;sc.add(tip);
+      }
+    }
+    const sens=new THREE.Mesh(new THREE.SphereGeometry(0.3,10,10),dark); // chin sensor ball
+    sens.position.set(cx,1.1,bb.max.z+0.15);sens.castShadow=true;sc.add(sens);
+  }catch(err){console.warn('[longshot] heli meaner parts skipped',err);}
+}
 function loadV13Heli(){
   if(V13F.loading||V13F.ready||V13F.failed)return;V13F.loading=true;
   const s=document.createElement('script');s.src='models/v13-heli-data.js';
@@ -8164,7 +8653,7 @@ function loadV13Heli(){
       for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
       new THREE.GLTFLoader().parse(u8.buffer,'',function(g){
         const sc=g.scene;
-        sc.traverse(function(o){if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
+        sc.traverse(function(o){if(o.isMesh){o.castShadow=true;if(o.geometry){if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();o.geometry.boundingSphere.radius=Math.max(o.geometry.boundingSphere.radius,8);}}}); // V13.5 : heli meshes cull with a generous sphere (was frustumCulled=false — drawn + shadowed from everywhere)
         const grp=new THREE.Group();grp.rotation.order='YXZ';grp.add(sc);scene.add(grp);
         V13F.grp=grp;V13F.body=sc;
         V13F.mr=sc.getObjectByName('MainRotor');V13F.tr=sc.getObjectByName('TailRotor');
@@ -8177,6 +8666,7 @@ function loadV13Heli(){
         const nav=new THREE.Mesh(new THREE.SphereGeometry(0.11,8,8),
           new THREE.MeshBasicMaterial({color:0xff2a22,transparent:true,opacity:0.25}));
         nav.position.set(0.25,5.6,-7.35);sc.add(nav);V13F.navMat=nav.material;
+        heliMeanerParts(sc); // V13.5 : meaner silhouette + DECOR missile tubes
         grp.visible=false;
         V13F.ready=true;
         // a previously-owned, previously-parked aircraft is simply THERE
@@ -8196,16 +8686,19 @@ function buildHelipad(){
   const cv=document.createElement('canvas');cv.width=cv.height=256;const x2=cv.getContext('2d');
   x2.fillStyle='#33373c';x2.fillRect(0,0,256,256);
   for(let i=0;i<900;i++){x2.fillStyle='rgba(255,255,255,'+(Math.random()*0.05)+')';x2.fillRect(Math.random()*256,Math.random()*256,2,2);}
-  x2.strokeStyle='#e8e4da';x2.lineWidth=7;x2.beginPath();x2.arc(128,128,112,0,Math.PI*2);x2.stroke();
+  x2.strokeStyle='#e8e4da';x2.lineWidth=10;x2.beginPath();x2.arc(128,128,112,0,Math.PI*2);x2.stroke(); // V13.5 : heavier ring for grazing-angle readability
   x2.fillStyle='#e8e4da';x2.font='900 118px Arial';x2.textAlign='center';x2.textBaseline='middle';
   x2.fillText('H',128,134);
   const tex=new THREE.CanvasTexture(cv);
   const disc=new THREE.Mesh(new THREE.CircleGeometry(V13F.PAD_R,40),
     new THREE.MeshLambertMaterial({map:tex}));
   disc.rotation.x=-Math.PI/2;disc.position.set(cx,topY,cz);disc.receiveShadow=true;g.add(disc);
-  const skirt=new THREE.Mesh(new THREE.CylinderGeometry(V13F.PAD_R+0.7,V13F.PAD_R+1.5,0.3,40),
+  const skirt=new THREE.Mesh(new THREE.CylinderGeometry(V13F.PAD_R+0.7,V13F.PAD_R+1.5,0.3,40,1,true), // V13.5 : open-ended — the old capped top sat 0.01 m under the disc and z-fought it into a grey slab
     new THREE.MeshLambertMaterial({color:0x555a60}));
   skirt.position.set(cx,topY-0.16,cz);g.add(skirt);
+  const rim=new THREE.Mesh(new THREE.RingGeometry(V13F.PAD_R,V13F.PAD_R+0.6,40),
+    new THREE.MeshLambertMaterial({color:0xd8d2c0,side:THREE.DoubleSide}));
+  rim.rotation.x=-Math.PI/2;rim.position.set(cx,topY+0.02,cz);g.add(rim); // V13.5 : raised curb ring — the pad reads as ground, not a wall
   // edge lights : eight warm beads on the rim
   const lm=new THREE.MeshBasicMaterial({color:0xffc46b});
   for(let i=0;i<8;i++){const a=i/8*Math.PI*2;
@@ -8415,9 +8908,11 @@ function heliTick(dt,gdt){
   const cl=Math.hypot(cycX,cycY);if(cl>1){cycX/=cl;cycY/=cl;}
   f.head-=yawIn*0.85*gdt;
   /* cyclic : tilt targets — smoothed, so she leans in and out, never snaps */
+  const noCyc=(cycX===0&&cycY===0);
   const tP=-cycY*0.40,tR=cycX*0.32;
-  F.tiltP+=(tP-F.tiltP)*Math.min(1,gdt*2.4);
-  F.tiltR+=(tR-F.tiltR)*Math.min(1,gdt*2.4);
+  const tiltK=noCyc?5.0:2.4; // V13.5 AUTO-LEVEL : sticks released, she levels briskly instead of wallowing
+  F.tiltP+=(tP-F.tiltP)*Math.min(1,gdt*tiltK);
+  F.tiltR+=(tR-F.tiltR)*Math.min(1,gdt*tiltK);
   /* acceleration : the tilted disc pulls her along her own axes */
   const fx=Math.sin(f.head),fz=Math.cos(f.head),rxv=Math.cos(f.head),rzv=-Math.sin(f.head);
   const pull=27;
@@ -8425,15 +8920,14 @@ function heliTick(dt,gdt){
   f.vz+=(fz*(F.tiltP)*pull+rzv*F.tiltR*pull)*gdt;
   /* drag : strong bleed with no cyclic input (she settles to a hover),
      gentle under way (terminal ~98, capped at MAXH — the quad's 56 is far below) */
-  const noCyc=(cycX===0&&cycY===0);
-  const dragK=noCyc?0.85:0.11;
+  const dragK=noCyc?1.6:0.11; // V13.5 AUTO-LEVEL : released sticks bleed horizontal drift hard — she stops instead of sailing on
   f.vx-=f.vx*dragK*gdt;f.vz-=f.vz*dragK*gdt;
   const hSpd=Math.hypot(f.vx,f.vz),MAXH=82;
   if(hSpd>MAXH){f.vx*=MAXH/hSpd;f.vz*=MAXH/hSpd;}
   /* vertical : collective drives a damped climb rate; no input = altitude hold */
   const lift=F.rpm>0.92;
   const vyT=lift?coll*15:0;
-  f.vy+=(vyT-f.vy)*Math.min(1,gdt*(coll!==0?1.6:2.6));
+  f.vy+=(vyT-f.vy)*Math.min(1,gdt*(coll!==0?1.6:4.0)); // V13.5 AUTO-LEVEL : altitude settles faster with no collective input
   if(!lift&&!f.onGround)f.vy-=3.2*gdt; // spooled down in the air = she settles, never drops like a stone
   /* integrate */
   f.x=clamp(f.x+f.vx*gdt,-2960,2960);f.z=clamp(f.z+f.vz*gdt,-2960,2960);
@@ -8496,7 +8990,8 @@ bindBtn('btnHUp',()=>{V13F.up=true;$('btnHUp').classList.add('on');},()=>{V13F.u
 bindBtn('btnHDown',()=>{V13F.down=true;$('btnHDown').classList.add('on');},()=>{V13F.down=false;$('btnHDown').classList.remove('on');});
 bindBtn('btnHYawL',()=>{V13F.yawL=true;$('btnHYawL').classList.add('on');},()=>{V13F.yawL=false;$('btnHYawL').classList.remove('on');});
 bindBtn('btnHYawR',()=>{V13F.yawR=true;$('btnHYawR').classList.add('on');},()=>{V13F.yawR=false;$('btnHYawR').classList.remove('on');});
-bindBtn('btnFly',()=>{if(V13F.flyOn){if(V13F.fly.onGround)exitFlight(false);}else enterFlight();});
+bindBtn('btnFly',()=>{if(V13F.flyOn){if(V13F.fly.onGround)exitFlight(false);else toast('LAND FIRST TO EXIT');}else enterFlight();}); // V13.5 : the mid-air EXIT gate now explains itself (was silent)
+bindBtn('btnSprint',()=>{G.sprintHeld=true;$('btnSprint').classList.add('on');},()=>{G.sprintHeld=false;$('btnSprint').classList.remove('on');}); // V13.5 SPRINT (hold)
 bindEl($('btnPad'),()=>{if(V13F.nearPad&&!V13F.popOpen)openHeliPop();});
 bindEl($('heliNo'),()=>{closeHeliPop();tick();});
 bindEl($('heliYes'),()=>{confirmHeliSpawn();});
@@ -8504,7 +8999,7 @@ document.addEventListener('keydown',e=>{
   if(G.state!=='play'&&G.state!=='roam')return;
   if(V13F.popOpen){if(e.code==='Escape')closeHeliPop();return;}
   if(e.code==='KeyE'){
-    if(V13F.flyOn){if(V13F.fly.onGround)exitFlight(false);}
+    if(V13F.flyOn){if(V13F.fly.onGround)exitFlight(false);else toast('LAND FIRST TO EXIT');}
     else if(ATV.drive.on){/* the quad's own E handler owns this press */}
     else if(V13F.nearHeli)enterFlight();
     else if(V13F.nearPad)openHeliPop();
