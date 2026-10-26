@@ -670,7 +670,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v13.6</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v13.7</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -842,8 +842,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='13.6'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='13.7'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'13.7',lines:[ // V13.7 : Firebase access-key gate — personal keys, vault-checked
+  '<b>ACCESS KEY</b> \— the game now opens with your own personal key: after PLAY, enter the key issued to you and you\u2019re in. Keys are checked against the vault (one per player), a revoked key stops working, and your key is remembered on your device so you don\u2019t retype it.']},
  {v:'13.6',lines:[ // V13.6 : on-device verdict fixes — ghillie + net + bags rebuilt, guards fixed, meaner heli, no-surprises sweep
   '<b>VERDICT FIXES</b> \— the spawn ghillie, the overhead net and the sandbags are rebuilt so they read as camo and sandbags, not stripes and beige boxes. <b>GUARDS FIXED</b> \— camp guards are proper armed soldiers again (the black T-pose figures are gone) and the helicopter wears a meaner nose, bigger tubes and bright edges. <b>NO SURPRISES</b> \— shadows, tracers, map scrolling and the nav arrow in flight are all fixed too. <b>NEW CONTROLS</b> \— the touch buttons are rebuilt as clean icon buttons (no more text ovals) and the helicopter stick now banks and slides the way you push it. <b>SOLID WORLD</b> \— rocks, trees, bridge piers and camp buildings are real walls now, on foot and on the quad. <b>NEW MAP</b> \— outpost labels no longer pile up, the terrain reads properly, and the destination row and compass are fully visible.']},
  {v:'13.5',lines:[ // V13.5 : bug-tour fixes + camp guards + 5 bosses + heli overhaul + sprint + map nav
@@ -1068,10 +1070,140 @@ const LD={
     try{audio();}catch(e){} // the PLAY tap IS the audio gesture unlock
     try{if(typeof sClick==='function')sClick();}catch(e){}
     LD.el.ldRoot.classList.add('gone');
+    try{KEYGATE.show();}catch(e){} // V13.7 : PLAY opens the access-key gate
     setTimeout(function(){if(LD.el.ldRoot)LD.el.ldRoot.style.display='none';},520);
   }
 };
 LD.init();
+
+/* ==================== V13.7 — FIREBASE ACCESS-KEY GATE ===================
+   Front door: after PLAY, a full-screen black overlay asks for the player's
+   own access key. Validation is ONE path only: Firestore collection
+   `accessKeys`, doc ID = the entered key, valid iff the doc exists AND
+   active == true. No embedded key list anywhere in this file.
+   - Session rule: the "passed" flag lives in sessionStorage ONLY and is set
+     only by KEYGATE.authorize(), which runs only after a server validation
+     (or the offline cached-key allowance below). NO localStorage boolean.
+   - Cache policy: the validated KEY itself (not a boolean) is stored in
+     localStorage so a returning player skips typing; it is re-validated
+     online on every launch, so revocation is respected. Offline + a
+     previously validated key on this device still enters (revocation then
+     takes effect on the next online launch — stated honestly, not hidden).
+   - Revoked vs invalid are DISTINCT messages: doc exists + active==false
+     -> "This key has been revoked. Contact the owner."; doc missing ->
+     generic invalid message. Deleting a doc therefore yields the generic
+     message; active=false is the recommended revoke path.
+   - Enforcement layer: deployMission / enterRoam / startMission-instant all
+     refuse play without the session flag, so the gate is not just an
+     overlay — hiding the overlay alone never starts the game.
+   - Google sign-in / cloud save are untouched and stay optional + separate;
+     the gate never requires sign-in, and sign-in still works after the gate.
+   ========================================================================== */
+const KEYGATE={
+  SS:'longshot_keypass', LS:'longshot_key', _fastDone:false, busy:false,
+  passed:function(){try{return sessionStorage.getItem(KEYGATE.SS)==='1';}catch(e){return false;}},
+  cached:function(){try{return localStorage.getItem(KEYGATE.LS)||'';}catch(e){return '';}},
+  remember:function(k){try{localStorage.setItem(KEYGATE.LS,k);}catch(e){}},
+  forget:function(){try{localStorage.removeItem(KEYGATE.LS);}catch(e){}},
+  authorize:function(){try{sessionStorage.setItem(KEYGATE.SS,'1');}catch(e){}},
+  build:function(){
+    if(document.getElementById('keyGateRoot'))return;
+    var st=document.createElement('style');
+    st.textContent='#keyGateRoot{position:fixed;inset:0;z-index:950;background:#000;display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto;font-family:inherit}'+
+    '#keyGateCard{width:min(360px,92vw);background:linear-gradient(180deg,#0a1230,#05081a);border:1.5px solid rgba(70,110,255,.55);border-radius:18px;padding:28px 24px 24px;text-align:center;color:#e8eeff;box-shadow:0 0 40px rgba(46,91,255,.35)}'+
+    '#keyGateCard .kgWord{font-size:26px;font-weight:900;letter-spacing:.22em;color:#e8eeff;text-shadow:0 0 18px rgba(46,91,255,.9),0 0 42px rgba(46,91,255,.45)}'+
+    '#keyGateCard .kgSub{font-size:11px;font-weight:700;letter-spacing:.42em;color:#8fa3d9;margin-top:2px}'+
+    '#keyGateCard .kgRule{height:2px;margin:16px auto;background:linear-gradient(90deg,transparent,#2e5bff,transparent);border:0}'+
+    '#keyGateCard .kgHead{font-size:17px;font-weight:800;letter-spacing:.28em;margin:4px 0 6px}'+
+    '#keyGateCard .kgHint{font-size:12px;line-height:1.5;color:#8fa3d9;margin:0 0 16px}'+
+    '#keyGateIn{width:100%;box-sizing:border-box;padding:14px 12px;font-size:20px;letter-spacing:.18em;text-align:center;background:#05081a;border:1.5px solid #2e5bff;border-radius:12px;color:#e8eeff;outline:none;font-family:inherit}'+
+    '#keyGateBtn{width:100%;margin-top:14px;padding:14px 0;border:0;border-radius:12px;background:linear-gradient(180deg,#2e5bff,#2a4bd8);color:#e8eeff;font-family:inherit;font-size:16px;font-weight:800;letter-spacing:.3em;cursor:pointer;box-shadow:0 0 22px rgba(46,91,255,.45)}'+
+    '#keyGateBtn:disabled{opacity:.55;cursor:default}'+
+    '#keyGateMsg{min-height:20px;margin-top:12px;font-size:13px;line-height:1.4;color:#aebfff}'+
+    '#keyGateMsg.err{color:#ff7a7a}'+
+    '#keyGateFoot{margin-top:14px;font-size:11px;color:#5f739f;letter-spacing:.06em}';
+    document.head.appendChild(st);
+    var r=document.createElement('div');r.id='keyGateRoot';
+    r.innerHTML='<div id="keyGateCard">'+
+      '<div class="kgWord">GHOSTLINE</div><div class="kgSub">SNIPER OPS</div><hr class="kgRule">'+
+      '<div class="kgHead">ACCESS KEY</div>'+
+      '<p class="kgHint">Enter the key issued to you.<br>Keys are case-sensitive — one key per player.</p>'+
+      '<input id="keyGateIn" type="text" inputmode="text" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" aria-label="Access key">'+
+      '<button id="keyGateBtn" type="button">UNLOCK</button>'+
+      '<div id="keyGateMsg"></div>'+
+      '<div id="keyGateFoot">No key? Contact the owner.</div></div>';
+    document.body.appendChild(r);
+    document.getElementById('keyGateBtn').addEventListener('click',function(){KEYGATE.submit();});
+    document.getElementById('keyGateIn').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();KEYGATE.submit();}});
+  },
+  msg:function(t,isErr){var m=document.getElementById('keyGateMsg');if(!m)return;m.textContent=t||'';m.className=isErr?'err':'';},
+  setBtn:function(on){var b=document.getElementById('keyGateBtn');if(b){b.disabled=!on;}},
+  ensureDb:function(){return new Promise(function(res){
+    try{
+      if(typeof FBAPI!=='undefined'&&FBAPI.db){res(FBAPI.db);return;}
+      if(typeof firebase!=='undefined'&&firebase.firestore){
+        try{if(typeof FBAPI!=='undefined'&&FBAPI.init)FBAPI.init();}catch(e){}
+        res((typeof FBAPI!=='undefined'&&FBAPI.db)||null);return;}
+      if(typeof FBAPI!=='undefined'&&FBAPI.load){FBAPI.load().then(function(ok){
+        try{if(ok&&FBAPI.init)FBAPI.init();}catch(e){}
+        res(FBAPI.db||null);},function(){res(null);});return;}
+      res(null);
+    }catch(e){res(null);}
+  });},
+  /* validate: {net, valid, revoked}. net=false = could not reach Firestore. */
+  validate:function(key){return KEYGATE.ensureDb().then(function(db){
+    if(!db)return{net:false,valid:false,revoked:false};
+    return db.collection('accessKeys').doc(key).get().then(function(snap){
+      var ex=false,d=null;
+      try{ex=!!(snap&&snap.exists);d=ex?snap.data():null;}catch(e){ex=false;d=null;}
+      if(ex&&d&&d.active===true)return{net:true,valid:true,revoked:false};
+      if(ex)return{net:true,valid:false,revoked:true};
+      return{net:true,valid:false,revoked:false};
+    },function(){return{net:false,valid:false,revoked:false};});
+  });},
+  show:function(){
+    if(KEYGATE.passed()){KEYGATE.lift();return;}
+    KEYGATE.build();
+    var r=document.getElementById('keyGateRoot');if(!r)return;
+    r.style.display='flex';
+    var inp=document.getElementById('keyGateIn');
+    var c=KEYGATE.cached();
+    if(c&&!KEYGATE._fastDone){ /* returning player: re-validate the saved key */
+      KEYGATE._fastDone=true;KEYGATE.msg('CHECKING SAVED KEY…',false);KEYGATE.setBtn(false);
+      KEYGATE.validate(c).then(function(v){
+        KEYGATE.setBtn(true);
+        if(v.net&&v.valid){KEYGATE.authorize();KEYGATE.lift();}
+        else if(v.net&&v.revoked){KEYGATE.forget();KEYGATE.msg('This key has been revoked. Contact the owner.',true);if(inp)inp.focus();}
+        else if(v.net){KEYGATE.forget();KEYGATE.msg('That key is no longer valid. Enter a new key.',true);if(inp)inp.focus();}
+        else{KEYGATE.authorize();KEYGATE.lift();} /* offline + previously validated key */
+      });
+      return;
+    }
+    if(inp&&document.activeElement!==inp)inp.focus();
+  },
+  submit:function(){
+    if(KEYGATE.busy)return;
+    var inp=document.getElementById('keyGateIn');if(!inp)return;
+    var k=(inp.value||'').replace(/^\s+|\s+$/g,'');
+    if(!k){KEYGATE.msg('Enter your access key.',true);inp.focus();return;}
+    KEYGATE.busy=true;KEYGATE.msg('CHECKING…',false);KEYGATE.setBtn(false);
+    KEYGATE.validate(k).then(function(v){
+      KEYGATE.busy=false;KEYGATE.setBtn(true);
+      if(v.net&&v.valid){KEYGATE.remember(k);KEYGATE.authorize();KEYGATE.lift();}
+      else if(v.net&&v.revoked){KEYGATE.msg('This key has been revoked. Contact the owner.',true);inp.focus();inp.select();}
+      else if(v.net){KEYGATE.msg('Invalid key — check it and try again.',true);inp.focus();inp.select();}
+      else if(KEYGATE.cached()===k){KEYGATE.authorize();KEYGATE.lift();} /* offline + previously validated key */
+      else{KEYGATE.msg('No connection — connect and try again.',true);inp.focus();}
+    });
+  },
+  lift:function(){
+    var r=document.getElementById('keyGateRoot');
+    if(r)r.style.display='none';
+    KEYGATE.busy=false;
+    var inp=document.getElementById('keyGateIn');
+    if(inp){inp.value='';try{inp.blur();}catch(e){}}
+  }
+};
 
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const lerp=(a,b,t)=>a+(b-a)*t;
@@ -2749,6 +2881,7 @@ function spawnRoamCampEnemies(){
 }
 function enterRoam(){
   if(G.state!=='menu')return;
+  if(!KEYGATE.passed()){KEYGATE.show();return;} // V13.7 : no roam without a validated key in this session
   G.rifle=selRifle;lsSet('longshot_rifle',selRifle);
   startMission(G.menuMission); // full world reset on the picked mission (lands in menu; roam flag is set after, startMission clears it)
   hideMenu();G.state='roam';G.roam=true;document.body.classList.add('roam');
@@ -5078,8 +5211,9 @@ function startMission(n,instant){
   closePause();hideResults();
   showMenu(); // GHOSTLINE front door replaces the old mission card (living valley already respawned above)
   updateHUD();
-  if(instant){ // QUICK RETRY : same mission, same rifle — straight into play, no menu stop
+  if(instant&&KEYGATE.passed()){ // QUICK RETRY : same mission, same rifle — straight into play, no menu stop
     hideMenu();G.state='play';audio();wlRequest();sClick();updateHUD();}
+  else if(instant){KEYGATE.show();} // V13.7 : instant start without a validated key lands in the menu + gate, never in play
 }
 function missionComplete(){
   endKillcam();wlRelease();
@@ -5604,6 +5738,7 @@ function openTab(name){
 }
 function deployMission(){ // the old card tap-to-start : lock the rifle pick, hide the menu, straight into play — no extra step
   if(G.state!=='menu')return;
+  if(!KEYGATE.passed()){KEYGATE.show();return;} // V13.7 : no play without a validated key in this session
   G.rifle=selRifle;lsSet('longshot_rifle',selRifle);
   applyRifleZoom(); // scope range + stock look follow the locked-in rifle
   hideMenu();G.state='play';audio();wlRequest();sClick();buzz(10);updateHUD(); // WAKE LOCK : screen stays on for the mission
