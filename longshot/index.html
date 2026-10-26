@@ -670,7 +670,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v13.8</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v13.9</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -842,8 +842,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='13.8'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='13.9'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'13.9',lines:[ // V13.9 : online-required gate — no offline entry, funny bypass denial
+  '<b>ONLINE REQUIRED</b> — the gate now needs an internet connection: no more getting in offline, even with a saved key. A revoked key stops working on the very next launch, no exceptions. And if you try the offline trick, the gate has something to say about it.']},
  {v:'13.8',lines:[ // V13.8 : first-use key log — owner notified on first use of each key
   '<b>KEY USE NOTICES</b> \— the first time each access key is used, the owner gets notified. Nothing changes for you at the gate: same key, same black screen, and your key is still remembered on your device.']},
  {v:'13.7',lines:[ // V13.7 : Firebase access-key gate — personal keys, vault-checked
@@ -1084,13 +1086,16 @@ LD.init();
    `accessKeys`, doc ID = the entered key, valid iff the doc exists AND
    active == true. No embedded key list anywhere in this file.
    - Session rule: the "passed" flag lives in sessionStorage ONLY and is set
-     only by KEYGATE.authorize(), which runs only after a server validation
-     (or the offline cached-key allowance below). NO localStorage boolean.
+     only by KEYGATE.authorize(), which runs only after a server validation.
+     NO localStorage boolean, and NO offline allowance (V13.9: the gate
+     requires an online connection — offline never lifts, cached key or not).
    - Cache policy: the validated KEY itself (not a boolean) is stored in
      localStorage so a returning player skips typing; it is re-validated
-     online on every launch, so revocation is respected. Offline + a
-     previously validated key on this device still enters (revocation then
-     takes effect on the next online launch — stated honestly, not hidden).
+     online on every launch, so revocation is respected. V13.9: offline
+     NEVER enters — the gate shows "No connection" and refuses entry until
+     the device is back online, so a revoked key blocks on the very next
+     launch with no offline path around it. Cost, accepted by MW: no
+     internet = no game, including for the owner.
    - Revoked vs invalid are DISTINCT messages: doc exists + active==false
      -> "This key has been revoked. Contact the owner."; doc missing ->
      generic invalid message. Deleting a doc therefore yields the generic
@@ -1123,6 +1128,7 @@ const KEYGATE={
     '#keyGateBtn:disabled{opacity:.55;cursor:default}'+
     '#keyGateMsg{min-height:20px;margin-top:12px;font-size:13px;line-height:1.4;color:#aebfff}'+
     '#keyGateMsg.err{color:#ff7a7a}'+
+    '#keyGateMsgSub{margin-top:4px;font-size:12px;line-height:1.4;color:#8fa3d9}'+
     '#keyGateFoot{margin-top:14px;font-size:11px;color:#5f739f;letter-spacing:.06em}';
     document.head.appendChild(st);
     var r=document.createElement('div');r.id='keyGateRoot';
@@ -1133,12 +1139,15 @@ const KEYGATE={
       '<input id="keyGateIn" type="text" inputmode="text" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" aria-label="Access key">'+
       '<button id="keyGateBtn" type="button">UNLOCK</button>'+
       '<div id="keyGateMsg"></div>'+
+      '<div id="keyGateMsgSub"></div>'+
       '<div id="keyGateFoot">No key? Contact the owner.</div></div>';
     document.body.appendChild(r);
     document.getElementById('keyGateBtn').addEventListener('click',function(){KEYGATE.submit();});
     document.getElementById('keyGateIn').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();KEYGATE.submit();}});
   },
-  msg:function(t,isErr){var m=document.getElementById('keyGateMsg');if(!m)return;m.textContent=t||'';m.className=isErr?'err':'';},
+  msg:function(t,isErr){var m=document.getElementById('keyGateMsg');if(!m)return;m.textContent=t||'';m.className=isErr?'err':'';var s2=document.getElementById('keyGateMsgSub');if(s2)s2.textContent='';},
+  /* V13.9: funny offline-bypass denial — headline + plain subline, same card. */
+  msgFunny:function(h,s){var m=document.getElementById('keyGateMsg');if(m){m.textContent=h||'';m.className='';}var s2=document.getElementById('keyGateMsgSub');if(s2)s2.textContent=s||'';},
   setBtn:function(on){var b=document.getElementById('keyGateBtn');if(b){b.disabled=!on;}},
   ensureDb:function(){return new Promise(function(res){
     try{
@@ -1177,7 +1186,7 @@ const KEYGATE={
         if(v.net&&v.valid){KEYGATE.authorize();KEYGATE.lift();}
         else if(v.net&&v.revoked){KEYGATE.forget();KEYGATE.msg('This key has been revoked. Contact the owner.',true);if(inp)inp.focus();}
         else if(v.net){KEYGATE.forget();KEYGATE.msg('That key is no longer valid. Enter a new key.',true);if(inp)inp.focus();}
-        else{KEYGATE.authorize();KEYGATE.lift();} /* offline + previously validated key */
+        else{KEYGATE.msgFunny('bro tried the offline method 😂✌🏻','Nice try — connect to the internet to get in.');if(inp)inp.focus();} /* V13.9: offline NEVER lifts — cached holder gets the funny denial */
       });
       return;
     }
@@ -1198,8 +1207,8 @@ const KEYGATE={
       if(v.net&&v.valid){KEYGATE.remember(k);KEYGATE.authorize();KEYGATE.logUse(v.label);KEYGATE.lift();}
       else if(v.net&&v.revoked){KEYGATE.msg('This key has been revoked. Contact the owner.',true);inp.focus();inp.select();}
       else if(v.net){KEYGATE.msg('Invalid key — check it and try again.',true);inp.focus();inp.select();}
-      else if(KEYGATE.cached()===k){KEYGATE.authorize();KEYGATE.lift();} /* offline + previously validated key */
-      else{KEYGATE.msg('No connection — connect and try again.',true);inp.focus();}
+      else if(KEYGATE.cached()&&KEYGATE.cached()===k){KEYGATE.msgFunny('bro tried the offline method 😂✌🏻','Nice try — connect to the internet to get in.');inp.focus();} /* V13.9: typed cached key while offline = bypass attempt, funny denial */
+      else{KEYGATE.msg('No connection — connect and try again.',true);inp.focus();} /* V13.9: plain offline denial for everyone else */
     });
   },
   lift:function(){
