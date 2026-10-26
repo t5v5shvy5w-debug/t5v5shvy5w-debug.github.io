@@ -691,7 +691,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v14.1</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v14.2</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -864,8 +864,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='14.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='14.2'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'14.2',lines:[ // V14.2 : TP camera behind + joystick fixed + body rifle held + lobby hold guaranteed
+  '<b>THIRD-PERSON, FIXED</b> — the chase camera now sits behind your soldier (back of the head, not the face), and the walk stick moves you the way you push: up walks away from the camera, like it should. <b>YOUR SNIPER, IN HAND</b> — in third-person your rifle now sits in your soldier\u2019s hands at chest height, or slung across the back when the knife is out — never sticking out of the midsection again, including mid-switch. <b>LOBBY SHOWCASE, GUARANTEED</b> — the lobby soldier always holds your equipped sniper, and the standalone rifle can never show up beside it.']},
  {v:'14.1',lines:[ // V14.1 : creation fix + visual grid + hold pose + third-person cam + quad hands
   '<b>CREATION FIXED + 10× BETTER</b> — the preview figure now actually changes on every tap (gender, skin, clothes), and every grid square shows a real preview of the item itself, not just a label. <b>YOUR SOLDIER, FRONT AND CENTER</b> — the lobby soldier now holds your equipped sniper instead of standing tiny beside it. <b>THIRD-PERSON CAMERA</b> — a new camera option (Settings + the camera button, on by default): pull back behind your soldier anytime, with holster-to-back and draw-from-behind weapon animations, and the scope still zooms to first-person exactly as before. <b>QUAD RIDER</b> — hands properly on the handlebars, and your walk animation works on foot.']},
  {v:'14.0',lines:[ // V14.0 : helipad fix + heli refine + HUD customization + town + character creation
@@ -6276,6 +6278,7 @@ function pvTick(dt){ // called from the main frame loop ; renders only while the
   const mr=$('menuRoot');
   if(!mr||mr.style.display==='none')return; // LOBBY FIX : in-game — preview loop fully paused
   try{if(typeof CHAR!=='undefined')CHAR.syncPvChar();}catch(e){} // V14.0 C4 : lobby showcase figure follows the saved character
+  try{const _pid=(pvCanvas&&pvCanvas.parentNode)?pvCanvas.parentNode.id:'';if(pv.spin&&pv.spin.parent)pv.spin.parent.visible=(_pid!=='pvHome');}catch(e){} // V14.2 : stage visibility is LAW, not a sync-path side effect — the standalone rifle can never show in pvHome even if syncPvChar throws
   if(!pvCanvas.getClientRects||!pvCanvas.getClientRects().length)return; // LOBBY FIX : canvas parked in a hidden slot (MISSIONS / SETTINGS tabs) — paused. HOME / LOADOUT / SKINS keep their live turntable because the canvas is visibly mounted there.
   if(pvCanvas.parentNode){const _r=pvCanvas.parentNode.getBoundingClientRect(); // LOBBY POLISH : slot size changed under us (rotate / re-parent / tab settle) — re-fit THIS frame ; a fit computed at another size never survives into a visible state
     if(Math.abs(_r.width-(pv._lw||0))>1||Math.abs(_r.height-(pv._lh||0))>1)pvResize();}
@@ -7260,7 +7263,7 @@ function tpcFrame(dt){
       TPC.camYaw+=dy*(1-Math.exp(-dt*6));
       const fx=Math.sin(TPC.camYaw),fz=Math.cos(TPC.camYaw);
       _tpEye.set(G.px,surfH(G.px,G.pz)+1.7,G.pz);
-      _tpPos.set(G.px-fx*3.2,0,G.pz-fz*3.2);
+      _tpPos.set(G.px+fx*3.2,0,G.pz+fz*3.2); // V14.2 : chase cam BEHIND the player (was: minus placed it 3.2 m in FRONT, showing the face and inverting the joystick)
       _tpPos.y=Math.max(surfH(_tpPos.x,_tpPos.z)+0.7,surfH(G.px,G.pz)+2.0);
       const e=tr*tr*(3-2*tr);
       _tpEQ.copy(camera.quaternion);
@@ -10732,11 +10735,16 @@ const CHAR=(function(){
      standalone preview rifle hides in pvHome (figure carries it) and shows in
      every other tab, exactly as before. */
   function buildHoldRifle(){
-    try{
-      const outer=new THREE.Group();
-      const fit=(typeof pv!=='undefined'&&pv.fit)?pv.fit:null;
-      const src=(fit&&fit.children&&fit.children[0])?fit.children[0]:null;
-      if(src){
+    // V14.2 : clone path and procedural fallback are INDEPENDENT — a clone
+    // failure falls through to the fallback instead of returning null (the
+    // old single try/catch made the held prop silently vanish on any clone
+    // error, e.g. a Safari-only clone failure on the equipped GLB).
+    const outer=new THREE.Group();
+    const fit=(typeof pv!=='undefined'&&pv.fit)?pv.fit:null;
+    const src=(fit&&fit.children&&fit.children[0])?fit.children[0]:null;
+    let built=false;
+    if(src){
+      try{
         const inner=new THREE.Group();
         const clone=src.clone(true);clone.visible=true;
         const junk=[];clone.traverse(function(o){if(o.isPoints||o.isLine)junk.push(o);});
@@ -10747,9 +10755,11 @@ const CHAR=(function(){
         if(long>0.001){
           if(sz.z>sz.x&&sz.z>sz.y)inner.rotation.y=Math.PI/2;
           inner.scale.setScalar(1.9/long);
+          outer.add(inner);built=true;
         }
-        outer.add(inner);
-      }else{
+      }catch(e){built=false;try{if(typeof console!=='undefined'&&console.warn)console.warn('holdProp clone failed, using fallback');}catch(e2){}}
+    }
+    if(!built){
         const sk=(typeof equippedSkin==='function')?equippedSkin():null;
         const tint=(typeof skinTintFor==='function'&&sk)?skinTintFor(G.rifle,sk):0x2a2f38;
         const metal=new THREE.MeshStandardMaterial({color:0x1c1f26,metalness:0.7,roughness:0.45});
@@ -10763,8 +10773,7 @@ const CHAR=(function(){
         g.add(mk(0.10,0.16,0.06,metal,-0.05,-0.13,0));
         outer.add(g);
       }
-      return outer;
-    }catch(e){return null;}
+    return outer;
   }
   function disposeOwn(grp){if(!grp)return;grp.traverse(function(o){try{if(o.userData&&o.userData._ownGeo){if(o.geometry)o.geometry.dispose();if(o.material&&o.material.dispose)o.material.dispose();}}catch(e){}});}
   function sizePvFigure(grp,ch){
@@ -10786,7 +10795,7 @@ const CHAR=(function(){
       const key=JSON.stringify(ch)+'|'+parentId+'|'+rk+'|'+skId;
       const inHome=(parentId==='pvHome');
       const rifleGrp=(typeof pv!=='undefined'&&pv.spin)?pv.spin.parent:null;
-      if(!force&&key===pvKey){if(pvGrp){pvGrp.visible=inHome;sizePvFigure(pvGrp,ch);}if(rifleGrp)rifleGrp.visible=!inHome;return;}
+      if(!force&&key===pvKey){if(pvGrp){pvGrp.visible=inHome;sizePvFigure(pvGrp,ch);if(inHome&&!pvGrp.userData.holdProp){try{const _p=buildHoldRifle();if(_p){_p.position.set(0.05,1.20,0.50);_p.rotation.set(0,0.10,0.45);pvGrp.add(_p);pvGrp.userData.holdProp=_p;pvGrp.userData.holdRifle=true;pvGrp.userData.holdKey=rk+'|'+skId;}}catch(e){}}}if(rifleGrp)rifleGrp.visible=!inHome;return;}
       pvKey=key;
       if(pvGrp){
         if(pvGrp.userData.holdProp){pvGrp.remove(pvGrp.userData.holdProp);disposeOwn(pvGrp.userData.holdProp);pvGrp.userData.holdProp=null;}
@@ -10882,17 +10891,17 @@ const CHAR=(function(){
           else if(drawing){br.visible=true;const p=TPC.drawT;
             const e2=p<0.35?(function(){const q=p/0.35;return q*q*(3-2*q);})():1;
             const e3=p<0.35?0:(function(){const q=(p-0.35)/0.65;return q*q*(3-2*q);})();
-            br.position.set(0.05,0.30-0.32*e3,-0.30+0.72*e3);
-            br.rotation.set(0,0.2+1.25*e3,0.9-0.85*e3);
+            br.position.set(0.05,0.30-0.05*e3+0.25*Math.sin(Math.PI*e3),-0.30+0.85*e3); // V14.2 : draw ends at the new hands-held pose; arc lift keeps the transit clear of the groin box
+            br.rotation.set(0,0.2-1.7708*e3,0.9-0.9*e3);
             if(cp2.armR)cp2.armR.rotation.set(0.9*e2-1.95*e3,0,0);
             if(cp2.armL)cp2.armL.rotation.set(-1.05*e3,0,0.18*e3);
           }else if(holstering){br.visible=true;const p=TPC.holT;const ez=p*p*(3-2*p);
-            br.position.set(0.05,-0.02+0.32*ez,0.42-0.72*ez);
-            br.rotation.set(0,1.45-1.25*ez,0.05+0.85*ez);
+            br.position.set(0.05,0.25+0.05*ez+0.25*Math.sin(Math.PI*ez),0.55-0.85*ez); // V14.2 : holster starts at the new hands-held pose; arc lift keeps the transit clear of the groin box
+            br.rotation.set(0,-1.5708+1.7708*ez,0+0.9*ez);
             if(cp2.armR)cp2.armR.rotation.set(-1.05+1.05*ez,0,0.18*(1-ez));
             if(cp2.armL)cp2.armL.rotation.set(-1.05+1.05*ez,0,0.18*(1-ez));
           }else if(KNF.out){br.visible=true;br.position.set(0.05,0.30,-0.30);br.rotation.set(0,0.2,0.9);}
-          else{br.visible=true;br.position.set(0.05,-0.02,0.42);br.rotation.set(0,1.45,0.05);
+          else{br.visible=true;br.position.set(0.05,0.25,0.55);br.rotation.set(0,-1.5708,0); // V14.2 : HELD in the hands at chest height, barrel forward (was: hip height, fore-aft through the pelvis)
             if(cp2.armR)cp2.armR.rotation.set(-1.05,0,0.18);
             if(cp2.armL)cp2.armL.rotation.set(-1.05,0,-0.18);
           }
