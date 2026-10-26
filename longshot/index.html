@@ -670,7 +670,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v13.7</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v13.8</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -842,8 +842,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='13.7'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='13.8'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'13.8',lines:[ // V13.8 : first-use key log — owner notified on first use of each key
+  '<b>KEY USE NOTICES</b> \— the first time each access key is used, the owner gets notified. Nothing changes for you at the gate: same key, same black screen, and your key is still remembered on your device.']},
  {v:'13.7',lines:[ // V13.7 : Firebase access-key gate — personal keys, vault-checked
   '<b>ACCESS KEY</b> \— the game now opens with your own personal key: after PLAY, enter the key issued to you and you\u2019re in. Keys are checked against the vault (one per player), a revoked key stops working, and your key is remembered on your device so you don\u2019t retype it.']},
  {v:'13.6',lines:[ // V13.6 : on-device verdict fixes — ghillie + net + bags rebuilt, guards fixed, meaner heli, no-surprises sweep
@@ -1156,7 +1158,7 @@ const KEYGATE={
     return db.collection('accessKeys').doc(key).get().then(function(snap){
       var ex=false,d=null;
       try{ex=!!(snap&&snap.exists);d=ex?snap.data():null;}catch(e){ex=false;d=null;}
-      if(ex&&d&&d.active===true)return{net:true,valid:true,revoked:false};
+      if(ex&&d&&d.active===true)return{net:true,valid:true,revoked:false,label:((typeof d.label==='string'&&d.label)?d.label:'unlabeled')};
       if(ex)return{net:true,valid:false,revoked:true};
       return{net:true,valid:false,revoked:false};
     },function(){return{net:false,valid:false,revoked:false};});
@@ -1181,6 +1183,10 @@ const KEYGATE={
     }
     if(inp&&document.activeElement!==inp)inp.focus();
   },
+  /* V13.8: first-use log — label + timestamp ONLY, never the key string.
+     Fire-and-forget: a log failure must never block entry (e.g. rules not
+     yet pasted). Called ONLY from the submit-path success branch. */
+  logUse:function(label){try{KEYGATE.ensureDb().then(function(db){if(!db)return;var ts=null;try{ts=firebase.firestore.FieldValue.serverTimestamp();}catch(e){ts=new Date();}try{db.collection('keyUses').add({label:label,usedAt:ts}).catch(function(){});}catch(e){}});}catch(e){}},
   submit:function(){
     if(KEYGATE.busy)return;
     var inp=document.getElementById('keyGateIn');if(!inp)return;
@@ -1189,7 +1195,7 @@ const KEYGATE={
     KEYGATE.busy=true;KEYGATE.msg('CHECKING…',false);KEYGATE.setBtn(false);
     KEYGATE.validate(k).then(function(v){
       KEYGATE.busy=false;KEYGATE.setBtn(true);
-      if(v.net&&v.valid){KEYGATE.remember(k);KEYGATE.authorize();KEYGATE.lift();}
+      if(v.net&&v.valid){KEYGATE.remember(k);KEYGATE.authorize();KEYGATE.logUse(v.label);KEYGATE.lift();}
       else if(v.net&&v.revoked){KEYGATE.msg('This key has been revoked. Contact the owner.',true);inp.focus();inp.select();}
       else if(v.net){KEYGATE.msg('Invalid key — check it and try again.',true);inp.focus();inp.select();}
       else if(KEYGATE.cached()===k){KEYGATE.authorize();KEYGATE.lift();} /* offline + previously validated key */
