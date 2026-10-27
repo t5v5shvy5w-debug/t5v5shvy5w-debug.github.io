@@ -95,8 +95,8 @@ button,.hbtn,.mbtn,#joy,#setBtn,#hud{-webkit-touch-callout:none;-webkit-user-sel
 #btnHDown{right:138px;bottom:calc(30px + env(safe-area-inset-bottom));width:84px;height:84px;border-color:#ffcf7a;color:#ffe2ae}
 #btnHYawL{right:138px;bottom:calc(138px + env(safe-area-inset-bottom));width:84px;height:84px;border-color:#9db8ff;color:#d5e2ff} /* V13.5 : TURN joins the right flight cluster — it overlapped the left stick */
 #btnHYawR{right:16px;bottom:calc(144px + env(safe-area-inset-bottom));width:84px;height:84px;border-color:#9db8ff;color:#d5e2ff} /* V13.5 : TURN joins the right flight cluster */
-#btnSprint{right:120px;bottom:calc(194px + env(safe-area-inset-bottom));width:68px;height:68px;border-color:#7ad0ff;color:#c2e8ff}
-#stamWrap{position:fixed;right:116px;bottom:calc(184px + env(safe-area-inset-bottom));width:60px;height:5px;border-radius:3px;background:rgba(232,243,228,.16);z-index:31;overflow:hidden;pointer-events:none} /* V13.6 P9 : re-seated under the resized SPRINT button */
+#btnSprint{right:136px;bottom:calc(194px + env(safe-area-inset-bottom));width:68px;height:68px;border-color:#7ad0ff;color:#c2e8ff}
+#stamWrap{position:fixed;right:132px;bottom:calc(184px + env(safe-area-inset-bottom));width:60px;height:5px;border-radius:3px;background:rgba(232,243,228,.16);z-index:31;overflow:hidden;pointer-events:none} /* V13.6 P9 : re-seated under the resized SPRINT button */
 #stamFill{height:100%;width:100%;background:rgba(120,200,120,.88)}
 #btnFly{left:20px;bottom:calc(152px + env(safe-area-inset-bottom));width:76px;height:76px;border-color:#7ad0ff;color:#c2e8ff}
 #btnFly:active{transform:scale(.90)}
@@ -691,7 +691,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v14.2</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v15.0</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -864,8 +864,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='14.2'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='15.0'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'15.0',lines:[ // V15.0 : Claude 38-fix bundle — payouts, guards, graphics budgets, sky/light, map/HUD
+  '<b>38 FIXES, ONE BUILD</b> — retry payouts now pay only the mission just played (no more re-paying the whole session), empty clicks stay silent outside play and while reloading, and the reload cancel checks the bolt cooldown first so taps during the bolt cycle fire instead of swallowing. <b>SHARPER + SMOOTHER</b> — world textures get proper anisotropy (16x on ULTRA), pixel budgets cap big-tablet rendering, and ULTRA shadows jump to 3072. <b>NEW SKY + LIGHT</b> — warm sunset fog, an elevation-mapped sky gradient, and sun placement anchored to the world. <b>CLEANER MAP + HUD</b> — map labels never cover another marker or the compass, sprint and stamina sit clear of each other, and a soft vignette frames the view.']},
  {v:'14.2',lines:[ // V14.2 : TP camera behind + joystick fixed + body rifle held + lobby hold guaranteed
   '<b>THIRD-PERSON, FIXED</b> — the chase camera now sits behind your soldier (back of the head, not the face), and the walk stick moves you the way you push: up walks away from the camera, like it should. <b>YOUR SNIPER, IN HAND</b> — in third-person your rifle now sits in your soldier\u2019s hands at chest height, or slung across the back when the knife is out — never sticking out of the midsection again, including mid-switch. <b>LOBBY SHOWCASE, GUARANTEED</b> — the lobby soldier always holds your equipped sniper, and the standalone rifle can never show up beside it.']},
  {v:'14.1',lines:[ // V14.1 : creation fix + visual grid + hold pose + third-person cam + quad hands
@@ -1404,7 +1406,7 @@ function birdChirp(){const ac=AC;if(G.muted||!ac||ac.state!=='running')return;
 /* ---------------- game state ---------------- */
 const G={
   state:'menu',            // menu | play | over | win
-  mission:1, score:0, best:+(localStorage.getItem('longshot_best')||0),
+  mission:1, score:0, best:+(lsGet('longshot_best',0))||0,
   kills:0, chain:0, lastKillT:-99,
   ammo:5, reloading:false, reloadT:0, reloadMax:2.2, fireCd:0,
   alarm:0, lastShotT:-99, converged:false,
@@ -1444,39 +1446,39 @@ if(RIFLE_ORDER.indexOf(G.rifle)<0||!rifleUnlocked(G.rifle))G.rifle='longshot'; /
 
 /* ---------------- three.js setup ---------------- */
 const wrap=$('c');
+function prCap(pr,px){const a=Math.max(1,innerWidth*innerHeight);return Math.max(0.6,Math.min(window.devicePixelRatio||1,pr,Math.sqrt(px/a)));} // V15 : pixel-RATIO cap AND pixel-COUNT cap — big tablets no longer render 4+ MP
 let renderer=null;
 try{renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});}
 catch(e){showFatal('WEBGL UNAVAILABLE — this device/browser could not start WebGL, so the 3D view cannot render. Try again in Safari with WebGL enabled.');throw e;}
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=true;
+renderer.setPixelRatio(prCap(2,2.8e6)); renderer.setSize(innerWidth,innerHeight); renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.outputEncoding=THREE.sRGBEncoding;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.18;
-wrap.appendChild(renderer.domElement);
+wrap.appendChild(renderer.domElement); (function(){try{const st=document.createElement('style');st.textContent='#gfxVig{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;z-index:3;background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 56%,rgba(6,10,20,.34) 100%)}';document.head.appendChild(st);const v=document.createElement('div');v.id='gfxVig';document.body.appendChild(v);}catch(e){}})(); // V15 : filmic corner falloff
 const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(0xe6c69c,420,2400); // V13 : vista-depth haze for the 6 km world (was 260/980)
+scene.fog=new THREE.Fog(0xdb9150,380,2400); // V13 : vista-depth haze for the 6 km world (was 260/980)
 const camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,0.1,12000); // V13 : far plane covers the 6 km world + backdrop ring
 camera.rotation.order='YXZ';
 scene.add(camera);
 
 const hemi=new THREE.HemisphereLight(0xffd9b0,0x5a5a3f,0.55);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffb066,1.35);
-sun.position.set(300,85,-40);sun.target.position.set(0,0,-120);scene.add(sun.target);
+sun.target.position.set(0,0,-96);sun.position.set(300,85,-136);scene.add(sun.target); // V15 : target starts on the tracked anchor (was 24 m off)
+function sunPlace(ox,oy,oz){sun.position.set(sun.target.position.x+ox,oy,sun.target.position.z+oz);sun.target.updateMatrixWorld();} // V15 : light offset is always relative to its (moving) target
 sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
 sun.shadow.camera.left=-150;sun.shadow.camera.right=150;sun.shadow.camera.top=150;sun.shadow.camera.bottom=-150;
-sun.shadow.camera.near=20;sun.shadow.camera.far=700;sun.shadow.bias=-0.0006;
+sun.shadow.camera.near=20;sun.shadow.camera.far=700;sun.shadow.bias=-0.0006;sun.shadow.normalBias=0.03; // FIX 14.3 : normal-offset cuts shadow acne without pushing shadows off their casters
 scene.add(sun);
 
 /* sky dome : gradient + sun glow */
 let skyMesh=null,daySkyTex=null,sunGlow=null;
 (function(){const cv=document.createElement('canvas');cv.width=4;cv.height=256;const x=cv.getContext('2d');
  const gr=x.createLinearGradient(0,0,0,256);
- gr.addColorStop(0,'#2a4a86');gr.addColorStop(0.45,'#7d9fc8');gr.addColorStop(0.7,'#c7ab8e');gr.addColorStop(0.86,'#f2a95e');gr.addColorStop(1,'#ffcf8a');
+ /* V15 : the old stops put the horizon (50%) in a grey blue/tan mix and the orange stops under the ground. Re-mapped by ELEVATION (y = 0.5 - deg/180); horizon colour = the fog colour as displayed, so land and sky meet with no seam. */ gr.addColorStop(0,'#1644a0');gr.addColorStop(0.22,'#2e6ac4');gr.addColorStop(0.333,'#548eda');gr.addColorStop(0.417,'#84b4e8');gr.addColorStop(0.465,'#b0ccec');gr.addColorStop(0.49,'#d2d6de');gr.addColorStop(0.5,'#e3d4b9');gr.addColorStop(1,'#e3d4b9');
  x.fillStyle=gr;x.fillRect(0,0,4,256);
- const tex=new THREE.CanvasTexture(cv);
- const sky=new THREE.Mesh(new THREE.SphereGeometry(950,24,14),new THREE.MeshBasicMaterial({map:tex,side:THREE.BackSide,fog:false}));
+ const tex=new THREE.CanvasTexture(cv);tex.encoding=THREE.sRGBEncoding; // V15 : colours are authored as display colours
+const sky=new THREE.Mesh(new THREE.SphereGeometry(950,40,24),new THREE.MeshBasicMaterial({map:tex,side:THREE.BackSide,fog:false,toneMapped:false,dithering:true}));
  skyMesh=sky;daySkyTex=tex;
  sky.frustumCulled=false;sky.renderOrder=-1;sky.material.depthWrite=false; // V13.5 : dome rides the camera, never culls, never occludes
  scene.add(sky);})();
@@ -1561,19 +1563,19 @@ function applyEnvironment(){
   if(night){
     scene.fog.color.setHex(0x0d1626);scene.fog.near=220;scene.fog.far=1500;
     hemi.color.setHex(0x35496e);hemi.groundColor.setHex(0x0a0c10);hemi.intensity=0.34;
-    sun.color.setHex(0x9db8e8);sun.intensity=0.5;sun.position.set(-220,300,-140);
+    sun.color.setHex(0x9db8e8);sun.intensity=0.5;sunPlace(-220,300,-140);
     renderer.toneMappingExposure=1.02;
-    if(skyMesh){skyMesh.material.map=nightSkyTex;skyMesh.material.needsUpdate=true;}
+    if(skyMesh){skyMesh.material.map=nightSkyTex;skyMesh.material.toneMapped=true;skyMesh.material.needsUpdate=true;}
     if(sunGlow)sunGlow.visible=false;
     starsPts.visible=true;moonSpr.visible=true;
     for(const c of clouds)c.material.color.setHex(0x2c3a55);
     for(const L of lanterns){L.intensity=1.5;L.color.setHex(HWN?0xff7722:0xffa050);} // HALLOWEEN : night lanterns burn pumpkin-orange in season
   }else{
-    scene.fog.color.setHex(0xe6c69c);scene.fog.near=420;scene.fog.far=2400;
+    scene.fog.color.setHex(0xdb9150);scene.fog.near=380;scene.fog.far=2400;
     hemi.color.setHex(0xffd9b0);hemi.groundColor.setHex(0x5a5a3f);hemi.intensity=0.55;
-    sun.color.setHex(0xffb066);sun.intensity=1.35;sun.position.set(300,85,-40);
+    sun.color.setHex(0xffb066);sun.intensity=1.35;sunPlace(300,85,-40);
     renderer.toneMappingExposure=1.18;
-    if(skyMesh){skyMesh.material.map=daySkyTex;skyMesh.material.needsUpdate=true;}
+    if(skyMesh){skyMesh.material.map=daySkyTex;skyMesh.material.toneMapped=false;skyMesh.material.needsUpdate=true;}
     if(sunGlow)sunGlow.visible=true;
     starsPts.visible=false;moonSpr.visible=false;
     for(const c of clouds)c.material.color.setHex(0xffffff);
@@ -2651,7 +2653,7 @@ function loadWorldPack(){
   };
   document.head.appendChild(s);
 }
-function onWorldReady(){
+function onWorldReady(){setTimeout(function(){try{gfxAniso();}catch(e){}},800); // FIX 14.3 : world GLB textures get filtered once they land
   if(!WORLD.proto.soldier){WORLD.failed=true;return;}
   WORLD.ready=true;
   try{buildWorldScatter();}catch(err){console.warn('[longshot] world scatter failed',err);}
@@ -2832,7 +2834,7 @@ function spawnExplosion(p,scale){
 const joyVec={x:0,y:0};const KEYS={};
 document.addEventListener('keydown',e=>{KEYS[e.code]=true;
   if((G.state==='play'||G.state==='roam')&&(e.code.indexOf('Arrow')===0||e.code==='Space'))e.preventDefault();});
-document.addEventListener('keyup',e=>{KEYS[e.code]=false;});
+document.addEventListener('keyup',e=>{KEYS[e.code]=false;}); window.addEventListener('blur',()=>{for(const k in KEYS)KEYS[k]=false;}); // FIX 14.2 : alt-tab with a key held left it stuck down (character ran forever)
 /* one movement step, shared by missions (3.5 m/s) and free roam (5 m/s).
    Joystick vector is look-relative; WASD/arrows mirror it on desktop.
    NO sway or breath is added — the scope stays exactly as stable as it
@@ -4236,12 +4238,14 @@ const bulletMat=new THREE.MeshBasicMaterial({color:0xffc76a,transparent:true,opa
 const _tv=new THREE.Vector3(),_td=new THREE.Vector3();
 function fireBullet(){
   if(KC.active)endKillcam(); // firing mid-killcam : snap the camera home, then shoot
-  if(G.ammo<=0){sEmpty();toast('RELOAD — PRESS RELD');
+if(G.state!=='play'&&G.state!=='roam')return; // FIX 14.2 : no empty-click / toast outside play
+if(G.ammo<=0){if(G.reloading)return;sEmpty();toast('RELOAD — PRESS RELD');
     if(!lsGet('lh_tac','')){lsSet('lh_tac','1'); // one-time hint : tactical reloads are faster
       setTimeout(()=>toast('TAC RELOAD IS FASTER — RELOAD EARLY'),1750);}
     return;}
-  if(G.reloading){G.reloading=false;updateHUD();} // RELOAD CANCEL : ammo>0 is guaranteed here (the empty branch returned) — rounds already seated are yours, fire NOW
-  if(G.fireCd>0||(G.state!=='play'&&G.state!=='roam'))return; // WORLD 11.0 : the rifle works in free roam too
+  if(G.fireCd>0)return; // FIX 14.2 : cooldown check FIRST — a tap during the bolt cycle used to cancel the reload and then not fire
+
+if(G.reloading){G.reloading=false;updateHUD();} // RELOAD CANCEL : ammo>0 is guaranteed here (the empty branch returned) — rounds already seated are yours, fire NOW
   G.ammo--;G.shots++;G.fireCd=RIFLES[G.rifle].cool;G.lastShotT=G.swayT;
   const dir=new THREE.Vector3();camera.getWorldDirection(dir);
   const m=new THREE.Mesh(bulletGeo,bulletMat);
@@ -4345,7 +4349,7 @@ function bulletUpdate(dt){
           if(bullets.indexOf(b)<0)return; // mission reset mid-flight cleared every bullet — bail out
           if(b.kills>=3){spent=true;break;}}}
       for(const e of enemies){if(!e.alive||b.pierced.indexOf(e)>=0)continue;
-        const c=e.chest(),dx=p.x-c.x,dy=p.y-c.y,dz=p.z-c.z,d2=dx*dx+dy*dy+dz*dz;
+        const c=e.chest(),d2=segPtD2(px0,py0,pz0,p.x,p.y,p.z,c.x,c.y,c.z); // FIX 14.2 : segment test like the driver/barrels — a point test could skip a body edge between substeps
         if(d2<(e.boss?2.56:1.1)){ // OVERPENETRATION : kill resolves inline, the round flies on (cap 3 kills) — V13.5 boss sphere r 1.6 fits the 4.16 m body
           /* TRUE IMPACT : closest point on this substep's segment to the chest
              center — the round's position here can be ~1m short of the body */
@@ -4403,9 +4407,8 @@ function bulletUpdate(dt){
       scene.remove(b.m);bullets.splice(i,1);}
   }
 }
-function impactPuff(p,kind,prof){
-  const metal=kind==='metal',pr=prof||{};
-  const m=new THREE.Mesh(new THREE.SphereGeometry((metal?0.32:0.62)*(pr.rMul||1),8,8),
+const _puffGeos=new Map(); // FIX 14.3 : one cached geometry per puff radius — impactPuff used to allocate a new SphereGeometry per hit and never free it (GPU memory leak + GC stutter over a long session)
+function puffGeo(r){const k=r.toFixed(3);let g=_puffGeos.get(k);if(!g){g=new THREE.SphereGeometry(r,10,8);_puffGeos.set(k,g);}return g;} function impactPuff(p,kind,prof){ const metal=kind==='metal',pr=prof||{}; const m=new THREE.Mesh(puffGeo((metal?0.32:0.62)*(pr.rMul||1)),
     new THREE.MeshBasicMaterial({color:metal?0xd8d8d8:0xcbb98f,transparent:true,opacity:0.9}));
   m.position.copy(p);scene.add(m);
   /* per-puff profile : the defaults reproduce the stock puff exactly; the
@@ -4621,7 +4624,7 @@ function bindBtn(id,down,up){
   const end=e=>{e.preventDefault();el.classList.remove('on');up&&up();};
   el.addEventListener('touchend',end);el.addEventListener('touchcancel',end);
   el.addEventListener('mousedown',e=>{e.stopPropagation();el.classList.add('on');down();});
-  el.addEventListener('mouseup',()=>{el.classList.remove('on');up&&up();});
+  window.addEventListener('mouseup',()=>{if(!el.classList.contains('on'))return;el.classList.remove('on');up&&up();}); // FIX 14.2 : release anywhere (a held SCOPE no longer sticks)
 }
 bindBtn('btnFire',()=>{if(KNF.out)knifeSwing();else fireBullet();}); // V12 : FIRE swings while the knife is out
 bindBtn('btnScope',()=>{if(G.scopeHold)setScoped(true);else setScoped(!G.scoped);},()=>{if(G.scopeHold)setScoped(false);}); // SCOPE MODE : TOGGLE taps, HOLD scopes only while pressed
@@ -4638,7 +4641,7 @@ if(!isTouch){
   document.addEventListener('mousedown',e=>{
     if(document.pointerLockElement!==renderer.domElement||(G.state!=='play'&&G.state!=='roam'))return;
     if(e.button===0){if(KNF.out)knifeSwing();else fireBullet();}else if(e.button===2)setScoped(!G.scoped);}); // V12 : click swings while the knife is out
-  document.addEventListener('contextmenu',e=>e.preventDefault());
+  document.addEventListener('contextmenu',e=>e.preventDefault()); document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement&&(G.state==='play'||G.state==='roam')&&!KC.active&&!G.pauseOpen&&!G.settingsOpen&&!G.mapOpen&&!G.heliOpen)openPause();}); // FIX 14.3 : Esc / alt-tab frees the mouse -> pause instead of running blind
   document.addEventListener('wheel',e=>{if(G.scoped&&(G.state==='play'||G.state==='roam')){
     G.zoom=clamp(G.zoom+(e.deltaY>0?-0.5:0.5),RIFLES[G.rifle].zmin,G.maxZoom);
     $('zoomSlider').value=G.zoom;updateHUD();}},{passive:true});
@@ -4821,8 +4824,9 @@ $('setRet').addEventListener('change',e=>{G.retColor=e.target.value;lsSet('longs
    tracker untouched. SHADOWS/GRASS toggle live scene state, PARTICLES
    scales every spawnBurst count, SHOW FPS surfaces the perf tracker's
    own per-second number. */
+const QUALITY_PX={low:1.0e6,medium:1.8e6,high:3.0e6,ultra:4.6e6}; // V15 : presets are budgets, not just ratios
 const QUALITY_PR={low:0.75,medium:1,high:2,ultra:2}; // V12 : HIGH now allows the full 2x pixel-ratio cap (was 1.5)
-const QUALITY_SHADOW={low:512,medium:1024,high:2048,ultra:2048};
+const QUALITY_SHADOW={low:512,medium:1024,high:2048,ultra:3072}; // FIX 14.3 : ULTRA was an exact copy of HIGH — it now gets sharper shadows + 16x texture filtering
 function partMul(v){return v==='low'?0.4:(v==='medium'?0.7:1);}
 function setShadowSize(sz){
   if(sun.shadow.mapSize.x===sz)return;
@@ -4837,11 +4841,11 @@ function applyShadows(){
     for(const m of ms)m.needsUpdate=true;}}); // materials recompile with shadows on/off
   renderer.shadowMap.needsUpdate=true;
 }
-function applyGraphics(){
-  if(G.quality==='auto'){G.perfLvl=0;G.perfLow=0;G.perfHigh=0;applyPerfLvl();}
+function gfxAniso(){ // FIX 14.3 : most world textures sat at 1x filtering -> smeared at the shallow angles a sniper looks at. One pass, only mip-mapped colour maps, skipped once applied.
+try{const mx=renderer.capabilities.getMaxAnisotropy(),want=Math.min(G.quality==='ultra'?16:8,mx),seen=new Set(); scene.traverse(o=>{if(o.isSprite||!o.material)return;const ms=Array.isArray(o.material)?o.material:[o.material]; for(const m of ms){const t=m&&m.map;if(!t||!t.isTexture||seen.has(t))continue;seen.add(t); if(t.anisotropy<want&&t.image&&t.generateMipmaps&&t.minFilter!==THREE.NearestFilter&&t.minFilter!==THREE.LinearFilter){t.anisotropy=want;t.needsUpdate=true;}}});}catch(e){}} function applyGraphics(){ setTimeout(gfxAniso,1500); if(G.quality==='auto'){G.perfLvl=0;G.perfLow=0;G.perfHigh=0;applyPerfLvl();}
   else{
     renderer.shadowMap.autoUpdate=true; // manual presets never freeze the shadow map
-    renderer.setPixelRatio(QUALITY_PR[G.quality]||1);
+    applyPR();
     setShadowSize(QUALITY_SHADOW[G.quality]||1024);
   }
   applyShadows();
@@ -4945,7 +4949,8 @@ async function wlRequest(){try{
 }catch(e){wlLock=null;}}
 function wlRelease(){try{if(wlLock)wlLock.release();}catch(e){}wlLock=null;}
 document.addEventListener('visibilitychange',()=>{ // hidden : release nothing; visible mid-mission : re-acquire
-  if(!document.hidden&&G.state==='play'&&!wlLock)wlRequest();});
+  if(document.hidden){try{for(const k in KEYS)KEYS[k]=false;if((G.state==='play'||G.state==='roam')&&!KC.active&&!G.pauseOpen)openPause();}catch(e){}} // FIX 14.2 : leaving the app / a call / notification shade now pauses instead of leaving you exposed
+if(!document.hidden&&G.state==='play'&&!wlLock)wlRequest();});
 
 /* ---------------- BULLET-CAM KILLCAM : chase the round, orbit the drop, blend home ----------------
    Safety contract: KC only drives the camera. The kill itself (die / score / sound / toast)
@@ -5304,7 +5309,7 @@ function startMission(n,instant){
   G.ammo=rifle.mag;G.reloading=false;G.reloadMax=rifle.reload;G.alarm=0;G.converged=false;G.hp=100;G.fireCd=0;G.lastDmg=null;
   G.chain=0;G.kills=0;G.shots=0;G.hits=0;G.longest=0;G.bestChain=0;
   G.hsCount=0;G.playTime=0;G.awarded=false; // GHOSTLINE results state : headshots / mission clock / economy one-shot guard
-  G.px=0;G.pz=24;G.yaw=0;G.pitch=0.02;G.breath=100;G.breathFx=0;
+  G.px=0;G.pz=24;G.yaw=0;G.pitch=0.02;G.breath=100;G.breathFx=0;G.reposAcc=0;frame._lpx=0;frame._lpz=24; // FIX 14.2 : the move tracker still held last mission's spot -> bogus CONTACT BROKEN on every restart
   G.maxZoom=cfg.maxZoom;G.zoom=Math.min(8,cfg.maxZoom);
   applyRifleZoom(); // per-rifle scope range + stock accent for the active rifle
   G.windDir0=rand(0,TAU);G.windDir=G.windDir0; // mission base heading; gusts vary around it live
@@ -5333,7 +5338,7 @@ function missionComplete(){
   if(ghost){const bonus=G.missionScore;G.score+=bonus;
     ghostLine='<div class="ghost"><span>GHOST — UNDETECTED</span><b>2× MISSION SCORE &nbsp;+'+bonus+'</b></div>';}
   saveMissionBest(G.mission,G.missionScore+(ghost?G.missionScore:0)); // per-mission best (incl. ghost bonus)
-  if(G.score>G.best){G.best=G.score;localStorage.setItem('longshot_best',G.best);}
+  if(G.score>G.best){G.best=G.score;lsSet('longshot_best',G.best);}
   lsSet('longshot_rifles',Math.max(rifleMaxMission(),G.mission)); // unlock progress
   if(ghost){const gm=ghostMissions();if(gm.indexOf(G.mission)<0){gm.push(G.mission);lsSet('longshot_ghostMissions',JSON.stringify(gm));}} // GHOSTLINE : star-rating flag
   saveMissionTime(G.mission,G.playTime); // GHOSTLINE : best (fastest) completion time, shown in the briefing
@@ -5414,9 +5419,10 @@ function kickEnv(){const T=0.22;if(G.kickT>=T)return 0;const k=G.kickT/T; // rec
 /* adaptive quality : rolling FPS over ~1s buckets. Sustained <45 for ~3s steps quality
    down one notch at a time (pixelRatio 2 -> 1.5 -> 1.2, then shadow-map freeze);
    sustained >57 for ~6s steps back up. Hysteresis, one variable per step, silent. */
-const PERF_PR=[2,1.5,1.2,1.2];
+const PERF_PR=[2,1.5,1.25,1.0]; const PERF_PX=[2.8e6,2.2e6,1.7e6,1.3e6]; // V15 : pixel-count budget per adaptive level
+function applyPR(){const q=G.quality;renderer.setPixelRatio(q==='auto'?prCap(PERF_PR[G.perfLvl],PERF_PX[G.perfLvl]):prCap(QUALITY_PR[q]||1,QUALITY_PX[q]||2e6));} // FIX 14.3 : the last step used to repeat 1.2 — it now really drops, so a struggling phone actually recovers
 function applyPerfLvl(){
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,PERF_PR[G.perfLvl]));
+  applyPR();
   if(G.perfLvl>=3){renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;}
   else{renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;} // V13.5 : the frame-loop throttle governs updates, not every-frame autoUpdate
 }
@@ -5642,7 +5648,7 @@ function frame(now){
   renderer.render(scene,camera);
   pvTick(dt); // GHOSTLINE : the menu's rifle preview renders on this same loop (no-op in play)
 }
-function onResize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();sizeReticle();}
+function onResize(){renderer.setSize(innerWidth,innerHeight);try{applyPR();}catch(e){}camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();sizeReticle();}
 window.addEventListener('resize',onResize);
 window.addEventListener('orientationchange',()=>setTimeout(onResize,250));
 /* ---------------- v10.0 FRONT DOOR : cold-open intro + What's New splash ----------------
@@ -5738,8 +5744,8 @@ function rankFor(xp){let cur=RANKS[0],nxt=null;for(let i=0;i<RANKS.length;i++){i
 function awardResults(complete){ // ECONOMY : banked once per mission end (G.awarded guard), off the FINAL score
   if(G.awarded)return G.lastAward||{cr:0,xp:0};
   G.awarded=true;
-  const cr=Math.round(G.score/10)+(complete?25:0);
-  const xp=Math.round(G.score/15)+(complete?15:0);
+  const base=G.missionScore+((complete&&G.peakAlarm<25)?G.missionScore:0); // FIX 14.2 : G.score is the whole-session total, so every retry re-paid all earlier score — pay off this mission's own (ghost-boosted) score
+const cr=Math.round(base/10)+(complete?25:0); const xp=Math.round(base/15)+(complete?15:0);
   setCredits(credits()+cr);lsSet('longshot_xp',xpTotal()+xp);
   G.lastAward={cr:cr,xp:xp};
   return G.lastAward;
@@ -8623,10 +8629,11 @@ function drawMapLabels(x){ // deterministic: sort by y, stack x-overlapping labe
       if(it.x<res.x1+2&&res.x0<it.x+it.w+2&&it.y<res.y1+4&&res.y0<it.y+it.h+4)it.y=res.y1+4;}
     let over=0;items.forEach(function(it){if(it.y+it.h>558)over=Math.max(over,it.y+it.h-558);});
     if(over>0)items.forEach(function(it){it.y-=over;});}
-  stack();stack(); // second pass re-guarantees after the upward shift
+  (function place(){ // V15 : greedy slot search — never cover another label's marker, stay clear of the compass + map edge
+const placed=[],order=items.slice().sort(function(a,b){return a.my-b.my;}); const bad=function(it,x0,y0){const x1=x0+it.w,y1=y0+it.h; if(x0<2||x1>558||y0<2||y1>558)return true; if(x0<res.x1+2&&res.x0<x1+2&&y0<res.y1+4&&res.y0<y1+4)return true; for(let i=0;i<placed.length;i++){const o=placed[i];if(x0<o.x+o.w+3&&o.x<x1+3&&y0<o.y+o.h+3&&o.y<y1+3)return true;} for(let i=0;i<items.length;i++){const o=items[i];if(o!==it&&o.mx>x0-4&&o.mx<x1+4&&o.my>y0-4&&o.my<y1+4)return true;} return false;}; order.forEach(function(it){const w=it.w,h=it.h,mx=it.mx,my=it.my; const cand=[[mx+9,my-h/2],[mx-w-9,my-h/2],[mx-w/2,my-h-9],[mx-w/2,my+9],[mx+9,my-h-6],[mx-w-9,my-h-6],[mx+9,my+4],[mx-w-9,my+4],[mx-w/2,my-h-32],[mx-w/2,my+30],[mx+9,my-h-30],[mx-w-9,my+28]]; for(let i=0;i<cand.length;i++){const cx=Math.min(Math.max(cand[i][0],2),558-w),cy=cand[i][1];if(!bad(it,cx,cy)){it.x=cx;it.y=cy;break;}} placed.push(it);}); })(); stack();stack(); // safety net : anything that found no free slot is stacked as before
   V13D.labelBoxes=items.map(function(it){return {t:it.t,x0:it.x,y0:it.y,x1:it.x+it.w,y1:it.y+it.h};});
   items.forEach(function(it){
-    const ex=Math.min(Math.max(it.mx,it.x),it.x+it.w),ey=it.my<it.y?it.y:it.y+it.h;
+    const ex=Math.min(Math.max(it.mx,it.x),it.x+it.w),ey=(it.my>=it.y&&it.my<=it.y+it.h)?it.my:(it.my<it.y?it.y:it.y+it.h);
     if(Math.abs(ey-it.my)>2||Math.abs(ex-it.mx)>2){x.strokeStyle='rgba(230,238,255,0.55)';x.lineWidth=1;x.beginPath();x.moveTo(ex,ey);x.lineTo(it.mx,it.my);x.stroke();}
     x.fillStyle='rgba(4,8,24,0.78)';x.fillRect(it.x,it.y,it.w,it.h);
     x.strokeStyle='rgba(143,163,217,0.6)';x.lineWidth=1;x.strokeRect(it.x+0.5,it.y+0.5,it.w-1,it.h-1);
