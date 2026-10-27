@@ -691,7 +691,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v15.0</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v15.1</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -864,8 +864,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='15.0'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='15.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'15.1',lines:[ // V15.1 : REAL CITY — planned street grid, store street, plaza, parking, and detail everywhere
+  '<b>REAL CITY</b> — the scattered towers are gone: a planned grid of streets with sidewalks, lane markings and crosswalks, mid-rise and high-rise blocks, a store street with signs and awnings, three stores you can walk into, a plaza, a parking lot, street lamps, traffic lights, stop signs, parked cars, benches, hydrants and billboards. <b>PEOPLE</b> — pedestrians walk the sidewalks now, every one a different look, kids included. Adults can be taken down but nothing happens — no score, no payout, no wanted level. <b>DOGS</b> — some walkers bring a dog, and every dog looks like a dog. Shooting one does not kill it outright: a prompt asks cmon bro really, and only I am a monster goes through with it.']},
  {v:'15.0',lines:[ // V15.0 : Claude 38-fix bundle — payouts, guards, graphics budgets, sky/light, map/HUD
   '<b>38 FIXES, ONE BUILD</b> — retry payouts now pay only the mission just played (no more re-paying the whole session), empty clicks stay silent outside play and while reloading, and the reload cancel checks the bolt cooldown first so taps during the bolt cycle fire instead of swallowing. <b>SHARPER + SMOOTHER</b> — world textures get proper anisotropy (16x on ULTRA), pixel budgets cap big-tablet rendering, and ULTRA shadows jump to 3072. <b>NEW SKY + LIGHT</b> — warm sunset fog, an elevation-mapped sky gradient, and sun placement anchored to the world. <b>CLEANER MAP + HUD</b> — map labels never cover another marker or the compass, sprint and stamina sit clear of each other, and a soft vignette frames the view.']},
  {v:'14.2',lines:[ // V14.2 : TP camera behind + joystick fixed + body rifle held + lobby hold guaranteed
@@ -1273,7 +1275,7 @@ const FLATS=[ // flattened sites — later chunks append bridge / outpost / heli
   {x:0,z:24,r:52,h:4.0},
   {x:0,z:-1010,r:95,h:20},
   {x:150,z:-930,r:48,h:24.9}, // V13 Chunk F : the helipad terrace
-  {x:600,z:-1750,r:170,h:29}]; // V14.0 C3 : the town pad — leveled site for the C3 town (core r85 fully flat, feather to r170; helipad/camp/spawn flats untouched)
+  {x:600,z:-1750,r:300,h:29}]; // V15.1 C3 : the town pad widened for the REAL CITY (core r150 fully flat, feather to r300; logging camp at 330 m + hideouts + barns + helipad/camp/spawn flats untouched)
 var GRIDH={data:null,cell:6000/256}; // V13.2 : baked height grid (filled after the terrain mesh builds) — var + early : groundH() is called by camp dressing long before the geography section runs
 function mainlandH(x,z){
   let h=24+n2(x,z)*11+Math.sin(x*0.017-z*0.013)*2.2;                    // rolling heartland
@@ -4364,6 +4366,17 @@ function bulletUpdate(dt){
         if(!an.alive)continue;const ac=an.center(),adx=p.x-ac.x,ady=p.y-ac.y,adz=p.z-ac.z;
         if(adx*adx+ady*ady+adz*adz<an.r*an.r){an.die();spent=true;break;}}
       if(spent)break;
+      // V15.1 : bullet vs pedestrians — adults die silent + scoreless (round stops), dogs open the prompt (round stops, no damage), kids never tested
+      if(typeof V15NPC!=='undefined'&&V15NPC.ready)for(const c151np of V15NPC.list){
+        if(!c151np.alive||c151np.kind==='kid')continue;
+        const c151nx=p.x-c151np.x,c151ny=p.y-(groundH(c151np.x,c151np.z)+c151np.ch),c151nz=p.z-c151np.z;
+        if(c151nx*c151nx+c151ny*c151ny+c151nz*c151nz<c151np.r*c151np.r){c151np.die();spent=true;break;}}
+      if(spent)break;
+      if(typeof V15NPC!=='undefined'&&V15NPC.ready&&!V15NPC.prompt.open)for(const c151dg of V15NPC.dogs){
+        if(!c151dg.alive)continue;
+        const c151dx=p.x-c151dg.x,c151dy=p.y-(groundH(c151dg.x,c151dg.z)+c151dg.ch),c151dz=p.z-c151dg.z;
+        if(c151dx*c151dx+c151dy*c151dy+c151dz*c151dz<c151dg.r*c151dg.r){V15NPC.openDogPrompt(c151dg);spent=true;break;}}
+      if(spent)break;
       if(truck.active&&driver.alive){_tv.copy(p).sub(truck.group.position);_tv.y-=1.2;
         if(_tv.lengthSq()<100)truck.lastCrackT=G.swayT;} // round cracked past the truck — the driver reacts
       if(truck.active&&truck.group&&!b.throughCab){_tv.copy(p);truck.group.worldToLocal(_tv); // truck body (driver capsule checked above)
@@ -7324,8 +7337,9 @@ function knifeHit(){
     if(!(best.boss&&bossHit(best,150,best.chest())))killEnemy(best,dir,false,false,false,best.chest(),null,true); // melee gate: silent, no skin counter, no bullet-cam
     sTone(160,0.08,'square',0.06);
   }
-  else if(typeof V13E!=='undefined'&&V13E.ready){ // V13 : knife vs wildlife — silent, scoreless
+  else{ // V15.1 : knife vs wildlife, then pedestrians — the wildlife else-if used to swallow the pedestrian branch when V13E.ready
     let ba=null,bad=2.3;
+    if(typeof V13E!=='undefined'&&V13E.ready){ // V13 : knife vs wildlife — silent, scoreless
     for(const an of V13E.animals){
       if(!an.alive)continue;
       const dx=an.x-G.px,dz=an.z-G.pz,dh=Math.hypot(dx,dz);
@@ -7333,7 +7347,24 @@ function knifeHit(){
       if((dx*_kf.x+dz*_kf.z)/(dh*fh)<0.45)continue;
       ba=an;bad=dh;
     }
+    }
     if(ba){ba.die();sTone(160,0.08,'square',0.06);}
+    else if(typeof V15NPC!=='undefined'&&V15NPC.ready){ // V15.1 : knife vs pedestrians — adults die silent + scoreless, dogs prompt, kids never tested
+    let c151nk=null,c151nkd=2.3,c151nd=null,c151ndd=2.3;
+    for(const c151np of V15NPC.list){
+      if(!c151np.alive||c151np.kind==='kid')continue;
+      const dx=c151np.x-G.px,dz=c151np.z-G.pz,dh=Math.hypot(dx,dz);
+      if(dh>c151nkd||dh<0.01)continue;
+      if((dx*_kf.x+dz*_kf.z)/(dh*fh)<0.45)continue;
+      c151nk=c151np;c151nkd=dh;}
+    for(const c151dg of V15NPC.dogs){
+      if(!c151dg.alive)continue;
+      const dx=c151dg.x-G.px,dz=c151dg.z-G.pz,dh=Math.hypot(dx,dz);
+      if(dh>c151ndd||dh<0.01)continue;
+      if((dx*_kf.x+dz*_kf.z)/(dh*fh)<0.45)continue;
+      c151nd=c151dg;c151ndd=dh;}
+    if(c151nk&&(!c151nd||c151nkd<=c151ndd)){c151nk.die();sTone(160,0.08,'square',0.06);}
+    else if(c151nd){V15NPC.openDogPrompt(c151nd);sTone(160,0.08,'square',0.06);}}
   }
 }
 function knifeTick(dt){
@@ -7880,6 +7911,7 @@ function v13Tick(dt,gdt){
   if(typeof v13TickD==='function')v13TickD(dt,gdt);
   if(typeof v13TickE==='function')v13TickE(dt,gdt);
   if(typeof v13TickF==='function')v13TickF(dt,gdt);
+  if(typeof npcTick==='function')npcTick(dt,gdt);
 }
 /* sea + valley lake : scenery surfaces at SEA_Y / LAKE_Y (no swimming —
    walkers and the quad stop at the shoreline via the surfH guards). */
@@ -8434,13 +8466,12 @@ V13C.foundSet=function(){try{const a=JSON.parse(lsGet('longshot_loot','[]'));ret
    (13.5/13.6 rule: no oversized invisible walls, no phantom margins — the
    5 cm ground pads are step-over curbs and are deliberately NOT colliders).
    Foot (obbResolve 0.55) and quad (obbResolve 1.5) both read the same OBBS
-   list, so one registration blocks both. Streets are gaps, not geometry:
-   the avenue (x 590-610, z -1830..-1680) and cross street (x 520-680,
-   z -1760..-1740) carry no building footprint — see V14C3.streets, which
-   the probe checks. Map presence: mapBuildBase inks every footprint and
+   list, so one registration blocks both. V15.1: streets are real geometry
+   (road + sidewalk slabs, markings, crosswalks); the grid below carries
+   no building footprint — see V14C3.streets, which the probe checks. Map presence: mapBuildBase inks every footprint and
    mapDraw labels the town (no loot markers anywhere in this code). */
 const V14C3={town:{x:600,z:-1750},
-  streets:[{x0:590,x1:610,z0:-1830,z1:-1680},{x0:520,x1:680,z0:-1760,z1:-1740}],
+  streets:[{x0:520,x1:534,z0:-1870,z1:-1630},{x0:588,x1:602,z0:-1870,z1:-1630},{x0:656,x1:670,z0:-1870,z1:-1630},{x0:520,x1:700,z0:-1856,z1:-1842},{x0:520,x1:700,z0:-1800,z1:-1786},{x0:520,x1:700,z0:-1744,z1:-1730},{x0:520,x1:700,z0:-1688,z1:-1674}],
   buildings:[],meshCount:0};
 (function buildTown(){
   const lam=c=>new THREE.MeshLambertMaterial({color:c});
@@ -8493,28 +8524,738 @@ const V14C3={town:{x:600,z:-1750},
     OBBS.push({x:b.x,z:b.z,hw:b.w/2,hd:b.d/2,yaw:b.yaw}); // exact footprint, zero margin
     V14C3.buildings.push(b);
   }
-  const TOWN=[
-    {x:560,z:-1790,w:22,d:22,h:58,yaw:0,kind:'tower',facade:'#5a6478'},
-    {x:648,z:-1792,w:20,d:20,h:46,yaw:0.15,kind:'tower',facade:'#4e5a70'},
-    {x:555,z:-1850,w:24,d:24,h:68,yaw:-0.1,kind:'tower',facade:'#626e84'},
-    {x:545,z:-1772,w:16,d:12,h:8,yaw:0,kind:'store',wall:0xb8a888,accent:0xc23b2a},
-    {x:655,z:-1772,w:16,d:12,h:7,yaw:0,kind:'store',wall:0x9aa5b0,accent:0x2a6db0},
-    {x:545,z:-1725,w:14,d:10,h:7,yaw:0.3,kind:'store',wall:0xa88f7a,accent:0xd8a018},
-    {x:655,z:-1725,w:14,d:10,h:8,yaw:-0.2,kind:'store',wall:0x8fa08a,accent:0x3f7a4a},
-    {x:530,z:-1795,w:12,d:10,h:7,yaw:0.4,kind:'house',wall:0xcbbfa5,roof:0x4c3a2c},
-    {x:675,z:-1805,w:12,d:10,h:6,yaw:-0.3,kind:'house',wall:0xb5a894,roof:0x3f464e},
-    {x:525,z:-1705,w:11,d:9,h:6,yaw:0.2,kind:'house',wall:0x9fb0a8,roof:0x4c3a2c},
-    {x:675,z:-1705,w:11,d:9,h:7,yaw:0,kind:'house',wall:0xc4b49a,roof:0x3f464e},
-    {x:600,z:-1670,w:12,d:10,h:6,yaw:0.1,kind:'house',wall:0xb8a888,roof:0x4c3a2c}
-  ];
+  // V15.1: the old scattered town is gone — the planned city (C151_CITY, below) replaces it.
   const SCATTERED=[ // outside town: ridge cabin, south barn, island house, roadside store (all clear of roads/camps/paths by >=80 m)
     {x:1150,z:-1500,w:8,d:6,h:5,yaw:0.5,kind:'house',wall:0x8a7a5e,roof:0x3a3230},
     {x:350,z:-2350,w:10,d:7,h:6,yaw:-0.2,kind:'house',wall:0x7a4436,roof:0x4c3a2c},
     {x:-150,z:180,w:10,d:8,h:6,yaw:0.3,kind:'house',wall:0xcbbfa5,roof:0x3f464e},
     {x:120,z:-1180,w:12,d:9,h:7,yaw:0.2,kind:'store',wall:0xa8a090,accent:0xc23b2a}
   ];
-  TOWN.forEach(build);SCATTERED.forEach(build);
+  SCATTERED.forEach(build);
 })();
+/* ==================== V15.1 REAL CITY — geometry ====================
+   Replaces the scattered-tower town with a planned city on the widened
+   town pad (FLATS town r 170 -> 300, core r150 flat, so the whole grid
+   sits on level ground; logging camp at 330 m and all hideouts/outposts
+   are outside the new radius). Grid: 3 N-S streets x 4 E-W streets,
+   road + sidewalk slabs, markings, crosswalks, 24 buildings, plaza,
+   parking lot, park, and street props. Every building: facade texture
+   + roof + trim + door/storefront — no bare boxes (quality bar 3).
+   Every solid building registers an OBB exactly on its footprint;
+   enterable stores register wall-segment OBBs only (open front has NO
+   collider). Thin poles (lamps, signs) carry NO OBB — walk-through of
+   a 15 cm pole is standard and the zero-no-clip gate covers buildings.
+   All meshes use the game's box vocabulary + shared unit geometry.
+   Deterministic seeded textures (same city every load). */
+const C151_BOX=new THREE.BoxGeometry(1,1,1);
+const C151_CYL=new THREE.CylinderGeometry(1,1,1,10);
+const C151_SPH=new THREE.SphereGeometry(1,8,8);
+const C151_MATS={};
+function c151_lam(c){if(!C151_MATS[c])C151_MATS[c]=new THREE.MeshLambertMaterial({color:c});return C151_MATS[c];}
+function c151_bas(c){return new THREE.MeshBasicMaterial({color:c});}
+function c151_box(w,h,d,x,y,z,mat,yaw,rx,shadow){
+  const m=new THREE.Mesh(C151_BOX,mat);
+  m.position.set(x,y,z);m.scale.set(w,h,d);m.rotation.set(rx||0,yaw||0,0);
+  if(shadow){m.castShadow=true;}m.receiveShadow=true;scene.add(m);V14C3.meshCount++;return m;}
+function c151_texBox(w,h,d,x,y,z,tex,yaw,shadow){
+  const m=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({map:tex}));
+  m.position.set(x,y,z);m.scale.set(w,h,d);m.rotation.y=yaw||0;
+  if(shadow){m.castShadow=true;}m.receiveShadow=true;scene.add(m);V14C3.meshCount++;return m;}
+function c151_canvas(w,h,draw){const cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d');draw(x,w,h);return new THREE.CanvasTexture(cv);}
+function c151_rnd(seed){let s=seed;return function(){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;};}
+function c151_facade(base,winLit,seed,style){ // style: 'glass'|'brick'|'concrete'
+  const tex=c151_canvas(128,256,function(x,w,h){
+    const rnd=c151_rnd(seed);
+    x.fillStyle=base;x.fillRect(0,0,w,h);
+    if(style==='brick'){
+      x.strokeStyle='rgba(0,0,0,0.25)';x.lineWidth=1;
+      for(let r=0;r<32;r++){const y=r*8;x.beginPath();x.moveTo(0,y);x.lineTo(w,y);x.stroke();
+        for(let c=0;c<8;c++){const ox=(r%2)?8:0;x.beginPath();x.moveTo(c*16+ox,y);x.lineTo(c*16+ox,y+8);x.stroke();}}
+    }else if(style==='concrete'){
+      x.strokeStyle='rgba(0,0,0,0.18)';
+      for(let c=0;c<=4;c++){x.beginPath();x.moveTo(c*32,0);x.lineTo(c*32,h);x.stroke();}
+      for(let r=0;r<=8;r++){x.beginPath();x.moveTo(0,r*32);x.lineTo(w,r*32);x.stroke();}
+      for(let i=0;i<12;i++){x.fillStyle='rgba(0,0,0,0.05)';x.fillRect(rnd()*w,rnd()*h,14,20);}
+    }else{ // glass: dense dark grid
+      x.fillStyle='rgba(12,18,28,0.55)';
+      for(let r=0;r<16;r++)for(let c=0;c<8;c++)x.fillRect(2+c*16,2+r*16,13,12);
+    }
+    const rows=12,cols=6;
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+      const px=8+c*20,py=8+r*20;
+      x.fillStyle=rnd()<winLit?'rgba(255,214,140,0.95)':'rgba(20,30,48,0.9)';
+      x.fillRect(px,py,13,12);
+      x.fillStyle='rgba(0,0,0,0.35)';x.fillRect(px,py,13,2);}
+  });
+  if(style==='brick'){tex.wrapS=THREE.RepeatWrapping;tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(2,4);}
+  return tex;}
+function c151_css(c){return (typeof c==='string')?c:('#'+c.toString(16).padStart(6,'0'));}
+function c151_sign(text,bg,fg){
+  return c151_canvas(512,128,function(x,w,h){
+    x.fillStyle=c151_css(bg);x.fillRect(0,0,w,h);
+    x.strokeStyle=c151_css(fg);x.lineWidth=6;x.strokeRect(8,8,w-16,h-16);
+    x.fillStyle=c151_css(fg);x.font='700 62px system-ui, sans-serif';x.textAlign='center';x.textBaseline='middle';
+    x.fillText(text,w/2,h/2+2, w-40);});}
+function c151_off(yaw,lx,lz){return [lx*Math.cos(yaw)+lz*Math.sin(yaw),-lx*Math.sin(yaw)+lz*Math.cos(yaw)];}
+function c151_obb(x,z,hw,hd,yaw){OBBS.push({x:x,z:z,hw:hw,hd:hd,yaw:yaw||0});}
+function c151_parapet(b,gy){
+  const f=c151_off(b.yaw,0,-b.d/2),bk=c151_off(b.yaw,0,b.d/2),lf=c151_off(b.yaw,-b.w/2,0),rt=c151_off(b.yaw,b.w/2,0);
+  const m=c151_lam(0x3a3f4a),y=gy+b.h+0.45;
+  c151_box(b.w,0.9,0.3,b.x+f[0],y,b.z+f[1],m,b.yaw,0,false);
+  c151_box(b.w,0.9,0.3,b.x+bk[0],y,b.z+bk[1],m,b.yaw,0,false);
+  c151_box(0.3,0.9,b.d,b.x+lf[0],y,b.z+lf[1],m,b.yaw,0,false);
+  c151_box(0.3,0.9,b.d,b.x+rt[0],y,b.z+rt[1],m,b.yaw,0,false);}
+function c151_roofKit(b,gy,water){
+  c151_box(b.w+1,0.5,b.d+1,b.x,gy+b.h+0.15,b.z,c151_lam(0x3a3f4a),b.yaw,0,true);
+  c151_box(1.2,0.8,1.0,b.x-2,gy+b.h+0.8,b.z-1,c151_lam(0x6a7078),b.yaw,0,false);
+  c151_box(1.2,0.8,1.0,b.x+2,gy+b.h+0.8,b.z+1,c151_lam(0x6a7078),b.yaw,0,false);
+  c151_box(0.3,3,0.3,b.x,gy+b.h+1.8,b.z,c151_lam(0x22262e),b.yaw,0,false);
+  if(water){
+    const lx=c151_off(b.yaw,-b.w/4,-b.d/4);
+    c151_box(0.25,2.4,0.25,b.x+lx[0]-0.9,gy+b.h+1.5,b.z+lx[1]-0.9,c151_lam(0x4a4038),b.yaw,0,false);
+    c151_box(0.25,2.4,0.25,b.x+lx[0]+0.9,gy+b.h+1.5,b.z+lx[1]-0.9,c151_lam(0x4a4038),b.yaw,0,false);
+    c151_box(0.25,2.4,0.25,b.x+lx[0]-0.9,gy+b.h+1.5,b.z+lx[1]+0.9,c151_lam(0x4a4038),b.yaw,0,false);
+    c151_box(0.25,2.4,0.25,b.x+lx[0]+0.9,gy+b.h+1.5,b.z+lx[1]+0.9,c151_lam(0x4a4038),b.yaw,0,false);
+    const tank=new THREE.Mesh(C151_CYL,c151_lam(0x7a5a42));
+    tank.position.set(b.x+lx[0],gy+b.h+3.6,b.z+lx[1]);tank.scale.set(1.5,2.0,1.5);scene.add(tank);V14C3.meshCount++;
+    const cone=new THREE.Mesh(new THREE.CylinderGeometry(0.1,1.5,1.0,10),c151_lam(0x4a4038));
+    cone.position.set(b.x+lx[0],gy+b.h+5.1,b.z+lx[1]);scene.add(cone);V14C3.meshCount++;}
+  const bc=new THREE.Mesh(C151_SPH,c151_bas(0xff2222));
+  bc.position.set(b.x,gy+b.h+3.6,b.z);bc.scale.set(0.25,0.25,0.25);scene.add(bc);V14C3.meshCount++;}
+function c151_build(b){
+  const gy=groundH(b.x,b.z);
+  c151_box(b.w+2,0.14,b.d+2,b.x,gy-0.02,b.z,c151_lam(0x8d8d88),b.yaw,0,false);
+  const fo=c151_off(b.yaw,0,-(b.d/2)); // front face center (local -z)
+  const foDoor=c151_off(b.yaw,0,-(b.d/2+0.15));
+  if(b.kind==='tower'){
+    c151_texBox(b.w,b.h,b.d,b.x,gy+b.h/2-0.1,b.z,c151_facade(b.facade,0.30,Math.floor(b.x*7-b.z),'glass'),b.yaw,true);
+    c151_parapet(b,gy);c151_roofKit(b,gy,!!b.water);
+    c151_box(b.w+1.5,1.2,b.d+1.5,b.x,gy+0.5,b.z,c151_lam(0x555c6a),b.yaw,0,false);
+    c151_obb(b.x,b.z,b.w/2,b.d/2,b.yaw);
+  }else if(b.kind==='midrise'){
+    c151_texBox(b.w,b.h,b.d,b.x,gy+b.h/2-0.1,b.z,c151_facade(b.facade,0.25,Math.floor(b.x*7-b.z),b.style||'brick'),b.yaw,true);
+    c151_parapet(b,gy);
+    c151_box(b.w+0.6,0.4,b.d+0.6,b.x,gy+b.h+0.1,b.z,c151_lam(0x3f464e),b.yaw,0,false);
+    c151_box(0.3,3,0.3,b.x,gy+b.h+1.8,b.z,c151_lam(0x22262e),b.yaw,0,false);
+    c151_box(1.0,0.7,0.8,b.x-2,gy+b.h+0.7,b.z-1,c151_lam(0x6a7078),b.yaw,0,false);
+    const d1=c151_off(b.yaw,-2,-(b.d/2+0.2)),d2=c151_off(b.yaw,2,-(b.d/2+0.2));
+    c151_box(0.9,0.6,0.5,b.x+d1[0],gy+3.2,b.z+d1[1],c151_lam(0x8a8d90),b.yaw,0,false);
+    c151_box(0.9,0.6,0.5,b.x+d2[0],gy+3.2,b.z+d2[1],c151_lam(0x8a8d90),b.yaw,0,false);
+    c151_box(1.4,2.4,0.2,b.x+foDoor[0],gy+1.2,b.z+foDoor[1],c151_lam(0x1c1e24),b.yaw,0,false);
+    c151_box(2.2,0.14,1.2,b.x+foDoor[0],gy+0.07,b.z+foDoor[1],c151_lam(0x9a9a92),b.yaw,0,false);
+    c151_box(b.w+1.2,1.0,b.d+1.2,b.x,gy+0.4,b.z,c151_lam(0x555c6a),b.yaw,0,false);
+    c151_obb(b.x,b.z,b.w/2,b.d/2,b.yaw);
+  }else if(b.kind==='storefront'){
+    c151_box(b.w,b.h,b.d,b.x,gy+b.h/2-0.1,b.z,c151_lam(b.wall),b.yaw,0,true);
+    c151_box(b.w+0.6,0.4,b.d+0.6,b.x,gy+b.h+0.1,b.z,c151_lam(0x3f464e),b.yaw,0,false);
+    c151_box(0.5,1.2,0.5,b.x,gy+b.h+0.9,b.z,c151_lam(0x6a7078),b.yaw,0,false);
+    const aw=c151_off(b.yaw,0,-(b.d/2+1.0));
+    c151_box(b.w+1,0.22,2.4,b.x+aw[0],gy+b.h*0.62,b.z+aw[1],c151_lam(b.accent),b.yaw,0,false);
+    const so=c151_off(b.yaw,0,-(b.d/2+0.2));
+    const sign=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({map:c151_sign(b.sign,b.accent,0xffffff)}));
+    sign.position.set(b.x+so[0],gy+b.h-0.7,b.z+so[1]);sign.scale.set(b.w*0.7,0.9,0.3);sign.rotation.y=b.yaw;scene.add(sign);V14C3.meshCount++;
+    const w1=c151_off(b.yaw,-b.w/4,-(b.d/2+0.12)),w2=c151_off(b.yaw,b.w/4,-(b.d/2+0.12));
+    c151_box(b.w*0.32,1.8,0.15,b.x+w1[0],gy+1.4,b.z+w1[1],c151_lam(0x1a2836),b.yaw,0,false);
+    c151_box(b.w*0.32,1.8,0.15,b.x+w2[0],gy+1.4,b.z+w2[1],c151_lam(0x1a2836),b.yaw,0,false);
+    c151_box(1.4,2.2,0.2,b.x+foDoor[0],gy+1.0,b.z+foDoor[1],c151_lam(0x1c1e24),b.yaw,0,false);
+    c151_box(2.2,0.14,1.2,b.x+foDoor[0],gy+0.07,b.z+foDoor[1],c151_lam(0x9a9a92),b.yaw,0,false);
+    c151_obb(b.x,b.z,b.w/2,b.d/2,b.yaw);
+  }else if(b.kind==='enterable'){
+    // U-shape: left wall, right wall, back wall, open-top (no roof by spec); front OPEN (no wall, no OBB).
+    const t=0.4, hw=b.w/2, hd=b.d/2;
+    const lw=c151_off(b.yaw,-(hw-t/2),0), rw=c151_off(b.yaw,(hw-t/2),0), bw=c151_off(b.yaw,0,(hd-t/2));
+    c151_box(t,b.h,b.d,b.x+lw[0],gy+b.h/2-0.1,b.z+lw[1],c151_lam(b.wall),b.yaw,0,true);
+    c151_box(t,b.h,b.d,b.x+rw[0],gy+b.h/2-0.1,b.z+rw[1],c151_lam(b.wall),b.yaw,0,true);
+    c151_box(b.w,b.h,t,b.x+bw[0],gy+b.h/2-0.1,b.z+bw[1],c151_lam(b.wall),b.yaw,0,true);
+    // SPEC: no roof over the interior section — open-top store, sky visible from inside
+    c151_box(b.w,0.3,b.d,b.x,gy+0.05,b.z,c151_lam(0x7a7568),b.yaw,0,false); // interior floor
+    const aw=c151_off(b.yaw,0,-(b.d/2+1.0));
+    c151_box(b.w+1,0.22,2.4,b.x+aw[0],gy+b.h*0.62,b.z+aw[1],c151_lam(b.accent),b.yaw,0,false);
+    const so=c151_off(b.yaw,0,-(b.d/2+0.2));
+    const sign=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({map:c151_sign(b.sign,b.accent,0xffffff)}));
+    sign.position.set(b.x+so[0],gy+b.h-0.7,b.z+so[1]);sign.scale.set(b.w*0.7,0.9,0.3);sign.rotation.y=b.yaw;scene.add(sign);V14C3.meshCount++;
+    // interior props (all solid OBBs): counter + 2 shelf rows
+    const c0=c151_off(b.yaw,0,(hd-1.6));
+    c151_box(b.w*0.6,1.1,0.8,b.x+c0[0],gy+0.55,b.z+c0[1],c151_lam(0x6a5a42),b.yaw,0,false);
+    const s1=c151_off(b.yaw,-(hw-1.2),0), s2=c151_off(b.yaw,(hw-1.2),0);
+    c151_box(0.8,1.8,b.d-3,b.x+s1[0],gy+0.9,b.z+s1[1],c151_lam(0x5a4a38),b.yaw,0,false);
+    c151_box(0.8,1.8,b.d-3,b.x+s2[0],gy+0.9,b.z+s2[1],c151_lam(0x5a4a38),b.yaw,0,false);
+    // interior dressing (NO new OBBs — all within existing prop footprints):
+    // counter top slab + shelf goods + back-wall name board (reads as a store inside)
+    c151_box(b.w*0.6+0.2,0.08,0.9,b.x+c0[0],gy+1.14,b.z+c0[1],c151_lam(0x3a2f22),b.yaw,0,false);
+    const goods=[0x8a3a2a,0x3a6a3a,0xc8a83a,0x3a5a8a];
+    for(const sx of [-(hw-1.2),(hw-1.2)])for(let gi=0;gi<4;gi++){
+      const gz=-2.4+gi*1.6, go=c151_off(b.yaw,sx,gz);
+      c151_box(0.5,0.3,0.5,b.x+go[0],gy+1.95,b.z+go[1],c151_lam(goods[(gi+((sx>0)?1:0))%4]),b.yaw,0,false);}
+    const bo=c151_off(b.yaw,0,(hd-0.5));
+    const board=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({map:c151_sign(b.sign,b.accent,0xffffff)}));
+    board.position.set(b.x+bo[0],gy+2.6,b.z+bo[1]);board.scale.set(b.w*0.5,1.0,0.1);board.rotation.y=b.yaw;scene.add(board);V14C3.meshCount++;
+    // OBBs: wall segments + interior props (front opening deliberately unblocked)
+    const wob=(lx,lz,ww,dd)=>{const o=c151_off(b.yaw,lx,lz);c151_obb(b.x+o[0],b.z+o[1],ww/2,dd/2,b.yaw);};
+    wob(-(hw-t/2),0,t,b.d); wob((hw-t/2),0,t,b.d); wob(0,(hd-t/2),b.w,t);
+    wob(0,(hd-1.6),b.w*0.6,0.8); wob(-(hw-1.2),0,0.8,b.d-3); wob((hw-1.2),0,0.8,b.d-3);
+    V14C3.buildings.push(b); // map inks the outer footprint
+  }else if(b.kind==='house'){
+    c151_box(b.w,b.h,b.d,b.x,gy+b.h/2-0.1,b.z,c151_lam(b.wall),b.yaw,0,true);
+    const r1=c151_off(b.yaw,0,-b.d*0.24),r2=c151_off(b.yaw,0,b.d*0.24);
+    c151_box(b.w+1.0,0.28,b.d*0.68,b.x+r1[0],gy+b.h+0.55,b.z+r1[1],c151_lam(b.roof),b.yaw,0.55,false);
+    c151_box(b.w+1.0,0.28,b.d*0.68,b.x+r2[0],gy+b.h+0.55,b.z+r2[1],c151_lam(b.roof),b.yaw,-0.55,false);
+    c151_box(1.1,2.0,0.2,b.x+foDoor[0],gy+0.9,b.z+foDoor[1],c151_lam(0x2a2118),b.yaw,0,false);
+    const w1=c151_off(b.yaw,-b.w/4,-(b.d/2+0.12)),w2=c151_off(b.yaw,b.w/4,-(b.d/2+0.12));
+    c151_box(1.2,1.2,0.15,b.x+w1[0],gy+1.8,b.z+w1[1],c151_lam(0x1a2836),b.yaw,0,false);
+    c151_box(1.2,1.2,0.15,b.x+w2[0],gy+1.8,b.z+w2[1],c151_lam(0x1a2836),b.yaw,0,false);
+    c151_box(2.2,0.14,1.2,b.x+foDoor[0],gy+0.07,b.z+foDoor[1],c151_lam(0x9a9a92),b.yaw,0,false);
+    c151_box(0.6,1.2,0.6,b.x+b.w/3,gy+b.h+1.0,b.z,c151_lam(0x6a4a38),b.yaw,0,false); // chimney
+    c151_obb(b.x,b.z,b.w/2,b.d/2,b.yaw);
+  }else if(b.kind==='civic'){
+    c151_texBox(b.w,b.h,b.d,b.x,gy+b.h/2-0.1,b.z,c151_facade(b.facade,0.25,Math.floor(b.x*7-b.z),'concrete'),b.yaw,true);
+    c151_parapet(b,gy);
+    c151_box(b.w+0.6,0.4,b.d+0.6,b.x,gy+b.h+0.1,b.z,c151_lam(0x3f464e),b.yaw,0,false);
+    for(const sx of [-1,1])for(const sz of [-1,1]){
+      const co=c151_off(b.yaw,sx*(b.w/2-0.6),-(b.d/2+0.8));
+      c151_box(0.5,b.h*0.7,0.5,b.x+co[0],gy+b.h*0.35,b.z+co[1],c151_lam(0xb8b0a0),b.yaw,0,false);}
+    const so=c151_off(b.yaw,0,-(b.d/2+0.2));
+    const sign=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({map:c151_sign(b.sign,b.accent,0xffffff)}));
+    sign.position.set(b.x+so[0],gy+b.h-0.7,b.z+so[1]);sign.scale.set(b.w*0.7,0.9,0.3);sign.rotation.y=b.yaw;scene.add(sign);V14C3.meshCount++;
+    c151_box(1.6,2.6,0.2,b.x+foDoor[0],gy+1.3,b.z+foDoor[1],c151_lam(0x1c1e24),b.yaw,0,false);
+    c151_box(3.0,0.18,1.6,b.x+foDoor[0],gy+0.09,b.z+foDoor[1],c151_lam(0x9a9a92),b.yaw,0,false);
+    c151_box(3.4,0.18,2.0,b.x+foDoor[0],gy+0.02,b.z+foDoor[1],c151_lam(0x8d8d88),b.yaw,0,false);
+    c151_obb(b.x,b.z,b.w/2,b.d/2,b.yaw);
+  }else if(b.kind==='depot'){
+    c151_box(b.w,b.h,b.d,b.x,gy+b.h/2-0.1,b.z,c151_lam(b.wall),b.yaw,0,true);
+    c151_parapet(b,gy);
+    c151_box(b.w+0.6,0.4,b.d+0.6,b.x,gy+b.h+0.1,b.z,c151_lam(0x3f464e),b.yaw,0,false);
+    const d1=c151_off(b.yaw,-b.w/4,-(b.d/2+0.12)),d2=c151_off(b.yaw,b.w/4,-(b.d/2+0.12));
+    c151_box(b.w*0.3,3.2,0.15,b.x+d1[0],gy+1.6,b.z+d1[1],c151_lam(0x3a3f44),b.yaw,0,false);
+    c151_box(b.w*0.3,3.2,0.15,b.x+d2[0],gy+1.6,b.z+d2[1],c151_lam(0x3a3f44),b.yaw,0,false);
+    c151_box(1.2,2.2,0.2,b.x+foDoor[0],gy+1.1,b.z+foDoor[1],c151_lam(0x1c1e24),b.yaw,0,false);
+    const so=c151_off(b.yaw,0,-(b.d/2+0.2));
+    const sign=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({map:c151_sign(b.sign,b.accent,0xffffff)}));
+    sign.position.set(b.x+so[0],gy+b.h-0.7,b.z+so[1]);sign.scale.set(b.w*0.6,0.9,0.3);sign.rotation.y=b.yaw;scene.add(sign);V14C3.meshCount++;
+    c151_obb(b.x,b.z,b.w/2,b.d/2,b.yaw);
+  }
+  if(b.kind!=='enterable')V14C3.buildings.push(b);
+}
+/* ---- the city: 24 buildings in a real grid (blocks B1-B6 + south strip + east strip) ---- */
+const C151_CITY=[
+  {x:555,z:-1825,w:20,d:20,h:58,yaw:0,kind:'tower',facade:'#5a6478',water:true},
+  {x:575,z:-1810,w:14,d:14,h:22,yaw:0,kind:'midrise',facade:'#7a4a3a',style:'brick'},
+  {x:550,z:-1808,w:14,d:10,h:8,yaw:Math.PI,kind:'enterable',wall:0xb8a888,accent:0x8a2a22,sign:'DINER'},
+  {x:635,z:-1825,w:18,d:18,h:46,yaw:0,kind:'tower',facade:'#4e5a70',water:false},
+  {x:615,z:-1810,w:14,d:14,h:18,yaw:0,kind:'midrise',facade:'#9a9a92',style:'concrete'},
+  {x:645,z:-1808,w:12,d:10,h:7,yaw:Math.PI,kind:'storefront',wall:0x9aa5b0,accent:0x24344d,sign:'BOOKS'},
+  {x:546,z:-1779,w:12,d:10,h:8,yaw:0,kind:'enterable',wall:0xcbbfa5,accent:0xb08a2a,sign:'BAKERY'},
+  {x:562,z:-1779,w:12,d:10,h:7,yaw:0,kind:'storefront',wall:0xa88f7a,accent:0x2a5a3a,sign:'CAFE'},
+  {x:578,z:-1779,w:12,d:10,h:7,yaw:0,kind:'storefront',wall:0x8fa08a,accent:0x6e2a5a,sign:'CLOTHING'},
+  {x:561,z:-1755,w:20,d:14,h:26,yaw:0,kind:'midrise',facade:'#8a5a44',style:'brick'},
+  {x:622,z:-1779,w:14,d:10,h:8,yaw:0,kind:'enterable',wall:0xb5a894,accent:0x2a6d2a,sign:'MARKET'},
+  {x:640,z:-1779,w:12,d:10,h:7,yaw:0,kind:'storefront',wall:0x9fb0a8,accent:0x8a2a22,sign:'PHARMACY'},
+  {x:638,z:-1756,w:16,d:16,h:68,yaw:0,kind:'tower',facade:'#626e84',water:true},
+  {x:614,z:-1755,w:12,d:14,h:20,yaw:0,kind:'midrise',facade:'#a8a094',style:'concrete'},
+  {x:545,z:-1722,w:12,d:10,h:7,yaw:0,kind:'storefront',wall:0xc4b49a,accent:0x8a5a2a,sign:'HARDWARE'},
+  {x:548,z:-1710,w:12,d:10,h:7,yaw:0,kind:'house',wall:0xcbbfa5,roof:0x4c3a2c},
+  {x:568,z:-1710,w:11,d:10,h:6,yaw:0.05,kind:'house',wall:0xb5a894,roof:0x3f464e},
+  {x:578,z:-1697,w:11,d:11,h:18,yaw:0,kind:'midrise',facade:'#6e4238',style:'brick'},
+  {x:620,z:-1710,w:14,d:14,h:24,yaw:0,kind:'midrise',facade:'#2a3542',style:'glass'},
+  {x:642,z:-1710,w:11,d:10,h:6,yaw:-0.05,kind:'house',wall:0x9fb0a8,roof:0x4c3a2c},
+  {x:630,z:-1723,w:11,d:10,h:7,yaw:0,kind:'storefront',wall:0xb8a888,accent:0x3f7a4a,sign:'FLOWERS'},
+  {x:548,z:-1652,w:12,d:10,h:7,yaw:0,kind:'house',wall:0xd8d0bc,roof:0x3f464e},
+  {x:570,z:-1652,w:11,d:10,h:6,yaw:0.05,kind:'house',wall:0xc4b49a,roof:0x4c3a2c},
+  {x:612,z:-1652,w:12,d:12,h:9,yaw:0,kind:'civic',facade:'#9a9a92',accent:0x24344d,sign:'POST OFFICE'},
+  {x:685,z:-1825,w:18,d:22,h:9,yaw:Math.PI/2,kind:'depot',wall:0x8d8d88,accent:0x3a3f4a,sign:'STORAGE'},
+  {x:685,z:-1710,w:16,d:18,h:8,yaw:Math.PI/2,kind:'depot',wall:0x7a7568,accent:0x3a3f4a,sign:'WORKSHOP'}
+];
+C151_CITY.forEach(c151_build);
+/* ---- streets: road slabs (1 cm height offsets kill z-fighting at overlaps) + split sidewalks ---- */
+(function c151_streets(){
+  const gy=groundH(600,-1750);
+  const roadM=c151_lam(0x2e3238), walkM=c151_lam(0x9a9a92);
+  // N-S roads (top gy+0.15) + E-W roads (top gy+0.16, x520-700 so the
+  // west lot/park strip is NOT crossed by through-roads)
+  for(const r of [{x0:522,x1:532},{x0:590,x1:600},{x0:658,x1:668}])
+    c151_box(r.x1-r.x0,0.3,240,(r.x0+r.x1)/2,gy,-1750,roadM,0,0,false);
+  for(const r of [{z0:-1854,z1:-1844},{z0:-1798,z1:-1788},{z0:-1742,z1:-1732},{z0:-1686,z1:-1676}])
+    c151_box(180,0.3,r.z1-r.z0,610,gy+0.01,(r.z0+r.z1)/2,roadM,0,0,false);
+  // N-S sidewalks (top gy+0.31, extended 2 m into E-W corridors for corner coverage)
+  const nsSegs=[[-1870,-1854],[-1844,-1798],[-1788,-1742],[-1732,-1686],[-1676,-1630]];
+  for(const s of [{x0:520,x1:522},{x0:532,x1:534},{x0:588,x1:590},{x0:600,x1:602},{x0:656,x1:658},{x0:668,x1:670}])
+    for(const zg of nsSegs)
+      c151_box(s.x1-s.x0,0.3,zg[1]-zg[0],(s.x0+s.x1)/2,gy+0.16,(zg[0]+zg[1])/2,walkM,0,0,false);
+  // E-W sidewalks (top gy+0.30; west strip has its own lot/park slabs)
+  const ewSegs=[[534,588],[602,656],[670,700]];
+  for(const s of [{z0:-1856,z1:-1854},{z0:-1844,z1:-1842},{z0:-1800,z1:-1798},{z0:-1788,z1:-1786},{z0:-1744,z1:-1742},{z0:-1732,z1:-1730},{z0:-1688,z1:-1686},{z0:-1676,z1:-1674}])
+    for(const xg of ewSegs)
+      c151_box(xg[1]-xg[0],0.3,s.z1-s.z0,(xg[0]+xg[1])/2,gy+0.15,(s.z0+s.z1)/2,walkM,0,0,false);
+  // plaza slab (east part of the south strip; civic building fronts it)
+  c151_box(34,0.32,40,637,gy+0.16,-1652,c151_lam(0xa8a094),0,0,false);
+  c151_box(16,0.3,64,510,gy+0.15,-1822,c151_lam(0x33373d),0,0,false);
+  c151_box(16,0.3,66,510,gy+0.15,-1709,c151_lam(0x8f8a7a),0,0,false);
+})();
+/* ---- instanced markings + props ---- */
+function c151_inst(geo,mat,list){
+  const im=new THREE.InstancedMesh(geo,mat,list.length);
+  const d=new THREE.Object3D();
+  for(let i=0;i<list.length;i++){const t=list[i];
+    d.position.set(t[0],t[1],t[2]);d.rotation.set(0,t[3]||0,0);d.scale.set(t[4]||1,t[5]||1,t[6]||1);d.updateMatrix();
+    im.setMatrixAt(i,d.matrix);}
+  im.instanceMatrix.needsUpdate=true;im.receiveShadow=true;scene.add(im);V14C3.meshCount++;return im;}
+(function c151_markings(){
+  const gy=groundH(600,-1750);
+  const dashes=[];
+  for(const xc of [527,595,663])for(let z=-1866;z<-1634;z+=6)dashes.push([xc,gy+0.18,z,0,0.15,0.04,3]);
+  for(const zc of [-1849,-1793,-1737,-1681])for(let x=524;x<698;x+=6)dashes.push([x,gy+0.19,zc,0,3,0.04,0.15]);
+  c151_inst(C151_BOX,c151_lam(0xd8b93a),dashes);
+  const walks=[];
+  const nsX=[527,595,663], ewZ=[-1849,-1793,-1737,-1681];
+  for(const xc of nsX)for(const zc of ewZ){
+    for(let i=0;i<10;i++)walks.push([xc-4.5+i,gy+0.20,zc,0,0.6,0.04,3]);
+    for(let i=0;i<10;i++)walks.push([xc,gy+0.20,zc-4.5+i,0,3,0.04,0.6]);}
+  c151_inst(C151_BOX,c151_lam(0xe8e8e2),walks);
+  // parking bay lines
+  const bays=[];
+  for(let i=0;i<11;i++){bays.push([504,gy+0.33,-1852+i*6,0,6,0.04,0.15]);bays.push([516,gy+0.33,-1852+i*6,0,6,0.04,0.15]);}
+  c151_inst(C151_BOX,c151_lam(0xe8e8e2),bays);
+  // manhole discs
+  for(const p of [[545,-1793],[640,-1793],[595,-1849],[595,-1737],[527,-1681],[663,-1681]]){
+    const mh=new THREE.Mesh(C151_CYL,c151_lam(0x1e2226));
+    mh.position.set(p[0],gy+0.19,p[1]);mh.scale.set(0.5,0.04,0.5);scene.add(mh);V14C3.meshCount++;}
+})();
+(function c151_props(){
+  const gy=groundH(600,-1750);
+  const poleT=[],headT=[],glowMat=new THREE.SpriteMaterial({map:(function(){const cv=document.createElement('canvas');cv.width=64;cv.height=64;const x=cv.getContext('2d');const g=x.createRadialGradient(32,32,2,32,32,30);g.addColorStop(0,'rgba(255,194,122,0.9)');g.addColorStop(1,'rgba(255,194,122,0)');x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(cv);})(),transparent:true,opacity:0.35,depthWrite:false});
+  function lamp(x,z){
+    poleT.push([x,gy+2.5,z,0,0.15,5,0.15]);headT.push([x,gy+5.0,z,0,0.6,0.2,0.35]);
+    const sp=new THREE.Sprite(glowMat);sp.position.set(x,gy+4.9,z);sp.scale.set(3,3,1);scene.add(sp);V14C3.meshCount++;}
+  for(let z=-1860;z<-1640;z+=25){lamp(588.3,z);lamp(601.7,z+12);}
+  for(let x=525;x<695;x+=25){lamp(x,-1799.7);lamp(x+12,-1786.3);}
+  c151_inst(C151_BOX,c151_lam(0x22262e),poleT);
+  c151_inst(C151_BOX,c151_bas(0xffc27a),headT);
+  // stop signs at 8 minor intersections: pole + red octagon + STOP plate,
+  // on the sidewalk, facing the approaching driver
+  const octGeo=new THREE.CylinderGeometry(0.45,0.45,0.06,8);
+  const stopTex=c151_canvas(128,128,function(x,w,h){
+    x.fillStyle='#c22a1e';x.fillRect(0,0,w,h);
+    x.fillStyle='#ffffff';x.font='700 34px system-ui, sans-serif';x.textAlign='center';x.textBaseline='middle';
+    x.fillText('STOP',w/2,h/2);});
+  for(const xc of [527,663])for(const zc of [-1849,-1793,-1737,-1681]){
+    const sx=xc+6,sz=zc-8;
+    c151_box(0.12,2.4,0.12,sx,gy+1.2,sz,c151_lam(0x22262e),0,0,false);
+    const oc=new THREE.Mesh(octGeo,c151_lam(0xc22a1e));
+    oc.position.set(sx,gy+2.6,sz);oc.rotation.x=Math.PI/2;scene.add(oc);V14C3.meshCount++;
+    const pl=new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.7),new THREE.MeshBasicMaterial({map:stopTex,transparent:true}));
+    pl.position.set(sx,gy+2.6,sz+0.05);scene.add(pl);V14C3.meshCount++;}
+  // traffic lights at Main Ave x Main St + Main Ave x street 3 (green lit)
+  for(const zc of [-1793,-1737]){
+    const px=601.7,pz=zc-8;
+    c151_box(0.2,5.4,0.2,px,gy+2.7,pz,c151_lam(0x22262e),0,0,false);
+    c151_box(0.45,1.3,0.45,px,gy+5.2,pz,c151_lam(0x1a1e24),0,0,false);
+    const dots=[[0xff2222,5.65],[0xffcc22,5.2],[0x22cc44,4.75]];
+    for(let i=0;i<3;i++){
+      const dot=new THREE.Mesh(C151_SPH,i===2?c151_bas(dots[i][0]):c151_lam(0x1a1a1a));
+      dot.position.set(px,gy+dots[i][1],pz+0.25);dot.scale.set(0.14,0.14,0.14);scene.add(dot);V14C3.meshCount++;}
+  }
+  // benches / planters / hydrants / trees / meters (instanced)
+  const benchSeat=[],benchBack=[],benchLeg=[],planterB=[],shrubT=[],hydB=[],hydC=[],trunkT=[],leafT=[],meterP=[],meterH=[];
+  function bench(x,z,ry){
+    benchSeat.push([x,gy+0.55,z,ry,1.8,0.12,0.5]);
+    benchBack.push([x+Math.sin(ry)*0.22,gy+0.95,z+Math.cos(ry)*0.22,ry,1.8,0.8,0.12]);
+    const cx=Math.cos(ry)*0.7,sz=-Math.sin(ry)*0.7;
+    benchLeg.push([x+cx,gy+0.28,z+sz,ry,0.12,0.55,0.45]);benchLeg.push([x-cx,gy+0.28,z-sz,ry,0.12,0.55,0.45]);}
+  function planter(x,z){planterB.push([x,gy+0.4,z,0,1.2,0.8,1.2]);shrubT.push([x,gy+1.05,z,0,0.7,0.7,0.7]);}
+  function hydrant(x,z){hydB.push([x,gy+0.45,z,0,0.3,0.9,0.3]);hydC.push([x,gy+0.95,z,0,0.22,0.22,0.22]);}
+  function tree(x,z,s){trunkT.push([x,gy+1.2*s,z,0,0.22*s,2.4*s,0.22*s]);leafT.push([x,gy+3.2*s,z,0,1.8*s,1.8*s,1.8*s]);leafT.push([x+0.5*s,gy+2.6*s,z,0,1.1*s,1.1*s,1.1*s]);}
+  function meter(x,z){meterP.push([x,gy+0.5,z,0,0.08,1,0.08]);meterH.push([x,gy+1.05,z,0,0.22,0.3,0.15]);}
+  bench(628,-1668,0);bench(648,-1668,0);bench(628,-1636,Math.PI);bench(648,-1636,Math.PI);
+  bench(540,-1786.8,0);bench(570,-1786.8,0);bench(620,-1786.8,0);bench(650,-1786.8,0);
+  bench(506,-1710,Math.PI/2);bench(506,-1700,Math.PI/2);
+  planter(637,-1644);planter(620,-1640);planter(545,-1786.8);planter(600,-1786.8);planter(655,-1786.8);
+  planter(516,-1715);planter(516,-1705);planter(590,-1799.7);planter(660,-1799.7);planter(660,-1786.3);
+  hydrant(534.5,-1799.5);hydrant(601.5,-1799.5);hydrant(656.5,-1799.5);hydrant(534.5,-1786.5);
+  hydrant(601.5,-1786.5);hydrant(656.5,-1786.5);hydrant(534.5,-1743.5);hydrant(656.5,-1743.5);
+  tree(505,-1735,1.2);tree(515,-1725,1.0);tree(505,-1695,1.1);tree(515,-1685,1.3);tree(505,-1745,1.0);tree(515,-1705,1.1);
+  tree(590,-1860,1.0);tree(600,-1860,1.0);tree(590,-1640,1.1);tree(600,-1640,1.1);
+  tree(624,-1660,1.0);tree(650,-1644,1.0);
+  meter(545,-1786.8);meter(555,-1786.8);meter(625,-1786.8);meter(635,-1786.8);meter(645,-1786.8);meter(655,-1786.8);
+  const wood=c151_lam(0x6a4a2e);
+  c151_inst(C151_BOX,wood,benchSeat);c151_inst(C151_BOX,wood,benchBack);c151_inst(C151_BOX,c151_lam(0x3a3a3a),benchLeg);
+  c151_inst(C151_BOX,c151_lam(0x8a8d90),planterB);c151_inst(C151_SPH,c151_lam(0x2a5a2a),shrubT);
+  c151_inst(C151_CYL,c151_lam(0xc22a1e),hydB);c151_inst(C151_SPH,c151_lam(0xc22a1e),hydC);
+  c151_inst(C151_CYL,c151_lam(0x4a3524),trunkT);c151_inst(C151_SPH,c151_lam(0x2a5a2a),leafT);
+  c151_inst(C151_BOX,c151_lam(0x3a3f44),meterP);c151_inst(C151_BOX,c151_lam(0x6a7078),meterH);
+  // billboards (generic slogans only)
+  function billboard(x,z,ry,text){
+    c151_box(0.3,7,0.3,x-2,gy+3.5,z,c151_lam(0x22262e),ry,0,false);
+    c151_box(0.3,7,0.3,x+2,gy+3.5,z,c151_lam(0x22262e),ry,0,false);
+    const bd=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({map:c151_sign(text,0x24344d,0xffffff)}));
+    bd.position.set(x,gy+7.5,z);bd.scale.set(7,3,0.3);bd.rotation.y=ry;scene.add(bd);V14C3.meshCount++;}
+  billboard(515,-1850,-0.6,'VISIT DOWNTOWN');
+  billboard(685,-1650,2.5,'EAT AT THE DINER');
+  // flag pole + deep-blue flag on the plaza
+  const fp=new THREE.Mesh(C151_CYL,c151_lam(0xb8bcc2));
+  fp.position.set(637,gy+4,-1660);fp.scale.set(0.12,8,0.12);scene.add(fp);V14C3.meshCount++;
+  c151_box(2.4,1.4,0.06,638.3,gy+7.2,-1660,c151_lam(0x1d4e89),0,0,false);
+  // bus shelter on Main St north sidewalk
+  c151_box(0.15,2.6,0.15,617,gy+1.3,-1799,c151_lam(0x22262e),0,0,false);
+  c151_box(0.15,2.6,0.15,623,gy+1.3,-1799,c151_lam(0x22262e),0,0,false);
+  c151_box(6.5,0.2,1.6,620,gy+2.7,-1799,c151_lam(0x3a3f4a),0,0,false);
+  const glass=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x9fb8c8,transparent:true,opacity:0.35}));
+  glass.position.set(620,gy+1.5,-1799.8);glass.scale.set(6.2,1.8,0.08);scene.add(glass);V14C3.meshCount++;
+  // mailboxes
+  for(const p of [[536,-1799.5],[604,-1799.5],[656,-1786.5]]){
+    c151_box(0.12,1.0,0.12,p[0],gy+0.5,p[1],c151_lam(0x3a3f44),0,0,false);
+    c151_box(0.5,0.4,0.3,p[0],gy+1.15,p[1],c151_lam(0x1d4e89),0,0,false);}
+  // dumpsters in alleys (solid OBBs)
+  for(const p of [[561,-1768],[622,-1768],[673,-1705],[559,-1652]]){
+    c151_box(1.8,1.2,1.1,p[0],gy+0.6,p[1],c151_lam(0x2a5a3a),0,0,false);
+    c151_box(1.8,0.15,1.1,p[0],gy+1.25,p[1],c151_lam(0x1e4228),0,0,false);
+    c151_obb(p[0],p[1],0.9,0.55,0);}
+  // fire escapes on 2 midrise south faces
+  for(const b of [{x:561,z:-1755,w:20,d:14},{x:614,z:-1755,w:12,d:14}]){
+    for(let f=0;f<3;f++){
+      const y=gy+3+f*5.5;
+      c151_box(4,0.15,1.0,b.x,y,b.z+b.d/2+0.6,c151_lam(0x22262e),0,0,false);
+      c151_box(4,0.9,0.08,b.x,y+0.5,b.z+b.d/2+1.05,c151_lam(0x22262e),0,0,false);}
+    c151_box(0.3,17,0.3,b.x-2,gy+8.5,b.z+b.d/2+0.6,c151_lam(0x22262e),0,0,false);}
+  // curb ramps at the Main Ave x Main St crossing
+  for(const p of [[589,-1799.5,-0.2],[601,-1799.5,-0.2],[589,-1786.5,0.2],[601,-1786.5,0.2]])
+    c151_box(2,0.3,1.5,p[0],gy+0.18,p[1],c151_lam(0x9a9a92),0,p[2],false);
+  // parked cars (solid OBBs, varied muted colors)
+  const carCols=[0x8a8d90,0x3a3f44,0x6e2a22,0x2a3a4a,0xb8b0a0,0x4a4a44,0x7a7a72,0x5a2a3a];
+  function car(x,z,ry,ci){
+    const col=carCols[ci%carCols.length];
+    const g=new THREE.Group();g.position.set(x,gy+0.15,z);g.rotation.y=ry;scene.add(g);
+    function pb(w,h,d,px,py,pz,mat){const m=new THREE.Mesh(C151_BOX,mat);m.position.set(px,py,pz);m.scale.set(w,h,d);m.castShadow=true;m.receiveShadow=true;g.add(m);V14C3.meshCount++;}
+    pb(4.2,0.7,1.8,0,0.55,0,c151_lam(col));
+    pb(2.2,0.6,1.6,-0.2,1.2,0,c151_lam(0x1a2836));
+    const wg=new THREE.CylinderGeometry(0.35,0.35,0.25,10);
+    for(const wx of [-1.3,1.3])for(const wz of [-0.85,0.85]){
+      const wh=new THREE.Mesh(wg,c151_lam(0x14161a));wh.position.set(wx,0.35,wz);wh.rotation.x=Math.PI/2;g.add(wh);V14C3.meshCount++;}
+    const o=c151_off(ry,0,0);c151_obb(x,z,2.1,0.9,ry);}
+  car(545,-1796.5,0,0);car(560,-1796.5,0,1);car(625,-1796.5,0,2);car(645,-1796.5,0,3); // Main St: north curb, centerline clear for foot + quad
+  car(591.2,-1830,Math.PI/2,4);car(591.2,-1770,Math.PI/2,5);car(598.8,-1700,Math.PI/2,6);car(598.8,-1660,Math.PI/2,7);
+  car(506,-1830,Math.PI/2,0);car(506,-1820,Math.PI/2,2);car(514,-1830,Math.PI/2,4);car(514,-1820,Math.PI/2,5);
+})();
+
+/* ==================== V15.1 PEDESTRIANS + DOGS ====================
+   Ambient city life. Procedural figures (same box-skeleton approach as
+   guards — NEVER GLB people, iOS Safari lesson). Adults killable with
+   ZERO consequences (no score/CR/XP/counters/missions/sync — the kill
+   itself is the only effect, like wildlife). Kids are in NO hit test
+   (bullet/knife/blast): shots pass through, literally nothing changes,
+   never a prompt. Dogs are killable ONLY through the exact 2-button
+   prompt ("cmon bro really?" / "I'm a monster" / "Leave it alone");
+   any other dismissal (X, backdrop, Esc) counts as "Leave it alone"
+   and NEVER kills. One prompt at a time, no stacking; later shots
+   re-prompt. Dog kills give ZERO score/CR/XP. Population steady via
+   respawn (adults 20 s, dogs 30 s with owner). NPCs never enter
+   enemies[] so missions/outposts can never see them. No player
+   collision with NPCs (walk-through, standard for ambient NPCs).
+   Looks: parameterized generator, distinct-look keys enforced at
+   spawn/respawn (16/16 pedestrians, 4/4 dogs). */
+const V15NPC={ready:false,list:[],dogs:[],pending:[],prompt:{open:false,dog:null},
+  looksUsed:{},dogVarUsed:{},time:0,
+  paths:[
+    {pts:[[536,-1787],[586,-1787]],loop:false},
+    {pts:[[604,-1787],[654,-1787]],loop:false},
+    {pts:[[589,-1840],[589,-1802]],loop:false},
+    {pts:[[589,-1784],[589,-1746]],loop:false},
+    {pts:[[589,-1728],[589,-1690]],loop:false},
+    {pts:[[626,-1665],[648,-1665],[648,-1638],[626,-1638]],loop:true}
+  ]};
+const C151_SKINS=[0xf5d7c0,0xe8b898,0xc98e5e,0xa06a3e,0x7a4a26,0x5a3520,0xd9a075,0xb87a4a];
+const C151_SHIRTS=[0xc23b2a,0x2a6db0,0x2a7a4a,0xd8a018,0x6e2a5a,0xe8e8e2,0x22262e,0x8a8d90,0xb8a888,0x3f7a4a,0x24344d,0xd86a2a];
+const C151_PANTS=[0x22262e,0x3a3f44,0x5a4632,0x8a8d90,0x1d4e89,0x6e2a22,0x4a4a44,0xb8b0a0];
+const C151_SHOES=[0x1a1a1a,0x6a4a2e,0xe8e8e2,0x3a3f44];
+const C151_HAIRSTYLES=['short','long','bun','bald','cap','beanie'];
+const C151_HAIRCOLS=[0x1a1a1a,0x3a2410,0x6a4a22,0xd8b878,0x8a8d90,0xc22a1e];
+const C151_ACCS=['none','backpack','scarf'];
+function c151_pick(a){return a[Math.floor(Math.random()*a.length)];}
+function c151_randLook(gender,kid){
+  const hs=c151_pick(C151_HAIRSTYLES);
+  return {gender:gender,kid:kid,
+    scale:kid?Math.round((1.00+Math.random()*0.25)*20)/20:Math.round((1.55+Math.random()*0.35)*20)/20,
+    build:c151_pick([0.9,1.0,1.1]),
+    skin:c151_pick(C151_SKINS),shirt:c151_pick(C151_SHIRTS),pants:c151_pick(C151_PANTS),shoe:c151_pick(C151_SHOES),
+    hair:hs,hairCol:c151_pick(C151_HAIRCOLS),
+    sleeve:c151_pick(['short','long']),jacket:Math.random()<0.3,acc:c151_pick(C151_ACCS)};}
+function c151_figure(p){
+  const g=new THREE.Group(),meshes=[];
+  function bm(w,h,d,x,y,z,mat){
+    const m=new THREE.Mesh(C151_BOX,mat);m.position.set(x,y,z);m.scale.set(w,h,d);
+    m.castShadow=true;m.receiveShadow=true;g.add(m);meshes.push(m);return m;}
+  const skin=c151_lam(p.skin),shirt=c151_lam(p.jacket?0x2a2e35:p.shirt),pants=c151_lam(p.pants),shoe=c151_lam(p.shoe),hairM=c151_lam(p.hairCol);
+  const b=p.build;
+  // legs: hip pivots (thigh+shin single box + shoe)
+  function leg(sx){
+    const piv=new THREE.Group();piv.position.set(sx*0.11*b,0.95,0);g.add(piv);
+    const th=new THREE.Mesh(C151_BOX,pants);th.position.set(0,-0.45,0);th.scale.set(0.17*b,0.90,0.18);th.castShadow=true;piv.add(th);meshes.push(th);
+    const sh=new THREE.Mesh(C151_BOX,shoe);sh.position.set(0,-0.90,0.05);sh.scale.set(0.16,0.10,0.30);sh.castShadow=true;piv.add(sh);meshes.push(sh);
+    return piv;}
+  const legL=leg(-1),legR=leg(1);
+  bm(0.46*b,0.62,0.26,0,1.26,0,shirt); // torso
+  bm(0.47*b,0.06,0.27,0,0.98,0,c151_lam(0x1a1a1a)); // belt
+  function arm(sx){
+    const piv=new THREE.Group();piv.position.set(sx*0.29*b,1.50,0);g.add(piv);
+    const up=new THREE.Mesh(C151_BOX,shirt);up.position.set(0,-0.17,0);up.scale.set(0.11,0.34,0.13);up.castShadow=true;piv.add(up);meshes.push(up);
+    const fo=new THREE.Mesh(C151_BOX,p.sleeve==='short'?skin:shirt);fo.position.set(0,-0.50,0);fo.scale.set(0.10,0.32,0.12);fo.castShadow=true;piv.add(fo);meshes.push(fo);
+    return piv;}
+  const armL=arm(-1),armR=arm(1);
+  const head=bm(0.24,0.28,0.26,0,1.71,0,skin); // head
+  if(p.kid)head.scale.set(0.29,0.34,0.31);
+  if(p.hair==='short')bm(0.26,0.08,0.28,0,1.88,0,hairM);
+  else if(p.hair==='long'){bm(0.26,0.08,0.28,0,1.88,0,hairM);bm(0.26,0.32,0.06,0,1.68,0.16,hairM);}
+  else if(p.hair==='bun'){bm(0.26,0.08,0.28,0,1.88,0,hairM);bm(0.14,0.14,0.14,0,1.96,0.08,hairM);}
+  else if(p.hair==='cap'){
+    const cap=new THREE.Mesh(C151_CYL,hairM);cap.position.set(0,1.88,0);cap.scale.set(0.16,0.08,0.16);g.add(cap);meshes.push(cap);
+    bm(0.16,0.03,0.16,0,1.86,-0.18,hairM);}
+  else if(p.hair==='beanie')bm(0.26,0.12,0.28,0,1.90,0,hairM);
+  if(p.acc==='backpack')bm(0.30,0.42,0.14,0,1.28,0.20,c151_lam(c151_pick([0x7a1f1f,0x24344d,0x2a5a3a,0x8a8d90])));
+  else if(p.acc==='scarf')bm(0.28,0.10,0.30,0,1.58,0,c151_lam(c151_pick([0xc23b2a,0x1d4e89,0xd8a018,0xe8e8e2])));
+  g.scale.setScalar(p.scale/1.85);
+  return {group:g,legL:legL,legR:legR,armL:armL,armR:armR,meshes:meshes};}
+function c151_spawnNPC(pathIdx,kind,gender,startPt){
+  let look,key,tries=0;
+  do{look=c151_randLook(gender,kind==='kid');key=JSON.stringify(look);tries++;}while(V15NPC.looksUsed[key]&&tries<40);
+  V15NPC.looksUsed[key]=true;
+  const fig=c151_figure(look);
+  const path=V15NPC.paths[pathIdx];
+  const sp=path.pts[startPt];
+  const np={kind:kind,gender:gender,x:sp[0],z:sp[1],gy:groundH(sp[0],sp[1]),pathIdx:pathIdx,
+    wp:path.loop?(startPt+1)%path.pts.length:(startPt===0?1:0),
+    dir:path.loop?1:(startPt===0?1:-1),
+    speed:kind==='kid'?1.0+Math.random()*0.3:1.2+Math.random()*0.6,
+    phase:Math.random()*10,group:fig.group,legL:fig.legL,legR:fig.legR,armL:fig.armL,armR:fig.armR,meshes:fig.meshes,
+    alive:true,deathT:0,faded:false,gone:false,lookKey:key,scale:look.scale,
+    ch:1.26*(look.scale/1.85),r:0.6,dog:null,dogT:0};
+  np.die=function(){c151_npcDie(np);};
+  np.group.position.set(np.x,np.gy,np.z);scene.add(np.group);
+  V15NPC.list.push(np);return np;}
+function c151_dogVariant(){
+  let v,k,tries=0;
+  do{v={size:c151_pick([0.7,1.0,1.3]),coat:c151_pick([0x1a1a1a,0x6a4a2e,0xc8a878,0xe8e8e2,0x8a8d90]),ears:c151_pick(['floppy','pointy'])};
+    k=v.size+'|'+v.coat+'|'+v.ears;tries++;}while(V15NPC.dogVarUsed[k]&&tries<40);
+  V15NPC.dogVarUsed[k]=true;v.key=k;return v;}
+function c151_buildDog(v){
+  const g=new THREE.Group(),meshes=[],s=v.size,coat=c151_lam(v.coat);
+  function bm(w,h,d,x,y,z,mat){const m=new THREE.Mesh(C151_BOX,mat);m.position.set(x,y,z);m.scale.set(w,h,d);m.castShadow=true;g.add(m);meshes.push(m);return m;}
+  bm(0.62*s,0.28*s,0.26*s,0,0.42*s,0,coat); // body
+  bm(0.26*s,0.30*s,0.28*s,0,0.44*s,-0.28*s,coat); // chest
+  bm(0.24*s,0.22*s,0.24*s,0,0.62*s,-0.38*s,coat); // head
+  bm(0.14*s,0.12*s,0.16*s,0,0.58*s,-0.55*s,coat); // snout
+  bm(0.06*s,0.05*s,0.05*s,0,0.60*s,-0.64*s,c151_lam(0x0a0a0a)); // nose
+  function ear(sx){
+    const e=bm(0.09*s,0.18*s,0.05*s,sx*0.10*s,0.74*s,-0.38*s,coat);
+    if(v.ears==='floppy'){e.position.y=0.70*s;e.rotation.z=-sx*0.3;}
+    else e.rotation.z=-sx*0.15;
+    return e;}
+  ear(-1);ear(1);
+  function dogLeg(px,pz){
+    const piv=new THREE.Group();piv.position.set(px,0.30*s,pz);g.add(piv);
+    const l=new THREE.Mesh(C151_BOX,coat);l.position.set(0,-0.15*s,0);l.scale.set(0.09*s,0.30*s,0.09*s);l.castShadow=true;piv.add(l);meshes.push(l);
+    return piv;}
+  const legs=[dogLeg(-0.10*s,-0.20*s),dogLeg(0.10*s,-0.20*s),dogLeg(-0.10*s,0.20*s),dogLeg(0.10*s,0.20*s)];
+  const tail=bm(0.05*s,0.05*s,0.22*s,0,0.52*s,0.36*s,coat);tail.rotation.x=-0.5;
+  bm(0.27*s,0.07*s,0.27*s,0,0.55*s,-0.28*s,c151_lam(0x7a1f1f)); // collar
+  return {group:g,meshes:meshes,legs:legs,tail:tail};}
+function c151_spawnDog(owner,fadeIn){
+  const v=c151_dogVariant();
+  const d=c151_buildDog(v);
+  const dg={x:owner.x+1,z:owner.z,gy:0,size:v.size,coat:v.coat,ears:v.ears,
+    group:d.group,meshes:d.meshes,legs:d.legs,tail:d.tail,owner:owner,variantKey:v.key,
+    alive:true,deathT:0,faded:false,gone:false,ch:0.45*v.size,r:0.5*v.size,phase:Math.random()*10,fadeIn:fadeIn?1:0};
+  dg.gy=groundH(dg.x,dg.z);
+  dg.die=function(){c151_dogDie(dg);};
+  dg.group.position.set(dg.x,dg.gy,dg.z);scene.add(dg.group);
+  if(fadeIn){for(const m of dg.meshes){m.material=m.material.clone();m.material.transparent=true;m.material.opacity=0;}}
+  // leash line (owner hand -> dog collar), updated per tick
+  const lg=new THREE.BufferGeometry();
+  lg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
+  dg.leash=new THREE.Line(lg,new THREE.LineBasicMaterial({color:0x1a1a1a}));
+  scene.add(dg.leash);
+  V15NPC.dogs.push(dg);owner.dog=dg;return dg;}
+function c151_deathStep(o,dt){
+  o.deathT+=dt;
+  if(o.deathT<0.6){const k=o.deathT/0.6;o.group.rotation.x=-1.4*k;}
+  else if(o.deathT<14){o.group.rotation.x=-1.4;}
+  else if(o.deathT<20){
+    const op=1-(o.deathT-14)/6;
+    if(!o.faded){o.faded=true;for(const m of o.meshes){m.material=m.material.clone();m.material.transparent=true;}}
+    for(const m of o.meshes)m.material.opacity=op;}
+  else return true;
+  return false;}
+function npcTick(dt,gdt){
+  if(!V15NPC.ready||!gdt||gdt<=0)return;
+  V15NPC.time+=dt;
+  const t=V15NPC.time;
+  const px=(typeof G!=='undefined')?G.px:1e9,pz=(typeof G!=='undefined')?G.pz:1e9;
+  for(let i=V15NPC.list.length-1;i>=0;i--){
+    const np=V15NPC.list[i];
+    if(!np.alive){
+      if(c151_deathStep(np,dt)){
+        scene.remove(np.group);
+        if(np.faded)for(const m of np.meshes)m.material.dispose();
+        delete V15NPC.looksUsed[np.lookKey];
+        const pend={kind:np.kind,gender:np.gender,pathIdx:np.pathIdx,respawnT:20,dog:null,dogDead:false};
+        if(np.dog&&np.dog.alive){pend.dog=np.dog;np.dog.owner=null;}
+        V15NPC.pending.push(pend);
+        V15NPC.list.splice(i,1);}
+      continue;}
+    const path=V15NPC.paths[np.pathIdx];
+    const tgt=path.pts[np.wp];
+    let dx=tgt[0]-np.x,dz=tgt[1]-np.z;const dist=Math.hypot(dx,dz);
+    if(dist<0.5){
+      if(path.loop){np.wp=(np.wp+1)%path.pts.length;}
+      else{if(np.wp===0&&np.dir===-1)np.dir=1;else if(np.wp===path.pts.length-1&&np.dir===1)np.dir=-1;np.wp+=np.dir;}
+    }else{
+      dx/=dist;dz/=dist;
+      np.x+=dx*np.speed*dt;np.z+=dz*np.speed*dt;
+      const ob=obbResolve(np.x,np.z,0.4);np.x=ob[0];np.z=ob[1];
+      np.gy=groundH(np.x,np.z);
+      const want=Math.atan2(-dx,-dz);
+      let dy=want-np.group.rotation.y;
+      while(dy>Math.PI)dy-=TAU;while(dy<-Math.PI)dy+=TAU;
+      np.group.rotation.y+=dy*Math.min(1,dt*8);
+      np.phase+=dt*np.speed*3.4;
+      const sw=Math.sin(np.phase)*0.55;
+      np.legL.rotation.x=sw;np.legR.rotation.x=-sw;np.armL.rotation.x=-sw*0.7;np.armR.rotation.x=sw*0.7;
+      np.group.position.set(np.x,np.gy+Math.abs(Math.sin(np.phase))*0.03,np.z);}
+    if(np.dogT>0&&!np.dog){np.dogT-=dt;if(np.dogT<=0)c151_spawnDog(np,true);}
+  }
+  for(let i=V15NPC.dogs.length-1;i>=0;i--){
+    const dg=V15NPC.dogs[i];
+    if(!dg.alive){
+      if(c151_deathStep(dg,dt)){
+        scene.remove(dg.group);scene.remove(dg.leash);
+        if(dg.faded)for(const m of dg.meshes)m.material.dispose();
+        delete V15NPC.dogVarUsed[dg.variantKey];
+        const ow=dg.owner;
+        if(ow&&ow.alive){ow.dog=null;ow.dogT=30;}
+        else if(ow){for(const pd of V15NPC.pending)if(pd.dog===dg){pd.dog=null;pd.dogDead=true;}}
+        else{for(const pd of V15NPC.pending)if(pd.dog===dg){pd.dog=null;pd.dogDead=true;}}
+        V15NPC.dogs.splice(i,1);}
+      continue;}
+    if(dg.fadeIn>0){
+      dg.fadeIn=Math.max(0,dg.fadeIn-dt);
+      const op=1-dg.fadeIn;
+      for(const m of dg.meshes)m.material.opacity=op;
+      if(dg.fadeIn===0)for(const m of dg.meshes){m.material.transparent=false;m.material.opacity=1;}}
+    const ow=dg.owner;
+    if(ow&&ow.alive){
+      // follow: side offset from owner heading + catch-up speed
+      const th=ow.group.rotation.y;
+      const rx=Math.cos(th),rz=-Math.sin(th); // owner right vector
+      const tx=ow.x+rx*0.9+(-Math.sin(th))*0.3,tz=ow.z+rz*0.9+(-Math.cos(th))*0.3;
+      let dx=tx-dg.x,dz=tz-dg.z;const dist=Math.hypot(dx,dz);
+      const sp=dist>10?6.0:(ow.speed*1.45);
+      if(dist>0.4){
+        dx/=dist;dz/=dist;
+        dg.x+=dx*sp*dt;dg.z+=dz*sp*dt;
+        const ob=obbResolve(dg.x,dg.z,0.3);dg.x=ob[0];dg.z=ob[1];
+        dg.gy=groundH(dg.x,dg.z);
+        const want=Math.atan2(-dx,-dz);
+        let dy=want-dg.group.rotation.y;
+        while(dy>Math.PI)dy-=TAU;while(dy<-Math.PI)dy+=TAU;
+        dg.group.rotation.y+=dy*Math.min(1,dt*8);
+        dg.phase+=dt*sp*2.2;
+        const sw=Math.sin(dg.phase)*0.7;
+        dg.legs[0].rotation.x=sw;dg.legs[3].rotation.x=sw;dg.legs[1].rotation.x=-sw;dg.legs[2].rotation.x=-sw;}
+      dg.group.position.set(dg.x,dg.gy,dg.z);
+      dg.tail.rotation.y=Math.sin(t*6)*0.4;
+      const lp=dg.leash.geometry.attributes.position;
+      lp.setXYZ(0,ow.x+rx*0.25,ow.gy+0.9*(ow.scale/1.85),ow.z+rz*0.25);
+      lp.setXYZ(1,dg.x,dg.gy+0.55*dg.size,dg.z);
+      lp.needsUpdate=true;dg.leash.visible=true;
+    }else{
+      dg.tail.rotation.y=Math.sin(t*6)*0.4;
+      dg.leash.visible=false;}
+  }
+  for(let i=V15NPC.pending.length-1;i>=0;i--){
+    const pd=V15NPC.pending[i];
+    pd.respawnT-=dt;
+    if(pd.respawnT>0)continue;
+    const path=V15NPC.paths[pd.pathIdx];
+    let startPt=-1;
+    for(let k=0;k<path.pts.length;k++){
+      const p=path.pts[k];
+      if(Math.hypot(p[0]-px,p[1]-pz)>80){startPt=k;break;}}
+    if(startPt<0){pd.respawnT=2;continue;}
+    const np=c151_spawnNPC(pd.pathIdx,pd.kind,pd.gender,startPt);
+    if(pd.dog){pd.dog.owner=np;np.dog=pd.dog;}
+    else if(pd.dogDead){c151_spawnDog(np,true);}
+    V15NPC.pending.splice(i,1);}
+}
+/* ---- dog prompt UI (exact 2 options; any other dismissal = Leave it alone) ---- */
+(function c151_promptUI(){
+  const bd=document.createElement('div');bd.id='dogPromptBg';
+  bd.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:299;display:none;';
+  const pn=document.createElement('div');pn.id='dogPrompt';
+  pn.style.cssText='position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:300;display:none;background:#0d1b33;border:2px solid #2a4a7a;border-radius:14px;padding:22px 20px;width:min(340px,86vw);text-align:center;';
+  pn.innerHTML='<div id="dogPromptX" style="position:absolute;top:6px;right:10px;font-size:26px;line-height:36px;width:36px;height:36px;color:#9fb8d8;cursor:pointer;">×</div><div style="color:#e8eeff;font:700 22px system-ui,sans-serif;margin:10px 0 18px;">cmon bro really?</div><div id="dogBtnMonster" style="background:#7a1f1f;color:#fff;font:700 18px system-ui,sans-serif;padding:0 12px;height:56px;line-height:56px;border-radius:10px;margin-bottom:12px;cursor:pointer;">I\'m a monster</div><div id="dogBtnLeave" style="background:#1d4e89;color:#fff;font:700 18px system-ui,sans-serif;padding:0 12px;height:56px;line-height:56px;border-radius:10px;cursor:pointer;">Leave it alone</div>';
+  document.body.appendChild(bd);document.body.appendChild(pn);
+  let lastTap=0;
+  function tap(el,fn){
+    el.addEventListener('touchstart',function(e){e.preventDefault();lastTap=Date.now();fn();},{passive:false});
+    el.addEventListener('click',function(){if(Date.now()-lastTap<500)return;fn();});}
+  V15NPC.closeDogPrompt=function(kill){
+    if(!V15NPC.prompt.open)return;
+    const dg=V15NPC.prompt.dog;
+    V15NPC.prompt.open=false;V15NPC.prompt.dog=null;
+    bd.style.display='none';pn.style.display='none';
+    if(kill&&dg&&dg.alive)dg.die();};
+  V15NPC.openDogPrompt=function(dg){
+    if(V15NPC.prompt.open)return;
+    V15NPC.prompt.open=true;V15NPC.prompt.dog=dg;
+    bd.style.display='block';pn.style.display='block';
+    if(document.pointerLockElement)document.exitPointerLock();};
+  tap(document.getElementById('dogBtnMonster'),function(){V15NPC.closeDogPrompt(true);});
+  tap(document.getElementById('dogBtnLeave'),function(){V15NPC.closeDogPrompt(false);});
+  tap(document.getElementById('dogPromptX'),function(){V15NPC.closeDogPrompt(false);});
+  tap(bd,function(){V15NPC.closeDogPrompt(false);});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&V15NPC.prompt.open)V15NPC.closeDogPrompt(false);});
+})();
+/* ---- NPC kill API (used by the bullet/knife hooks; zero writes by design) ---- */
+function c151_npcDie(np){if(!np.alive)return;np.alive=false;np.deathT=0;np.faded=false;}
+function c151_dogDie(dg){if(!dg.alive)return;dg.alive=false;dg.deathT=0;dg.faded=false;}
+/* ---- initial population: 12 adults (6m/6f) + 4 kids + 4 dogs ----
+   Spread along each path (no shared spawn points) with alternating
+   directions so the street reads populated from the first frame. */
+(function c151_populate(){
+  const plan=[
+    [0,'adult','m'],[0,'adult','f'],[0,'kid',null],
+    [1,'adult','m'],[1,'adult','f'],[1,'kid',null],
+    [2,'adult','m'],[2,'adult','f'],[2,'kid',null],
+    [3,'adult','f'],[3,'adult','m'],[3,'adult','f'],
+    [4,'adult','m'],[4,'adult','f'],
+    [5,'adult','m'],[5,'kid',null]
+  ];
+  const byPath={};
+  for(const row of plan){(byPath[row[0]]=byPath[row[0]]||[]).push(row);}
+  const spawned=[];
+  for(const pk in byPath){
+    const pi=parseInt(pk,10);
+    const rows=byPath[pk],path=V15NPC.paths[pi],n=rows.length;
+    for(let i=0;i<n;i++){
+      const row=rows[i];
+      let np;
+      if(path.loop){
+        np=c151_spawnNPC(pi,row[1],row[2],i%path.pts.length);
+      }else{
+        const f=(i+0.5)/n;
+        np=c151_spawnNPC(pi,row[1],row[2],0);
+        np.x=path.pts[0][0]+(path.pts[1][0]-path.pts[0][0])*f;
+        np.z=path.pts[0][1]+(path.pts[1][1]-path.pts[0][1])*f;
+        np.gy=groundH(np.x,np.z);
+        np.wp=(i%2===0)?1:0;np.dir=(i%2===0)?1:-1;
+        np.group.position.set(np.x,np.gy,np.z);}
+      spawned.push(np);}}
+  // dogs: first adult on paths 0,1,2,3
+  const owners=[];
+  for(const p of [0,1,2,3]){
+    for(const np of spawned)if(np.pathIdx===p&&np.kind==='adult'){owners.push(np);break;}}
+  for(const ow of owners)c151_spawnDog(ow,false);
+  V15NPC.ready=true;})();
+
 function v13TickC(dt,gdt){
   const loot=V13C.loot;if(!loot.length)return;
   for(const c of loot){ // glint shimmer (visible at range, the only finder aid out there)
@@ -8696,7 +9437,7 @@ function mapDraw(){
   /* the bridge : labelled at its deck midpoint (deck spans z -408 to -925) */
   {const bm=mapW2M(0,-666);mapLabel(x,'BRIDGE',bm[0],bm[1]);}
   /* V14.0 C3 : the town label (decluttered with the rest by drawMapLabels) */
-  if(typeof V14C3!=='undefined'){const tm=mapW2M(V14C3.town.x,V14C3.town.z);mapLabel(x,'TOWN',tm[0],tm[1]);}
+  if(typeof V14C3!=='undefined'){const tm=mapW2M(V14C3.town.x,V14C3.town.z);mapLabel(x,'CITY',tm[0],tm[1]);}
   /* the quad, when you're not on it */
   if(!ATV.drive.on){const m=mapW2M(ATV.drive.x,ATV.drive.z);
     x.fillStyle='#e8ecf4';x.fillRect(m[0]-3,m[1]-3,6,6);
