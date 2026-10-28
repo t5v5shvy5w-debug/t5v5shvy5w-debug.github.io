@@ -187,6 +187,7 @@ body.lefthand #stamWrap{right:auto;left:116px}
 #pauseChip{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top));transform:translateX(-50%);z-index:65;font:600 12px ui-monospace,monospace;letter-spacing:4px;color:#ffe9a8;background:rgba(8,12,8,.62);border:1px solid rgba(255,233,168,.4);padding:5px 14px 5px 18px;border-radius:20px;display:none;pointer-events:none}
 /* ---------- v10.0 front door : What's New splash + cold-open black ---------- */
 #wnSplash{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(2,5,2,.55);padding:12px}
+#wnPanel{touch-action:pan-y} /* 15.2.1 : WN panel pans vertically on touch even though body is touch-action:none */
 #wnLines{text-align:left;margin:8px 0 2px}
 #wnLines p{font-size:13.5px;line-height:1.55;color:#d7e6d2;margin-bottom:7px;letter-spacing:.4px}
 #wnLines p b{color:#ffe9a8;font-weight:700}
@@ -698,7 +699,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v15.2</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v15.2.1</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -871,8 +872,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='15.2'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='15.2.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'15.2.1',lines:[ // V15.2.1 : What\u2019s New panel scroll/close fix
+  '<b>WHAT\u2019S NEW, FIXED</b> — the What\u2019s New panel itself: it scrolls properly on touch now, so you can always reach GOT IT to close it.']},
  {v:'15.2',lines:[ // V15.2 : COMBINED — respawn fix, more life, heli nuke, bubbles, parachute
   '<b>CITY ACTIVITY</b> — the city is alive now. Cars drive the street grid and stop at red lights, which cycle on a timed sequence. People chat in groups on the plaza, sit on benches, wait at the bus shelter, linger outside stores, jog the sidewalks, and cross at crosswalks. Kids play on the new playground swings and seesaw. At night the lamps and shop windows glow, flags wave, rooftop vents spin, and birds circle overhead. Distant traffic and chatter fade in as you approach the city. <b>RESPAWN FIXED</b> — killed everyone in the city? They come back now. Adults and dogs return after a short wait, and the full population is back when you leave and return, or when you relaunch. No more empty streets. <b>MORE LIFE</b> — 54 people walk the city (up from 39) and 8 dogs on leashes (up from 4), every look distinct. Dog rules are unchanged: the prompt still asks, and leaving a dog alone never hurts it. <b>HELI NUKE</b> — the helicopter carries 3 nukes. Drop one over the city and the whole city goes: building-by-building explosions, a mushroom cloud, rubble you can walk around, and fires that burn for the rest of your session. Kids float down safe in bubbles, unharmed. Relaunch and the city is fully restored. A fresh helicopter brings a fresh 3 nukes. <b>PARACHUTE</b> — falling? A big PARACHUTE button appears. Tap it, or press P, and a deep-blue canopy opens above you for a gentle steered landing.']},
  {v:'15.1',lines:[ // V15.1 : REAL CITY — planned street grid, store street, plaza, parking, and detail everywhere
@@ -4626,7 +4629,7 @@ document.addEventListener('touchstart',e=>{
   if(!uiTouch)e.preventDefault();
 },{passive:false});
 document.addEventListener('touchmove',e=>{
-  if(e.target&&e.target.closest&&e.target.closest('#card2,.uiscroll,#briefRoot,#pauseRoot,#mapRoot,#heliRoot,#charRoot') /* V13.6 : map + heli panels must scroll natively on touch */)return; // UI SCROLL : settings panel / GHOSTLINE tab panels / briefing must scroll natively — never block it
+  if(e.target&&e.target.closest&&e.target.closest('#card2,.uiscroll,#briefRoot,#pauseRoot,#mapRoot,#heliRoot,#charRoot,#wnSplash') /* V13.6 : map + heli panels must scroll natively on touch */)return; // UI SCROLL : settings panel / GHOSTLINE tab panels / briefing must scroll natively — never block it (WN splash added 15.2.1)
   for(const t of e.changedTouches){
     if(t.identifier===aimId){const[x,y]=touchPos(t);aimByPixels(x-lastAX,y-lastAY);lastAX=x;lastAY=y;}
     else if(t.identifier===joyId&&!G.scoped){ // joystick never moves you while scoped
