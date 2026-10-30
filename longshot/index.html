@@ -699,7 +699,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
     <div class="sethead dng"><!-- 11.4 -->DANGER</div>
     <div class="row"><button class="mbtn" id="setRestart">RESTART MISSION</button><button class="mbtn" id="setAbandon">ABANDON</button></div>
     <div class="sethead"><!-- 11.4 -->ABOUT</div>
-    <p class="setver">GHOSTLINE — v15.2.1</p><!-- 11.4 : static build line — bump with LS_VER -->
+    <p class="setver">GHOSTLINE — v15.3</p><!-- 11.4 : static build line — bump with LS_VER -->
     <p style="margin:10px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Precision Rifle Chassis" by austincford (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Kar98k" by AdamKokrito (CC BY 3.0) — poly.pizza</p>
     <p style="margin:2px 0 0;font-size:10px;line-height:1.5;color:#7e90c4;text-align:center">Rifle: "Sniper Material West" by Pichuliru (CC0 1.0) — poly.pizza</p>
@@ -803,6 +803,7 @@ body.lefthand #ammoChip{right:auto;left:16px;text-align:left}
         <div class="setrow"><span>Character</span><span><button class="mbtn" id="charBtn">CUSTOMIZE CHARACTER</button></span></div>
         <div class="sethead dng"><!-- 11.4 -->DANGER</div>
         <button class="ubtn deny" id="stReset" style="border:1px solid #7a3a30">RESET PROGRESS</button>
+        <button class="ubtn" id="stReloadMap" style="border:1px solid #2a4bd8">RELOAD MAP</button>
       </div>
       <p style="font-size:10px;color:#7e90c4;letter-spacing:1px;text-align:center;margin-top:12px">FULL SETTINGS (KILLCAM, RETICLE, INVERT…) LIVE IN THE GEAR PANEL</p>
     </div></div>
@@ -872,8 +873,10 @@ if(typeof THREE==='undefined'){showFatal('3D ENGINE FAILED TO LOAD — three.min
 /* ============================================================
    LONG SHOT SNIPER — single-file mobile/desktop sniper game
    ============================================================ */
-const LS_VER='15.2.1'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
+const LS_VER='15.3'; // WHAT'S NEW gate : the splash shows once per version — bump with each release
 const WN_ENTRIES=[ // newest first : future versions unshift a new entry; only the newest renders
+ {v:'15.3',lines:[ // V15.3 : EXPANDED CITY + UNIVERSAL NUKE + HELI REWORK
+  '<b>THE CITY GREW IN EVERY DIRECTION</b> — the old city is untouched, and four new districts wrap around it: Foundry Row to the north (depots, workshops, loading docks, container stacks), Garden Ave to the south (houses with yards, a grocer, a library, a neighbourhood park), the Market Quarter to the east (dense storefronts, a market plaza with stalls, and the tallest new tower), and Old Mill Hamlet to the west (spread-out houses, a mill, a barn store, gravel lots, farm fences). 36 new buildings, 62 city buildings total, every one its own shape, height, facade, and sign — no clones, no mirrors. Streets connect straight through with no seams. <b>DETAIL EVERYWHERE</b> — address numbers, window boxes on houses and storefronts, real night light pools from the street lamps (capped so performance holds), dressed roads and sidewalks with markings, joints, drains, and stop bars, plus tower entrances, house yards, rooftop gear, alley dressing, and street furniture across the whole city. <b>MORE LIFE</b> — 74 people walk the city (up from 54) and 11 dogs on leashes (up from 8), every look distinct, and respawn still covers everyone. <b>NUKE ANYWHERE</b> — drop a nuke anywhere on the map and everything in the blast disc goes: city blocks, camps, trees, rocks, props, all flattened to rubble with a fire floor that burns for the session. The blast tears a REAL crater into the ground, and the ground collision matches it, so you fall in. Nuke a crater again and it digs deeper. Relaunch or RESET restores everything. <b>CRATER TRAP + CALL HELI</b> — nothing climbs out of a crater on its own, on foot or in the quad. Press CALL HELI and a separate rescue heli flies over, drops a rope that always reaches you, and lifts you to safe ground; your own heli stays exactly where you left it, and rescue works even if you own no heli. <b>RELOAD MAP</b> — a new Settings button restores the whole map to pristine behind a loading screen, craters filled, fires out, population topped up, and it clears the nuke cooldown too. <b>0 NUKES</b> — at 0 nukes, pressing NUKE asks are you sure u can handle that much power? YES gives 1 nuke, NO gives 999, and the button is never disabled. Drops cool down for exactly 5 minutes 10 seconds, and a fresh heli does not dodge it. <b>REAL NUKE LOOK</b> — bigger fireball, crazier particles, insane lingering smoke, and a mushroom cloud that hangs around for at least 5 real minutes. <b>HELI NUKES + ROOFS</b> — the heli carries 1 visible nuke per side, the same model as the falling nuke, and the count never stacks even at 999 ammo. The heli now collides with every building, and rooftops are landable: settle, take off, and step out on a roof. Fly into a building and it crashes for real — moderate explosion, heli destroyed, and you eject and parachute down. Nuke the bridge and it collapses with real-physics feel; a quad on it sinks and is lost for the session. The world map shows the expanded city.']},
  {v:'15.2.1',lines:[ // V15.2.1 : What\u2019s New panel scroll/close fix
   '<b>WHAT\u2019S NEW, FIXED</b> — the What\u2019s New panel itself: it scrolls properly on touch now, so you can always reach GOT IT to close it.']},
  {v:'15.2',lines:[ // V15.2 : COMBINED — respawn fix, more life, heli nuke, bubbles, parachute
@@ -7942,6 +7945,7 @@ function v13Tick(dt,gdt){
   if(typeof npcTick==='function')npcTick(dt,gdt);
   if(typeof actTick==='function')actTick(dt,gdt);
   if(typeof V15MRG!=='undefined')V15MRG.tick(dt,gdt); // MERGE: F3 top-up + nuke + bubbles + parachute (post-camera)
+  if(typeof V15DTR!=='undefined')V15DTR.tick(); // DETAIL: night light pools
 }
 /* sea + valley lake : scenery surfaces at SEA_Y / LAKE_Y (no swimming —
    walkers and the quad stop at the shoreline via the surfH guards). */
@@ -12839,6 +12843,2190 @@ document.addEventListener('keydown',function(e){
   if(G.settingsOpen||G.pauseOpen||G.mapOpen||G.heliOpen)return;
   if(e.code==='KeyN')V15MRG.dropNuke();
   else if(e.code==='KeyP')V15MRG.openCanopy();});
+
+
+/* ==================== V15.3 CITY EXPANSION ====================
+   Layer only: grows the 15.2 city in EVERY direction around the old
+   city, which stays exactly as-is. Runs FIRST (before the detail
+   module), so the detail module sees the new buildings in C151_CITY
+   but skips them (x153 flag) — expansion detail lives here, at LOCAL
+   ground heights, not the flat old-city gy.
+   Districts (each genuinely different in mix, streets, dressing):
+     NORTH "Foundry Row" — industrial: depots, workshops, midrises,
+       docks, containers, barrels. No houses.
+     SOUTH "Garden Ave" — residential: houses with yards, grocer,
+       library civic, neighbourhood park, picket fences.
+     EAST "Market Quarter" — dense mixed-use: towers, midrises,
+       storefront row, one enterable market hall, market plaza.
+     WEST "Old Mill Hamlet" — low-density rural: houses, mill depot,
+       barn store, log piles, farm fences, gravel lots.
+   Terrain rule: the town pad feather (r150 flat, r300 blend) means
+   the ring slopes. Buildings sit at per-building groundH plus a
+   1.8 m foundation skirt (grade-proof to 1.75 m corner deviation,
+   measured by probe_153_terrain2/3); streets are tilted segment
+   ribbons with shared joint heights (no lips, no floating slabs),
+   built as instanced batches to bound draw calls. Nuke growth:
+   MRG_RECT is widened in place (const object, mutable properties);
+   expansion buildings are pushed into C151_CITY AFTER c151_build,
+   so chain explosions, fire placement, _nuked flags, rubble, and
+   map footprints all include them; meshes/OBBs carry c151 (nuke
+   hide/remove) + c153x (probe filter). No scorch wrap: the original
+   200x240 center scorch plane stays as-is and the ring reads via
+   rubble + fires + hidden buildings (a tiled ring decal would float
+   on the slopes — deliberately not built).
+   Life: 9 new paths pushed into V15NPC.paths (indices 6-14);
+   walkers spawned via c151_spawnNPC (existing look-uniqueness
+   checks), dogs via c151_spawnDog. Safe by construction: npcTick
+   iterates the list dynamically and re-reads groundH per step;
+   respawn pending logic indexes paths (works for new indices);
+   mrgFillBase/mrgFillAct loop pi<6 only (no interference).
+   Lamps: poles + emissive heads + slim OBBs, NO glow sprites
+   (perf: sprites are one draw call each; heads already glow via
+   basic material, and the capped pool lights give real pools).
+   Lamp positions/heights feed the detail module's pool list. */
+var V15EXP={ready:false,buildings:[],newObbs:[],plates:0,boxes:0,lamps:[],lampPos:[],lampY:{},paths:[],walkers:0,dogs:0,streets:[],rect:{x0:380,x1:860,z0:-2030,z1:-1490},sigs:[]};
+(function(){
+  if(typeof MRG_RECT!=='undefined'){MRG_RECT.x0=380;MRG_RECT.x1=860;MRG_RECT.z0=-2030;MRG_RECT.z1=-1490;}
+  function mk(geo,mat,x,y,z,sx,sy,sz,ry){
+    var m=new THREE.Mesh(geo,mat);
+    m.position.set(x,y,z);m.scale.set(sx,sy,sz);if(ry)m.rotation.y=ry;
+    m.castShadow=false;m.receiveShadow=true;m.userData.c153x=true;m.userData.c151=true;scene.add(m);V14C3.meshCount++;return m;}
+  function obb(x,z,hw,hd,yaw,cls){
+    c151_obb(x,z,hw,hd,yaw);V15EXP.newObbs.push({x:x,z:z,hw:hw,hd:hd,yaw:yaw||0,cls:cls});}
+  function xinst(geo,mat,list){
+    var im=new THREE.InstancedMesh(geo,mat,list.length);im.userData.c153x=true;im.userData.c151=true;
+    var d=new THREE.Object3D();
+    for(var i=0;i<list.length;i++){var t=list[i];
+      d.position.set(t[0],t[1],t[2]);
+      if(t.length>=9){d.rotation.set(t[3]||0,t[4]||0,t[5]||0);d.scale.set(t[6]||1,t[7]||1,t[8]||1);}
+      else{d.rotation.set(0,t[3]||0,0);d.scale.set(t[4]||1,t[5]||1,t[6]||1);}
+      d.updateMatrix();
+      im.setMatrixAt(i,d.matrix);}
+    im.instanceMatrix.needsUpdate=true;im.receiveShadow=true;scene.add(im);V14C3.meshCount++;return im;}
+  function sig(b){
+    return [b.kind,b.w,b.d,b.h,b.facade||b.wall||'',b.style||'',b.accent||'',b.sign||'',b.roof||'',Math.round(b.yaw/(Math.PI/2))].join('|');}
+  /* ---- 1. BUILDINGS (schema-compatible with C151_CITY) ---- */
+  var C153X=[
+    /* NORTH — Foundry Row (industrial) */
+    {x:480,z:-1992,w:22,d:16,h:9,yaw:Math.PI,kind:'depot',wall:0x8d8d88,accent:0x3a3f4a,sign:'FOUNDRY'},
+    {x:560,z:-1992,w:16,d:14,h:20,yaw:Math.PI,kind:'midrise',facade:'#7a5a44',style:'brick'},
+    {x:630,z:-1992,w:18,d:16,h:8,yaw:Math.PI,kind:'depot',wall:0x7a7568,accent:0x3a3f4a,sign:'MACHINE SHOP'},
+    {x:425,z:-1905,w:14,d:14,h:9,yaw:-Math.PI/2,kind:'depot',wall:0x9a9a92,accent:0x4a4a44,sign:'IRONWORKS'},
+    {x:486,z:-1910,w:14,d:14,h:18,yaw:0,kind:'midrise',facade:'#6a6a72',style:'concrete'},
+    {x:560,z:-1910,w:12,d:10,h:7,yaw:0,kind:'storefront',wall:0xa8a090,accent:0x8a5a2a,sign:'SUPPLY'},
+    {x:630,z:-1910,w:14,d:12,h:22,yaw:0,kind:'midrise',facade:'#3a4a5a',style:'glass'},
+    {x:682,z:-1910,w:14,d:14,h:8,yaw:Math.PI/2,kind:'depot',wall:0x8d8d88,accent:0x2a3a4a,sign:'WAREHOUSE'},
+    {x:415,z:-1992,w:14,d:14,h:16,yaw:Math.PI,kind:'midrise',facade:'#5a4a3a',style:'brick'},
+    {x:682,z:-1992,w:14,d:14,h:26,yaw:Math.PI,kind:'midrise',facade:'#4a5a6a',style:'glass'},
+    /* SOUTH — Garden Ave (residential) */
+    /* CORNER FIX (expand probe q1da): the south rows' west slots (415/486)
+       overlapped the west column (410/480), and the east slot (800)
+       overlapped the east column (810). South rows now run 520..710;
+       the corners belong to the side districts + park. */
+    {x:520,z:-1615,w:11,d:10,h:6.5,yaw:Math.PI,kind:'house',wall:0xa89a86,roof:0x2e3440},
+    {x:560,z:-1615,w:11,d:10,h:6,yaw:Math.PI,kind:'house',wall:0x9fb0a8,roof:0x4c3a2c},
+    {x:630,z:-1615,w:12,d:10,h:7,yaw:Math.PI,kind:'enterable',wall:0xb8a888,accent:0x2a6d2a,sign:'GROCER'},
+    {x:710,z:-1615,w:11,d:10,h:7,yaw:Math.PI,kind:'house',wall:0xcbbfa5,roof:0x3f464e},
+    /* S7/S8 CUT (expand probe q1da): the -1525 row's west houses overlapped
+       W9/W10 and the SW-corner park. The -1525 row now starts at the
+       library; the park owns the SW corner. */
+    {x:560,z:-1525,w:12,d:12,h:9,yaw:0,kind:'civic',facade:'#a8a094',accent:0x2a4a7a,sign:'LIBRARY'},
+    {x:520,z:-1525,w:12,d:10,h:6,yaw:0,kind:'house',wall:0x7a8a92,roof:0x4a2e2a},
+    {x:630,z:-1525,w:12,d:10,h:7,yaw:0,kind:'house',wall:0x9aa5b0,roof:0x5a3a2a},
+    {x:710,z:-1525,w:12,d:10,h:7,yaw:0,kind:'storefront',wall:0xa88f7a,accent:0x6e2a5a,sign:'DELI'},
+    /* EAST — Market Quarter (dense mixed-use) */
+    {x:730,z:-1820,w:14,d:14,h:20,yaw:-Math.PI/2,kind:'midrise',facade:'#8a6a4a',style:'brick'},
+    /* E2 CUT (terrain3: every tower plot here measures 1.64-2.14 m corner
+       deviation — past even a deepened skirt. The block becomes Ridge
+       View Park instead: path + benches + trees, all slope-proof
+       point/segmented objects. Finished park beats a floating tower. */
+    {x:730,z:-1765,w:12,d:10,h:7,yaw:-Math.PI/2,kind:'enterable',wall:0xcbbfa5,accent:0x8a2a22,sign:'MARKET'},
+    {x:810,z:-1765,w:14,d:14,h:24,yaw:Math.PI/2,kind:'midrise',facade:'#7a4a3a',style:'brick'},
+    {x:730,z:-1710,w:12,d:10,h:7,yaw:-Math.PI/2,kind:'storefront',wall:0x9fb0a8,accent:0x3f7a4a,sign:'SPICES'},
+    {x:810,z:-1710,w:18,d:18,h:52,yaw:Math.PI/2,kind:'tower',facade:'#4e5a70',water:true},
+    {x:730,z:-1620,w:14,d:14,h:18,yaw:-Math.PI/2,kind:'midrise',facade:'#9a9a92',style:'concrete'},
+    {x:810,z:-1620,w:14,d:10,h:7,yaw:Math.PI/2,kind:'storefront',wall:0xb5a894,accent:0x2a5a3a,sign:'OUTFITTER'},
+    {x:730,z:-1525,w:11,d:10,h:6,yaw:0,kind:'house',wall:0xc4b49a,roof:0x3a3230},
+    {x:810,z:-1525,w:12,d:10,h:6.5,yaw:0,kind:'house',wall:0xb8a888,roof:0x5a3a2a},
+    /* WEST — Old Mill Hamlet (low-density rural) */
+    {x:410,z:-1820,w:11,d:10,h:6,yaw:-Math.PI/2,kind:'house',wall:0xcbbfa5,roof:0x3f464e},
+    {x:480,z:-1820,w:14,d:12,h:8,yaw:Math.PI/2,kind:'depot',wall:0x8d8d88,accent:0x3a3f4a,sign:'MILL'},
+    {x:410,z:-1765,w:11,d:10,h:6.5,yaw:-Math.PI/2,kind:'house',wall:0xb5a894,roof:0x4c3a2c},
+    {x:480,z:-1765,w:12,d:10,h:6,yaw:Math.PI/2,kind:'house',wall:0x9fb0a8,roof:0x3a3230},
+    {x:410,z:-1710,w:11,d:10,h:7,yaw:-Math.PI/2,kind:'house',wall:0xd8d0bc,roof:0x5a3a2a},
+    {x:480,z:-1710,w:12,d:10,h:7,yaw:Math.PI/2,kind:'storefront',wall:0xa8a090,accent:0x8a2a22,sign:'FEED & SEED'},
+    {x:410,z:-1620,w:11,d:10,h:6,yaw:-Math.PI/2,kind:'house',wall:0xc4b49a,roof:0x4c3a2c},
+    {x:480,z:-1620,w:14,d:12,h:8,yaw:Math.PI/2,kind:'depot',wall:0x7a7568,accent:0x4a4a44,sign:'BARN STORE'},
+    /* W9 CUT (expand probe q1da): (410,-1525) sat dead-center in the south
+       park (path/picnic/benches). W10 stays as the west district's south
+       house, 55 m clear of park props. */
+    {x:480,z:-1525,w:11,d:10,h:6,yaw:0,kind:'house',wall:0x8fa08a,roof:0x5a3a2a}
+  ];
+  for(var bi=0;bi<C153X.length;bi++){
+    var b=C153X[bi];
+    var ob0=OBBS.length,ch0=scene.children.length;
+    c151_build(b);
+    for(var oi=ob0;oi<OBBS.length;oi++){
+      OBBS[oi].c153x=true;
+      V15EXP.newObbs.push({x:OBBS[oi].x,z:OBBS[oi].z,hw:OBBS[oi].hw,hd:OBBS[oi].hd,yaw:OBBS[oi].yaw||0,cls:'building'});}
+    for(var ci=ch0;ci<scene.children.length;ci++)scene.children[ci].userData.c153x=true;
+    var gyb=groundH(b.x,b.z);
+    mk(C151_BOX,c151_lam(0x55504a),b.x,gyb-0.85,b.z,b.w+2,1.8,b.d+2,b.yaw);
+    b.x153=true;C151_CITY.push(b);V15EXP.buildings.push(b);V15EXP.sigs.push(sig(b));}
+  /* ---- 2. STREETS: tilted segment ribbons, shared joint heights ----
+     New parts only (old slabs stay untouched): N-S 445 full, 755
+     full, 527/595/663 north + south extensions; E-W -1955, -1560
+     full, -1849/-1793/-1737/-1681 west + east extensions (east
+     capped at 830 on -1737/-1681 and at 800 on -1849/-1793 — the
+     ridge face runs 0.14..0.18 grade east of 800 on the northern
+     two; -1849 west capped at 410 — terrain5: 380..410 runs 0.125;
+     N-S extensions stop at -1560 — the run to -1490 drops
+     at 0.10..0.13, so the south band fronts the avenue and the
+     strip to the rect edge stays a greenbelt). */
+  var NS_C=[445,527,595,663,755],EW_C=[-1955,-1849,-1793,-1737,-1681,-1560];
+  var PARTS=[];
+  function addPart(ax,c,a,b){var p={ax:ax,c:c,a:a,b:b};PARTS.push(p);V15EXP.streets.push(p);
+    if(ax==='ns')V14C3.streets.push({x0:c-7,x1:c+7,z0:a,z1:b});
+    else V14C3.streets.push({x0:a,x1:b,z0:c-7,z1:c+7});}
+  addPart('ns',445,-1955,-1560);
+  addPart('ns',527,-2030,-1870);addPart('ns',527,-1630,-1560);
+  addPart('ns',595,-2030,-1870);addPart('ns',595,-1630,-1560);
+  addPart('ns',663,-2030,-1870);addPart('ns',663,-1630,-1560);
+  addPart('ns',755,-1870,-1560);
+  addPart('ew',-1955,380,700);addPart('ew',-1560,380,860);
+  addPart('ew',-1849,410,520);addPart('ew',-1849,700,800); // west run capped at 410 (terrain5: 380..410 runs 0.125 grade)
+  addPart('ew',-1793,380,520);addPart('ew',-1793,700,800);
+  addPart('ew',-1737,380,520);addPart('ew',-1737,700,830);
+  addPart('ew',-1681,380,520);addPart('ew',-1681,700,830);
+  function jointsFor(p){
+    var cs=(p.ax==='ns')?EW_C:NS_C,J=[p.a,p.b];
+    for(var i=0;i<cs.length;i++)if(cs[i]>p.a&&cs[i]<p.b)J.push(cs[i]);
+    for(var s=p.a+30;s<p.b;s+=30)J.push(s);
+    J.sort(function(a,b){return a-b;});
+    var out=[];
+    for(var k=0;k<J.length;k++)if(k===0||J[k]-out[out.length-1]>0.01)out.push(J[k]);
+    return out;}
+  for(var pi=0;pi<PARTS.length;pi++){
+    var pp=PARTS[pi],js=jointsFor(pp),jh=[];
+    for(var ji=0;ji<js.length;ji++)jh.push(pp.ax==='ns'?groundH(pp.c,js[ji]):groundH(js[ji],pp.c));
+    pp.joints=js;pp.jh=jh;}
+  function roadTopAt(p,pos){
+    var js=p.joints,jh=p.jh;
+    if(pos<=js[0])return jh[0]+(p.ax==='ns'?0.15:0.16);
+    for(var i=0;i<js.length-1;i++){
+      if(pos>=js[i]&&pos<=js[i+1]){
+        var f=(js[i+1]===js[i])?0:(pos-js[i])/(js[i+1]-js[i]);
+        return (jh[i]+(jh[i+1]-jh[i])*f)+(p.ax==='ns'?0.15:0.16);}}
+    return jh[jh.length-1]+(p.ax==='ns'?0.15:0.16);}
+  function partAt(ax,coord,pos){
+    for(var i=0;i<PARTS.length;i++){var p=PARTS[i];
+      if(p.ax===ax&&p.c===coord&&pos>=p.a-0.01&&pos<=p.b+0.01)return p;}
+    return null;}
+  function tilt(list,ax,fixed,s0,s1,w,th,off,part){
+    var yA=roadTopAt(part,s0)+off,yB=roadTopAt(part,s1)+off,len=s1-s0;
+    if(len<=0)return;
+    if(ax==='ns')list.push([fixed,(yA+yB)/2,(s0+s1)/2,-Math.atan2(yB-yA,len),0,0,w,th,len]);
+    else list.push([(s0+s1)/2,(yA+yB)/2,fixed,0,0,Math.atan2(yB-yA,len),len,th,w]);}
+  function intervals(a,b,centers){
+    var bands=[];
+    for(var i=0;i<centers.length;i++){var c=centers[i];if(c>=a&&c<=b)bands.push([c-7,c+7]);}
+    bands.sort(function(x,y){return x[0]-y[0];});
+    var out=[],cur=a;
+    for(var k=0;k<bands.length;k++){
+      if(bands[k][0]>cur)out.push([cur,Math.min(bands[k][0],b)]);
+      if(bands[k][1]>cur)cur=bands[k][1];}
+    if(cur<b)out.push([cur,b]);
+    return out.filter(function(iv){return iv[1]-iv[0]>=2;});}
+  function split30(s0,s1){
+    var n=Math.max(1,Math.ceil((s1-s0)/30)),out=[],len=(s1-s0)/n;
+    for(var k=0;k<n;k++)out.push([s0+k*len,s0+(k+1)*len]);
+    return out;}
+  var roadList=[],walkList=[],dashList=[],whiteList=[];
+  for(var si=0;si<PARTS.length;si++){
+    var sp=PARTS[si],cs=(sp.ax==='ns')?EW_C:NS_C;
+    for(var j2=0;j2<sp.joints.length-1;j2++){
+      var s0=sp.joints[j2],s1=sp.joints[j2+1];
+      tilt(roadList,sp.ax,sp.c,s0,s1,10,0.3,sp.ax==='ns'?-0.15:-0.16,sp);}
+    var ivs=intervals(sp.a,sp.b,cs);
+    for(var vi=0;vi<ivs.length;vi++){
+      var pcs=split30(ivs[vi][0],ivs[vi][1]);
+      for(var pc=0;pc<pcs.length;pc++){
+        var a0=pcs[pc][0],a1=pcs[pc][1];
+        tilt(walkList,sp.ax,sp.c-6,a0,a1,2,0.3,sp.ax==='ns'?0.01:-0.01,sp);
+        tilt(walkList,sp.ax,sp.c+6,a0,a1,2,0.3,sp.ax==='ns'?0.01:-0.01,sp);
+        tilt(whiteList,sp.ax,sp.c-4.5,a0,a1,0.12,0.02,0.025,sp);
+        tilt(whiteList,sp.ax,sp.c+4.5,a0,a1,0.12,0.02,0.025,sp);}}
+    for(var dp=sp.a+3;dp<sp.b-1;dp+=6)
+      tilt(dashList,sp.ax,sp.c,dp-1.5,dp+1.5,0.15,0.04,0.03,sp);}
+  /* crosswalks at the 18 NEW crossings (old x old already striped) +
+     stop bars on the N-S approaches of the 12 spine crossings */
+  var NEWX=[];
+  for(var nx=0;nx<NS_C.length;nx++)for(var ex=0;ex<EW_C.length;ex++){
+    var xc=NS_C[nx],zc=EW_C[ex];
+    var oldX=(xc===527||xc===595||xc===663)&&(zc===-1849||zc===-1793||zc===-1737||zc===-1681);
+    if(!oldX)NEWX.push([xc,zc]);}
+  for(var xi=0;xi<NEWX.length;xi++){
+    var xc2=NEWX[xi][0],zc2=NEWX[xi][1];
+    var nsp=partAt('ns',xc2,zc2),ewp=partAt('ew',zc2,xc2);
+    if(!nsp||!ewp)continue;
+    for(var ci=0;ci<10;ci++){
+      tilt(whiteList,'ns',xc2-4.5+ci,zc2-1.5,zc2+1.5,0.6,0.04,0.05,nsp);
+      tilt(whiteList,'ew',zc2-4.5+ci,xc2-1.5,xc2+1.5,0.6,0.04,0.05,ewp);}
+    if(xc2===445||xc2===755){
+      var barY=roadTopAt(nsp,zc2-8)+0.025;
+      whiteList.push([xc2,barY,zc2-8,0,0,0,9,0.02,0.5]);}}
+  xinst(C151_BOX,c151_lam(0x2e3238),roadList);
+  xinst(C151_BOX,c151_lam(0x9a9a92),walkList);
+  xinst(C151_BOX,c151_lam(0xd8b93a),dashList);
+  xinst(C151_BOX,c151_lam(0xe8e8e2),whiteList);
+  /* ---- 3. LAMPS (poles + emissive heads + slim OBBs, no sprites) ---- */
+  function lamp(x,z){
+    var gy=groundH(x,z);
+    mk(C151_BOX,c151_lam(0x22262e),x,gy+2.5,z,0.15,5,0.15,0);
+    mk(C151_BOX,c151_bas(0xffc27a),x,gy+5.0,z,0.6,0.2,0.35,0);
+    obb(x,z,0.25,0.25,0,'lamp');
+    V15EXP.lamps.push([x,z]);V15EXP.lampPos.push([x,z]);V15EXP.lampY[x+','+z]=gy+4.9;}
+  for(var li=0;li<PARTS.length;li++){
+    var lp=PARTS[li],side=0;
+    for(var lpos=lp.a+15;lpos<lp.b-5;lpos+=30){
+      var nearX=false;
+      var cs2=(lp.ax==='ns')?EW_C:NS_C;
+      for(var ci2=0;ci2<cs2.length;ci2++)if(Math.abs(lpos-cs2[ci2])<10)nearX=true;
+      if(nearX){side++;continue;}
+      var off2=(side%2===0)?-6.7:6.7;side++;
+      if(lp.ax==='ns')lamp(lp.c+off2,lpos);else lamp(lpos,lp.c+off2);}}
+  /* ---- 4. STOP SIGNS at the 12 spine crossings ---- */
+  var stopTex=c151_canvas(128,128,function(x,w,h){
+    x.fillStyle='#c22a1e';x.fillRect(0,0,w,h);
+    x.fillStyle='#ffffff';x.font='700 34px system-ui, sans-serif';x.textAlign='center';x.textBaseline='middle';
+    x.fillText('STOP',w/2,h/2);});
+  var octGeo=new THREE.CylinderGeometry(0.45,0.45,0.06,8);
+  for(var sg=0;sg<NEWX.length;sg++){
+    var sxc=NEWX[sg][0],szc=NEWX[sg][1];
+    if(!(sxc===445||sxc===755))continue;
+    var px2=(sxc===445)?sxc-6:sxc+6,pz2=szc-8,gy2=groundH(px2,pz2); // 445 stops go WEST: path X2 walks the 445 east sidewalk (diagwalk: 5 head-on poles)
+    mk(C151_BOX,c151_lam(0x22262e),px2,gy2+1.2,pz2,0.12,2.4,0.12,0);
+    obb(px2,pz2,0.25,0.25,0,'stopsign');
+    var oc=new THREE.Mesh(octGeo,c151_lam(0xc22a1e));
+    oc.position.set(px2,gy2+2.6,pz2);oc.rotation.x=Math.PI/2;oc.userData.c153x=true;oc.userData.c151=true;scene.add(oc);V14C3.meshCount++;
+    var pl=new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.7),new THREE.MeshBasicMaterial({map:stopTex,transparent:true}));
+    pl.position.set(px2,gy2+2.6,pz2+0.05);pl.userData.c153x=true;pl.userData.c151=true;scene.add(pl);V14C3.meshCount++;}
+  /* ---- 5. STREET-NAME BLADES on the nearest new lamp poles ---- */
+  function bladeAt(tx,tz,txt,ry){
+    var best=null,bd=1e9;
+    for(var bi2=0;bi2<V15EXP.lamps.length;bi2++){
+      var lp2=V15EXP.lamps[bi2],dd=Math.hypot(lp2[0]-tx,lp2[1]-tz);
+      if(dd<bd){bd=dd;best=lp2;}}
+    if(!best)return;
+    var tex=c151_canvas(512,128,function(cx,w,h){
+      cx.fillStyle='#1d5a2a';cx.fillRect(0,0,w,h);
+      cx.fillStyle='#ffffff';cx.font='700 64px system-ui, sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+      cx.fillText(txt,w/2,h/2+2);});
+    var mat=new THREE.MeshBasicMaterial({map:tex});
+    var gy3=groundH(best[0],best[1]);
+    for(var s=-1;s<=1;s+=2){
+      var pl2=new THREE.Mesh(new THREE.PlaneGeometry(2.4,0.5),mat);
+      pl2.position.set(best[0]+s*0.12*Math.cos(ry),gy3+4.2,best[1]-s*0.12*Math.sin(ry));
+      pl2.rotation.y=ry+(s>0?0:Math.PI);pl2.userData.c153x=true;pl2.userData.c151=true;scene.add(pl2);V14C3.meshCount++;}}
+  bladeAt(600,-1955,'FOUNDRY AVE',0);
+  bladeAt(600,-1560,'GARDEN AVE',0);
+  bladeAt(445,-1790,'MILL ST',Math.PI/2);
+  bladeAt(755,-1765,'MARKET ST',Math.PI/2);
+  /* ---- 6. DISTRICT PROPS (all solid, class-tagged OBBs) ---- */
+  function bench(x,z,ry){
+    var gy=groundH(x,z);
+    mk(C151_BOX,c151_lam(0x6a4a2e),x,gy+0.55,z,1.8,0.12,0.5,ry);
+    mk(C151_BOX,c151_lam(0x6a4a2e),x+Math.sin(ry)*0.22,gy+0.95,z+Math.cos(ry)*0.22,1.8,0.8,0.12,ry);
+    mk(C151_BOX,c151_lam(0x3a3a3a),x+Math.cos(ry)*0.7,gy+0.28,z-Math.sin(ry)*0.7,0.12,0.55,0.45,ry);
+    mk(C151_BOX,c151_lam(0x3a3a3a),x-Math.cos(ry)*0.7,gy+0.28,z+Math.sin(ry)*0.7,0.12,0.55,0.45,ry);
+    obb(x,z,0.9,0.25,ry,'bench');}
+  function hydrant(x,z){
+    var gy=groundH(x,z);
+    mk(C151_CYL,c151_lam(0xc22a1e),x,gy+0.45,z,0.3,0.9,0.3,0);
+    mk(C151_SPH,c151_lam(0xc22a1e),x,gy+0.95,z,0.22,0.22,0.22,0);
+    obb(x,z,0.25,0.25,0,'hydrant');}
+  function cityTree(x,z,s){
+    var gy=groundH(x,z);
+    mk(C151_CYL,c151_lam(0x4a3524),x,gy+1.2*s,z,0.22*s,2.4*s,0.22*s,0);
+    mk(C151_SPH,c151_lam(0x2a5a2a),x,gy+3.2*s,z,1.8*s,1.8*s,1.8*s,0);
+    mk(C151_SPH,c151_lam(0x2a5a2a),x+0.5*s,gy+2.6*s,z,1.1*s,1.1*s,1.1*s,0);
+    obb(x,z,0.3,0.3,0,'tree');}
+  function can(x,z){
+    var gy=groundH(x,z);
+    mk(C151_CYL,c151_lam(0x3a3f44),x,gy+0.45,z,0.5,0.9,0.5,0);
+    mk(C151_BOX,c151_lam(0x22262e),x,gy+0.92,z,0.55,0.08,0.55,0);
+    obb(x,z,0.25,0.25,0,'can');}
+  /* NORTH: containers, barrels, pallets, cones, benches, cans */
+  var contSpots=[[500,-1975],[660,-1975],[470,-1930],[650,-1930]];
+  for(var ci3=0;ci3<contSpots.length;ci3++){
+    var cp=contSpots[ci3],gyc=groundH(cp[0],cp[1]);
+    mk(C151_BOX,c151_lam(0x2a5a7a),cp[0],gyc+1.2,cp[1],6,2.4,2.4,0);
+    mk(C151_BOX,c151_lam(0x7a3a2a),cp[0],gyc+3.6,cp[1],6,2.4,2.4,0);
+    obb(cp[0],cp[1],3,1.2,0,'container');}
+  var barrelSpots=[[431,-1935],[433,-1935],[431,-1975],[433,-1975],[499,-1935],[501,-1935],[659,-1935],[661,-1935]];
+  var barrelList=[];
+  for(var bi3=0;bi3<barrelSpots.length;bi3++){
+    var bp=barrelSpots[bi3];
+    barrelList.push([bp[0],groundH(bp[0],bp[1])+0.45,bp[1],0,0.7,0.9,0.7]);
+    obb(bp[0],bp[1],0.35,0.35,0,'barrel');}
+  xinst(C151_CYL,c151_lam(0x3a3f44),barrelList);
+  var palletSpots=[[540,-1935],[615,-1935],[540,-1975],[615,-1975]];
+  for(var pi3=0;pi3<palletSpots.length;pi3++){
+    var pp3=palletSpots[pi3];
+    mk(C151_BOX,c151_lam(0x8a7a52),pp3[0],groundH(pp3[0],pp3[1])+0.08,pp3[1],1.2,0.15,1.0,0);
+    obb(pp3[0],pp3[1],0.6,0.5,0,'pallet');}
+  var coneSpots=[[472,-1980],[480,-1980],[488,-1980],[622,-1980],[630,-1980],[638,-1980]];
+  for(var co3=0;co3<coneSpots.length;co3++){
+    var cp3=coneSpots[co3];
+    mk(C151_CYL,c151_lam(0xc22a1e),cp3[0],groundH(cp3[0],cp3[1])+0.25,cp3[1],0.3,0.5,0.3,0);
+    obb(cp3[0],cp3[1],0.15,0.15,0,'cone');}
+  bench(545,-1945,0);bench(620,-1945,0);
+  can(455,-1945);can(675,-1945);can(540,-1932);can(640,-1932);
+  /* SOUTH: park (paths, benches, picnic, trees, shrubs) + hydrants + cans */
+  mk(C151_BOX,c151_lam(0x9a9a92),410,groundH(410,-1525)+0.32,-1525,2,0.04,40,0);
+  mk(C151_BOX,c151_lam(0x9a9a92),410,groundH(410,-1505)+0.32,-1505,30,0.04,2,0);
+  bench(405,-1540,0);bench(415,-1540,0);bench(405,-1515,0);bench(415,-1515,0);
+  var picSpots=[[405,-1525],[418,-1525]];
+  for(var pc3=0;pc3<picSpots.length;pc3++){
+    var pc=picSpots[pc3],gyp=groundH(pc[0],pc[1]);
+    mk(C151_BOX,c151_lam(0x6a4a2e),pc[0],gyp+0.75,pc[1],1.8,0.1,0.8,0);
+    mk(C151_BOX,c151_lam(0x6a4a2e),pc[0],gyp+0.45,pc[1]-0.55,1.8,0.08,0.3,0);
+    mk(C151_BOX,c151_lam(0x6a4a2e),pc[0],gyp+0.45,pc[1]+0.55,1.8,0.08,0.3,0);
+    obb(pc[0],pc[1],0.9,0.4,0,'picnic');}
+  cityTree(395,-1545,1.1);cityTree(425,-1545,1.0);cityTree(395,-1515,1.2);
+  cityTree(425,-1515,1.0);cityTree(395,-1500,1.1);cityTree(425,-1500,1.0);
+  var parkShrubs=[[400,-1535],[420,-1535],[400,-1510],[420,-1510],[410,-1495],[400,-1495]];
+  for(var ps3=0;ps3<parkShrubs.length;ps3++){
+    var ps=parkShrubs[ps3];
+    mk(C151_SPH,c151_lam(0x2a5a2a),ps[0],groundH(ps[0],ps[1])+0.45,ps[1],0.55,0.55,0.55,0);}
+  hydrant(455,-1550);hydrant(675,-1550);hydrant(540,-1550);hydrant(800,-1550);
+  can(455,-1545);can(675,-1545);can(540,-1545);can(800,-1545);
+  /* EAST: market plaza (slab, stalls, banners, benches, cans, hydrants) */
+  mk(C151_BOX,c151_lam(0xa8a094),776.5,groundH(776.5,-1765)+0.16,-1765,27,0.32,30,0);
+  var stallSpots=[[768,-1775],[782,-1775],[768,-1755],[782,-1755]];
+  for(var st3=0;st3<stallSpots.length;st3++){
+    var st=stallSpots[st3],gys=groundH(st[0],st[1]);
+    mk(C151_BOX,c151_lam(0x6a5a42),st[0],gys+0.55,st[1],1.8,1.0,0.8,0);
+    mk(C151_BOX,c151_lam(0x8a2a22),st[0],gys+2.4,st[1],2.4,0.15,2.0,0);
+    mk(C151_BOX,c151_lam(0x22262e),st[0]-1.1,gys+1.2,st[1],0.12,2.4,0.12,0);
+    mk(C151_BOX,c151_lam(0x22262e),st[0]+1.1,gys+1.2,st[1],0.12,2.4,0.12,0);
+    obb(st[0],st[1],0.9,0.4,0,'stall');}
+  function banner(px,pz,qx,qz,txt,ry){
+    var gyb1=groundH(px,pz),gyb2=groundH(qx,qz);
+    mk(C151_BOX,c151_lam(0x22262e),px,gyb1+2.25,pz,0.12,4.5,0.12,0);
+    mk(C151_BOX,c151_lam(0x22262e),qx,gyb2+2.25,qz,0.12,4.5,0.12,0);
+    obb(px,pz,0.25,0.25,0,'bannerpole');obb(qx,qz,0.25,0.25,0,'bannerpole');
+    var tex=c151_sign(txt,0x24344d,0xffffff);
+    var bm=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({map:tex}));
+    var mx=(px+qx)/2,mz=(pz+qz)/2,gym=groundH(mx,mz);
+    bm.position.set(mx,gym+4.5,mz);bm.scale.set(12,2,0.3);bm.rotation.y=ry;
+    bm.userData.c153x=true;bm.userData.c151=true;scene.add(bm);V14C3.meshCount++;}
+  banner(752,-1765,764,-1765,'MARKET DAY',0); // +3 east: west pole was ON path X3 (diagwalk head-on)
+  banner(755,-1569,755,-1557,'GARDEN FAIR',Math.PI/2); // -3 north: south pole was ON path X1 (diagwalk head-on)
+  bench(770,-1783,0);bench(785,-1783,0);bench(770,-1747,0);bench(785,-1747,0);
+  can(767,-1783);can(783,-1783);can(767,-1747);can(783,-1747);
+  hydrant(767,-1805);hydrant(783,-1805);hydrant(767,-1725);hydrant(783,-1725);
+  /* EAST: Ridge View Park (the CUT E2 block — hillside, no buildings) */
+  for(var rp=0;rp<6;rp++){
+    var rx2=771+rp*6;
+    mk(C151_BOX,c151_lam(0x9a9a92),rx2,groundH(rx2,-1820)+0.06,-1820,6,0.06,2,0);}
+  bench(778,-1826,0);bench(798,-1814,0);
+  cityTree(772,-1810,1.1);cityTree(786,-1832,1.0);cityTree(800,-1812,1.2);cityTree(806,-1830,1.0);
+  var rshr=[[780,-1822],[792,-1818],[800,-1826]];
+  for(var rs=0;rs<rshr.length;rs++)
+    mk(C151_SPH,c151_lam(0x2a5a2a),rshr[rs][0],groundH(rshr[rs][0],rshr[rs][1])+0.45,rshr[rs][1],0.55,0.55,0.55,0);
+  /* WEST: log piles, farm fences, benches, cans, trees, gravel lots */
+  var logSpots=[[395,-1783],[395,-1745],[495,-1783],[495,-1745]];
+  for(var lg3=0;lg3<logSpots.length;lg3++){
+    var lg=logSpots[lg3],gyl=groundH(lg[0],lg[1]);
+    for(var lgi=0;lgi<3;lgi++){
+      var lm=new THREE.Mesh(C151_CYL,c151_lam(0x5d4630));
+      var lx=lg[0],ly=lgi<2?gyl+0.25:gyl+0.7,lz=lg[1]+(lgi===0?-0.45:(lgi===1?0.45:0));
+      lm.position.set(lx,ly,lz);lm.scale.set(3,0.5,0.5);lm.rotation.z=Math.PI/2;
+      lm.userData.c153x=true;lm.userData.c151=true;scene.add(lm);V14C3.meshCount++;}
+    obb(lg[0],lg[1],1.5,0.5,0,'logpile');}
+  var fenceSpots=[[395,-1805],[395,-1755],[395,-1695],[495,-1805],[495,-1755],[495,-1695]];
+  for(var fe3=0;fe3<fenceSpots.length;fe3++){
+    var fe=fenceSpots[fe3];
+    mk(C151_BOX,c151_lam(0x6a4a2e),fe[0],groundH(fe[0],fe[1])+0.5,fe[1],14,1.0,0.12,0);
+    obb(fe[0],fe[1],7,0.06,0,'farmfence');}
+  bench(420,-1783,0);bench(470,-1783,0);bench(420,-1747,0);bench(470,-1747,0);
+  can(435,-1783);can(435,-1747);
+  cityTree(395,-1865,1.1);cityTree(420,-1865,1.0);cityTree(395,-1605,1.2);
+  cityTree(420,-1605,1.0);cityTree(395,-1505,1.1);cityTree(420,-1505,1.0);
+  var lotSpots=[[395,-1840],[495,-1840],[395,-1590],[495,-1590]];
+  for(var lo3=0;lo3<lotSpots.length;lo3++){
+    var lo=lotSpots[lo3];
+    mk(C151_BOX,c151_lam(0x8f8a7a),lo[0],groundH(lo[0],lo[1])+0.03,lo[1],24,0.06,12,0);}
+  /* ---- 7. EXPANSION DETAIL (local ground, mirrors the detail module) ---- */
+  function plateTex2(txt){
+    return c151_canvas(256,96,function(x,w,h){
+      x.fillStyle='#1c1e24';x.fillRect(0,0,w,h);
+      x.strokeStyle='#c8ccd4';x.lineWidth=6;x.strokeRect(4,4,w-8,h-8);
+      x.fillStyle='#e8ecf2';x.font='700 52px system-ui, sans-serif';x.textAlign='center';x.textBaseline='middle';
+      x.fillText(txt,w/2,h/2+2);});}
+  for(var k=0;k<V15EXP.buildings.length;k++){
+    var eb=V15EXP.buildings[k],num=String(100+(26+k)*11),lx,lz;
+    if(eb.kind==='tower'){lx=0;lz=-(eb.d/2+0.9);}
+    else if(eb.kind==='enterable'){lx=-(eb.w/2-0.5);lz=-(eb.d/2+0.18);}
+    else{lx=1.6;lz=-(eb.d/2+0.18);}
+    var eo=c151_off(eb.yaw,lx,lz),egy=groundH(eb.x,eb.z);
+    var pm=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({map:plateTex2(num)}));
+    pm.position.set(eb.x+eo[0],egy+2.3,eb.z+eo[1]);pm.scale.set(1.2,0.5,0.08);pm.rotation.y=eb.yaw;
+    pm.userData.c153x=true;pm.userData.c151=true;scene.add(pm);V14C3.meshCount++;
+    V15EXP.plates++;}
+  var xboxList=[],xplantList=[];
+  function xwinBox(b,lx,wy){
+    var gyb2=groundH(b.x,b.z);
+    var o=c151_off(b.yaw,lx,-(b.d/2+0.35));
+    xboxList.push([b.x+o[0],gyb2+wy,b.z+o[1],b.yaw,1.0,0.25,0.3]);
+    obb(b.x+o[0],b.z+o[1],0.5,0.15,b.yaw,'winbox');
+    for(var kk=-1;kk<=1;kk++){
+      var po=c151_off(b.yaw,lx+kk*0.3,-(b.d/2+0.35));
+      xplantList.push([b.x+po[0],gyb2+wy+0.2,b.z+po[1],0,0.16,0.16,0.16]);}
+    V15EXP.boxes++;}
+  for(var hj=0;hj<V15EXP.buildings.length;hj++){
+    var hb3=V15EXP.buildings[hj];
+    if(hb3.kind==='house'){xwinBox(hb3,-hb3.w/4,1.05);xwinBox(hb3,hb3.w/4,1.05);}
+    else if(hb3.kind==='storefront'){xwinBox(hb3,-hb3.w/4,0.35);xwinBox(hb3,hb3.w/4,0.35);}}
+  xinst(C151_BOX,c151_lam(0x6a4a2e),xboxList);
+  xinst(C151_SPH,c151_lam(0x2a5a2a),xplantList);
+  for(var ti3=0;ti3<V15EXP.buildings.length;ti3++){
+    var tb=V15EXP.buildings[ti3];
+    if(tb.kind!=='tower')continue;
+    var tgy=groundH(tb.x,tb.z);
+    var d0=c151_off(tb.yaw,0,-(tb.d/2+0.9));
+    mk(C151_BOX,c151_lam(0x1c1e24),tb.x+d0[0],tgy+1.3,tb.z+d0[1],1.6,2.6,0.2,tb.yaw);
+    var c0=c151_off(tb.yaw,0,-(tb.d/2+1.9));
+    mk(C151_BOX,c151_lam(0x3a3f4a),tb.x+c0[0],tgy+3.0,tb.z+c0[1],3.4,0.22,2.0,tb.yaw);
+    var s0=c151_off(tb.yaw,0,-(tb.d/2+1.65));
+    mk(C151_BOX,c151_lam(0x9a9a92),tb.x+s0[0],tgy+0.07,tb.z+s0[1],3.4,0.14,1.8,tb.yaw);}
+  var xfenceList=[];
+  for(var yh=0;yh<V15EXP.buildings.length;yh++){
+    var yb=V15EXP.buildings[yh];
+    if(yb.kind!=='house')continue;
+    var ygy=groundH(yb.x,yb.z);
+    var fd=c151_off(yb.yaw,0,-1);
+    var doorO=c151_off(yb.yaw,0,-(yb.d/2+0.15));
+    var doorX=yb.x+doorO[0],doorZ=yb.z+doorO[1];
+    var lo=c151_off(yb.yaw,0,-(yb.d/2+4));
+    mk(C151_BOX,c151_lam(0x3a6a3a),yb.x+lo[0],ygy+0.03,yb.z+lo[1],yb.w+2,0.06,8,yb.yaw);
+    var swEdge=null,swAxis=null;
+    if(Math.abs(fd[1])>0.5){
+      var best2=null;
+      for(var eci=0;eci<EW_C.length;eci++){
+        var ec=EW_C[eci];
+        if(fd[1]<0&&ec<yb.z&&(best2===null||ec>best2))best2=ec;
+        if(fd[1]>0&&ec>yb.z&&(best2===null||ec<best2))best2=ec;}
+      if(best2!==null){swEdge=best2+(fd[1]<0?7:-7);swAxis='z';}}
+    else{
+      var best3=null;
+      for(var nci=0;nci<NS_C.length;nci++){
+        var nc=NS_C[nci];
+        if(fd[0]>0&&nc>yb.x&&(best3===null||nc<best3))best3=nc;
+        if(fd[0]<0&&nc<yb.x&&(best3===null||nc>best3))best3=nc;}
+      if(best3!==null){swEdge=best3+(fd[0]>0?-7:7);swAxis='x';}}
+    if(swEdge!==null){
+      var doorCoord=(swAxis==='z')?doorZ:doorX;
+      var pLen=Math.abs(swEdge-doorCoord);
+      var nseg=Math.max(1,Math.ceil(pLen/10)),segLen=pLen/nseg;
+      for(var sg2=0;sg2<nseg;sg2++){
+        var mid=doorCoord+Math.sign(swEdge-doorCoord)*(sg2*segLen+segLen/2);
+        var mx2=(swAxis==='z')?doorX:mid,mz2=(swAxis==='z')?mid:doorZ;
+        mk(C151_BOX,c151_lam(0x9a9a92),mx2,groundH(mx2,mz2)+0.06,mz2,1.6,0.06,segLen,yb.yaw);}}
+    for(var fs=-1;fs<=1;fs+=2){
+      var fo2=c151_off(yb.yaw,fs*(yb.w/2+1),-(yb.d/2+4));
+      xfenceList.push([yb.x+fo2[0],ygy+0.5,yb.z+fo2[1],yb.yaw,0.12,1.0,8]);
+      obb(yb.x+fo2[0],yb.z+fo2[1],0.06,4,yb.yaw,'fence');}
+    var yshr=[[-yb.w/2+1,-(yb.d/2+2)],[yb.w/2-1,-(yb.d/2+6)],[-yb.w/2+2,-(yb.d/2+7)]];
+    for(var ss3=0;ss3<yshr.length;ss3++){
+      var so2=c151_off(yb.yaw,yshr[ss3][0],yshr[ss3][1]);
+      mk(C151_SPH,c151_lam(0x2a5a2a),yb.x+so2[0],ygy+0.45,yb.z+so2[1],0.55,0.55,0.55,0);}}
+  xinst(C151_BOX,c151_lam(0x6a4a2e),xfenceList);
+  var xroofAC=[],xrearAC=[];
+  for(var ri3=0;ri3<V15EXP.buildings.length;ri3++){
+    var rb=V15EXP.buildings[ri3],rgy=groundH(rb.x,rb.z);
+    if(rb.kind==='storefront'){
+      var r1=c151_off(rb.yaw,-3,0),r2=c151_off(rb.yaw,3,0);
+      xroofAC.push([rb.x+r1[0],rgy+rb.h+0.45,rb.z+r1[1],rb.yaw,1.0,0.7,0.8]);
+      xroofAC.push([rb.x+r2[0],rgy+rb.h+0.45,rb.z+r2[1],rb.yaw,1.0,0.7,0.8]);}
+    else if(rb.kind==='civic'){
+      var c1=c151_off(rb.yaw,-2,0),c2=c151_off(rb.yaw,2,0);
+      xroofAC.push([rb.x+c1[0],rgy+rb.h+0.45,rb.z+c1[1],rb.yaw,1.0,0.7,0.8]);
+      xroofAC.push([rb.x+c2[0],rgy+rb.h+0.45,rb.z+c2[1],rb.yaw,1.0,0.7,0.8]);}
+    else if(rb.kind==='depot'){
+      var d1=c151_off(rb.yaw,0,-3),d2=c151_off(rb.yaw,0,3);
+      xroofAC.push([rb.x+d1[0],rgy+rb.h+0.45,rb.z+d1[1],rb.yaw,1.0,0.7,0.8]);
+      xroofAC.push([rb.x+d2[0],rgy+rb.h+0.45,rb.z+d2[1],rb.yaw,1.0,0.7,0.8]);}
+    else if(rb.kind==='midrise'){
+      for(var as3=-1;as3<=1;as3+=2){
+        var ao=c151_off(rb.yaw,as3*3,(rb.d/2+0.2));
+        xrearAC.push([rb.x+ao[0],rgy+5.75,rb.z+ao[1],rb.yaw,0.9,0.6,0.5]);}}}
+  xinst(C151_BOX,c151_lam(0x6a7078),xroofAC);
+  xinst(C151_BOX,c151_lam(0x8a8d90),xrearAC);
+  var antSpots=[];
+  for(var an3=0;an3<V15EXP.buildings.length;an3++){
+    var ab=V15EXP.buildings[an3];
+    if(ab.kind==='civic')antSpots.push(ab);
+    else if(ab.kind==='depot'&&(ab.sign==='FOUNDRY'||ab.sign==='MILL'))antSpots.push(ab);}
+  for(var an4=0;an4<antSpots.length;an4++){
+    var ab2=antSpots[an4],agy=groundH(ab2.x,ab2.z);
+    mk(C151_BOX,c151_lam(0x22262e),ab2.x,agy+ab2.h+1.5,ab2.z,0.15,3,0.15,0);}
+  for(var gl3=0;gl3<V15EXP.buildings.length;gl3++){
+    var gb=V15EXP.buildings[gl3];
+    if(!(gb.kind==='storefront'||gb.kind==='enterable'||gb.kind==='civic'||gb.kind==='depot')||!gb.sign)continue;
+    if(typeof V15ACT==='undefined'||!V15ACT.shopGlowMat)continue;
+    var fo=c151_off(gb.yaw,0,-(gb.d/2+0.2));
+    var gl=new THREE.Mesh(new THREE.PlaneGeometry(Math.min(gb.w*0.7,6),1.6),V15ACT.shopGlowMat);
+    gl.position.set(gb.x+fo[0],groundH(gb.x,gb.z)+1.4,gb.z+fo[1]);gl.rotation.y=gb.yaw+Math.PI;
+    gl.userData.c153x=true;gl.userData.c151=true;scene.add(gl);V14C3.meshCount++;}
+  for(var ei3=0;ei3<V15EXP.buildings.length;ei3++){
+    var eb2=V15EXP.buildings[ei3];
+    if(eb2.kind!=='enterable')continue;
+    var egy2=groundH(eb2.x,eb2.z),hd=eb2.d/2;
+    var r0=c151_off(eb2.yaw,0,0);
+    mk(C151_BOX,c151_lam(0x6e2a22),eb2.x+r0[0],egy2+0.08,eb2.z+r0[1],eb2.w*0.5,0.04,2.0,eb2.yaw);
+    var cc1=c151_off(eb2.yaw,-0.8,(hd-1.6)),cc2=c151_off(eb2.yaw,0.8,(hd-1.6));
+    mk(C151_BOX,c151_lam(0x8a7a52),eb2.x+cc1[0],egy2+1.35,eb2.z+cc1[1],0.5,0.4,0.5,eb2.yaw);
+    mk(C151_BOX,c151_lam(0x8a7a52),eb2.x+cc2[0],egy2+1.35,eb2.z+cc2[1],0.5,0.4,0.5,eb2.yaw);}
+  /* ---- 8. LIFE: new paths + walkers + dogs (respawn-covered) ---- */
+  var XPATHS=[
+    {pts:[[450,-1949],[690,-1949]],loop:false},
+    {pts:[[450,-1554],[850,-1554]],loop:false},
+    {pts:[[451,-1900],[451,-1560]],loop:false},
+    {pts:[[749,-1860],[749,-1500]],loop:false},
+    {pts:[[533,-2020],[533,-1965]],loop:false},
+    {pts:[[589,-2020],[589,-1965]],loop:false},
+    {pts:[[450,-1675],[850,-1675]],loop:false},
+    {pts:[[519,-2020],[519,-1632],[508,-1628],[508,-1598],[519,-1594],[519,-1560]],loop:false}, // 527 WEST verge, JOGGED west around NEW1 (#9 fix): the #8 straight line ran through NEW1's footprint (520,-1615, 11x10 -> x 514.5..525.5, z -1620..-1610) and the X7 kid (spawn frac 0.85 -> -1629, 9 m north of the face) pinned after 7.9 m (npc2X #8). The jog holds x=508 past NEW1 (6.5 m clear of its west face, 5.5 m clear of its west yard-fence posts at x=513.5), rejoining the verge south of the house; spawn fracs still map onto the clean first segment (519,-2020)->(519,-1632). The old -1500 end ran through NEW2 (520,-1525) and pinned the kid after ~47 m (#3/#6) — the -1560 end already fixed that; this jog fixes NEW1, the remaining blocker.
+    {pts:[[657,-2020],[657,-1500]],loop:false} // 663 WEST sidewalk: x=601 hits old banner pole + old lamp column (diagwalk head-on)
+  ];
+  for(var xp=0;xp<XPATHS.length;xp++){V15NPC.paths.push(XPATHS[xp]);V15EXP.paths.push(XPATHS[xp]);}
+  function xspawn(pathIdx,kind,gender,frac,dir){
+    var startPt=(dir<0)?1:0;
+    var np=c151_spawnNPC(pathIdx,kind,gender,startPt);
+    if(!np)return null;
+    var path=V15NPC.paths[pathIdx],a=path.pts[0],b=path.pts[1];
+    np.x=a[0]+(b[0]-a[0])*frac;np.z=a[1]+(b[1]-a[1])*frac;np.gy=groundH(np.x,np.z);
+    np.wp=(dir<0)?0:1;np.dir=dir;
+    np.group.position.set(np.x,np.gy,np.z);
+    V15EXP.walkers++;return np;}
+  var XSPAWN=[
+    [6,'adult','m',0.15,1],[6,'adult','f',0.55,-1],[6,'kid',null,0.85,1],
+    [7,'adult','m',0.2,1],[7,'adult','f',0.6,-1],[7,'kid',null,0.9,1],
+    [8,'adult','m',0.3,1],[8,'adult','f',0.7,-1],
+    [9,'adult','m',0.25,1],[9,'adult','f',0.65,-1],[9,'kid',null,0.9,1],
+    [10,'adult','m',0.5,1],
+    [11,'adult','f',0.5,-1],
+    [12,'adult','m',0.3,1],[12,'adult','f',0.7,-1],
+    [13,'adult','m',0.2,1],[13,'adult','f',0.55,-1],[13,'kid',null,0.85,1],
+    [14,'adult','m',0.35,1],[14,'adult','f',0.75,-1]
+  ];
+  var xowners=[];
+  for(var xs=0;xs<XSPAWN.length;xs++){
+    var sp=XSPAWN[xs];
+    var np2=xspawn(sp[0],sp[1],sp[2],sp[3],sp[4]);
+    if(np2&&np2.kind==='adult'&&(sp[0]===6||sp[0]===7||sp[0]===9)&&sp[2]==='m')xowners.push(np2);}
+  for(var xo=0;xo<xowners.length;xo++){
+    var ow=xowners[xo];
+    c151_spawnDog(ow,false);ow.dogOwner=true;V15EXP.dogs++;}
+  V15EXP.ready=true;
+})();
+
+/* ==================== V15.3 CITY DETAIL ====================
+   Layer only: adds detail onto the 15.2 city. No edits to geo, NPC,
+   activity, merge, rifle, gate, or save code. Runs at load, after geo
+   + activity populate (injected before the main script close). Every new
+   solid object records its OBB in V15DTR.newObbs (class-tagged) so the
+   collision probe can verify each one; ground dressing and above-head
+   trim carry no OBB, same classes as 15.1/15.2. Bushes stay
+   walk-through (concealment exemption). No new lights beyond the
+   capped 6-point pool, no shadows on pool lights. */
+var V15DTR={ready:false,lamps:[],pool:[],plates:0,boxes:0,newObbs:[],obbBase:0};
+(function(){
+  var gy=groundH(600,-1750);
+  V15DTR.obbBase=OBBS.length;
+  function mk(geo,mat,x,y,z,sx,sy,sz,ry){
+    var m=new THREE.Mesh(geo,mat);
+    m.position.set(x,y,z);m.scale.set(sx,sy,sz);if(ry)m.rotation.y=ry;
+    m.castShadow=false;m.receiveShadow=true;m.userData.c153=true;m.userData.c151=true;scene.add(m);V14C3.meshCount++;return m;}
+  function obb(x,z,hw,hd,yaw,cls){
+    c151_obb(x,z,hw,hd,yaw);V15DTR.newObbs.push({x:x,z:z,hw:hw,hd:hd,yaw:yaw||0,cls:cls});}
+  function plateTex(txt){
+    return c151_canvas(256,96,function(x,w,h){
+      x.fillStyle='#1c1e24';x.fillRect(0,0,w,h);
+      x.strokeStyle='#c8ccd4';x.lineWidth=6;x.strokeRect(4,4,w-8,h-8);
+      x.fillStyle='#e8ecf2';x.font='700 52px system-ui, sans-serif';x.textAlign='center';x.textBaseline='middle';
+      x.fillText(txt,w/2,h/2+2);});}
+  /* ---- 1a. Address numbers: one plate per building, unique numbers ---- */
+  for(var i=0;i<C151_CITY.length;i++){
+    var b=C151_CITY[i],num=String(100+i*11),lx,lz;
+    if(b.x153)continue; // EXPANSION: new buildings detail themselves (local ground)
+    if(b.kind==='tower'){lx=0;lz=-(b.d/2+0.9);}
+    else if(b.kind==='enterable'){lx=-(b.w/2-0.5);lz=-(b.d/2+0.18);}
+    else{lx=1.6;lz=-(b.d/2+0.18);}
+    var o=c151_off(b.yaw,lx,lz);
+    var pm=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({map:plateTex(num)}));
+    pm.position.set(b.x+o[0],gy+2.3,b.z+o[1]);pm.scale.set(1.2,0.5,0.08);pm.rotation.y=b.yaw;
+    pm.userData.c153=true;pm.userData.c151=true;scene.add(pm);V14C3.meshCount++;
+    V15DTR.plates++;}
+  /* ---- 1b. Window boxes / planters under front windows ---- */
+  var boxList=[],plantList=[];
+  function winBox(b,lx,wy){
+    var o=c151_off(b.yaw,lx,-(b.d/2+0.35));
+    boxList.push([b.x+o[0],gy+wy,b.z+o[1],b.yaw,1.0,0.25,0.3]);
+    obb(b.x+o[0],b.z+o[1],0.5,0.15,b.yaw,'winbox');
+    for(var k=-1;k<=1;k++){
+      var po=c151_off(b.yaw,lx+k*0.3,-(b.d/2+0.35));
+      plantList.push([b.x+po[0],gy+wy+0.2,b.z+po[1],0,0.16,0.16,0.16]);}
+    V15DTR.boxes++;}
+  for(var j=0;j<C151_CITY.length;j++){
+    var hb=C151_CITY[j];
+    if(hb.x153)continue; // EXPANSION: skip (see plates)
+    if(hb.kind==='house'){winBox(hb,-hb.w/4,1.05);winBox(hb,hb.w/4,1.05);}
+    else if(hb.kind==='storefront'){winBox(hb,-hb.w/4,0.35);winBox(hb,hb.w/4,0.35);}}
+  c151_inst(C151_BOX,c151_lam(0x6a4a2e),boxList);
+  c151_inst(C151_SPH,c151_lam(0x2a5a2a),plantList);
+  /* ---- 1c. Real night light pools: 6 capped PointLights, no shadows ---- */
+  var lampPos=[];
+  for(var z=-1860;z<-1640;z+=25){lampPos.push([588.3,z]);lampPos.push([601.7,z+12]);}
+  for(var x=525;x<695;x+=25){lampPos.push([x,-1799.7]);lampPos.push([x+12,-1786.3]);}
+  lampPos.push([506,-1822]);lampPos.push([506,-1709]); // lot lamps (built in 2f)
+  if(typeof V15EXP!=='undefined'&&V15EXP.lampPos){for(var xi=0;xi<V15EXP.lampPos.length;xi++)lampPos.push(V15EXP.lampPos[xi]);}
+  V15DTR.lamps=lampPos;
+  V15DTR.lampY={};if(typeof V15EXP!=='undefined'&&V15EXP.lampY){for(var lk in V15EXP.lampY)V15DTR.lampY[lk]=V15EXP.lampY[lk];}
+  for(var li=0;li<6;li++){
+    var L=new THREE.PointLight(0xffc27a,0,22,1);
+    L.position.set(0,-100,0);scene.add(L);V15DTR.pool.push(L);}
+  V15DTR.applyLights=function(nightF,px,pz){
+    var ranked=lampPos.slice();
+    ranked.sort(function(a,b){
+      var da=Math.hypot(a[0]-px,a[1]-pz),db=Math.hypot(b[0]-px,b[1]-pz);return da-db;});
+    for(var k=0;k<6;k++){
+      var lp=ranked[k],Lt=V15DTR.pool[k];
+      var ly=(V15DTR.lampY&&V15DTR.lampY[lp[0]+','+lp[1]])?V15DTR.lampY[lp[0]+','+lp[1]]:gy+4.9;
+      Lt.position.set(lp[0],ly,lp[1]);Lt.intensity=nightF*1.5;}};
+  V15DTR.tick=function(){
+    if(typeof G==='undefined')return;
+    if(G.state!=='play'&&G.state!=='roam'){
+      for(var k=0;k<6;k++)V15DTR.pool[k].intensity=0;return;}
+    var nf=(typeof V15ACT!=='undefined'&&V15ACT.nightF)?V15ACT.nightF:0;
+    if(typeof V15NUKE!=='undefined'&&V15NUKE.destroyed)nf=0; // lamps are gone with the city
+    V15DTR.applyLights(nf,G.px,G.pz);};
+  /* ---- 1d. Road / sidewalk / surface dressing (ground, no OBBs) ---- */
+  var joints=[];
+  var nsX=[[520,522],[532,534],[588,590],[600,602],[656,658],[668,670]];
+  var nsZ=[[-1870,-1854],[-1844,-1798],[-1788,-1742],[-1732,-1686],[-1676,-1630]];
+  for(var si=0;si<nsX.length;si++)for(var zi=0;zi<nsZ.length;zi++){
+    var cx=(nsX[si][0]+nsX[si][1])/2;
+    for(var jz=nsZ[zi][0]+2;jz<nsZ[zi][1];jz+=4)joints.push([cx,gy+0.315,jz,0,2,0.01,0.12]);}
+  var ewZ=[[-1856,-1854],[-1844,-1842],[-1800,-1798],[-1788,-1786],[-1744,-1742],[-1732,-1730],[-1688,-1686],[-1676,-1674]];
+  var ewX=[[534,588],[602,656],[670,700]];
+  for(var ei=0;ei<ewZ.length;ei++)for(var xi=0;xi<ewX.length;xi++){
+    var cz=(ewZ[ei][0]+ewZ[ei][1])/2;
+    for(var jx=ewX[xi][0]+2;jx<ewX[xi][1];jx+=4)joints.push([jx,gy+0.305,cz,0,0.12,0.01,2]);}
+  c151_inst(C151_BOX,c151_lam(0x6a6a62),joints);
+  var patches=[];
+  var patchSpots=[[521,-1860],[533,-1830],[589,-1810],[601,-1760],[657,-1720],[669,-1690],
+    [560,-1799],[630,-1799],[560,-1787],[630,-1787],[560,-1731],[630,-1731]];
+  for(var pi=0;pi<patchSpots.length;pi++){
+    var ps=patchSpots[pi];
+    var onNS=(ps[0]===521||ps[0]===533||ps[0]===589||ps[0]===601||ps[0]===657||ps[0]===669);
+    patches.push([ps[0],onNS?gy+0.315:gy+0.305,ps[1],0,1.5,0.01,1.5]);}
+  c151_inst(C151_BOX,c151_lam(0x8a8a82),patches);
+  var cracks=[];
+  var crackSpots=[[521,-1840],[533,-1760],[589,-1700],[601,-1840],[657,-1800],[669,-1720],
+    [550,-1799],[640,-1799],[550,-1787],[640,-1787],[550,-1731],[640,-1731]];
+  for(var ci=0;ci<crackSpots.length;ci++){
+    var cs=crackSpots[ci];
+    var cNS=(cs[0]===521||cs[0]===533||cs[0]===589||cs[0]===601||cs[0]===657||cs[0]===669);
+    cracks.push([cs[0],cNS?gy+0.315:gy+0.305,cs[1],cNS?0:Math.PI/2,2,0.01,0.06]);}
+  c151_inst(C151_BOX,c151_lam(0x3a3a34),cracks);
+  var edges=[];
+  var nsSegs=[[-1866,-1856],[-1842,-1800],[-1786,-1744],[-1730,-1688],[-1674,-1634]];
+  for(var r=0;r<3;r++){
+    var rx=[527,595,663][r];
+    for(var es=0;es<nsSegs.length;es++){
+      var zm=(nsSegs[es][0]+nsSegs[es][1])/2,ln=nsSegs[es][1]-nsSegs[es][0];
+      edges.push([rx-4.5,gy+0.175,zm,0,0.12,0.02,ln]);
+      edges.push([rx+4.5,gy+0.175,zm,0,0.12,0.02,ln]);}}
+  var ewSegs=[[534,588],[602,656],[670,700]];
+  for(var er=0;er<4;er++){
+    var rz=[-1849,-1793,-1737,-1681][er];
+    for(var xs=0;xs<ewSegs.length;xs++){
+      var xm=(ewSegs[xs][0]+ewSegs[xs][1])/2,xl=ewSegs[xs][1]-ewSegs[xs][0];
+      edges.push([xm,gy+0.175,rz-4.5,0,xl,0.02,0.12]);
+      edges.push([xm,gy+0.175,rz+4.5,0,xl,0.02,0.12]);}}
+  c151_inst(C151_BOX,c151_lam(0xe8e8e2),edges);
+  var bars=[];
+  for(var bx=0;bx<2;bx++)for(var bz=0;bz<4;bz++)
+    bars.push([[527,663][bx],gy+0.175,[-1849,-1793,-1737,-1681][bz]-8,0,9,0.02,0.5]);
+  for(var lz=0;lz<2;lz++){
+    bars.push([595,gy+0.175,[-1793,-1737][lz]-8,0,9,0.02,0.5]);
+    bars.push([595,gy+0.175,[-1793,-1737][lz]+8,0,9,0.02,0.5]);}
+  c151_inst(C151_BOX,c151_lam(0xe8e8e2),bars);
+  var drains=[];
+  var drainSpots=[[533,-1843],[589,-1843],[657,-1843],[533,-1787],[657,-1787],[533,-1731],[657,-1731],[533,-1675]];
+  for(var di=0;di<drainSpots.length;di++)drains.push([drainSpots[di][0],gy+0.175,drainSpots[di][1],0,0.8,0.02,0.5]);
+  c151_inst(C151_BOX,c151_lam(0x1e2226),drains);
+  var stains=[];
+  for(var st=0;st<4;st++)stains.push([[508,512,508,512][st],gy+0.175,[-1825,-1828,-1715,-1712][st],0,1.2,0.02,0.8]);
+  c151_inst(C151_BOX,c151_lam(0x1a1c20),stains);
+  var ramps=[];
+  for(var rz2=0;rz2<3;rz2++){
+    var zc=[-1849,-1737,-1681][rz2];
+    ramps.push([589,gy+0.18,zc-6.5,-0.2]);
+    ramps.push([601,gy+0.18,zc-6.5,-0.2]);
+    ramps.push([589,gy+0.18,zc+6.5,0.2]);
+    ramps.push([601,gy+0.18,zc+6.5,0.2]);}
+  for(var ri=0;ri<ramps.length;ri++){
+    var rp=ramps[ri];
+    var rm=new THREE.Mesh(C151_BOX,c151_lam(0x9a9a92));
+    rm.position.set(rp[0],rp[1],rp[2]);rm.scale.set(2,0.3,1.5);
+    rm.rotation.x=rp[3];
+    rm.userData.c153=true;rm.userData.c151=true;scene.add(rm);V14C3.meshCount++;}
+  /* ---- 2a. Tower entrances: door + canopy + step on the front face ---- */
+  for(var ti=0;ti<C151_CITY.length;ti++){
+    var tb=C151_CITY[ti];
+    if(tb.x153||tb.kind!=='tower')continue;
+    var d0=c151_off(tb.yaw,0,-(tb.d/2+0.9));
+    mk(C151_BOX,c151_lam(0x1c1e24),tb.x+d0[0],gy+1.3,tb.z+d0[1],1.6,2.6,0.2,tb.yaw);
+    var c0=c151_off(tb.yaw,0,-(tb.d/2+1.9));
+    mk(C151_BOX,c151_lam(0x3a3f4a),tb.x+c0[0],gy+3.0,tb.z+c0[1],3.4,0.22,2.0,tb.yaw);
+    var s0=c151_off(tb.yaw,0,-(tb.d/2+1.65));
+    mk(C151_BOX,c151_lam(0x9a9a92),tb.x+s0[0],gy+0.07,tb.z+s0[1],3.4,0.14,1.8,tb.yaw);}
+  /* ---- 2b. House front yards: lawn + path + side fences + shrubs ---- */
+  var fenceList=[];
+  for(var hi=0;hi<C151_CITY.length;hi++){
+    var hb2=C151_CITY[hi];
+    if(hb2.x153||hb2.kind!=='house')continue;
+    var fz=-(hb2.d/2+4);
+    var lo=c151_off(hb2.yaw,0,fz);
+    mk(C151_BOX,c151_lam(0x3a6a3a),hb2.x+lo[0],gy+0.03,hb2.z+lo[1],hb2.w+2,0.06,8,hb2.yaw);
+    var swYard=(hb2.z<-1680)?-1730:-1686; // nearest E-W sidewalk near edge
+    var fd=c151_off(hb2.yaw,0,-1); // front dir (world)
+    var doorO=c151_off(hb2.yaw,0,-(hb2.d/2+0.15));
+    var doorX=hb2.x+doorO[0],doorZ=hb2.z+doorO[1];
+    var pLen=(doorZ-swYard)/(-fd[1]);
+    mk(C151_BOX,c151_lam(0x9a9a92),doorX+fd[0]*(pLen/2),gy+0.06,doorZ+fd[1]*(pLen/2),1.6,0.06,pLen,hb2.yaw);
+    for(var fs=-1;fs<=1;fs+=2){
+      var fo2=c151_off(hb2.yaw,fs*(hb2.w/2+1),fz);
+      fenceList.push([hb2.x+fo2[0],gy+0.5,hb2.z+fo2[1],hb2.yaw,0.12,1.0,8]);
+      obb(hb2.x+fo2[0],hb2.z+fo2[1],0.06,4,hb2.yaw,'fence');}
+    var shrubSpots=[[-hb2.w/2+1,-(hb2.d/2+2)],[hb2.w/2-1,-(hb2.d/2+6)],[-hb2.w/2+2,-(hb2.d/2+7)]];
+    for(var ss=0;ss<shrubSpots.length;ss++){
+      var so2=c151_off(hb2.yaw,shrubSpots[ss][0],shrubSpots[ss][1]);
+      mk(C151_SPH,c151_lam(0x2a5a2a),hb2.x+so2[0],gy+0.45,hb2.z+so2[1],0.55,0.55,0.55,0);}}
+  c151_inst(C151_BOX,c151_lam(0x6a4a2e),fenceList);
+  /* ---- 2c. Alley dressing: barrels + pallets + rear AC boxes ---- */
+  var barrelList=[];
+  var barrelSpots=[[563,-1766],[565,-1766],[620,-1766],[624,-1766],[671,-1705],[675,-1705]];
+  for(var bi=0;bi<barrelSpots.length;bi++){
+    barrelList.push([barrelSpots[bi][0],gy+0.45,barrelSpots[bi][1],0,0.7,0.9,0.7]);
+    obb(barrelSpots[bi][0],barrelSpots[bi][1],0.35,0.35,0,'barrel');}
+  c151_inst(C151_CYL,c151_lam(0x3a3f44),barrelList);
+  var palletSpots=[[559,-1766],[626,-1766],[671,-1707],[557,-1650]];
+  for(var pi2=0;pi2<palletSpots.length;pi2++){
+    mk(C151_BOX,c151_lam(0x8a7a52),palletSpots[pi2][0],gy+0.08,palletSpots[pi2][1],1.2,0.15,1.0,0);
+    obb(palletSpots[pi2][0],palletSpots[pi2][1],0.6,0.5,0,'pallet');}
+  var rearAC=[];
+  for(var mi=0;mi<C151_CITY.length;mi++){
+    var mb=C151_CITY[mi];
+    if(mb.x153||mb.kind!=='midrise')continue;
+    for(var as=-1;as<=1;as+=2){
+      var ao=c151_off(mb.yaw,as*3,(mb.d/2+0.2));
+      rearAC.push([mb.x+ao[0],gy+5.75,mb.z+ao[1],mb.yaw,0.9,0.6,0.5]);}}
+  c151_inst(C151_BOX,c151_lam(0x8a8d90),rearAC);
+  /* ---- 2d. Rooftop additions: AC boxes + antennas (high, no OBBs) ---- */
+  var roofAC=[];
+  for(var ri2=0;ri2<C151_CITY.length;ri2++){
+    var rb=C151_CITY[ri2];
+    if(rb.x153)continue; // EXPANSION: skip (see plates)
+    if(rb.kind==='storefront'){
+      roofAC.push([rb.x-3,gy+rb.h+0.45,rb.z,rb.yaw,1.0,0.7,0.8]);
+      roofAC.push([rb.x+3,gy+rb.h+0.45,rb.z,rb.yaw,1.0,0.7,0.8]);}
+    else if(rb.kind==='civic'){
+      roofAC.push([rb.x-2,gy+rb.h+0.45,rb.z,rb.yaw,1.0,0.7,0.8]);
+      roofAC.push([rb.x+2,gy+rb.h+0.45,rb.z,rb.yaw,1.0,0.7,0.8]);}
+    else if(rb.kind==='depot'){
+      roofAC.push([rb.x,gy+rb.h+0.45,rb.z-3,rb.yaw,1.0,0.7,0.8]);
+      roofAC.push([rb.x,gy+rb.h+0.45,rb.z+3,rb.yaw,1.0,0.7,0.8]);}}
+  c151_inst(C151_BOX,c151_lam(0x6a7078),roofAC);
+  mk(C151_BOX,c151_lam(0x22262e),612,gy+9+1.5,-1652,0.15,3,0.15,0);
+  mk(C151_BOX,c151_lam(0x22262e),685,gy+9+1.5,-1825,0.15,3,0.15,Math.PI/2);
+  mk(C151_BOX,c151_lam(0x22262e),685,gy+8+1.5,-1710,0.15,3,0.15,Math.PI/2);
+  /* ---- 2e. Plaza chess tables + planters; park picnic tables + path ---- */
+  var chessSpots=[[632,-1644],[642,-1644]];
+  for(var ch=0;ch<chessSpots.length;ch++){
+    mk(C151_BOX,c151_lam(0x6a5a42),chessSpots[ch][0],gy+0.75,chessSpots[ch][1],1.0,0.1,1.0,0);
+    mk(C151_BOX,c151_lam(0x3a3f44),chessSpots[ch][0],gy+0.35,chessSpots[ch][1],0.3,0.7,0.3,0);
+    obb(chessSpots[ch][0],chessSpots[ch][1],0.5,0.5,0,'chess');}
+  var plazaPlanters=[[624,-1660],[650,-1660]];
+  for(var pp=0;pp<plazaPlanters.length;pp++){
+    mk(C151_BOX,c151_lam(0x8a8d90),plazaPlanters[pp][0],gy+0.4,plazaPlanters[pp][1],1.2,0.8,1.2,0);
+    mk(C151_SPH,c151_lam(0x2a5a2a),plazaPlanters[pp][0],gy+1.05,plazaPlanters[pp][1],0.7,0.7,0.7,0);
+    obb(plazaPlanters[pp][0],plazaPlanters[pp][1],0.6,0.6,0,'planter');}
+  var picnicSpots=[[509,-1720],[509,-1690]];
+  for(var pc=0;pc<picnicSpots.length;pc++){
+    mk(C151_BOX,c151_lam(0x6a4a2e),picnicSpots[pc][0],gy+0.75,picnicSpots[pc][1],1.8,0.1,0.8,0);
+    mk(C151_BOX,c151_lam(0x6a4a2e),picnicSpots[pc][0],gy+0.45,picnicSpots[pc][1]-0.55,1.8,0.08,0.3,0);
+    mk(C151_BOX,c151_lam(0x6a4a2e),picnicSpots[pc][0],gy+0.45,picnicSpots[pc][1]+0.55,1.8,0.08,0.3,0);
+    obb(picnicSpots[pc][0],picnicSpots[pc][1],0.9,0.4,0,'picnic');}
+  mk(C151_BOX,c151_lam(0x9a9a92),509,gy+0.32,-1723.5,2,0.04,37,0);
+  mk(C151_BOX,c151_lam(0x9a9a92),509,gy+0.32,-1690,2,0.04,10,0);
+  /* ---- 2f. Parking lot: lamps + wheel stops ---- */
+  var glowMat=V15ACT.lampGlow;
+  var lotLamps=[[506,-1822],[506,-1709]];
+  for(var ll=0;ll<lotLamps.length;ll++){
+    mk(C151_BOX,c151_lam(0x22262e),lotLamps[ll][0],gy+2.5,lotLamps[ll][1],0.15,5,0.15,0);
+    mk(C151_BOX,c151_bas(0xffc27a),lotLamps[ll][0],gy+5.0,lotLamps[ll][1],0.6,0.2,0.35,0);
+    if(glowMat){
+      var sp=new THREE.Sprite(glowMat);sp.position.set(lotLamps[ll][0],gy+4.9,lotLamps[ll][1]);sp.scale.set(3,3,1);sp.userData.c153=true;sp.userData.c151=true;scene.add(sp);V14C3.meshCount++;}
+    obb(lotLamps[ll][0],lotLamps[ll][1],0.25,0.25,0,'lamp');}
+  var carSpots=[[506,-1830],[514,-1830],[506,-1820],[514,-1820]];
+  var stopList=[];
+  for(var cs=0;cs<carSpots.length;cs++){
+    stopList.push([carSpots[cs][0],gy+0.22,carSpots[cs][1]-2.3,0,1.6,0.15,0.25]);
+    stopList.push([carSpots[cs][0],gy+0.22,carSpots[cs][1]+2.3,0,1.6,0.15,0.25]);
+    obb(carSpots[cs][0],carSpots[cs][1]-2.3,0.8,0.12,0,'wheelstop');
+    obb(carSpots[cs][0],carSpots[cs][1]+2.3,0.8,0.12,0,'wheelstop');}
+  c151_inst(C151_BOX,c151_lam(0x8d8d88),stopList);
+  /* ---- 2g. Trash cans: 10, all OFF probe walk lines ---- */
+  var canSpots=[[521,-1855],[533,-1855],[601,-1855],[669,-1855],[521,-1799],[669,-1799],
+    [521,-1743],[669,-1743],[521,-1677],[669,-1677]];
+  var canBody=[],canRim=[];
+  for(var cn=0;cn<canSpots.length;cn++){
+    canBody.push([canSpots[cn][0],gy+0.45,canSpots[cn][1],0,0.5,0.9,0.5]);
+    canRim.push([canSpots[cn][0],gy+0.92,canSpots[cn][1],0,0.55,0.08,0.55]);
+    obb(canSpots[cn][0],canSpots[cn][1],0.25,0.25,0,'can');}
+  c151_inst(C151_CYL,c151_lam(0x3a3f44),canBody);
+  c151_inst(C151_BOX,c151_lam(0x22262e),canRim);
+  /* ---- 2h. Street-name blades on existing lamp poles (no new OBBs) ---- */
+  function blade(x,z,txt,ry){
+    var tex=c151_canvas(512,128,function(cx,w,h){
+      cx.fillStyle='#1d5a2a';cx.fillRect(0,0,w,h);
+      cx.fillStyle='#ffffff';cx.font='700 64px system-ui, sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+      cx.fillText(txt,w/2,h/2+2);});
+    var mat=new THREE.MeshBasicMaterial({map:tex});
+    for(var s=-1;s<=1;s+=2){
+      var pl=new THREE.Mesh(new THREE.PlaneGeometry(2.4,0.5),mat);
+      pl.position.set(x+s*0.12*Math.cos(ry),gy+4.2,z-s*0.12*Math.sin(ry));
+      pl.rotation.y=ry+(s>0?0:Math.PI);pl.userData.c153=true;pl.userData.c151=true;scene.add(pl);V14C3.meshCount++;}}
+  blade(588.3,-1785,'MAIN AVE',0);
+  blade(600,-1799.7,'MAIN ST',Math.PI/2);
+  blade(588.3,-1735,'3RD ST',0);
+  blade(675,-1799.7,'AVE E',Math.PI/2);
+  /* ---- 2i. Civic drop box + depot docks ---- */
+  mk(C151_BOX,c151_lam(0x9a9a92),604,gy+0.03,-1658.5,1.0,0.06,1.0,0);
+  mk(C151_BOX,c151_lam(0x1d4e89),604,gy+0.6,-1658.5,0.6,1.1,0.4,0);
+  obb(604,-1658.5,0.3,0.2,0,'dropbox');
+  var docks=[{x:672.5,z:-1825,w:3,d:12,yaw:0},{x:674.5,z:-1710,w:3,d:10,yaw:0}];
+  for(var dk=0;dk<docks.length;dk++){
+    var dd=docks[dk];
+    mk(C151_BOX,c151_lam(0x8d8d88),dd.x,gy+0.03,dd.z,dd.w,0.06,dd.d,0);
+    mk(C151_BOX,c151_lam(0x8a7a52),dd.x,gy+0.14,dd.z-3,1.2,0.15,1.0,0);
+    mk(C151_BOX,c151_lam(0x8a7a52),dd.x,gy+0.14,dd.z+3,1.2,0.15,1.0,0);
+    obb(dd.x,dd.z-3,0.6,0.5,0,'dockpallet');
+    obb(dd.x,dd.z+3,0.6,0.5,0,'dockpallet');
+    var coneSpots=[[dd.x-1,dd.z-dd.d/2+0.5],[dd.x-1,dd.z+dd.d/2-0.5],[dd.x+1,dd.z-dd.d/2+0.5],[dd.x+1,dd.z+dd.d/2-0.5]];
+    for(var co=0;co<coneSpots.length;co++){
+      mk(C151_CYL,c151_lam(0xc22a1e),coneSpots[co][0],gy+0.25,coneSpots[co][1],0.3,0.5,0.3,0);
+      obb(coneSpots[co][0],coneSpots[co][1],0.15,0.15,0,'cone');}}
+  /* ---- 2j. Enterable interiors: rugs + counter crates (no new OBBs) ---- */
+  for(var ei2=0;ei2<C151_CITY.length;ei2++){
+    var eb=C151_CITY[ei2];
+    if(eb.x153||eb.kind!=='enterable')continue;
+    var hd=eb.d/2;
+    var r0=c151_off(eb.yaw,0,0);
+    mk(C151_BOX,c151_lam(0x6e2a22),eb.x+r0[0],gy+0.08,eb.z+r0[1],eb.w*0.5,0.04,2.0,eb.yaw);
+    var cc=c151_off(eb.yaw,0,(hd-1.6));
+    mk(C151_BOX,c151_lam(0x8a7a52),eb.x+cc[0]-0.8,gy+1.35,eb.z+cc[1],0.5,0.4,0.5,eb.yaw);
+    mk(C151_BOX,c151_lam(0x8a7a52),eb.x+cc[0]+0.8,gy+1.35,eb.z+cc[1],0.5,0.4,0.5,eb.yaw);}
+  V15DTR.ready=true;
+})();
+
+/* V15.3 UNIVERSAL NUKE — one blast disc everywhere, real craters, persistent
+   mushroom clouds, 0-prompt grants, 310 s drop cooldown, RELOAD MAP restore.
+   Runs AFTER all core code (same scope): rebinds mrgDetonate + mrgRubble +
+   V15MRG.dropNuke + wraps V15MRG.tick. Core mrgDestroyCity becomes dead code
+   (kept, never called). No rifle/save/sync code touched, no new sync keys. */
+(function(){
+  var R=400, CR=200, CDEPTH=18, MAXCLOUDS=8, FIREPOOL=32, FIRESPER=16;
+  var S={discs:[],hiddenMeshes:[],removedObbs:[],removedBlockers:[],removedBush:[],
+    instHidden:[],rubbleMeshes:[],glowMeshes:[],fireOrder:[],clouds:[],
+    coolUntil:0,qLevel:0,dtAcc:0,dtN:0,dtWin:0,promptOpen:false,reloadRunning:false,
+    fallGlow:null,fallShadow:null,
+    terrain:null,gridSnap:null,colSnap:null,outMesh:null,outIdx:null,
+    terrainY:null,ready:false};
+  window.V15NUKE3=S;
+  function inDisc(x,z,bx,bz){var dx=x-bx,dz=z-bz;return dx*dx+dz*dz<=R*R;}
+  function fmt(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);}
+  function nowMs(){return Date.now();}
+  /* ---- pristine snapshots (module runs at load, before any blast) ---- */
+  (function snap(){
+    try{
+      var terr=null;
+      for(var i=0;i<scene.children.length;i++){var o=scene.children[i];
+        if(o.userData&&o.userData.isTerrain){terr=o;break;}}
+      if(terr&&terr.geometry){
+        S.terrain=terr;
+        S.gridSnap=new Float32Array(GRIDH.data);
+        S.terrainY=new Float32Array(terr.geometry.attributes.position.array);
+        S.colSnap=new Float32Array(terr.geometry.attributes.color.array);}}
+    catch(e){}
+    /* outpost merged mesh: color-attribute Mesh, mid-size, with a vertex near
+       the radar mast axis (-1560,-2150) */
+    try{
+      var cands=[];
+      for(var j=0;j<scene.children.length;j++){var m=scene.children[j];
+        if(!m.isMesh||m.isInstancedMesh||!m.geometry||!m.geometry.attributes.color)continue;
+        var n=m.geometry.attributes.position.count;
+        if(n>1000&&n<30000)cands.push(m);}
+      for(var k=0;k<cands.length;k++){var g=cands[k].geometry,pa=g.attributes.position,hit=false;
+        for(var v=0;v<pa.count;v++){
+          if(Math.abs(pa.getX(v)+1560)<2&&Math.abs(pa.getZ(v)+2150)<2){hit=true;break;}}
+        if(hit){S.outMesh=cands[k];
+          S.outIdx=g.index?new Uint32Array(g.index.array):null;break;}}}
+    catch(e){}
+    /* camp dressing groups: tag at load by EXACT dressCamp spot (guards
+       patrol nearby but never stand exactly on a dressing spot) */
+    try{var spots=[[6,-1000],[-8,-1024],[14,-1016],[-16,-990]];
+      for(var si=0;si<scene.children.length;si++){var so=scene.children[si];
+        if(!so.isGroup)continue;
+        for(var sj=0;sj<spots.length;sj++){
+          if(Math.abs(so.position.x-spots[sj][0])<0.01&&Math.abs(so.position.z-spots[sj][1])<0.01)
+            so.userData.u153campdress=true;}}}catch(e){}
+    S.ready=true;
+  })();
+  function terrainMesh(){return S.terrain;}
+  /* ---- crater + scorch: edit the baked grid (groundH reads it, so collision
+     matches the visual by construction), then re-skin the terrain mesh ---- */
+  function craterAndScorch(bx,bz){
+    var cell=GRIDH.cell, d=GRIDH.data;
+    var i0=Math.max(0,Math.floor((bx-R+3000)/cell)), i1=Math.min(256,Math.ceil((bx+R+3000)/cell));
+    var j0=Math.max(0,Math.floor((bz-R+3000)/cell)), j1=Math.min(256,Math.ceil((bz+R+3000)/cell));
+    for(var j=j0;j<=j1;j++)for(var i=i0;i<=i1;i++){
+      var x=-3000+i*cell,z=-3000+j*cell,dx=x-bx,dz=z-bz,rr=Math.sqrt(dx*dx+dz*dz);
+      if(rr>CR)continue;
+      var o=j*257+i, pristine=S.gridSnap[o];
+      var dep=CDEPTH*0.5*(1+Math.cos(Math.PI*rr/CR));
+      var nv=d[o]-dep; if(nv<pristine-45)nv=pristine-45; d[o]=nv;}
+    var terr=terrainMesh(); if(!terr)return;
+    var pos=terr.geometry.attributes.position, col=terr.geometry.attributes.color;
+    for(var v2=0;v2<pos.count;v2++){
+      var vx=pos.getX(v2),vz=pos.getZ(v2),dx2=vx-bx,dz2=vz-bz,r2=Math.sqrt(dx2*dx2+dz2*dz2);
+      if(r2<=R){
+        pos.setY(v2,groundH(vx,vz));
+        var t=(1-r2/R)*0.9, cr=col.getX(v2),cg=col.getY(v2),cb=col.getZ(v2);
+        col.setXYZ(v2, cr+(0.10-cr)*t, cg+(0.08-cg)*t, cb+(0.07-cb)*t);
+        if(r2<=CR){
+          var h=Math.abs(Math.sin(v2*127.1)*43758.5453)%1;
+          if(h<0.12)col.setXYZ(v2,1.8,0.5,0.08);}}
+    }
+    pos.needsUpdate=true;col.needsUpdate=true;
+    terr.geometry.computeVertexNormals();
+    terr.geometry.attributes.normal.needsUpdate=true;
+  }
+  /* ---- tagged rubble (rebinds core mrgRubble so the chain loop tags too) ---- */
+  function uRubble(b,gy,zone){
+    if(b._rubbled)return;b._rubbled=true;
+    var h=1.0+Math.random()*1.2;
+    var m=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x3f3a34}));
+    m.userData.u153rubble=true;m.userData.u153zone=zone||'city';
+    m.position.set(b.x,gy+h/2,b.z);m.scale.set(b.w*0.8,h,b.d*0.8);m.rotation.y=b.yaw;
+    m.castShadow=true;m.receiveShadow=true;scene.add(m);V14C3.meshCount++;S.rubbleMeshes.push(m);
+    for(var i=0;i<2;i++){
+      var s=0.5+Math.random()*0.7;
+      var dd=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:i?0x2e2a26:0x4a443c}));
+      dd.userData.u153rubble=true;dd.userData.u153zone=zone||'city';
+      dd.position.set(b.x+(Math.random()-0.5)*b.w*0.5,gy+s/2,b.z+(Math.random()-0.5)*b.d*0.5);
+      dd.scale.set(s,s*0.7,s);dd.rotation.y=Math.random()*TAU;scene.add(dd);V14C3.meshCount++;S.rubbleMeshes.push(dd);}
+    var ob={x:b.x,z:b.z,hw:b.w*0.35,hd:b.d*0.35,yaw:b.yaw,rubble:true,u153:true};
+    OBBS.push(ob);S.rubbleMeshes.push(ob);
+  }
+  try{mrgRubble=function(b,gy){uRubble(b,gy,'city');};}catch(e){}
+  /* ---- outpost merged-mesh triangle filter (cumulative across discs) ---- */
+  function filterOutMesh(){
+    if(!S.outMesh||!S.outIdx)return;
+    var g=S.outMesh.geometry, pa=g.attributes.position, idx=S.outIdx, kept=[];
+    for(var t=0;t<idx.length;t+=3){
+      var ax=pa.getX(idx[t]),az=pa.getZ(idx[t]),bx2=pa.getX(idx[t+1]),bz2=pa.getZ(idx[t+1]),
+          cx=pa.getX(idx[t+2]),cz=pa.getZ(idx[t+2]);
+      var mx=(ax+bx2+cx)/3, mz=(az+bz2+cz)/3, drop=false;
+      for(var d2=0;d2<S.discs.length;d2++){var dc=S.discs[d2];
+        if(inDisc(mx,mz,dc.x,dc.z)){drop=true;break;}}
+      if(!drop){kept.push(idx[t],idx[t+1],idx[t+2]);}}
+    g.setIndex(kept);
+  }
+  /* ---- scattered buildings (hardcoded from the core builder: 4, all clear
+     of roads/camps/paths by >=80 m, so the footprint test is unambiguous) ---- */
+  var SCAT=[{x:1150,z:-1500,w:8,d:6},{x:350,z:-2350,w:10,d:7},{x:-150,z:180,w:10,d:8},{x:120,z:-1180,w:12,d:9}];
+  function inScat(x,z){for(var i=0;i<SCAT.length;i++){var s=SCAT[i];
+    if(Math.abs(x-s.x)<s.w/2+1.5&&Math.abs(z-s.z)<s.d/2+1.5)return s;}return null;}
+  function isLootGrp(o){if(typeof V13C==='undefined'||!V13C.loot)return false;
+    for(var i=0;i<V13C.loot.length;i++){var g=V13C.loot[i].grp;
+      if(o===g)return true;var p=o.parent;while(p){if(p===g)return true;p=p.parent;}}return false;}
+  /* ---- universal destroy: everything in the disc, positive-ID only ---- */
+  function destroyDisc(bx,bz){
+    var gy0=groundH(bx,bz);
+    craterAndScorch(bx,bz);
+    S.discs.push({x:bx,z:bz});
+    /* city meshes (tagged) + scattered meshes (footprint) + camp groups */
+    var campGrp=null;
+    try{if(typeof flagMesh!=='undefined'&&flagMesh&&flagMesh.parent)campGrp=flagMesh.parent;}catch(e){}
+    var campHit=campGrp&&Math.hypot(0-bx,-1010-bz)<=R+60;
+    for(var ci=0;ci<scene.children.length;ci++){var o=scene.children[ci];
+      if(isLootGrp(o))continue;
+      var ud=o.userData||{};
+      if((ud.c151||ud.c152prop||ud.c153||ud.c153x)&&!ud.playground){
+        if(inDisc(o.position.x,o.position.z,bx,bz)&&o.visible!==false){o.visible=false;S.hiddenMeshes.push(o);}}
+      else if(o.isMesh&&!o.isInstancedMesh&&inScat(o.position.x,o.position.z)){
+        if(inDisc(o.position.x,o.position.z,bx,bz)&&o.visible!==false){o.visible=false;S.hiddenMeshes.push(o);}}
+      else if(ud.u153campdress&&campHit){
+        if(inDisc(o.position.x,o.position.z,bx,bz)&&o.visible!==false){o.visible=false;S.hiddenMeshes.push(o);}}}
+    if(campGrp&&campHit&&campGrp.visible!==false){campGrp.visible=false;S.hiddenMeshes.push(campGrp);}
+    /* barrels */
+    try{for(var bi=0;bi<BARRELS.length;bi++){var bb=BARRELS[bi];
+      if(bb.alive&&inDisc(bb.pos.x,bb.pos.z,bx,bz)){bb.alive=false;if(bb.group)bb.group.visible=false;S.hiddenMeshes.push(bb.group);}}}catch(e){}
+    /* instanced meshes: per-instance position test (covers trees, rocks,
+       bushes, grass, concealment bushes, crates, logs, city batches) */
+    scene.traverse(function(im){
+      if(!im.isInstancedMesh||!im.instanceMatrix)return;
+      var arr=im.instanceMatrix.array, cnt=im.count, changed=false;
+      var zero=new THREE.Matrix4().makeScale(0.001,0.001,0.001);
+      for(var ii=0;ii<cnt;ii++){
+        var px=arr[ii*16+12],pz=arr[ii*16+14];
+        if(px===0&&pz===0)continue;
+        if(inDisc(px,pz,bx,bz)){
+          var orig=new THREE.Matrix4().fromArray(arr,ii*16);
+          S.instHidden.push({mesh:im,index:ii,mat:orig});
+          im.setMatrixAt(ii,zero);changed=true;}}
+      if(changed)im.instanceMatrix.needsUpdate=true;});
+    /* concealment list entries in the disc */
+    try{for(var bl=BUSH.list.length-1;bl>=0;bl--){var be=BUSH.list[bl];
+      if(inDisc(be.x,be.z,bx,bz)){S.removedBush.push(be);BUSH.list.splice(bl,1);}}}catch(e){}
+    /* BLOCKERS in the disc (mission owner-linked excluded) */
+    for(var bk=BLOCKERS.length-1;bk>=0;bk--){var bl2=BLOCKERS[bk];
+      if(bl2.owner)continue;
+      if(inDisc(bl2.x,bl2.z,bx,bz)){S.removedBlockers.push(bl2);BLOCKERS.splice(bk,1);}}
+    /* OBBS in the disc (playground / driving cars / rubble / bridge strip /
+       helipad excluded) */
+    for(var oi=OBBS.length-1;oi>=0;oi--){var ob=OBBS[oi];
+      if(ob.playground||ob.car||ob.rubble)continue;
+      if(Math.abs(ob.x)<7.4&&ob.z>-940&&ob.z<-396)continue;
+      if(Math.hypot(ob.x-150,ob.z+930)<16)continue;
+      if(inDisc(ob.x,ob.z,bx,bz)){S.removedObbs.push(ob);OBBS.splice(oi,1);}}
+    /* outpost merged mesh triangles */
+    filterOutMesh();
+    /* city + scattered buildings: mark nuked, chain entries, rubble via chain */
+    var chain=[];
+    for(var cb=0;cb<C151_CITY.length;cb++){var b=C151_CITY[cb];
+      if(inDisc(b.x,b.z,bx,bz)){b._nuked=true;chain.push({b:b,at:0});}}
+    for(var sb=0;sb<SCAT.length;sb++){var sc=SCAT[sb];
+      if(inDisc(sc.x,sc.z,bx,bz))chain.push({b:{x:sc.x,z:sc.z,w:sc.w,d:sc.d,yaw:0.3,_rubbled:false},at:0});}
+    /* outposts + camp hit: immediate tagged mounds, puff-only chain entries */
+    try{for(var oi2=0;oi2<V13C.outposts.length;oi2++){var op=V13C.outposts[oi2];
+      if(inDisc(op.cx,op.cz,bx,bz)){
+        uRubble({x:op.cx,z:op.cz,w:16,d:16,yaw:0,_rubbled:false},groundH(op.cx,op.cz),'outpost');
+        chain.push({b:{x:op.cx,z:op.cz,w:16,d:16,yaw:0,_rubbled:true},at:0});}}}catch(e){}
+    if(campHit){
+      uRubble({x:0,z:-1010,w:20,d:20,yaw:0,_rubbled:false},groundH(0,-1010),'camp');
+      chain.push({b:{x:0,z:-1010,w:20,d:20,yaw:0,_rubbled:true},at:0});}
+    chain.sort(function(a,b2){return Math.hypot(a.b.x-bx,a.b.z-bz)-Math.hypot(b2.b.x-bx,b2.b.z-bz);});
+    for(var chi=0;chi<chain.length;chi++)chain[chi].at=0.25+Math.floor(chi/2)*0.10;
+    /* life in the disc */
+    function killList(list){
+      for(var li=0;li<list.length;li++){var np=list[li];
+        if(!np.alive||!inDisc(np.x,np.z,bx,bz))continue;
+        if(np.kind==='adult')np.die();
+        else if(np.kind==='kid'){
+          if(np.behavior==='play-swing'||np.behavior==='play-seesaw')continue;
+          mrgStartBubble(np);}}}
+    try{killList(V15NPC.list);}catch(e){}
+    try{killList(V15ACT.list);}catch(e){}
+    try{for(var di=0;di<V15NPC.dogs.length;di++){var dg=V15NPC.dogs[di];
+      if(dg.alive&&inDisc(dg.x,dg.z,bx,bz))dg.die();}}catch(e){}
+    try{for(var ai=0;ai<V13E.animals.length;ai++){var an=V13E.animals[ai];
+      if(an.alive&&inDisc(an.x,an.z,bx,bz))an.die();}}catch(e){}
+    tryBridgeCollapse(bx,bz);
+    settleParkedHeli();
+    return {chain:chain,gy:gy0};
+  }
+  /* ---- fires: <=16 per blast from the 32-pool, oldest reused ---- */
+  function placeFires(bx,bz){
+    var placed=0, tries=0;
+    while(placed<FIRESPER&&tries<200){tries++;
+      var fx=bx+(Math.random()-0.5)*2*R*0.9, fz=bz+(Math.random()-0.5)*2*R*0.9;
+      if(!inDisc(fx,fz,bx,bz))continue;
+      if(typeof waterDepth==='function'&&waterDepth(fx,fz)>0.5)continue;
+      var slot=-1;
+      for(var i=0;i<FIREPOOL;i++){if(!V15NUKE.fires[i]||!V15NUKE.fires[i].used){slot=i;break;}}
+      if(slot<0){slot=S.fireOrder.shift();}
+      if(slot===undefined)break;
+      mrgPlaceFire(slot,fx,groundH(fx,fz),fz);
+      S.fireOrder.push(slot);placed++;}
+    return placed;
+  }
+  /* ---- mushroom cloud: 14 spheres + 10 ground sprites, capped at 8 ---- */
+  function buildCloud(bx,bz,gy){
+    for(var ci=0;ci<S.clouds.length;ci++){
+      if(S.clouds[ci].fading)continue;
+      var live=S.clouds.filter(function(c){return !c.fading;});
+      if(live.length>=MAXCLOUDS){live[0].fading=true;live[0].fadeT=0;break;}}
+    var grp=new THREE.Group(), spheres=[], smokes=[];
+    var sm=new THREE.MeshLambertMaterial({color:0x2e2a26,transparent:true,opacity:0.55});
+    var sm2=new THREE.MeshLambertMaterial({color:0x3a3430,transparent:true,opacity:0.5});
+    for(var si=0;si<6;si++){
+      var sp=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),sm);
+      sp.position.set(bx+(Math.random()-0.5)*6,gy+10+si*10,bz+(Math.random()-0.5)*6);
+      sp.scale.set(8+si*1.5,8+si*1.5,8+si*1.5);grp.add(sp);spheres.push(sp);}
+    for(var cj=0;cj<8;cj++){
+      var a=cj/8*Math.PI*2, rr=15+Math.random()*30;
+      var cp=new THREE.Mesh(new THREE.SphereGeometry(1,14,10),cj%2?sm:sm2);
+      cp.position.set(bx+Math.cos(a)*rr,gy+70+Math.random()*50,bz+Math.sin(a)*rr);
+      var sc=30+Math.random()*30;cp.scale.set(sc,sc*0.45,sc);grp.add(cp);spheres.push(cp);}
+    for(var gi=0;gi<10;gi++){
+      var spr=new THREE.Sprite(new THREE.SpriteMaterial({map:mrgRadialTex('rgba(120,110,100,0.55)','rgba(80,75,70,0)'),transparent:true,opacity:0.3,depthWrite:false}));
+      spr.position.set(bx+(Math.random()-0.5)*100,gy+2+Math.random()*6,bz+(Math.random()-0.5)*100);
+      spr.scale.set(18+Math.random()*20,10+Math.random()*8,1);grp.add(spr);smokes.push(spr);}
+    scene.add(grp);
+    S.clouds.push({grp:grp,spheres:spheres,smokes:smokes,birth:nowMs(),fading:false,fadeT:0,baseY:gy});
+  }
+  /* ---- module particle pools (core pools stay 60/80; these add up to
+     ~180 debris + ~240 embers per blast, same ballistic physics) ---- */
+  var modDebris=[], modEmbers=[];
+  function modThrow(x,y,z){
+    for(var i=0;i<120;i++){
+      var d=null;
+      for(var k=0;k<modDebris.length;k++)if(!modDebris[k].active){d=modDebris[k];break;}
+      if(!d){if(modDebris.length>=120){d=modDebris[0];}else{
+        var m=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x2e2a26}));
+        scene.add(m);d={mesh:m,active:false};modDebris.push(d);}}
+      d.active=true;d.mesh.visible=true;d.mesh.position.set(x,y,z);
+      var a=Math.random()*TAU,sp=8+Math.random()*17;
+      d.vx=Math.cos(a)*sp;d.vz=Math.sin(a)*sp;d.vy=10+Math.random()*20;d.life=2.5+Math.random()*1.5;}
+    for(var j=0;j<160;j++){
+      var e=null;
+      for(var k2=0;k2<modEmbers.length;k2++)if(!modEmbers[k2].active){e=modEmbers[k2];break;}
+      if(!e){if(modEmbers.length>=160){e=modEmbers[0];}else{
+        var s=new THREE.Sprite(new THREE.SpriteMaterial({map:mrgRadialTex('rgba(255,200,90,0.95)','rgba(255,120,20,0)'),transparent:true,opacity:0.9,depthWrite:false}));
+        scene.add(s);e={spr:s,active:false};modEmbers.push(e);}}
+      e.active=true;e.spr.visible=true;
+      e.spr.position.set(x+(Math.random()-0.5)*20,y+Math.random()*6,z+(Math.random()-0.5)*20);
+      e.vx=(Math.random()-0.5)*3;e.vy=3+Math.random()*5;e.vz=(Math.random()-0.5)*3;
+      e.life=2+Math.random()*3;e.s0=0.4+Math.random()*0.5;}
+  }
+  /* ---- universal detonation (rebinds core mrgDetonate) ---- */
+  function uDetonate(bomb){
+    var bx=bomb.x,bz=bomb.z;
+    var res=destroyDisc(bx,bz);
+    var gy=res.gy, chain=res.chain;
+    V15NUKE.blastX=bx;V15NUKE.blastZ=bz;
+    if(!V15NUKE.flashEl){
+      var el=document.createElement('div');
+      el.style.cssText='position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:400;display:none;';
+      document.body.appendChild(el);V15NUKE.flashEl=el;}
+    V15NUKE.flashEl.style.display='block';V15NUKE.flashEl.style.opacity='1';
+    try{G.slowmo=0.5;G.slowT=0.5;}catch(e){}
+    try{G.shake=0.85;}catch(e){}
+    V15NUKE.shakeT=1.4;V15NUKE.fovBoost=18;
+    var dist=Math.hypot(G.px-bx,G.pz-bz)+50;
+    mrgBoomAudio(dist);
+    var fb=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),
+      new THREE.MeshBasicMaterial({color:0xffcc55,transparent:true,opacity:1}));
+    fb.position.set(bx,gy+5,bz);scene.add(fb);
+    var rings=[];
+    for(var i=0;i<3;i++){
+      var r=new THREE.Mesh(new THREE.RingGeometry(0.95,1.0,64),
+        new THREE.MeshBasicMaterial({color:0xffddaa,transparent:true,opacity:0.85,side:THREE.DoubleSide,depthWrite:false}));
+      r.rotation.x=-Math.PI/2;r.position.set(bx,gy+1.5,bz);r.visible=false;scene.add(r);
+      rings.push({mesh:r,at:0.1+i*0.25});}
+    var dust=new THREE.Mesh(new THREE.CylinderGeometry(1,1,26,48,1,true),
+      new THREE.MeshBasicMaterial({color:0xc8b090,transparent:true,opacity:0.35,side:THREE.DoubleSide,depthWrite:false}));
+    dust.position.set(bx,gy+13,bz);dust.visible=false;scene.add(dust);
+    /* flat ground glow ONLY on flat ground (city pad); slopes get the
+       vertex scorch + cracks instead (a flat disc would float/bury) */
+    var flat=true, gmin=1e9, gmax=-1e9;
+    for(var sx=-50;sx<=50;sx+=25)for(var sz=-50;sz<=50;sz+=25){
+      var gh=groundH(bx+sx,bz+sz);if(gh<gmin)gmin=gh;if(gh>gmax)gmax=gh;}
+    if(gmax-gmin>3)flat=false;
+    var glow=null;
+    if(flat){
+      glow=new THREE.Mesh(new THREE.CircleGeometry(1,48),
+        new THREE.MeshBasicMaterial({color:0xff7722,transparent:true,opacity:0.55,depthWrite:false}));
+      glow.rotation.x=-Math.PI/2;glow.position.set(bx,gy+0.55,bz);glow.scale.set(130,130,1);scene.add(glow);
+      S.glowMeshes.push(glow);}
+    V15NUKE.seq={t:0,bx:bx,bz:bz,gy:gy,city:true,chain:chain,chainI:0,fb:fb,rings:rings,dust:dust,
+      glow:glow,glowT:0,plume:null,plumeDone:false,columnDone:false,fireballDone:false};
+    var placed=placeFires(bx,bz);
+    V15NUKE.destroyed=true;
+    for(var di=0;di<60;di++)mrgDebris(bx,gy+2,bz);
+    for(var ei=0;ei<80;ei++)mrgEmber(bx,gy+3,bz);
+    modThrow(bx,gy+2,bz);
+    buildCloud(bx,bz,gy);
+    S.lastBlast={x:bx,z:bz,gy:gy,fires:placed,flat:flat};
+  }
+  try{mrgDetonate=function(b){uDetonate(b);};}catch(e){}
+  /* ---- 0-prompt (dog-prompt discipline: exact text, 2 buttons, X +
+     backdrop + Esc dismiss with no grant, open guard, no stacking) ---- */
+  var pb=document.createElement('div');pb.id='nukePromptBg';
+  pb.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:299;display:none;';
+  var pn=document.createElement('div');pn.id='nukePrompt';
+  pn.style.cssText='position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:300;display:none;background:#0d1b33;border:2px solid #2a4a7a;border-radius:14px;padding:22px 20px;width:min(340px,86vw);text-align:center;';
+  pn.innerHTML='<div id="nukePromptX" style="position:absolute;top:6px;right:10px;font-size:26px;line-height:36px;width:36px;height:36px;color:#9fb8d8;cursor:pointer;">×</div><div style="color:#e8eeff;font:700 22px system-ui,sans-serif;margin:10px 0 18px;">are you sure u can handle that much power?</div><div id="nukeBtnYes" style="background:#7a1f1f;color:#fff;font:700 18px system-ui,sans-serif;padding:0 12px;height:56px;line-height:56px;border-radius:10px;margin-bottom:12px;cursor:pointer;">YES</div><div id="nukeBtnNo" style="background:#1d4e89;color:#fff;font:700 18px system-ui,sans-serif;padding:0 12px;height:56px;line-height:56px;border-radius:10px;cursor:pointer;">NO</div>';
+  document.body.appendChild(pb);document.body.appendChild(pn);
+  var lastTapN=0;
+  function tapN(el,fn){
+    el.addEventListener('touchstart',function(e){e.preventDefault();lastTapN=Date.now();fn();},{passive:false});
+    el.addEventListener('click',function(){if(Date.now()-lastTapN<500)return;fn();});}
+  function closePrompt(grant){
+    if(!S.promptOpen)return;
+    S.promptOpen=false;pb.style.display='none';pn.style.display='none';
+    if(grant===1)V15NUKE.count=1;
+    else if(grant===999)V15NUKE.count=999;
+    if(typeof v12HudDirty==='function')v12HudDirty();}
+  function openPrompt(){
+    if(S.promptOpen)return;
+    S.promptOpen=true;pb.style.display='block';pn.style.display='block';
+    if(document.pointerLockElement)document.exitPointerLock();}
+  tapN(document.getElementById('nukeBtnYes'),function(){closePrompt(1);});
+  tapN(document.getElementById('nukeBtnNo'),function(){closePrompt(999);});
+  tapN(document.getElementById('nukePromptX'),function(){closePrompt(0);});
+  tapN(pb,function(){closePrompt(0);});
+  document.addEventListener('keydown',function(e){
+    if(!S.promptOpen)return;
+    if(e.key==='Escape')closePrompt(0);
+    else if(e.code==='KeyY')closePrompt(1);
+    else if(e.code==='KeyN')closePrompt(999);});
+  S.openPrompt=openPrompt;S.closePrompt=closePrompt;
+  /* ---- drop gating: state/flyOn -> prompt-open -> 0-prompt (even in
+     cooldown) -> cooldown block -> drop + start 310 s cooldown ---- */
+  function coolLeft(){return Math.max(0,S.coolUntil-nowMs())/1000;}
+  S.coolLeft=coolLeft;
+  try{V15MRG.dropNuke=function(){
+    if(typeof G==='undefined'||(G.state!=='play'&&G.state!=='roam'))return false;
+    if(typeof V13F==='undefined'||!V13F.flyOn)return false;
+    if(S.promptOpen)return false;
+    if(V15NUKE.count<=0){openPrompt();return false;}
+    if(coolLeft()>0){toast('NUKE COOLDOWN '+fmt(coolLeft()));return false;}
+    if(V15NUKE.bombs.length>0){toast('BOMB ALREADY FALLING');return false;}
+    var f=V13F.fly;
+    /* PATCH 7 (falling-nuke model, MW Oct 28 10:39, tightened 10:40): the old
+       bomb was a lone 0.9 m near-black sphere — from the ground/chase cam it
+       read as a black circle (root cause: the bomb mesh itself, NOT a
+       shadow — no shadow mesh exists in the drop path). Replaced with the
+       LITERALLY SHARED buildNuke() model (same builder as the side mounts),
+       uniformly scaled 2.3x for fall-distance readability, rotated nose-down
+       (local +z nose maps to -Y via rotation.x = PI/2; the fall path is
+       vertical so nose-down is constant — the core tick only sets position).
+       Spawned at f.y-5 so the ~7.5 m model clears the heli belly. The core
+       tick moves b.mesh.position and detonates at surfH unchanged.
+       Ground shadow: a NEW subtle radial blob (NOT solid black — radial
+       gradient, max opacity 0.30, scales/dims with altitude), tracked in the
+       tick wrapper and removed at detonation. */
+    var bm=buildNuke();
+    bm.scale.setScalar(2.3);bm.rotation.x=Math.PI/2;
+    bm.position.set(f.x,f.y-5,f.z);scene.add(bm);
+    bm.userData.u153falling=true;
+    V15NUKE.bombs.push({mesh:bm,x:f.x,y:f.y-5,z:f.z,vy:0,trailT:0});
+    S.fallGlow=bm.userData.u153glow;
+    try{
+      if(S.fallShadow){scene.remove(S.fallShadow);S.fallShadow=null;}
+      var cv=document.createElement('canvas');cv.width=cv.height=64;
+      var cx2=cv.getContext('2d'),gr=cx2.createRadialGradient(32,32,2,32,32,30);
+      gr.addColorStop(0,'rgba(0,0,0,0.55)');gr.addColorStop(1,'rgba(0,0,0,0)');
+      cx2.fillStyle=gr;cx2.fillRect(0,0,64,64);
+      var sh=new THREE.Mesh(new THREE.CircleGeometry(1,24),
+        new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,opacity:0.2,depthWrite:false}));
+      sh.rotation.x=-Math.PI/2;sh.userData.u153fallShadow=true;scene.add(sh);S.fallShadow=sh;
+    }catch(e){S.fallShadow=null;}
+    V15NUKE.count--;
+    S.coolUntil=nowMs()+310000;
+    if(typeof v12HudDirty==='function')v12HudDirty();
+    toast('NUKE AWAY');
+    return true;};}catch(e){}
+  /* ---- side-mounted nukes: 1 per side, 2 total, NO stacking ----
+     Children of V13F.grp (inherit move/bank/land). Heli frame: nose +Z,
+     body bbox x -2.27..2.35, y 0..6.78, z -8.41..5.10; meaner stub wings at
+     y 2.2, x +-3.16 — mounts sit BELOW them (top 1.95 < wing bottom 2.09). */
+  function hazardTex(){
+    var cv=document.createElement('canvas');cv.width=128;cv.height=32;
+    var x=cv.getContext('2d');x.fillStyle='#d8b93a';x.fillRect(0,0,128,32);
+    x.fillStyle='#141414';
+    for(var i=-2;i<10;i++){x.beginPath();x.moveTo(i*20,32);x.lineTo(i*20+16,0);x.lineTo(i*20+32,0);x.lineTo(i*20+16,32);x.fill();}
+    var t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;}
+  /* ---- SHARED NUKE MODEL (PATCH 7, tightened Oct 28 10:40): ONE procedural
+     ordnance model, used literally in both places — the 2 side mounts and
+     the falling bomb. Same builder, same geometry, same materials, same
+     striping, same glow. Only a uniform GROUP scale differs (mount 1.0,
+     falling 2.3). The pylon is NOT part of the nuke: it is mount hardware
+     (the hardpoint), added only by buildMount, never on the falling bomb —
+     a pylon sticking out of a falling bomb would read as broken. */
+  function buildNuke(){
+    var grp=new THREE.Group();
+    var bodyMat=new THREE.MeshLambertMaterial({color:0x23262c});
+    var body=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,2.4,14),bodyMat);
+    body.rotation.x=Math.PI/2;grp.add(body);
+    var nose=new THREE.Mesh(new THREE.SphereGeometry(0.45,14,10),bodyMat);
+    nose.position.z=1.2;grp.add(nose);
+    var band=new THREE.Mesh(new THREE.CylinderGeometry(0.46,0.46,0.5,14),
+      new THREE.MeshLambertMaterial({map:hazardTex()}));
+    band.rotation.x=Math.PI/2;band.position.z=0.3;grp.add(band);
+    var finMat=new THREE.MeshLambertMaterial({color:0x3a3f47});
+    for(var f=0;f<4;f++){
+      var fin=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.9,0.7),finMat);
+      var a=f*Math.PI/2;
+      fin.position.set(Math.cos(a)*0.45,-0.1+Math.sin(a)*0.0,-1.25);
+      fin.position.x=Math.cos(a)*0.5;fin.position.y=Math.sin(a)*0.5;
+      /* #11: RADIAL fins (was rotation.z=a, tangential). Tangential fins
+         span only 2x(0.5+0.04)=1.08 unscaled (2.48 at fall scale 2.3 —
+         fallNuke v10fix measured w=2.48, not the claimed 4.4). Radial
+         fins (long axis on the radial line, rotation.z=a-PI/2) span
+         2x(0.5+0.45)=1.9 unscaled (4.37 at fall scale) — the classic
+         nuke tail cross, and the module's claimed ~4.4 m span. Shared
+         model, so side mounts get proper fins too. */
+      fin.rotation.z=a-Math.PI/2;grp.add(fin);}
+    var glow=new THREE.Mesh(new THREE.SphereGeometry(0.12,8,6),
+      new THREE.MeshBasicMaterial({color:0xff5533,transparent:true,opacity:0.3}));
+    glow.position.z=1.7;grp.add(glow);
+    grp.userData.u153nuke=true;grp.userData.u153glow=glow;
+    return grp;}
+  function buildMount(side){
+    var grp=buildNuke();
+    var pyl=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.18,1.4),
+      new THREE.MeshLambertMaterial({color:0x1c1f24}));
+    pyl.position.x=-side*0.35;grp.add(pyl);
+    grp.userData.u153mount=true;
+    return grp;}
+  function ensureMounts(){
+    try{
+      if(typeof V13F==='undefined'||!V13F.grp)return;
+      if(S.mountGroup===V13F.grp)return;
+      for(var s=-1;s<=1;s+=2){
+        var m=buildMount(s);
+        m.position.set(s*2.8,1.5,0.0);
+        V13F.grp.add(m);}
+      S.mountGroup=V13F.grp;
+      S.mountGlows=[];
+      V13F.grp.children.forEach(function(c){if(c.userData&&c.userData.u153mount)S.mountGlows.push(c.userData.u153glow);});
+    }catch(e){}}
+  /* ---- falling nuke (PATCH 7): same design language as the side mounts,
+     scaled ~2.4x to read from the ground/chase cam at fall distance.
+     Vertical bomb: body cylinder along Y, nose sphere at the BOTTOM
+     (nose-down fall), 4 radial tail fins at the top, hazard band near the
+     nose, pulsing tail glow. Overall ~7.3 m tall, ~4.4 m fin span. The fall
+     path is straight down (bomb x/z fixed), so no per-tick rotation is
+     needed — the core tick only sets position, and nose-down is constant. */
+  /* (buildFallingNuke deleted by the Oct 28 10:40 tightening: the falling
+     bomb uses buildNuke() directly — see dropNuke. No second model.) */
+  /* ---- RELOAD MAP: 6 real steps, bar tracks completion, auto-dismiss ---- */
+  var rbO=null,rbBar=null,rbStep=null;
+  (function buildReloadUI(){
+    var st=document.createElement('style');
+    st.textContent='#btnNuke.dis{opacity:1}#rbOverlay{position:fixed;inset:0;background:#05070f;z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;}#rbOverlay h1{color:#e8eeff;font:800 22px system-ui,sans-serif;text-align:center;margin:0 20px 24px;}#rbBarWrap{width:min(420px,80vw);height:18px;background:#16233f;border:1px solid #2a4bd8;border-radius:9px;overflow:hidden;}#rbBar{height:100%;width:0%;background:#2a4bd8;}#rbStep{color:#9fb8d8;font:600 14px system-ui,sans-serif;margin-top:14px;}';
+    document.head.appendChild(st);
+    var o=document.createElement('div');o.id='rbOverlay';
+    o.innerHTML='<h1>REBUILDING THE MAP YOUR ASS DESTROYED</h1><div id="rbBarWrap"><div id="rbBar"></div></div><div id="rbStep"></div>';
+    o.style.display='none';document.body.appendChild(o);
+    rbO=o;rbBar=document.getElementById('rbBar');rbStep=document.getElementById('rbStep');})();
+  /* #10: rAF + setTimeout fallback. A bare rAF frame() costs ~15 VIRTUAL
+     seconds per frame in the headless shell (diagnostic 21:26 UTC:
+     runReloadMap measured 198,000 virtual ms for 13 frames), because
+     shell rAF only fires when a pending game timer fires — so 5 reload
+     maps (~990 virtual s) blew every probe budget and trapRescue stalled
+     at phase 1x-done on #6/#8/#9. In a real browser rAF wins (~16 ms)
+     and behavior is unchanged; the 100 ms fallback only fires when rAF
+     is stalled (shell, background tab). 13 frames then cost ~1.3
+     virtual s in the shell, ~0.2 s in a real browser. */
+  function frame(){return new Promise(function(res){var done=false;function fin(){if(done)return;done=true;res();}requestAnimationFrame(function(){setTimeout(fin,0);});setTimeout(fin,100);});}
+  function pushOut(x,z){
+    for(var i=0;i<8;i++){
+      var r=obbResolve(x,z,0.55);var nx=r[0],nz=r[1];
+      for(var bi=0;bi<BLOCKERS.length;bi++){var b=BLOCKERS[bi];
+        var dx=nx-b.x,dz=nz-b.z,rr=b.r+0.55,d2=dx*dx+dz*dz;
+        if(d2<rr*rr&&d2>0.0001){var d=Math.sqrt(d2);nx=b.x+dx/d*rr;nz=b.z+dz/d*rr;}}
+      if(Math.abs(nx-x)<0.01&&Math.abs(nz-z)<0.01){x=nx;z=nz;break;}
+      x=nx;z=nz;}
+    return [x,z];}
+  function safetySnap(){
+    try{
+      var onFoot=(G.state==='play'||G.state==='roam')&&!(typeof ATV!=='undefined'&&ATV.drive.on)&&!(typeof V13F!=='undefined'&&V13F.flyOn);
+      if(onFoot){var r=pushOut(G.px,G.pz);G.px=r[0];G.pz=r[1];}
+      if(typeof ATV!=='undefined'&&ATV.drive.on&&ATV.grp){
+        var p=ATV.grp.position,r2=pushOut(p.x,p.z);p.x=r2[0];p.z=r2[1];}
+    }catch(e){}}
+  var EXP_PLAN={6:[['m'],['f'],['kid']],7:[['m'],['f'],['kid']],8:[['m'],['f']],
+    9:[['m'],['f'],['kid']],10:[['m']],11:[['f']],12:[['m'],['f']],
+    13:[['m'],['f'],['kid']],14:[['m'],['f']]};
+  function fillExpansion(){
+    try{
+      for(var pi=6;pi<=14;pi++){
+        var plan=EXP_PLAN[pi];if(!plan)continue;
+        for(var k=0;k<plan.length;k++){
+          var kind=plan[k][0]==='kid'?'kid':'adult', g=plan[k][0]==='kid'?null:plan[k][0];
+          var have=0;
+          for(var li=0;li<V15NPC.list.length;li++){var np=V15NPC.list[li];
+            if(np.pathIdx===pi&&np.kind===kind&&(kind==='kid'||np.gender===g))have++;}
+          for(var pd=0;pd<V15NPC.pending.length;pd++){var p2=V15NPC.pending[pd];
+            if(p2.pathIdx===pi&&p2.kind===kind&&(kind==='kid'||p2.gender===g))have++;}
+          if(have<1){
+            var path=V15NPC.paths[pi],kk=mrgFarthest(path,G.px,G.pz);
+            var np2=c151_spawnNPC(pi,kind,g,kk);
+            if((pi===6||pi===7||pi===9)&&g==='m'){np2.dogOwner=true;c151_spawnDog(np2,true);}}}}
+    }catch(e){}}
+  function stepCity(){
+    for(var i=0;i<S.hiddenMeshes.length;i++){var o=S.hiddenMeshes[i];
+      var ud=o.userData||{};
+      if(ud.c151||ud.c152prop||ud.c153||ud.c153x){o.visible=true;}}
+    for(var j=S.removedObbs.length-1;j>=0;j--){var ob=S.removedObbs[j];
+      if(ob.c151){OBBS.push(ob);S.removedObbs.splice(j,1);}}
+    for(var k=S.rubbleMeshes.length-1;k>=0;k--){var rm=S.rubbleMeshes[k];
+      if(rm.userData&&rm.userData.u153zone==='city'){
+        if(rm.isMesh||rm.isGroup)scene.remove(rm);
+        else{var ix=OBBS.indexOf(rm);if(ix>=0)OBBS.splice(ix,1);}
+        S.rubbleMeshes.splice(k,1);}}
+    for(var cb=0;cb<C151_CITY.length;cb++){C151_CITY[cb]._nuked=false;C151_CITY[cb]._rubbled=false;}
+  }
+  function stepCamps(){
+    for(var i=0;i<S.hiddenMeshes.length;i++){var o=S.hiddenMeshes[i];
+      var ud=o.userData||{};
+      if(!(ud.c151||ud.c152prop||ud.c153||ud.c153x)){if(o)o.visible=true;}}
+    try{for(var bi=0;bi<BARRELS.length;bi++){var bb=BARRELS[bi];
+      if(!bb.alive){bb.alive=true;if(bb.group)bb.group.visible=true;}}}catch(e){}
+    if(S.outMesh&&S.outIdx){S.outMesh.geometry.setIndex(new THREE.Uint32BufferAttribute(S.outIdx,1));}
+    for(var j=S.removedObbs.length-1;j>=0;j--){var ob=S.removedObbs[j];
+      if(!ob.c151){OBBS.push(ob);S.removedObbs.splice(j,1);}}
+    for(var k2=0;k2<S.removedBlockers.length;k2++)BLOCKERS.push(S.removedBlockers[k2]);
+    S.removedBlockers.length=0;
+    for(var k=S.rubbleMeshes.length-1;k>=0;k--){var rm=S.rubbleMeshes[k];
+      if(rm.userData&&(rm.userData.u153zone==='camp'||rm.userData.u153zone==='outpost'||rm.userData.u153zone==='scattered')){
+        if(rm.isMesh||rm.isGroup)scene.remove(rm);
+        else{var ix=OBBS.indexOf(rm);if(ix>=0)OBBS.splice(ix,1);}
+        S.rubbleMeshes.splice(k,1);}}
+    S.hiddenMeshes.length=0;
+  }
+  function stepRubbleSweep(){
+    for(var k=S.rubbleMeshes.length-1;k>=0;k--){var rm=S.rubbleMeshes[k];
+      if(rm.isMesh||rm.isGroup)scene.remove(rm);
+      else{var ix=OBBS.indexOf(rm);if(ix>=0)OBBS.splice(ix,1);}
+      S.rubbleMeshes.splice(k,1);}}
+  function stepTerrain(){
+    if(S.gridSnap)GRIDH.data.set(S.gridSnap);
+    var terr=S.terrain;
+    if(terr&&terr.geometry){
+      var pos=terr.geometry.attributes.position, col=terr.geometry.attributes.color;
+      for(var v=0;v<pos.count;v++){pos.setY(v,groundH(pos.getX(v),pos.getZ(v)));}
+      if(S.colSnap)col.array.set(S.colSnap);
+      pos.needsUpdate=true;col.needsUpdate=true;
+      terr.geometry.computeVertexNormals();
+      terr.geometry.attributes.normal.needsUpdate=true;}
+  }
+  function stepVegetation(){
+    for(var i=0;i<S.instHidden.length;i++){var h=S.instHidden[i];
+      h.mesh.setMatrixAt(h.index,h.mat);h.mesh.instanceMatrix.needsUpdate=true;}
+    S.instHidden.length=0;
+    for(var k=0;k<S.removedBush.length;k++)BUSH.list.push(S.removedBush[k]);
+    S.removedBush.length=0;
+  }
+  function stepFiresOut(){
+    for(var i=0;i<V15NUKE.fires.length;i++){var fr=V15NUKE.fires[i];
+      if(fr&&fr.used){fr.used=false;if(fr.grp)fr.grp.visible=false;}}
+    S.fireOrder.length=0;
+    if(V15NUKE.canopy){scene.remove(V15NUKE.canopy);V15NUKE.canopy=null;}
+    if(V15NUKE.sunOrig!==null&&typeof sun!=='undefined'&&sun){sun.intensity=V15NUKE.sunOrig;V15NUKE.sunOrig=null;}
+    if(V15NUKE.column){scene.remove(V15NUKE.column);V15NUKE.column=null;}
+    if(V15NUKE.cap){scene.remove(V15NUKE.cap);V15NUKE.cap=null;}
+    for(var g=0;g<S.glowMeshes.length;g++)scene.remove(S.glowMeshes[g]);
+    S.glowMeshes.length=0;
+    for(var c=0;c<S.clouds.length;c++)scene.remove(S.clouds[c].grp);
+    S.clouds.length=0;
+    for(var d=0;d<V15NUKE.debris.length;d++){V15NUKE.debris[d].active=false;V15NUKE.debris[d].mesh.visible=false;}
+    for(var e=0;e<V15NUKE.embers.length;e++){V15NUKE.embers[e].active=false;V15NUKE.embers[e].spr.visible=false;}
+    for(var d2=0;d2<modDebris.length;d2++){modDebris[d2].active=false;modDebris[d2].mesh.visible=false;}
+    for(var e2=0;e2<modEmbers.length;e2++){modEmbers[e2].active=false;modEmbers[e2].spr.visible=false;}
+    S.discs.length=0;
+    V15NUKE.destroyed=false;
+    S.coolUntil=0;
+  }
+  function stepPopulation(){
+    try{if(typeof V15MRG!=='undefined'&&V15MRG.topUp)V15MRG.topUp();}catch(e){}
+    fillExpansion();
+    try{for(var i=0;i<V13E.animals.length;i++){var an=V13E.animals[i];
+      if(!an.alive){an.alive=true;an.deathT=0;if(an.grp){an.grp.visible=true;an.grp.position.y=groundH(an.x,an.z);}}}}catch(e){}
+  }
+  async function runReloadMap(){
+    if(S.reloadRunning)return;S.reloadRunning=true;
+    try{
+      rbO.style.display='flex';rbBar.style.width='0%';rbStep.textContent='';
+      var steps=[['CITY',stepCity],['CAMPS',stepCamps],['TERRAIN',stepTerrain],
+        ['VEGETATION',stepVegetation],['FIRES OUT',stepFiresOut]];
+      for(var i=0;i<steps.length;i++){
+        rbStep.textContent=steps[i][0]+'…';await frame();
+        steps[i][1]();rbBar.style.width=Math.round((i+1)/6*100)+'%';await frame();}
+      stepRubbleSweep();
+      safetySnap();
+      rbStep.textContent='POPULATION…';await frame();
+      stepPopulation();rbBar.style.width='100%';await frame();
+      await frame();
+    }catch(e){}
+    rbO.style.display='none';S.reloadRunning=false;
+  }
+  S.runReloadMap=runReloadMap;
+  try{
+    var rbBtn=document.getElementById('stReloadMap');
+    if(rbBtn){
+      if(typeof bindEl==='function')bindEl(rbBtn,function(){runReloadMap();});
+      else rbBtn.addEventListener('click',function(){runReloadMap();});}
+  }catch(e){}
+
+  /* ================= CHUNK 4: trap + rescue + bridge + heli =================
+     Crater floor (decided): displacement moves vertices only, triangles are
+     never deleted, normals are recomputed — the bowl interior IS the original
+     top surface, so it reads as closed dirt from every reachable angle. No
+     material change: the terrain stays single-sided Lambert, and the underside
+     is unreachable (collision height == visual height everywhere). */
+  function gridVal(arr,x,z){
+    var cell=GRIDH.cell, fx=(x+3000)/cell, fz=(z+3000)/cell;
+    var i=Math.max(0,Math.min(255,Math.floor(fx))), j=Math.max(0,Math.min(255,Math.floor(fz)));
+    var tx=fx-i, tz=fz-j, o=j*257+i;
+    var a=arr[o], b=arr[o+1], c=arr[o+257], d=arr[o+258];
+    return a*(1-tx)*(1-tz)+b*tx*(1-tz)+c*(1-tx)*tz+d*tx*tz;}
+  function depthAt(x,z){
+    if(!S.gridSnap)return 0;
+    return gridVal(S.gridSnap,x,z)-gridVal(GRIDH.data,x,z);}
+  function isTrapped(x,z){
+    for(var i=0;i<S.discs.length;i++){var dc=S.discs[i];
+      var dx=x-dc.x, dz=z-dc.z;
+      if(dx*dx+dz*dz<CR*CR&&depthAt(x,z)>1.0)return true;}
+    return false;}
+  S.depthAt=depthAt;S.isTrapped=isTrapped;
+  /* ---- bridge: tag merged meshes + tower OBBs + pier/rail blockers ---- */
+  S.bridgeMeshes=[];S.bridgeObbs=[];S.bridgePier=[];S.bridgeRail=[];
+  S.bridgeDown=false;S.bridgePieces=[];S.quadLost=false;
+  (function tagBridge(){
+    try{
+      for(var i=0;i<scene.children.length;i++){var o=scene.children[i];
+        if(!o.isMesh||!o.geometry||!o.geometry.attributes.position)continue;
+        try{o.geometry.computeBoundingBox();}catch(e){continue;}
+        var bb=o.geometry.boundingBox;if(!bb)continue;
+        var wx=o.position.x, wz=o.position.z;
+        if(bb.min.x+wx>=-20&&bb.max.x+wx<=20&&bb.min.z+wz>=-1000&&bb.max.z+wz<=-300&&bb.max.y>5){
+          o.userData.u153bridge=true;S.bridgeMeshes.push(o);}}
+      for(var j=0;j<OBBS.length;j++){var ob=OBBS[j];
+        if((ob.x===6.8||ob.x===-6.8)&&(ob.z===-600||ob.z===-745)&&ob.hw===1.2)S.bridgeObbs.push(ob);}
+      for(var k=0;k<BLOCKERS.length;k++){var bl=BLOCKERS[k];
+        if(bl.k==='pier')S.bridgePier.push(bl);
+        else if((bl.x===7.3||bl.x===-7.3)&&bl.z>=-934&&bl.z<=-404&&bl.r===0.3)S.bridgeRail.push(bl);}
+    }catch(e){}
+  })();
+  function tryBridgeCollapse(bx,bz){
+    if(S.bridgeDown)return;
+    var cx=Math.max(-20,Math.min(20,bx)), cz=Math.max(-980,Math.min(-360,bz));
+    if(Math.hypot(bx-cx,bz-cz)>=R)return;
+    S.bridgeDown=true;
+    /* quad on the deck sinks and is LOST for the session (no collapse-site
+       respawn); the player on foot stays where they are and drops to water. */
+    try{
+      if(typeof ATV!=='undefined'&&ATV.grp&&ATV.grp.visible){
+        var qx=ATV.drive.x, qz=ATV.drive.z;
+        if(Math.abs(qx)<7.4&&qz>-940&&qz<-396){
+          S.quadLost=true;ATV.grp.visible=false;
+          if(ATV.drive.on){ATV.drive.on=false;ATV.drive.spd=0;G.px=qx;G.pz=qz;}
+          var qm=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x1c2a1a}));
+          qm.position.set(qx,deckY(qz),qz);qm.scale.set(2,1,3);scene.add(qm);
+          S.bridgePieces.push({mesh:qm,vy:0,vx:0,vz:0,rs:0.5,state:'falling',floatT:0,persist:false});}}
+    }catch(e){}
+    /* heli on the deck drops to the water surface (takeoff still works);
+       it is never lost with the bridge. */
+    try{
+      if(typeof V13F!=='undefined'&&V13F.grp&&V13F.grp.visible){
+        var hx=V13F.fly.x, hz=V13F.fly.z;
+        if(Math.abs(hx)<7.4&&hz>-940&&hz<-396&&V13F.fly.y>groundH(hx,hz)+1){
+          V13F.fly.y=-4.0;if(V13F.flyOn)V13F.fly.onGround=false;}}
+    }catch(e){}
+    for(var i=0;i<S.bridgeMeshes.length;i++)S.bridgeMeshes[i].visible=false;
+    var deckSegs=[];
+    for(var z=-935;z<-400;z+=17.2){
+      var zm=z+8.6, dy=deckY(zm);
+      var seg=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x4a4a4c}));
+      seg.position.set(0,dy-0.75,zm);seg.scale.set(14.8,1.5,17.2);scene.add(seg);
+      var pc={mesh:seg,vy:0,vx:(Math.random()-0.5)*2,vz:0,rs:(Math.random()-0.5)*1.2,state:'falling',floatT:0,persist:false,zm:zm};
+      deckSegs.push(pc);S.bridgePieces.push(pc);}
+    [-640,-700,-760,-820].forEach(function(tz){
+      var best=null, bd=1e9;
+      for(var di=0;di<deckSegs.length;di++){var dd=Math.abs(deckSegs[di].zm-tz);if(dd<bd&&!deckSegs[di].persist){bd=dd;best=deckSegs[di];}}
+      if(best)best.persist=true;});
+    for(var ti=0;ti<2;ti++){var zt=ti===0?-600:-745, top=deckY(zt)+38;
+      for(var sx=-1;sx<=1;sx+=2){
+        var leg=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x8b8d89}));
+        leg.position.set(sx*6.8,(top-16)/2,zt);leg.scale.set(2.4,top+16,2.4);scene.add(leg);
+        S.bridgePieces.push({mesh:leg,vy:0,vx:sx*1.5,vz:0,rs:sx*0.4,state:'falling',floatT:0,persist:false});}
+      var beam=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x8b8d89}));
+      beam.position.set(0,deckY(zt)+18,zt);beam.scale.set(16,2,1.8);scene.add(beam);
+      S.bridgePieces.push({mesh:beam,vy:0,vx:0,vz:0,rs:0.3,state:'falling',floatT:0,persist:false});}
+    for(var cs=-1;cs<=1;cs+=2){
+      var cab=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x2e3237}));
+      cab.position.set(cs*6.9,35,-670);cab.scale.set(0.35,0.35,500);scene.add(cab);
+      S.bridgePieces.push({mesh:cab,vy:0,vx:0,vz:0,rs:0.2,state:'falling',floatT:0,persist:false});}
+    S.bridgeObbsRemoved=[];
+    for(var oi=OBBS.length-1;oi>=0;oi--){if(S.bridgeObbs.indexOf(OBBS[oi])>=0){S.bridgeObbsRemoved.push(OBBS[oi]);OBBS.splice(oi,1);}}
+    S.bridgeBlockersRemoved=[];
+    for(var bi=BLOCKERS.length-1;bi>=0;bi--){var bl=BLOCKERS[bi];
+      if(S.bridgePier.indexOf(bl)>=0||S.bridgeRail.indexOf(bl)>=0){S.bridgeBlockersRemoved.push(bl);BLOCKERS.splice(bi,1);}}
+  }
+  function rebuildBridge(){
+    if(!S.bridgeDown)return;
+    S.bridgeDown=false;
+    for(var i=0;i<S.bridgeMeshes.length;i++)S.bridgeMeshes[i].visible=true;
+    for(var j=0;j<(S.bridgeObbsRemoved||[]).length;j++)if(OBBS.indexOf(S.bridgeObbsRemoved[j])<0)OBBS.push(S.bridgeObbsRemoved[j]);
+    for(var k=0;k<(S.bridgeBlockersRemoved||[]).length;k++)if(BLOCKERS.indexOf(S.bridgeBlockersRemoved[k])<0)BLOCKERS.push(S.bridgeBlockersRemoved[k]);
+    for(var p=0;p<S.bridgePieces.length;p++)scene.remove(S.bridgePieces[p].mesh);
+    S.bridgePieces.length=0;
+  }
+  /* ---- parked heli on a nuked building drops INTACT to rubble/ground ---- */
+  /* PATCH 6: footprint test WITHOUT the destroyed skip. roofAt() deliberately
+     skips destroyed buildings (so surfH/perch stop treating rubble as a roof),
+     which made settleParkedHeli's roofAt()+hbDestroyed() pair unsatisfiable —
+     a parked heli would have floated at roof height after its building was
+     nuked. footprintAt finds the landable building under the point regardless
+     of destroyed state, so the settle test can actually fire. */
+  function footprintAt(x,z){
+    for(var i=0;i<S.heliB.length;i++){var hb=S.heliB[i];
+      if(hb.circle||hb.roofY===null)continue;
+      var dx=x-hb.x, dz=z-hb.z, c=Math.cos(-hb.yaw), s=Math.sin(-hb.yaw);
+      var lx=dx*c-dz*s, lz=dx*s+dz*c;
+      if(Math.abs(lx)<hb.hw&&Math.abs(lz)<hb.hd)return hb;}
+    return null;}
+  function settleParkedHeli(){
+    try{
+      if(typeof V13F==='undefined'||!V13F.grp||!V13F.grp.visible)return;
+      var hx=V13F.fly.x, hz=V13F.fly.z, hb=footprintAt(hx,hz);
+      if(!hb||!hbDestroyed(hb))return;
+      var gy=groundH(hx,hz)+1.2;
+      V13F.fly.y=gy;if(V13F.flyOn)V13F.fly.onGround=true;
+      heliPlace(0);
+    }catch(e){}
+  }
+  /* ================= HELI BUILDINGS (collision + roofs) =================
+     Volume: fuselage sample points (nose +5.1, center, tail -8.41 along head,
+     radius 2.4) + rotor disc (center, radius 4.3). Heights: city/scattered
+     from builder data (exact); outpost OBB/BLOCKER heights are a conservative
+     heuristic (core data carries no height field) — over-blocking a low fence
+     rail beats letting a rotor through a barn wall. */
+  S.heliB=[];
+  function hbDestroyed(hb){
+    if(hb.city&&hb.b&&hb.b._nuked)return true;
+    for(var i=0;i<S.discs.length;i++){var dc=S.discs[i];
+      if(Math.hypot(hb.x-dc.x,hb.z-dc.z)<R)return true;}
+    return false;}
+  function roofAt(x,z){
+    for(var i=0;i<S.heliB.length;i++){var hb=S.heliB[i];
+      if(hb.circle||hb.roofY===null||hbDestroyed(hb))continue;
+      var dx=x-hb.x, dz=z-hb.z, c=Math.cos(-hb.yaw), s=Math.sin(-hb.yaw);
+      var lx=dx*c-dz*s, lz=dx*s+dz*c;
+      if(Math.abs(lx)<hb.hw&&Math.abs(lz)<hb.hd)return hb;}
+    return null;}
+  function clearOfBuildings(x,z,pad){
+    for(var i=0;i<S.heliB.length;i++){var hb=S.heliB[i];
+      if(hbDestroyed(hb))continue;
+      if(hb.circle){if(Math.hypot(x-hb.x,z-hb.z)<hb.r+pad)return false;}
+      else{var dx=x-hb.x, dz=z-hb.z, c=Math.cos(-hb.yaw), s=Math.sin(-hb.yaw);
+        var lx=dx*c-dz*s, lz=dx*s+dz*c;
+        if(Math.abs(lx)<hb.hw+pad&&Math.abs(lz)<hb.hd+pad)return false;}}
+    return true;}
+  (function buildHeliB(){
+    try{
+      for(var i=0;i<C151_CITY.length;i++){var b=C151_CITY[i], gy=groundH(b.x,b.z);
+        var land=(b.kind==='tower'||b.kind==='midrise'||b.kind==='civic'||b.kind==='depot'||b.kind==='storefront');
+        var top, roofY=null;
+        if(b.kind==='tower'||b.kind==='midrise'){top=gy+b.h+1.5;roofY=gy+b.h+0.4;}
+        else if(b.kind==='house'){top=gy+b.h+1.2;}
+        else if(b.kind==='enterable'){top=gy+b.h;}
+        else{top=gy+b.h+0.9;roofY=gy+b.h+0.3;}
+        S.heliB.push({x:b.x,z:b.z,hw:b.w/2,hd:b.d/2,yaw:b.yaw||0,base:gy-2,top:top,roofY:land?roofY:null,city:true,b:b,src:'city:'+b.kind});}
+      for(var s2=0;s2<SCAT.length;s2++){var sc=SCAT[s2], gy2=groundH(sc.x,sc.z);
+        S.heliB.push({x:sc.x,z:sc.z,hw:sc.w/2,hd:sc.d/2,yaw:0,base:gy2-2,top:gy2+7+1.2,roofY:null,city:false,src:'scattered'});}
+      for(var o=0;o<OBBS.length;o++){var ob=OBBS[o];
+        if(ob.c151||ob.c153||ob.c153x||ob.playground||ob.car||ob.rubble)continue;
+        if((ob.x===6.8||ob.x===-6.8)&&(ob.z===-600||ob.z===-745))continue;
+        var gy3=groundH(ob.x,ob.z);
+        var hh=Math.max(1.0,Math.min(5.0,Math.max(ob.hw,ob.hd)*0.8));
+        S.heliB.push({x:ob.x,z:ob.z,hw:ob.hw,hd:ob.hd,yaw:ob.yaw||0,base:gy3-2,top:gy3+hh,roofY:null,city:false,src:'outpost-obb'});}
+      for(var b2=0;b2<BLOCKERS.length;b2++){var bl2=BLOCKERS[b2];
+        if(bl2.owner)continue;
+        var gy4=groundH(bl2.x,bl2.z);
+        S.heliB.push({circle:true,x:bl2.x,z:bl2.z,r:bl2.r,base:gy4-2,top:gy4+4.5,roofY:null,city:false,src:'outpost-blocker'});}
+      for(var t2=0;t2<2;t2++){var zt2=t2===0?-600:-745;
+        S.heliB.push({x:6.8,z:zt2,hw:1.2,hd:1.2,yaw:0,base:-16,top:deckY(zt2)+38,roofY:null,city:false,src:'bridge-tower'});
+        S.heliB.push({x:-6.8,z:zt2,hw:1.2,hd:1.2,yaw:0,base:-16,top:deckY(zt2)+38,roofY:null,city:false,src:'bridge-tower'});}
+    }catch(e){}
+  })();
+  function heliHits(x,z,bot,topY){
+    var head=0;
+    try{head=V13F.fly.head;}catch(e){}
+    var sh=Math.sin(head), ch=Math.cos(head);
+    var pts=[[0,0,4.3],[sh*5.1,ch*5.1,2.4],[-sh*8.41,-ch*8.41,2.4]];
+    for(var i=0;i<S.heliB.length;i++){var hb=S.heliB[i];
+      if(hb.src==='bridge-tower'&&S.bridgeDown)continue;
+      if(hbDestroyed(hb))continue;
+      if(bot>=hb.top||topY<=hb.base)continue;
+      if(hb.circle){
+        for(var p=0;p<pts.length;p++){
+          if(Math.hypot(x+pts[p][0]-hb.x,z+pts[p][1]-hb.z)<hb.r+pts[p][2])return hb;}
+        continue;}
+      for(var q=0;q<pts.length;q++){
+        var dx=x+pts[q][0]-hb.x, dz=z+pts[q][1]-hb.z;
+        var c=Math.cos(-hb.yaw), s=Math.sin(-hb.yaw);
+        var lx=dx*c-dz*s, lz=dx*s+dz*c, rad=pts[q][2];
+        if(Math.abs(lx)<hb.hw+rad&&Math.abs(lz)<hb.hd+rad)return hb;}}
+    return null;}
+  S.heliHits=heliHits;S.roofAt=roofAt;
+  /* ---- surfH wrapper: bridge-down strip -> terrain; landable roof -> roof
+     surface. Everything else passes through to the original (deck + pad). */
+  try{
+    var origSurfH=surfH;
+    surfH=function(x,z){
+      if(S.bridgeDown&&Math.abs(x)<7.4&&z>-940&&z<-396)return groundH(x,z);
+      var hb=roofAt(x,z);
+      if(hb)return Math.max(origSurfH(x,z),hb.roofY);
+      return origSurfH(x,z);};
+  }catch(e){}
+  /* ---- foot wrapper: rescue lock + trap revert + on-roof OBB exemption
+     (the standing building's own footprint OBB is lifted for one call, so a
+     player on a roof can walk the roof instead of being shoved to its edge;
+     walking off the edge still works — the next call has the OBB back). */
+  try{
+    var origStep=stepPlayerMove;
+    stepPlayerMove=function(dt,speed){
+      if(S.rescue)return;
+      var preX=G.px, preZ=G.pz, roof=roofAt(preX,preZ), removed=null, ob=null;
+      /* PATCH 5 (parachute roof landing): a FALLING player above a nearby
+         landable roof also gets the OBB lift, so canopy steering can drift
+         over the roof edge instead of stopping at the 2D footprint wall.
+         Guarded: falling only, eyeY above that roof, footprint+6 m zone.
+         A ground walker never qualifies (eyeY ~ ground+1.7 < roofY), and the
+         falling branch lands on surfH == roofY, so nobody falls THROUGH. */
+      if(!roof&&typeof V15MRG!=='undefined'&&V15MRG.falling){
+        var eyeY2=V15MRG.eyeY;
+        for(var hi2=0;hi2<S.heliB.length;hi2++){var hb2=S.heliB[hi2];
+          if(typeof hb2.roofY!=='number'||typeof hb2.hw!=='number')continue;
+          if(hbDestroyed(hb2))continue;
+          if(eyeY2<=hb2.roofY)continue;
+          var dx2=preX-hb2.x, dz2=preZ-hb2.z, c2=Math.cos(-hb2.yaw), s2=Math.sin(-hb2.yaw);
+          var lx2=dx2*c2-dz2*s2, lz2=dx2*s2+dz2*c2;
+          if(Math.abs(lx2)<hb2.hw+6&&Math.abs(lz2)<hb2.hd+6){roof=hb2;break;}}}
+      if(roof){
+        for(var i=0;i<OBBS.length;i++){var o=OBBS[i];
+          if(o.x===roof.x&&o.z===roof.z&&o.hw===roof.hw&&o.hd===roof.hd){ob=o;break;}}
+        if(ob){var ix=OBBS.indexOf(ob);if(ix>=0){removed=ob;OBBS.splice(ix,1);}}}
+      try{origStep(dt,speed);}finally{if(removed)OBBS.push(removed);}
+      if(isTrapped(preX,preZ)&&!isTrapped(G.px,G.pz)){G.px=preX;G.pz=preZ;}};
+  }catch(e){}
+  /* ---- quad wrapper: trap revert only (movement code untouched) ---- */
+  try{
+    var origAtv=atvTick;
+    atvTick=function(gdt){
+      if(typeof ATV==='undefined'||!ATV.drive.on){origAtv(gdt);return;}
+      var preX=ATV.drive.x, preZ=ATV.drive.z;
+      origAtv(gdt);
+      if(isTrapped(preX,preZ)&&!isTrapped(ATV.drive.x,ATV.drive.z)){
+        ATV.drive.x=preX;ATV.drive.z=preZ;G.px=preX;G.pz=preZ;
+        if(ATV.grp){ATV.grp.position.x=preX;ATV.grp.position.z=preZ;}}};
+  }catch(e){}
+  /* ---- atvReset wrapper: a bridge/crater-lost quad comes back ONLY here
+     (the normal menu round-trip recovery path) — never at the loss site. ---- */
+  try{
+    var origAtvReset=atvReset;
+    atvReset=function(){
+      origAtvReset();
+      if(S.quadLost){S.quadLost=false;if(typeof ATV!=='undefined'&&ATV.grp)ATV.grp.visible=true;}};
+  }catch(e){}
+  /* ================= HELI CRASH =================
+     Trigger (reported): side contact with any heli building at ANY speed
+     while flying, OR a descending roof impact faster than 6 m/s vertical or
+     12 m/s horizontal. Gentle (<=6 vertical, <=12 horizontal) vertical
+     touchdown on a roof = landing/perch, never a crash. Ground landings keep
+     the original bounce behaviour. Scale: fireball radius ~12 m (nuke: 110),
+     20 debris + 30 embers, 6 smoke sprites, reused boom audio — no rings, no
+     mushroom cloud, no crater, no fire floor. Building + bystanders untouched.
+     Player: EJECTED into the existing falling state (no fall damage exists in
+     this game — landing only resets eye height + canopy), so the big labelled
+     PARACHUTE button appears on the next tick via the existing falling flag;
+     tap or P deploys the deep-blue canopy for a steered landing. */
+  S.heliCrashed=false;S.crashInfo=null;S.wreck=null;S.crashFb=null;S.crashSmoke=[];
+  function doHeliCrash(hit,preVy,preH){
+    try{
+      var F=V13F, f=F.fly, cx=f.x, cz=f.z, cy=f.y;
+      S.heliCrashed=true;
+      S.crashInfo={x:cx,z:cz,y:cy,building:hit.src,preVy:preVy,preH:preH};
+      if(F.grp)F.grp.visible=false;
+      F.flyOn=false;F.air='absent';f.vx=0;f.vy=0;f.vz=0;f.onGround=false;
+      try{mrgBoomAudio(50);}catch(e){}
+      var fb=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),
+        new THREE.MeshBasicMaterial({color:0xff8822,transparent:true,opacity:0.95}));
+      fb.position.set(cx,cy+2,cz);fb.scale.set(12,12,12);scene.add(fb);
+      S.crashFb={mesh:fb,t:0};
+      for(var d=0;d<20;d++)mrgDebris(cx,cy+2,cz);
+      for(var e2=0;e2<30;e2++)mrgEmber(cx,cy+3,cz);
+      for(var s=0;s<6;s++){
+        var spr=new THREE.Sprite(new THREE.SpriteMaterial({map:mrgRadialTex('rgba(90,85,80,0.6)','rgba(60,55,50,0)'),transparent:true,opacity:0.5,depthWrite:false}));
+        spr.position.set(cx+(Math.random()-0.5)*8,cy+2+Math.random()*4,cz+(Math.random()-0.5)*8);
+        spr.scale.set(8+Math.random()*8,6+Math.random()*4,1);scene.add(spr);
+        S.crashSmoke.push({spr:spr,t:0,vy:1+Math.random()*2});}
+      var gy=groundH(cx,cz);
+      var wg=new THREE.Group();
+      var fus=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x1a2530}));
+      fus.scale.set(3,1.8,6);wg.add(fus);
+      var rot=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x3a3f47}));
+      rot.scale.set(9,0.15,0.6);rot.position.y=2.2;rot.rotation.y=0.6;wg.add(rot);
+      var tail=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x1a2530}));
+      tail.scale.set(0.8,0.8,4);tail.position.set(0,0.5,-4.5);wg.add(tail);
+      wg.position.set(cx,cy,cz);scene.add(wg);
+      var slots=[];
+      for(var fi=0;fi<2;fi++){
+        var slot=-1;
+        for(var si=0;si<FIREPOOL;si++){if(!V15NUKE.fires[si]||!V15NUKE.fires[si].used){slot=si;break;}}
+        if(slot<0)break;
+        mrgPlaceFire(slot,cx+(fi===0?-1.5:1.5),gy,cz+(fi===0?1:-1));
+        slots.push(slot);}
+      S.wreck={grp:wg,vy:0,rs:(Math.random()-0.5)*2,ground:gy,rested:false,fires:slots};
+      var ep=pushOut(cx,cz);
+      G.px=ep[0];G.pz=ep[1];
+      if(typeof V15MRG!=='undefined'){V15MRG.eyeY=cy+2;V15MRG.falling=false;V15MRG.canopy=false;V15MRG.setCanopy(false);}
+      if(typeof v12HudDirty==='function')v12HudDirty();
+    }catch(e){}
+  }
+  function clearWreck(){
+    try{
+      if(S.wreck){
+        scene.remove(S.wreck.grp);
+        for(var i=0;i<S.wreck.fires.length;i++){var fr=V15NUKE.fires[S.wreck.fires[i]];
+          if(fr&&fr.used){fr.used=false;if(fr.grp)fr.grp.visible=false;}}
+        S.wreck=null;}
+      if(S.crashFb){scene.remove(S.crashFb.mesh);S.crashFb=null;}
+      for(var j=0;j<S.crashSmoke.length;j++)scene.remove(S.crashSmoke[j].spr);
+      S.crashSmoke.length=0;
+    }catch(e){}
+  }
+  /* ---- heliTick wrapper: crash evaluation (slide is DEAD — contact crashes) ---- */
+  try{
+    var origHeli=heliTick;
+    heliTick=function(dt,gdt){
+      if(typeof V13F==='undefined'||!V13F.flyOn){origHeli(dt,gdt);return;}
+      var f=V13F.fly;
+      var preX=f.x, preZ=f.z, preY=f.y, preVy=f.vy, preH=Math.hypot(f.vx,f.vz), preGround=f.onGround;
+      origHeli(dt,gdt);
+      if(!V13F.flyOn)return;
+      var overRoof=roofAt(f.x,f.z);
+      if(f.onGround){
+        if(!preGround&&overRoof&&preVy<0&&(Math.abs(preVy)>9.5||preH>12))doHeliCrash(overRoof,preVy,preH);
+        return;}
+      var hit=heliHits(f.x,f.z,f.y,f.y+7.5);
+      if(!hit)return;
+      if(!overRoof||hit!==overRoof){doHeliCrash(hit,preVy,preH);return;}
+      if(preVy>=0)return;
+      if(Math.abs(preVy)<=9.5&&preH<=12){
+        if(f.y<hit.top){f.y=hit.top;f.vy=0;f.onGround=true;f.vx*=0.2;f.vz*=0.2;}
+        return;}
+      doHeliCrash(hit,preVy,preH);};
+  }catch(e){}
+  /* ---- #14 landing latch (diag2 Q2a): a heli that settles at roof height
+     under continuous descent but never latches onGround gets the flag its
+     position already implies. Second wrapper runs AFTER the crash/slide
+     wrapper, so it can never convert a crash (crash sets S.heliCrashed and
+     clears flyOn, both guarded; a plunging heli fails the |vy| gate). */
+  try{
+    var origHeli2=heliTick;
+    heliTick=function(dt,gdt){
+      origHeli2(dt,gdt);
+      try{
+        if(typeof V13F==='undefined'||!V13F.flyOn)return;
+        var f2=V13F.fly;
+        if(f2.onGround||S.heliCrashed)return;
+        var hb2=roofAt(f2.x,f2.z);
+        if(!hb2)return;
+        if(f2.y<=hb2.top+0.05&&f2.y>=hb2.top-0.75&&Math.abs(f2.vy)<=1.5&&Math.hypot(f2.vx,f2.vz)<=12){
+          f2.y=hb2.top;f2.vy=0;f2.onGround=true;f2.vx*=0.2;f2.vz*=0.2;}
+      }catch(e){}};
+  }catch(e){}
+  /* ================= CALL HELI RESCUE =================
+     Separate aircraft: never touches V13F (player heli stays exactly where it
+     was), never lands anywhere (approaches + departs airborne, despawns after
+     drop-off), so it can never sit on an occupied pad. Works with no heli
+     owned. Pathing rule: cruise altitude = max(pristine ground at player + 40,
+     highest building top along the approach + drop legs + 10) — always above
+     the roofline. Rope: animated unspool, length = heli-to-player + 3 m grab
+     margin; hover pristine+40, max crater depth 45, so max rope ~88 m. */
+  S.rescue=null;
+  var callBtn=document.createElement('button');
+  callBtn.id='btnCallHeli';callBtn.className='hbtn';callBtn.textContent='CALL HELI';
+  callBtn.style.cssText='display:none;position:fixed;right:20px;bottom:calc(240px + env(safe-area-inset-bottom));width:110px;height:76px;background:#1d4e89;color:#fff;border:2px solid #7fb2ff;font-size:17px;font-weight:800;z-index:31;';
+  document.body.appendChild(callBtn);
+  function rescueVisible(){
+    try{
+      if(typeof G==='undefined'||(G.state!=='play'&&G.state!=='roam')||S.rescue)return false;
+      var onFoot=!(typeof ATV!=='undefined'&&ATV.drive.on)&&!(typeof V13F!=='undefined'&&V13F.flyOn);
+      if(onFoot&&(isTrapped(G.px,G.pz)||waterDepth(G.px,G.pz)>1.35))return true;
+      if(typeof ATV!=='undefined'&&ATV.drive.on&&isTrapped(ATV.drive.x,ATV.drive.z))return true;
+      return false;
+    }catch(e){return false;}}
+  function pathTop(ax,az,bx,bz){
+    var top=-1e9, n=Math.max(1,Math.ceil(Math.hypot(bx-ax,bz-az)/20));
+    for(var i=0;i<=n;i++){
+      var x=ax+(bx-ax)*i/n, z=az+(bz-az)*i/n;
+      for(var j=0;j<S.heliB.length;j++){var hb=S.heliB[j];
+        if(hbDestroyed(hb))continue;
+        var ok=false;
+        if(hb.circle){ok=Math.hypot(x-hb.x,z-hb.z)<hb.r+6;}
+        else{var dx=x-hb.x, dz=z-hb.z, c=Math.cos(-hb.yaw), s=Math.sin(-hb.yaw);
+          var lx=dx*c-dz*s, lz=dx*s+dz*c;
+          ok=Math.abs(lx)<hb.hw+6&&Math.abs(lz)<hb.hd+6;}
+        if(ok&&hb.top>top)top=hb.top;}}
+    return top;}
+  function findDrop(px,pz){
+    var trap=null;
+    for(var i=0;i<S.discs.length;i++){var dc=S.discs[i];
+      if(Math.hypot(px-dc.x,pz-dc.z)<CR+80){trap=dc;break;}}
+    var cx=trap?trap.x:px, cz=trap?trap.z:pz;
+    var dirs=[[1,0],[0.707,0.707],[0,1],[-0.707,0.707],[-1,0],[-0.707,-0.707],[0,-1],[0.707,-0.707]];
+    var radii=trap?[CR+15,CR+40,CR+80]:[15,40,80];
+    for(var r=0;r<radii.length;r++)for(var d=0;d<8;d++){
+      var x=cx+dirs[d][0]*radii[r], z=cz+dirs[d][1]*radii[r];
+      if(waterDepth(x,z)>1.0)continue;
+      if(isTrapped(x,z))continue;
+      if(!clearOfBuildings(x,z,6))continue;
+      if(typeof V13F!=='undefined'&&V13F.air==='parked'&&Math.hypot(x-V13F.fly.x,z-V13F.fly.z)<16)continue;
+      var po=pushOut(x,z);
+      if(Math.hypot(po[0]-x,po[1]-z)>0.5)continue;
+      return {x:po[0],z:po[1]};}
+    var fb=pushOut(4.5,24);
+    return {x:fb[0],z:fb[1]};}
+  function buildRescueHeli(){
+    var grp=new THREE.Group();
+    var dm=new THREE.MeshLambertMaterial({color:0x24344d});
+    var fus=new THREE.Mesh(C151_BOX,dm);fus.scale.set(3,2,6);grp.add(fus);
+    var cab=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x5a7a9a}));
+    cab.scale.set(2.4,1.2,2);cab.position.set(0,1.2,2);grp.add(cab);
+    var boom=new THREE.Mesh(C151_BOX,dm);boom.scale.set(0.6,0.6,5);boom.position.set(0,0.6,-5);grp.add(boom);
+    var r1=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x3a3f47}));
+    r1.scale.set(9,0.12,0.5);r1.position.y=2.4;grp.add(r1);
+    var r2=new THREE.Mesh(C151_BOX,new THREE.MeshLambertMaterial({color:0x3a3f47}));
+    r2.scale.set(0.5,0.12,9);r2.position.y=2.4;grp.add(r2);
+    var sk=new THREE.Mesh(C151_BOX,dm);sk.scale.set(2.6,0.2,4);sk.position.y=-1.2;grp.add(sk);
+    scene.add(grp);
+    return {grp:grp,rotor1:r1,rotor2:r2};}
+  function startRescue(){
+    if(S.rescue)return;
+    try{
+      if(typeof ATV!=='undefined'&&ATV.drive.on&&typeof atvDismount==='function')atvDismount();
+      var px=G.px, pz=G.pz;
+      var drop=findDrop(px,pz);
+      var pg=S.gridSnap?gridVal(S.gridSnap,px,pz):groundH(px,pz);
+      var pt1=pathTop(px,pz,px,pz);
+      var hover=Math.max(pg+40,pt1+10);
+      var dxn=px-drop.x, dzn=pz-drop.z, dl=Math.hypot(dxn,dzn)||1;
+      var sx=px+dxn/dl*300, sz=pz+dzn/dl*300;
+      var pt2=pathTop(sx,sz,px,pz);
+      hover=Math.max(hover,pt2+10);
+      var pt3=pathTop(px,pz,drop.x,drop.z);
+      hover=Math.max(hover,pt3+10);
+      var heli=buildRescueHeli();
+      heli.grp.position.set(sx,hover,sz);
+      var rope=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,1,6),
+        new THREE.MeshLambertMaterial({color:0x222222}));
+      rope.position.set(px,hover,pz);rope.visible=false;scene.add(rope);
+      S.rescue={phase:'inbound',t:0,from:{x:sx,z:sz},to:{x:px,z:pz},hover:hover,
+        drop:drop,heli:heli,rope:rope,playerY:groundH(px,pz),hangY:hover-2,
+        startPx:px,startPz:pz,ropeLen:0};
+      callBtn.style.display='none';
+    }catch(e){S.rescue=null;}}
+  function cancelRescue(){
+    if(!S.rescue)return;
+    try{scene.remove(S.rescue.heli.grp);scene.remove(S.rescue.rope);}catch(e){}
+    S.rescue=null;}
+  S.cancelRescue=cancelRescue;S.startRescue=startRescue;
+  tapN(callBtn,function(){startRescue();});
+  function rescueTick(gdt){
+    var R=S.rescue;if(!R)return;
+    R.t+=gdt;
+    var heli=R.heli.grp;
+    heli.rotation.y+=gdt*0.2;
+    R.heli.rotor1.rotation.y+=gdt*20;R.heli.rotor2.rotation.y+=gdt*20;
+    if(R.phase==='inbound'){
+      var k=Math.min(1,R.t/4);
+      heli.position.set(R.from.x+(R.to.x-R.from.x)*k,R.hover,R.from.z+(R.to.z-R.from.z)*k);
+      if(k>=1){R.phase='rope';R.t=0;R.rope.visible=true;}}
+    else if(R.phase==='rope'){
+      var full=(R.hover-2)-(R.playerY)+3;
+      var len=full*Math.min(1,R.t/1);
+      R.ropeLen=len;
+      R.rope.scale.y=Math.max(0.01,len);
+      R.rope.position.set(R.to.x,R.hover-1-len/2,R.to.z);
+      if(R.t>=1){R.phase='lift';R.t=0;}}
+    else if(R.phase==='lift'){
+      var lt=R.t;
+      var hangY;
+      if(lt<2){var kk=lt/2;hangY=R.playerY+(R.hover-2-R.playerY)*kk;G.px=R.to.x;G.pz=R.to.z;}
+      else if(lt<6){var kk2=(lt-2)/4;hangY=R.hover-2;
+        G.px=R.to.x+(R.drop.x-R.to.x)*kk2;G.pz=R.to.z+(R.drop.z-R.to.z)*kk2;}
+      else if(lt<9){var kk3=(lt-6)/3;hangY=(R.hover-2)+(groundH(R.drop.x,R.drop.z)-(R.hover-2))*kk3;
+        G.px=R.drop.x;G.pz=R.drop.z;}
+      else{
+        G.px=R.drop.x;G.pz=R.drop.z;
+        var dg=groundH(R.drop.x,R.drop.z);
+        try{camera.position.y=dg+1.7;}catch(e){}
+        R.phase='depart';R.t=0;
+        scene.remove(R.rope);R.rope=null;
+        S.rescue=R;
+        return;}
+      var len2=(R.hover-1)-(hangY);
+      R.rope.scale.y=Math.max(0.01,len2);
+      R.rope.position.set(G.px,R.hover-1-len2/2,G.pz);
+      heli.position.set(G.px,R.hover,G.pz);
+      try{camera.position.y=hangY+1.7;}catch(e){}
+      R.hangY=hangY;}
+    else if(R.phase==='depart'){
+      var k2=Math.min(1,R.t/5);
+      var dxn2=R.to.x-R.drop.x, dzn2=R.to.z-R.drop.z, dl2=Math.hypot(dxn2,dzn2)||1;
+      heli.position.set(R.drop.x+dxn2/dl2*300*k2,R.hover,R.drop.z+dzn2/dl2*300*k2);
+      if(k2>=1){scene.remove(heli);S.rescue=null;}}
+  }
+  /* ---- reload wrappers: cancel rescue cleanly, rebuild bridge, clear wreck,
+     nudge a parked heli out of a restored building (state untouched) ---- */
+  try{
+    var origStepCamps=stepCamps;
+    stepCamps=function(){origStepCamps();rebuildBridge();};
+  }catch(e){}
+  try{
+    var origFiresOut=stepFiresOut;
+    stepFiresOut=function(){origFiresOut();clearWreck();};
+  }catch(e){}
+  try{
+    var origReload=runReloadMap;
+    runReloadMap=async function(){
+      cancelRescue();
+      await origReload();
+      try{
+        if(typeof V13F!=='undefined'&&V13F.grp&&V13F.grp.visible&&!V13F.flyOn){
+          var hb=roofAt(V13F.fly.x,V13F.fly.z);
+          if(hb){var po=pushOut(V13F.fly.x,V13F.fly.z);
+            V13F.fly.x=po[0];V13F.fly.z=po[1];V13F.fly.y=V13F.surfY(po[0],po[1]);heliPlace(0);}}
+      }catch(e){}
+    };
+    S.runReloadMap=runReloadMap;
+  }catch(e){}
+  /* ---- V15MRG.tick wrapper: original first, then amped seq, module
+     particles, clouds, mounts, cooldown text, quality fallback, bridge
+     pieces, rescue, crash wreck, CALL HELI visibility ---- */
+  try{
+    var origMRGTick=V15MRG.tick;
+    V15MRG.tick=function(dt,gdt){
+      origMRGTick.call(this,dt,gdt);
+      var gg=(gdt>0)?gdt:0;
+      var sq=V15NUKE.seq;
+      if(sq&&sq.fb&&sq.fb.parent&&!sq.fireballDone){
+        var t=sq.t, fb=sq.fb;
+        if(t<0.25){var r=6+30*(t/0.25);fb.scale.set(r,r,r);fb.position.y=sq.gy+5;}
+        else if(t<1.5){var k=(t-0.25)/1.25, r2=36+74*k;fb.scale.set(r2,r2,r2);fb.position.y=sq.gy+5+20*k;fb.material.color.setHex(0xff6622);}
+        else if(t<3){var k2=(t-1.5)/1.5, r3=110-50*k2;fb.scale.set(r3,r3,r3);fb.position.y=sq.gy+25+35*k2;fb.material.color.setHex(0x554444);fb.material.opacity=1-0.6*k2;}}
+      if(sq&&sq.rings)for(var ri=0;ri<sq.rings.length;ri++){var rg=sq.rings[ri];
+        if(rg.mesh.visible&&!rg.done){var k3=Math.min(1,(sq.t-rg.at)/3.5), rad=5+600*k3;
+          rg.mesh.scale.set(rad,rad,1);rg.mesh.material.opacity=0.85*(1-k3);}}
+      if(sq&&sq.dust&&sq.dust.visible){var k4=Math.min(1,(sq.t-0.2)/4), rad2=10+500*k4;
+        sq.dust.scale.set(rad2,1,rad2);sq.dust.material.opacity=0.35*(1-k4);}
+      for(var di=0;di<modDebris.length;di++){var dd=modDebris[di];if(!dd.active)continue;
+        dd.mesh.position.x+=dd.vx*gg;dd.mesh.position.y+=dd.vy*gg;dd.mesh.position.z+=dd.vz*gg;
+        dd.vy-=22*gg;dd.life-=gg;
+        var gy3=groundH(dd.mesh.position.x,dd.mesh.position.z);
+        if(dd.mesh.position.y<gy3){dd.mesh.position.y=gy3;dd.vy*=-0.35;dd.vx*=0.6;dd.vz*=0.6;}
+        if(dd.life<=0){dd.active=false;dd.mesh.visible=false;}}
+      for(var ei=0;ei<modEmbers.length;ei++){var em=modEmbers[ei];if(!em.active)continue;
+        em.spr.position.x+=em.vx*gg;em.spr.position.y+=em.vy*gg;em.spr.position.z+=em.vz*gg;
+        em.life-=gg;var es=Math.max(0.01,em.s0*(em.life/5));em.spr.scale.set(es,es,1);
+        if(em.life<=0){em.active=false;em.spr.visible=false;}}
+      var now=nowMs();
+      for(var ci=S.clouds.length-1;ci>=0;ci--){var cl=S.clouds[ci];
+        var age=(now-cl.birth)/1000;
+        var baseOp=age<300?0.55-(0.30*(age/300)):0.25;
+        if(cl.fading){cl.fadeT+=gg;var fo=Math.max(0,1-cl.fadeT/10);
+          cl.spheres.forEach(function(sp){sp.material.opacity=0.55*fo;});
+          cl.smokes.forEach(function(sm){sm.material.opacity=0.3*fo;});
+          if(cl.fadeT>=10){scene.remove(cl.grp);S.clouds.splice(ci,1);}continue;}
+        /* #13: was cloud-level hiding (ci%2===0 -> ALL spheres of every
+           other cloud invisible, permanent, never restored). That made
+           the SOLE cloud vanish entirely at qLevel 1 — violating the
+           brief's "must remain present until cleared" (q1d12 cloud
+           11P/4F: cloud existed at opacity 0.25 yet visible=false).
+           Now sphere-level thinning: every other SPHERE in EACH cloud
+           hides, so every cloud keeps 7/14 spheres visibly present
+           while still halving sphere draws. */
+        if(S.qLevel>=1){cl.spheres.forEach(function(sp,si){if(si%2===0)sp.visible=false;});}
+        cl.spheres.forEach(function(sp){
+          sp.material.opacity=baseOp;
+          sp.position.y+=0.3*gg;});
+        cl.smokes.forEach(function(sm){
+          sm.material.opacity=0.15+0.20*(0.5+0.5*Math.sin(now/1000+sm.position.x));
+          sm.position.x+=Math.sin(now/2000+sm.position.z)*0.3*gg;});}
+      if(S.mountGlows)for(var mg=0;mg<S.mountGlows.length;mg++){
+        if(S.mountGlows[mg])S.mountGlows[mg].opacity=0.25+0.20*Math.sin((typeof G!=='undefined'?G.swayT:0)*3+mg);}
+      /* PATCH 7 tick: falling-bomb glow pulse + ground-shadow track/clear */
+      try{
+        if(V15NUKE.bombs.length>0){
+          if(S.fallGlow)S.fallGlow.material.opacity=0.25+0.20*Math.sin(Date.now()/1000*3);
+          var fb0=V15NUKE.bombs[0];
+          if(S.fallShadow){
+            var gy0=surfH(fb0.x,fb0.z), alt0=fb0.y-gy0;
+            S.fallShadow.position.set(fb0.x,gy0+0.15,fb0.z);
+            var sc0=1.5+Math.max(0,alt0)*0.03;
+            S.fallShadow.scale.set(sc0,sc0,1);
+            S.fallShadow.material.opacity=Math.max(0.10,Math.min(0.30,0.30-Math.max(0,alt0)*0.0015));}
+        }else if(S.fallShadow){scene.remove(S.fallShadow);S.fallShadow=null;S.fallGlow=null;}
+      }catch(e){}
+      try{ensureMounts();}catch(e){}
+      try{
+        var nk=document.getElementById('btnNuke');
+        if(nk&&coolLeft()>0){var exp='NUKE<br>'+fmt(coolLeft());
+          if(nk.innerHTML!==exp)nk.innerHTML=exp;}
+      }catch(e){}
+      S.dtAcc+=dt;S.dtN++;
+      if(S.dtAcc>=5&&!V15NUKE.seq){
+        var mean=S.dtAcc/Math.max(1,S.dtN);
+        if(mean>0.024&&S.qLevel===0)S.qLevel=1;
+        S.dtAcc=0;S.dtN=0;}
+      for(var bp=S.bridgePieces.length-1;bp>=0;bp--){var pc=S.bridgePieces[bp], pm=pc.mesh;
+        if(pc.state==='falling'){
+          pc.vy-=22*gg;pm.position.y+=pc.vy*gg;pm.position.x+=pc.vx*gg;pm.position.z+=pc.vz*gg;
+          pm.rotation.x+=pc.rs*gg;pm.rotation.z+=pc.rs*0.6*gg;
+          if(pm.position.y<=-5){
+            if(pc.persist){pm.position.y=-4.2;pc.state='wreck';}
+            else{pm.position.y=-4.7;pc.state='float';pc.floatT=8;}}}
+        else if(pc.state==='float'){
+          pc.floatT-=gg;pm.position.y=-4.7+Math.sin(now/500)*0.15;
+          if(pc.floatT<=0)pc.state='sink';}
+        else if(pc.state==='sink'){
+          pm.position.y-=2*gg;
+          if(pm.position.y<-25){scene.remove(pm);S.bridgePieces.splice(bp,1);}}}
+      rescueTick(gg);
+      try{callBtn.style.display=rescueVisible()?'flex':'none';}catch(e){}
+      if(S.crashFb){S.crashFb.t+=gg;
+        var cf=S.crashFb.mesh, cs=Math.max(0.01,12*(1-S.crashFb.t/1.5));
+        cf.scale.set(cs,cs,cs);cf.material.opacity=Math.max(0,0.95*(1-S.crashFb.t/1.5));
+        if(S.crashFb.t>=1.5){scene.remove(cf);S.crashFb=null;}}
+      for(var cs2=S.crashSmoke.length-1;cs2>=0;cs2--){var csm=S.crashSmoke[cs2];
+        csm.t+=gg;csm.spr.position.y+=csm.vy*gg;csm.spr.material.opacity=Math.max(0,0.5*(1-csm.t/6));
+        if(csm.t>=6){scene.remove(csm.spr);S.crashSmoke.splice(cs2,1);}}
+      if(S.wreck&&!S.wreck.rested){
+        var w=S.wreck.grp;
+        if(w.position.y>S.wreck.ground){
+          S.wreck.vy-=22*gg;w.position.y+=S.wreck.vy*gg;w.rotation.x+=S.wreck.rs*gg;
+          if(w.position.y<=S.wreck.ground){w.position.y=S.wreck.ground;
+            if(Math.abs(S.wreck.vy)>4){S.wreck.vy*=-0.3;}
+            else{S.wreck.vy=0;S.wreck.rested=true;w.rotation.x=0;}}}
+        else S.wreck.rested=true;}
+    };
+  }catch(e){}
+  S.tickWrapped=true;
+})();
 
 </script>
 <script>
