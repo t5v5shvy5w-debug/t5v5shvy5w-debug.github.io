@@ -74,6 +74,7 @@
 <div id="topbar">
   <h1>RUINBORN <span>//</span> FEMALE SURVIVOR</h1>
   <span class="sub">model viewer</span>
+  <span class="chip" id="walkVer" title="walk version — if this still says v2, your browser is showing the cached old page">walk v3</span>
   <div class="spacer"></div>
   <button id="panelBtn">☰ Panel</button>
   <span class="chip" id="statVerts">—</span>
@@ -209,6 +210,7 @@ scene.add(center);
 let modelRoot = null;
 const walkBones = {};   // name -> { bone, base: Quaternion }
 let walkPhase = 0, walkAmount = 0, heading = 0;
+let thighOffL = 0, thighOffR = 0;   // v3: constant offsets that cancel the base stride so the legs swing around neutral
 const heroPos = new THREE.Vector3(0, 0, 0);
 const joy = { x: 0, y: 0, active: false };
 const keys = {};
@@ -238,8 +240,12 @@ function applyWalkPose() {
   // thighs swing opposite; calves bend when the leg swings through; arms counter-swing
   // v2 (Nov 7): narrower stride (was 0.45 — legs scissored into a stiff split),
   // knee folds DURING the forward swing (peak mid-swing, straight at heel strike / toe-off)
-  set('CC_Base_L_Thigh', 0.28 * a * s);
-  set('CC_Base_R_Thigh', 0.28 * a * c);
+  // v3 (Nov 7): cadence was 2x too fast (rate 6.5 = 4.5 steps/sec, frantic march).
+  // rate 4.0 = ~2.8 steps/sec at 2.2 m/s, a natural fast walk. Base pose is
+  // neutral (measured: thighs ~straight down at rest), so no stride offset needed;
+  // thighOffL/R stay 0 unless tuned via the debug hook.
+  set('CC_Base_L_Thigh', thighOffL + 0.28 * a * s);
+  set('CC_Base_R_Thigh', thighOffR + 0.28 * a * c);
   set('CC_Base_L_Calf', 1.00 * a * Math.max(0, Math.cos(walkPhase)));
   set('CC_Base_R_Calf', 1.00 * a * Math.max(0, Math.cos(walkPhase + Math.PI)));
   set('CC_Base_L_Upperarm', 0.22 * a * c);
@@ -286,7 +292,7 @@ function updateWalk(dt) {
     while (dh < -Math.PI) dh += 2 * Math.PI;
     heading += dh * Math.min(1, dt * 10);
     modelRoot.rotation.y = heading;
-    walkPhase += step * 6.5;   // quicker steps to match the shorter stride (was 4.5)
+    walkPhase += step * 4.0;   // v3: natural cadence ~2.8 steps/sec (was 6.5 = 4.5 steps/sec, frantic)
     walkAmount = Math.min(1, walkAmount + dt * 6);
   } else {
     walkAmount = Math.max(0, walkAmount - dt * 6);
@@ -359,6 +365,21 @@ loader.load('ruinborn_female_full_webp.glb', (gltf) => {
       thighL: walkBones['CC_Base_L_Thigh'] ? walkBones['CC_Base_L_Thigh'].bone.rotation.x : null,
       thighR: walkBones['CC_Base_R_Thigh'] ? walkBones['CC_Base_R_Thigh'].bone.rotation.x : null,
     }),
+    // debug: tune the stride-neutralizing offsets at runtime (radians)
+    setThighOff: (l, r) => { thighOffL = l; thighOffR = r; applyWalkPose(); },
+    // debug: thigh direction hip->knee in world space (normalized), per leg
+    getThighDir: () => {
+      const out = {};
+      const v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
+      for (const [key, th, cf] of [['L', 'CC_Base_L_Thigh', 'CC_Base_L_Calf'], ['R', 'CC_Base_R_Thigh', 'CC_Base_R_Calf']]) {
+        const t = walkBones[th], c = walkBones[cf];
+        if (!t || !c) { out[key] = null; continue; }
+        t.bone.getWorldPosition(v1); c.bone.getWorldPosition(v2);
+        const d = v2.clone().sub(v1).normalize();
+        out[key] = [d.x, d.y, d.z].map(v => +v.toFixed(3));
+      }
+      return out;
+    },
   };
 }, (xhr) => {
   if (xhr.total) {
