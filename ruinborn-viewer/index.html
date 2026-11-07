@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>RUINBORN — Female Survivor Viewer</title>
+<style>
+  :root { --blue:#3b82f6; --panel:rgba(10,14,24,.88); --line:#22304a; --txt:#dbe7ff; --dim:#8aa0c2; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { width:100%; height:100%; overflow:hidden; background:#0b0f18; color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  #app { position:fixed; inset:0; }
+  canvas { display:block; touch-action:none; }
+
+  #topbar { position:fixed; top:0; left:0; right:0; z-index:10; display:flex; align-items:center; gap:10px;
+    padding:10px 14px; background:linear-gradient(180deg, rgba(5,8,16,.92), rgba(5,8,16,0)); pointer-events:none; }
+  #topbar h1 { font-size:17px; letter-spacing:.14em; font-weight:800; }
+  #topbar h1 span { color:var(--blue); }
+  #topbar .sub { font-size:12px; color:var(--dim); margin-left:2px; }
+  #topbar .spacer { flex:1; }
+  .chip { pointer-events:auto; font-size:12px; background:var(--panel); border:1px solid var(--line);
+    border-radius:999px; padding:5px 10px; color:var(--txt); }
+
+  #panel { position:fixed; z-index:10; top:56px; left:10px; bottom:10px; width:300px; max-width:86vw;
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; display:flex; flex-direction:column;
+    backdrop-filter:blur(6px); overflow:hidden; }
+  #panel.hidden { display:none; }
+  #panel header { padding:12px 14px 8px; border-bottom:1px solid var(--line); }
+  #panel header h2 { font-size:14px; letter-spacing:.08em; }
+  #panel header p { font-size:12px; color:var(--dim); margin-top:3px; line-height:1.45; }
+  #panel .body { flex:1; overflow-y:auto; padding:10px 14px 14px; -webkit-overflow-scrolling:touch; }
+  .section { margin-bottom:16px; }
+  .section > h3 { font-size:12px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; margin:10px 0 8px; }
+  .row { display:flex; align-items:center; gap:8px; margin:6px 0; }
+  .row label { flex:1; font-size:13px; }
+  .row .val { font-size:12px; color:var(--dim); width:34px; text-align:right; font-variant-numeric:tabular-nums; }
+  button { background:#16233d; color:var(--txt); border:1px solid var(--line); border-radius:9px;
+    padding:8px 12px; font-size:13px; cursor:pointer; }
+  button:active { background:#1e3054; }
+  button.primary { background:var(--blue); border-color:var(--blue); color:#fff; font-weight:700; }
+  button.wide { width:100%; }
+  input[type=range] { flex:1; min-width:0; accent-color:var(--blue); }
+  input[type=text] { width:100%; background:#0d1526; color:var(--txt); border:1px solid var(--line);
+    border-radius:9px; padding:8px 10px; font-size:13px; outline:none; }
+  input[type=text]::placeholder { color:var(--dim); }
+  .morph-group { margin-top:10px; }
+  .morph-group > h4 { font-size:12px; color:var(--dim); margin:8px 0 4px; word-break:break-all; }
+  .morph-group .row label { font-size:12px; word-break:break-all; }
+  .empty { font-size:12px; color:var(--dim); padding:8px 0; }
+
+  #toolbar { position:fixed; z-index:10; right:10px; bottom:10px; display:flex; flex-direction:column; gap:8px; }
+  #toolbar button { box-shadow:0 2px 10px rgba(0,0,0,.4); }
+
+  #loading { position:fixed; inset:0; z-index:20; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; background:#0b0f18; }
+  #loading .bar { width:min(280px,70vw); height:8px; background:#16233d; border-radius:99px; overflow:hidden; }
+  #loading .bar i { display:block; height:100%; width:0%; background:var(--blue); transition:width .15s; }
+  #loading p { font-size:13px; color:var(--dim); }
+  #loading.error p { color:#ff9a9a; }
+  #panelToggle { position:fixed; z-index:11; left:10px; bottom:10px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="topbar">
+  <h1>RUINBORN <span>//</span> FEMALE SURVIVOR</h1>
+  <span class="sub">model viewer</span>
+  <div class="spacer"></div>
+  <span class="chip" id="statVerts">—</span>
+  <span class="chip" id="statMorphs">—</span>
+</div>
+
+<div id="panel">
+  <header>
+    <h2>TEST AREA</h2>
+    <p>Flat grid, orbit with one finger / drag, pinch to zoom. Play the animation, then drive any face morph below.</p>
+  </header>
+  <div class="body">
+    <div class="section">
+      <h3>Animation</h3>
+      <div class="row"><label id="clipName">Clip: —</label></div>
+      <div class="row">
+        <button id="playBtn" class="primary" style="flex:1">▶ Play</button>
+        <button id="stopBtn">■ Stop</button>
+      </div>
+      <div class="row"><label>Speed</label>
+        <input id="speed" type="range" min="0.1" max="2" step="0.05" value="1">
+        <span class="val" id="speedVal">1.00×</span>
+      </div>
+      <div class="row"><label>Time</label><span class="val" id="timeVal" style="width:64px">0.00s</span></div>
+    </div>
+
+    <div class="section">
+      <h3>Face morphs <span id="morphCount"></span></h3>
+      <input id="morphFilter" type="text" placeholder="Filter morphs… (e.g. brow, smile, V_)">
+      <div class="row" style="margin-top:8px">
+        <button id="resetMorphs" class="wide">Reset all morphs</button>
+      </div>
+      <div id="morphList"><p class="empty">Loading model…</p></div>
+    </div>
+  </div>
+</div>
+
+<div id="toolbar">
+  <button id="wireBtn">Wireframe: off</button>
+  <button id="spinBtn">Auto-rotate: off</button>
+  <button id="camBtn">Reset camera</button>
+</div>
+<button id="panelToggle">☰ Panel</button>
+
+<div id="loading">
+  <div class="bar"><i id="loadFill"></i></div>
+  <p id="loadText">Loading model… 0%</p>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const app = document.getElementById('app');
+const loadingEl = document.getElementById('loading');
+const loadFill = document.getElementById('loadFill');
+const loadText = document.getElementById('loadText');
+const panel = document.getElementById('panel');
+
+// --- renderer / scene / camera ---
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+app.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0f18);
+scene.fog = new THREE.Fog(0x0b0f18, 9, 22);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.05, 100);
+const CAM_HOME = new THREE.Vector3(0.6, 1.45, 3.1);
+const TGT_HOME = new THREE.Vector3(0, 0.95, 0);
+camera.position.copy(CAM_HOME);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.copy(TGT_HOME);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 0.5;
+controls.maxDistance = 9;
+controls.maxPolarAngle = Math.PI * 0.52;
+controls.autoRotateSpeed = 1.2;
+
+// --- lights ---
+scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x1a1a2e, 0.9));
+const key = new THREE.DirectionalLight(0xffffff, 2.2);
+key.position.set(2.5, 4.5, 2.5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -2; key.shadow.camera.right = 2;
+key.shadow.camera.top = 3; key.shadow.camera.bottom = -1;
+key.shadow.camera.far = 15;
+key.shadow.bias = -0.0005;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x7fb2ff, 0.9);
+rim.position.set(-2.5, 2.5, -2.5);
+scene.add(rim);
+
+// --- flat grid test area ---
+const grid = new THREE.GridHelper(12, 24, 0x3b82f6, 0x223350);
+grid.position.y = 0.001;
+scene.add(grid);
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(12, 12),
+  new THREE.ShadowMaterial({ opacity: 0.35 })
+);
+ground.rotation.x = -Math.PI/2;
+ground.receiveShadow = true;
+scene.add(ground);
+// faint center marker
+const center = new THREE.Mesh(
+  new THREE.RingGeometry(0.18, 0.22, 48),
+  new THREE.MeshBasicMaterial({ color:0x3b82f6, side:THREE.DoubleSide, transparent:true, opacity:0.7 })
+);
+center.rotation.x = -Math.PI/2; center.position.y = 0.002;
+scene.add(center);
+
+// --- load the model ---
+let mixer = null, action = null, clip = null, clock = new THREE.Clock();
+let morphMeshes = [];   // { mesh, names:[...] }
+let wireOn = false;
+
+const loader = new GLTFLoader();
+loader.load('ruinborn_female_full_webp.glb', (gltf) => {
+  const model = gltf.scene;
+  model.traverse((o) => {
+    if (o.isMesh) {
+      o.castShadow = true;
+      o.receiveShadow = false;
+      if (o.morphTargetDictionary) {
+        morphMeshes.push({ mesh:o, names:Object.keys(o.morphTargetDictionary) });
+      }
+    }
+  });
+  scene.add(model);
+
+  // stats
+  let verts = 0;
+  model.traverse((o) => { if (o.isMesh && o.geometry) verts += o.geometry.attributes.position.count; });
+  document.getElementById('statVerts').textContent = verts.toLocaleString() + ' verts';
+  const totalMorphs = morphMeshes.reduce((n, m) => n + m.names.length, 0);
+  document.getElementById('statMorphs').textContent = totalMorphs + ' morphs';
+  document.getElementById('morphCount').textContent = '(' + totalMorphs + ')';
+
+  // animation
+  if (gltf.animations && gltf.animations.length) {
+    clip = gltf.animations[0];
+    document.getElementById('clipName').textContent = 'Clip: ' + (clip.name || 'Animation')
+      + '  ·  ' + clip.duration.toFixed(2) + 's';
+    mixer = new THREE.AnimationMixer(model);
+    action = mixer.clipAction(clip);
+    action.play();
+    setPlayUI(true);
+  } else {
+    document.getElementById('clipName').textContent = 'Clip: none in file';
+  }
+
+  buildMorphUI();
+  loadingEl.style.display = 'none';
+  window.__viewerReady = true;
+  window.__morphMeshes = morphMeshes;
+  window.__mixer = mixer;
+}, (xhr) => {
+  if (xhr.total) {
+    const p = Math.round(xhr.loaded / xhr.total * 100);
+    loadFill.style.width = p + '%';
+    loadText.textContent = 'Loading model… ' + p + '%  (' + (xhr.loaded/1e6).toFixed(1) + ' / ' + (xhr.total/1e6).toFixed(1) + ' MB)';
+  }
+}, (err) => {
+  loadingEl.classList.add('error');
+  loadText.textContent = 'Failed to load the model: ' + (err && err.message ? err.message : err);
+  console.error(err);
+});
+
+// --- morph UI ---
+const morphList = document.getElementById('morphList');
+function buildMorphUI() {
+  morphList.innerHTML = '';
+  morphMeshes.forEach((entry) => {
+    const group = document.createElement('div');
+    group.className = 'morph-group';
+    group.dataset.mesh = entry.mesh.name;
+    const h = document.createElement('h4');
+    h.textContent = entry.mesh.name + ' (' + entry.names.length + ')';
+    group.appendChild(h);
+    entry.names.forEach((name) => {
+      const idx = entry.mesh.morphTargetDictionary[name];
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.dataset.name = name.toLowerCase();
+      const label = document.createElement('label');
+      label.textContent = name;
+      const slider = document.createElement('input');
+      slider.type = 'range'; slider.min = '0'; slider.max = '1'; slider.step = '0.01'; slider.value = '0';
+      const val = document.createElement('span');
+      val.className = 'val'; val.textContent = '0.00';
+      slider.addEventListener('input', () => {
+        entry.mesh.morphTargetInfluences[idx] = parseFloat(slider.value);
+        val.textContent = parseFloat(slider.value).toFixed(2);
+      });
+      row.appendChild(label); row.appendChild(slider); row.appendChild(val);
+      group.appendChild(row);
+    });
+    morphList.appendChild(group);
+  });
+  applyMorphFilter();
+}
+document.getElementById('morphFilter').addEventListener('input', applyMorphFilter);
+function applyMorphFilter() {
+  const q = document.getElementById('morphFilter').value.trim().toLowerCase();
+  morphList.querySelectorAll('.morph-group').forEach((g) => {
+    let any = false;
+    g.querySelectorAll('.row').forEach((r) => {
+      const hit = !q || r.dataset.name.includes(q);
+      r.style.display = hit ? '' : 'none';
+      if (hit) any = true;
+    });
+    g.style.display = any ? '' : 'none';
+  });
+}
+document.getElementById('resetMorphs').addEventListener('click', () => {
+  morphList.querySelectorAll('input[type=range]').forEach((s) => {
+    s.value = '0';
+    s.dispatchEvent(new Event('input'));
+  });
+});
+
+// --- animation controls ---
+const playBtn = document.getElementById('playBtn');
+function setPlayUI(playing) {
+  playBtn.textContent = playing ? '⏸ Pause' : '▶ Play';
+}
+playBtn.addEventListener('click', () => {
+  if (!action) return;
+  if (action.paused) { action.paused = false; setPlayUI(true); }
+  else { action.paused = true; setPlayUI(false); }
+});
+document.getElementById('stopBtn').addEventListener('click', () => {
+  if (!action) return;
+  action.stop(); action.play(); action.paused = true; setPlayUI(false);
+  document.getElementById('timeVal').textContent = '0.00s';
+});
+const speedEl = document.getElementById('speed');
+speedEl.addEventListener('input', () => {
+  if (mixer) mixer.timeScale = parseFloat(speedEl.value);
+  document.getElementById('speedVal').textContent = parseFloat(speedEl.value).toFixed(2) + '×';
+});
+
+// --- toolbar ---
+document.getElementById('wireBtn').addEventListener('click', (e) => {
+  wireOn = !wireOn;
+  scene.traverse((o) => { if (o.isMesh && o.material) o.material.wireframe = wireOn; });
+  e.target.textContent = 'Wireframe: ' + (wireOn ? 'on' : 'off');
+});
+document.getElementById('spinBtn').addEventListener('click', (e) => {
+  controls.autoRotate = !controls.autoRotate;
+  e.target.textContent = 'Auto-rotate: ' + (controls.autoRotate ? 'on' : 'off');
+});
+document.getElementById('camBtn').addEventListener('click', () => {
+  camera.position.copy(CAM_HOME);
+  controls.target.copy(TGT_HOME);
+});
+document.getElementById('panelToggle').addEventListener('click', () => {
+  panel.classList.toggle('hidden');
+});
+
+// --- resize + loop ---
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  if (mixer) {
+    mixer.update(dt);
+    if (action && !action.paused) {
+      document.getElementById('timeVal').textContent = action.time.toFixed(2) + 's';
+    }
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
