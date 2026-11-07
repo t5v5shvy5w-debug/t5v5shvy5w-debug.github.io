@@ -236,12 +236,14 @@ function applyWalkPose() {
     w.bone.quaternion.copy(w.base).multiply(_q);
   };
   // thighs swing opposite; calves bend when the leg swings through; arms counter-swing
-  set('CC_Base_L_Thigh', 0.45 * a * s);
-  set('CC_Base_R_Thigh', 0.45 * a * c);
-  set('CC_Base_L_Calf', 0.85 * a * Math.max(0, Math.sin(walkPhase - 0.9)));
-  set('CC_Base_R_Calf', 0.85 * a * Math.max(0, Math.sin(walkPhase + Math.PI - 0.9)));
-  set('CC_Base_L_Upperarm', 0.30 * a * c);
-  set('CC_Base_R_Upperarm', 0.30 * a * s);
+  // v2 (Nov 7): narrower stride (was 0.45 — legs scissored into a stiff split),
+  // knee folds DURING the forward swing (peak mid-swing, straight at heel strike / toe-off)
+  set('CC_Base_L_Thigh', 0.28 * a * s);
+  set('CC_Base_R_Thigh', 0.28 * a * c);
+  set('CC_Base_L_Calf', 1.00 * a * Math.max(0, Math.cos(walkPhase)));
+  set('CC_Base_R_Calf', 1.00 * a * Math.max(0, Math.cos(walkPhase + Math.PI)));
+  set('CC_Base_L_Upperarm', 0.22 * a * c);
+  set('CC_Base_R_Upperarm', 0.22 * a * s);
   set('CC_Base_L_Forearm', -0.20 * a - 0.12 * a * c);
   set('CC_Base_R_Forearm', -0.20 * a - 0.12 * a * s);
   set('CC_Base_Spine01', 0.05 * a * s);
@@ -284,7 +286,7 @@ function updateWalk(dt) {
     while (dh < -Math.PI) dh += 2 * Math.PI;
     heading += dh * Math.min(1, dt * 10);
     modelRoot.rotation.y = heading;
-    walkPhase += step * 4.5;
+    walkPhase += step * 6.5;   // quicker steps to match the shorter stride (was 4.5)
     walkAmount = Math.min(1, walkAmount + dt * 6);
   } else {
     walkAmount = Math.max(0, walkAmount - dt * 6);
