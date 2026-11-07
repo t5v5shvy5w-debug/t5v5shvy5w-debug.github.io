@@ -57,7 +57,15 @@
   #loading .bar i { display:block; height:100%; width:0%; background:var(--blue); transition:width .15s; }
   #loading p { font-size:13px; color:var(--dim); }
   #loading.error p { color:#ff9a9a; }
-  #panelToggle { position:fixed; z-index:11; left:10px; bottom:10px; }
+  #panelToggle { display:none; }
+  #panelBtn { pointer-events:auto; }
+
+  /* virtual joystick — bottom-left, above the panel */
+  #joy { position:fixed; z-index:15; left:16px; bottom:16px; width:128px; height:128px; border-radius:50%;
+    background:rgba(20,32,56,.55); border:1px solid rgba(90,140,230,.55); touch-action:none;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+  #joyKnob { width:56px; height:56px; border-radius:50%; background:rgba(59,130,246,.85);
+    border:2px solid rgba(219,231,255,.9); box-shadow:0 2px 10px rgba(0,0,0,.5); pointer-events:none; }
 </style>
 </head>
 <body>
@@ -67,6 +75,7 @@
   <h1>RUINBORN <span>//</span> FEMALE SURVIVOR</h1>
   <span class="sub">model viewer</span>
   <div class="spacer"></div>
+  <button id="panelBtn">☰ Panel</button>
   <span class="chip" id="statVerts">—</span>
   <span class="chip" id="statMorphs">—</span>
 </div>
@@ -107,7 +116,7 @@
   <button id="spinBtn">Auto-rotate: off</button>
   <button id="camBtn">Reset camera</button>
 </div>
-<button id="panelToggle">☰ Panel</button>
+<div id="joy"><div id="joyKnob"></div></div>
 
 <div id="loading">
   <div class="bar"><i id="loadFill"></i></div>
@@ -152,6 +161,7 @@ const TGT_HOME = new THREE.Vector3(0, 0.95, 0);
 camera.position.copy(CAM_HOME);
 
 const controls = new OrbitControls(camera, renderer.domElement);
+window.__camera = camera; window.__controls = controls;
 controls.target.copy(TGT_HOME);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
@@ -195,6 +205,101 @@ center.rotation.x = -Math.PI/2; center.position.y = 0.002;
 scene.add(center);
 
 // --- load the model ---
+// --- joystick walking (procedural — the file has no walk cycle, just a 0.03s pose) ---
+let modelRoot = null;
+const walkBones = {};   // name -> { bone, base: Quaternion }
+let walkPhase = 0, walkAmount = 0, heading = 0;
+const heroPos = new THREE.Vector3(0, 0, 0);
+const joy = { x: 0, y: 0, active: false };
+const keys = {};
+const WALK_SPEED = 2.2, BOUND = 5.5;
+const _q = new THREE.Quaternion(), _axisX = new THREE.Vector3(1, 0, 0);
+
+function captureWalkBones(root) {
+  const names = ['CC_Base_L_Thigh', 'CC_Base_R_Thigh', 'CC_Base_L_Calf', 'CC_Base_R_Calf',
+    'CC_Base_L_Upperarm', 'CC_Base_R_Upperarm', 'CC_Base_L_Forearm', 'CC_Base_R_Forearm',
+    'CC_Base_Spine01', 'CC_Base_Pelvis'];
+  names.forEach((n) => {
+    const b = root.getObjectByName(n);
+    if (b) walkBones[n] = { bone: b, base: b.quaternion.clone() };
+  });
+  window.__walkBones = Object.keys(walkBones);
+}
+
+function applyWalkPose() {
+  const s = Math.sin(walkPhase), c = Math.sin(walkPhase + Math.PI);
+  const a = walkAmount;
+  const set = (name, ang) => {
+    const w = walkBones[name];
+    if (!w) return;
+    _q.setFromAxisAngle(_axisX, ang);
+    w.bone.quaternion.copy(w.base).multiply(_q);
+  };
+  // thighs swing opposite; calves bend when the leg swings through; arms counter-swing
+  set('CC_Base_L_Thigh', 0.45 * a * s);
+  set('CC_Base_R_Thigh', 0.45 * a * c);
+  set('CC_Base_L_Calf', 0.85 * a * Math.max(0, Math.sin(walkPhase - 0.9)));
+  set('CC_Base_R_Calf', 0.85 * a * Math.max(0, Math.sin(walkPhase + Math.PI - 0.9)));
+  set('CC_Base_L_Upperarm', 0.30 * a * c);
+  set('CC_Base_R_Upperarm', 0.30 * a * s);
+  set('CC_Base_L_Forearm', -0.20 * a - 0.12 * a * c);
+  set('CC_Base_R_Forearm', -0.20 * a - 0.12 * a * s);
+  set('CC_Base_Spine01', 0.05 * a * s);
+  set('CC_Base_Pelvis', 0.05 * a * c);
+  if (modelRoot) modelRoot.position.y = 0.025 * a * Math.abs(Math.sin(walkPhase));
+}
+
+function updateWalk(dt) {
+  if (!modelRoot) return;
+  // input: joystick wins, else WASD/arrows
+  let ix = joy.active ? joy.x : 0, iy = joy.active ? joy.y : 0;
+  if (!joy.active) {
+    if (keys['KeyW'] || keys['ArrowUp']) iy += 1;
+    if (keys['KeyS'] || keys['ArrowDown']) iy -= 1;
+    if (keys['KeyA'] || keys['ArrowLeft']) ix -= 1;
+    if (keys['KeyD'] || keys['ArrowRight']) ix += 1;
+  }
+  const mag = Math.min(1, Math.hypot(ix, iy));
+  if (window.__walkPoseFrozen) {
+    // frozen debug pose: hold phase/amount, still face current heading
+    modelRoot.position.x = heroPos.x;
+    modelRoot.position.z = heroPos.z;
+    applyWalkPose();
+    return;
+  }
+  if (mag > 0.12) {
+    // camera-relative movement
+    const fwd = new THREE.Vector3();
+    camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
+    const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0)).normalize();
+    const dir = new THREE.Vector3().addScaledVector(fwd, iy).addScaledVector(right, ix).normalize();
+    const step = WALK_SPEED * mag * dt;
+    heroPos.addScaledVector(dir, step);
+    heroPos.x = THREE.MathUtils.clamp(heroPos.x, -BOUND, BOUND);
+    heroPos.z = THREE.MathUtils.clamp(heroPos.z, -BOUND, BOUND);
+    // face movement direction (model faces +Z)
+    const targetHeading = Math.atan2(dir.x, dir.z);
+    let dh = targetHeading - heading;
+    while (dh > Math.PI) dh -= 2 * Math.PI;
+    while (dh < -Math.PI) dh += 2 * Math.PI;
+    heading += dh * Math.min(1, dt * 10);
+    modelRoot.rotation.y = heading;
+    walkPhase += step * 4.5;
+    walkAmount = Math.min(1, walkAmount + dt * 6);
+  } else {
+    walkAmount = Math.max(0, walkAmount - dt * 6);
+  }
+  modelRoot.position.x = heroPos.x;
+  modelRoot.position.z = heroPos.z;
+  applyWalkPose();
+  // camera follows her
+  const tx = heroPos.x, tz = heroPos.z;
+  const k = 1 - Math.exp(-6 * dt);
+  const dx = tx - controls.target.x, dz = tz - controls.target.z;
+  camera.position.x += dx * k; camera.position.z += dz * k;
+  controls.target.x += dx * k; controls.target.z += dz * k;
+  controls.target.y = 0.95;
+}
 let mixer = null, action = null, clip = null, clock = new THREE.Clock();
 let morphMeshes = [];   // { mesh, names:[...] }
 let wireOn = false;
@@ -202,6 +307,8 @@ let wireOn = false;
 const loader = new GLTFLoader();
 loader.load('ruinborn_female_full_webp.glb', (gltf) => {
   const model = gltf.scene;
+  modelRoot = model;
+  captureWalkBones(model);
   model.traverse((o) => {
     if (o.isMesh) {
       o.castShadow = true;
@@ -239,6 +346,18 @@ loader.load('ruinborn_female_full_webp.glb', (gltf) => {
   window.__viewerReady = true;
   window.__morphMeshes = morphMeshes;
   window.__mixer = mixer;
+  window.__walk = {
+    setInput: (x, y) => { joy.x = x; joy.y = y; joy.active = true; },
+    clearInput: () => { joy.x = 0; joy.y = 0; joy.active = false; },
+    // debug: freeze a mid-stride pose for screenshots (phase in radians, amount 0..1)
+    setPose: (phase, amount) => { walkPhase = phase; walkAmount = amount; window.__walkPoseFrozen = true; },
+    unfreeze: () => { window.__walkPoseFrozen = false; },
+    getState: () => ({
+      pos: [heroPos.x, heroPos.y, heroPos.z], heading, phase: walkPhase, amount: walkAmount,
+      thighL: walkBones['CC_Base_L_Thigh'] ? walkBones['CC_Base_L_Thigh'].bone.rotation.x : null,
+      thighR: walkBones['CC_Base_R_Thigh'] ? walkBones['CC_Base_R_Thigh'].bone.rotation.x : null,
+    }),
+  };
 }, (xhr) => {
   if (xhr.total) {
     const p = Math.round(xhr.loaded / xhr.total * 100);
@@ -336,12 +455,51 @@ document.getElementById('spinBtn').addEventListener('click', (e) => {
   e.target.textContent = 'Auto-rotate: ' + (controls.autoRotate ? 'on' : 'off');
 });
 document.getElementById('camBtn').addEventListener('click', () => {
-  camera.position.copy(CAM_HOME);
-  controls.target.copy(TGT_HOME);
+  camera.position.set(heroPos.x + CAM_HOME.x, CAM_HOME.y, heroPos.z + CAM_HOME.z);
+  controls.target.set(heroPos.x + TGT_HOME.x, TGT_HOME.y, heroPos.z + TGT_HOME.z);
 });
-document.getElementById('panelToggle').addEventListener('click', () => {
+document.getElementById('panelBtn').addEventListener('click', () => {
   panel.classList.toggle('hidden');
 });
+
+// --- virtual joystick + WASD ---
+const joyEl = document.getElementById('joy');
+const knobEl = document.getElementById('joyKnob');
+const JOY_R = 40;
+let joyPointer = null;
+function joyUpdate(clientX, clientY) {
+  const r = joyEl.getBoundingClientRect();
+  let dx = clientX - (r.left + r.width / 2);
+  let dy = clientY - (r.top + r.height / 2);
+  const len = Math.hypot(dx, dy);
+  if (len > JOY_R) { dx = dx / len * JOY_R; dy = dy / len * JOY_R; }
+  knobEl.style.transform = `translate(${dx}px, ${dy}px)`;
+  joy.x = dx / JOY_R;
+  joy.y = -dy / JOY_R;   // up on screen = forward
+}
+joyEl.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  joyPointer = e.pointerId;
+  joyEl.setPointerCapture(e.pointerId);
+  joy.active = true;
+  joyUpdate(e.clientX, e.clientY);
+});
+joyEl.addEventListener('pointermove', (e) => {
+  if (e.pointerId !== joyPointer) return;
+  e.preventDefault();
+  joyUpdate(e.clientX, e.clientY);
+});
+function joyEnd(e) {
+  if (e.pointerId !== joyPointer) return;
+  joyPointer = null;
+  joy.active = false;
+  joy.x = 0; joy.y = 0;
+  knobEl.style.transform = 'translate(0px, 0px)';
+}
+joyEl.addEventListener('pointerup', joyEnd);
+joyEl.addEventListener('pointercancel', joyEnd);
+addEventListener('keydown', (e) => { keys[e.code] = true; });
+addEventListener('keyup', (e) => { keys[e.code] = false; });
 
 // --- resize + loop ---
 addEventListener('resize', () => {
@@ -352,13 +510,14 @@ addEventListener('resize', () => {
 
 function animate() {
   requestAnimationFrame(animate);
-  const dt = clock.getDelta();
+  const dt = Math.min(clock.getDelta(), 0.05);
   if (mixer) {
     mixer.update(dt);
     if (action && !action.paused) {
       document.getElementById('timeVal').textContent = action.time.toFixed(2) + 's';
     }
   }
+  updateWalk(dt);
   controls.update();
   renderer.render(scene, camera);
 }
