@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WorthLens</title>
+<style>
+  body{background:#000;color:#ffb800;font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+  p{opacity:.85;letter-spacing:.02em}
+</style>
+</head>
+<body>
+<p>Opening WorthLens…</p>
+<script>
+(function(){
+  // Destination is stored encrypted (XOR + base64) so the link isn't readable in plain text.
+  var KEY = "worthlens";
+  var ENC = "HxsGBBtWSkEEGB0GHAQJCx1eBwoTBgRCEwsBFAoeWgkcFUE=";
+  try {
+    var bytes = atob(ENC), url = "";
+    for (var i = 0; i < bytes.length; i++) url += String.fromCharCode(bytes.charCodeAt(i) ^ KEY.charCodeAt(i % KEY.length));
+    window.location.replace(url);
+  } catch(e) {
+    document.querySelector('p').textContent = 'Could not open the link.';
+  }
+})();
+</script>
+</body>
+</html>
