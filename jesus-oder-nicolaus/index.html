@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Jesus oder Nikolaus? — Jesus or Nicholas | Lyrics</title>
+<style>
+  :root { --blue:#0a1128; --blue2:#101d42; --gold:#e8c15a; --gold-dim:#b99b45; --ink:#f2f0e8; --muted:#9aa7c7; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(1200px 600px at 50% -10%, #1b2f66 0%, var(--blue) 55%); color:var(--ink); font-family:Georgia,'Times New Roman',serif; min-height:100vh; padding:0 16px 64px; }
+  .wrap { max-width:860px; margin:0 auto; }
+  header { text-align:center; padding:44px 8px 8px; }
+  .candle { font-size:34px; letter-spacing:6px; }
+  h1 { font-size:clamp(30px,6vw,46px); line-height:1.15; margin:14px 0 6px; font-weight:700; }
+  h1 em { color:var(--gold); font-style:normal; }
+  .sub { color:var(--muted); font-size:16px; line-height:1.5; }
+  .sub b { color:var(--ink); font-weight:600; }
+  .player { margin:26px auto 8px; background:var(--blue2); border:1px solid #26386e; border-radius:16px; padding:18px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,.35); }
+  .player h2 { font-size:15px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin-bottom:12px; }
+  audio { width:100%; max-width:560px; }
+  .links { margin-top:14px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+  .links a { font-family:-apple-system,'Segoe UI',sans-serif; font-size:14px; color:var(--ink); background:#1a2a55; border:1px solid #31488a; border-radius:999px; padding:8px 16px; text-decoration:none; }
+  .links a:hover { border-color:var(--gold); color:var(--gold); }
+  .links a.gold { background:var(--gold); color:#1a1405; border-color:var(--gold); font-weight:700; }
+  .toggle { display:flex; justify-content:center; gap:8px; margin:26px 0 6px; font-family:-apple-system,'Segoe UI',sans-serif; }
+  .toggle button { background:transparent; color:var(--muted); border:1px solid #31488a; border-radius:999px; padding:8px 18px; font-size:14px; cursor:pointer; }
+  .toggle button.on { background:var(--gold); color:#1a1405; border-color:var(--gold); font-weight:700; }
+  section { margin-top:30px; }
+  .sec-label { text-align:center; font-family:-apple-system,'Segoe UI',sans-serif; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--gold-dim); margin-bottom:12px; }
+  .sec-label::before, .sec-label::after { content:"—"; margin:0 10px; color:#31488a; }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:640px){ .pair { grid-template-columns:1fr; } }
+  .col { background:rgba(16,29,66,.65); border:1px solid #22336b; border-radius:14px; padding:20px 20px 22px; }
+  .col h3 { font-family:-apple-system,'Segoe UI',sans-serif; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:12px; }
+  .col p { font-size:18px; line-height:1.75; }
+  .col p + p { margin-top:2px; }
+  .col .q { color:var(--gold); font-style:italic; }
+  footer { margin-top:44px; border-top:1px solid #22336b; padding-top:18px; color:var(--muted); font-size:13.5px; line-height:1.7; font-family:-apple-system,'Segoe UI',sans-serif; }
+  footer b { color:var(--ink); }
+  body.de-only .col.en { display:none; } body.de-only .pair { grid-template-columns:1fr; }
+  body.en-only .col.de { display:none; } body.en-only .pair { grid-template-columns:1fr; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="candle">🎄 ✦ 🎄</div>
+    <h1>Jesus oder Nikolaus?<br><em>Jesus or Nicholas?</em></h1>
+    <p class="sub">A German Christmas hymn by <b>Tina Peters de Wolf</b><br>English cover sung by Suno — same song, same melody, in English.</p>
+  </header>
+
+  <div class="player">
+    <h2>▶ &nbsp;Listen — English Cover</h2>
+    <audio controls preload="metadata" src="https://muse.ai/files/1387730617752351/1395426775832255/l3otb0slr50s7gghy1nd49kr/jesus-or-nicholas.mp3"></audio>
+    <div class="links">
+      <a class="gold" href="https://muse.ai/files/1387730617752351/1395426775832255/l3otb0slr50s7gghy1nd49kr/jesus-or-nicholas.mp3" download>⬇ Download MP3</a>
+      <a href="https://suno.com/s/7FaUW15T7ap0zrA4" target="_blank" rel="noopener">Suno song page</a>
+      <a href="https://www.youtube.com/watch?v=Ju5WUB0a4s0" target="_blank" rel="noopener">Original (German) on YouTube</a>
+    </div>
+  </div>
+
+  <div class="toggle">
+    <button id="t-both" class="on" onclick="show('both')">Both languages</button>
+    <button id="t-de" onclick="show('de')">Deutsch only</button>
+    <button id="t-en" onclick="show('en')">English only</button>
+  </div>
+
+  <section>
+    <div class="sec-label">Chorus</div>
+    <div class="pair">
+      <div class="col de"><h3>Deutsch</h3>
+        <p>Was hat der Weihnachtsmann für uns getan?</p>
+        <p>Bringt uns der Nikolaus Frieden ins Haus.</p>
+        <p>Er sitzt und nimmt die Ehre, die Jesus nur gehört.</p>
+        <p>Oh, ihr Christen, wen ehren wir?</p>
+        <p class="q">Wer kehrt ein bei unser Haus, Jesus oder Nikolaus?</p>
+      </div>
+      <div class="col en"><h3>English</h3>
+        <p>What has Saint Nicholas done for us?</p>
+        <p>He brings joy into our house.</p>
+        <p>He sits and takes the honor that belongs to Jesus alone.</p>
+        <p>Oh, you Christians, whom do we honor?</p>
+        <p class="q">Who comes into our house, Jesus or Nicholas?</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Verse 1</div>
+    <div class="pair">
+      <div class="col de"><h3>Deutsch</h3>
+        <p>Jesus hat uns Heil gebracht,</p>
+        <p>in der ersten Weihnachtsnacht.</p>
+        <p>Er verließ die Himmelskrone,</p>
+        <p>kam zu einem Krippenthron.</p>
+        <p>Zu uns in dies Erdenland,</p>
+        <p>das hat er für uns getan.</p>
+      </div>
+      <div class="col en"><h3>English</h3>
+        <p>Jesus brought us salvation</p>
+        <p>on the first Christmas night.</p>
+        <p>He left the crown of heaven,</p>
+        <p>came to a manger throne.</p>
+        <p>He came to us, into this world.</p>
+        <p>That is what he did for us.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Verse 2</div>
+    <div class="pair">
+      <div class="col de"><h3>Deutsch</h3>
+        <p>Er kannte seinen Weg,</p>
+        <p>dornengekrönt, ans Kreuz gestiegen.</p>
+        <p>Dennoch kam er willig hin,</p>
+        <p>als ein armes kleines Kind,</p>
+        <p>nahm sich unserer Menschheit an,</p>
+        <p>das hat er für uns getan.</p>
+      </div>
+      <div class="col en"><h3>English</h3>
+        <p>He knew the path before him,</p>
+        <p>crowned with thorns, he climbed the cross.</p>
+        <p>Yet he came willingly,</p>
+        <p>as a poor little child,</p>
+        <p>and he took our humanity.</p>
+        <p>That is what he did for us.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Verse 3</div>
+    <div class="pair">
+      <div class="col de"><h3>Deutsch</h3>
+        <p>Keiner Gnade sind wir wert,</p>
+        <p>doch hat er uns Gnad' beschert.</p>
+        <p>Suchte uns, die wir verloren,</p>
+        <p>und zum Sterben ist geboren.</p>
+        <p>In die Finsternis er kam,</p>
+        <p>das hat er für uns getan.</p>
+      </div>
+      <div class="col en"><h3>English</h3>
+        <p>We deserve no grace at all,</p>
+        <p>yet he gave us grace.</p>
+        <p>He sought us, we who were lost,</p>
+        <p>and he was born to die.</p>
+        <p>And he came into the darkness.</p>
+        <p>That is what he did for us.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Chorus</div>
+    <div class="pair">
+      <div class="col de"><h3>Deutsch</h3>
+        <p>Was hat der Weihnachtsmann für uns getan?</p>
+        <p>Bringt uns der Nikolaus Frieden ins Haus.</p>
+        <p>Er sitzt und nimmt die Ehre, die Jesus nur gehört.</p>
+        <p>Oh, ihr Christen, wen ehren wir?</p>
+        <p class="q">Wer kehrt ein bei unser Haus, Jesus oder Nikolaus?</p>
+      </div>
+      <div class="col en"><h3>English</h3>
+        <p>What has Saint Nicholas done for us?</p>
+        <p>He brings joy into our house.</p>
+        <p>He sits and takes the honor that belongs to Jesus alone.</p>
+        <p>Oh, you Christians, whom do we honor?</p>
+        <p class="q">Who comes into our house, Jesus or Nicholas?</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Final Verse</div>
+    <div class="pair">
+      <div class="col de"><h3>Deutsch</h3>
+        <p>Ihm gebührt die Ehre.</p>
+        <p>Folgen wir dem, der heilig führt.</p>
+        <p>Preisen wir den, der uns liebt,</p>
+        <p>oder den, den die Welt uns gibt?</p>
+        <p class="q">Wer kehrt ein bei unser Haus, Jesus oder Nikolaus?</p>
+      </div>
+      <div class="col en"><h3>English</h3>
+        <p>To him belongs the honor.</p>
+        <p>Let us follow the one who leads us in holiness.</p>
+        <p>Let us praise the one who loves us,</p>
+        <p>or the one the world gives us?</p>
+        <p class="q">Who comes into our house, Jesus or Nicholas?</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>About the lyrics:</b> no official lyrics are published for this song, so the German was transcribed from the recording and cross-checked three ways. The English is the Suno cover's lyrics, exactly as sung.</p>
+    <p style="margin-top:10px;">Two small differences between the versions: where the German says <b>“Weihnachtsmann”</b> (Santa Claus) the English cover says “Saint Nicholas”, and where the German says <b>“Frieden”</b> (peace) the English cover says “joy”. Everything else lines up verse for verse.</p>
+    <p style="margin-top:10px;">“Jesus oder Nikolaus?” — Tina Peters de Wolf · English cover made with Suno · MP3 download link expires Nov 10, 2026 — save it while it's live.</p>
+  </footer>
+</div>
+<script>
+  function show(mode){
+    document.body.classList.remove('de-only','en-only');
+    if(mode==='de') document.body.classList.add('de-only');
+    if(mode==='en') document.body.classList.add('en-only');
+    document.getElementById('t-both').classList.toggle('on', mode==='both');
+    document.getElementById('t-de').classList.toggle('on', mode==='de');
+    document.getElementById('t-en').classList.toggle('on', mode==='en');
+  }
+</script>
+</body>
+</html>
