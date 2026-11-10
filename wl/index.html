@@ -16,8 +16,8 @@
 <script>
 (function(){
   // Destination is stored encrypted (XOR + base64) so the link isn't readable in plain text.
-  var KEY = "worthlens";
-  var ENC = "HxsGBBtWSkEEGB0GHAQJCx1eBwoTBgRCEwsBFAoeWgkcFUE=";
+  var KEY = "valu";
+  var ENC = "HhUYBQVbQ1oAAAAAWxEJFAQNQgMTEw8QGk8NBQZO";
   try {
     var bytes = atob(ENC), url = "";
     for (var i = 0; i < bytes.length; i++) url += String.fromCharCode(bytes.charCodeAt(i) ^ KEY.charCodeAt(i % KEY.length));
